@@ -1,0 +1,16 @@
+{
+  "name": "Ops Gateway",
+  "active": true,
+  "proxies": [
+    {
+      "listen_path": "/chassis/",
+      "target_url": "http://chassis",
+      "strip_listen_path": true
+    },
+    {
+      "listen_path": "/countries/",
+      "target_url": "http://location:3001/countries",
+      "strip_listen_path": true
+    }
+  ]
+}

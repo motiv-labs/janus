@@ -1,0 +1,17 @@
+---
+# Use env interpreter for python and PHP
+ansible_python_interpreter : "/usr/bin/env python"
+
+project_name               : "ops-gateway"
+
+# Build paths
+project_relative_root_dir  : "{{ lookup('pipe', 'pwd') }}../../../"
+project_command_abs_path   : 'cd "{{ project_relative_root_dir }}"; pwd'
+project_abs_path           : "~/location-service-bin/"
+
+# Code ship has ENV variable COMMIT_ID
+git_hash                   : "{{ lookup('env', 'COMMIT_ID') }}"
+
+# General S3 
+project_s3_bucket          : "hf-build-artifacts"
+project_s3_region          : "eu-west-1"

@@ -1,0 +1,23 @@
+---
+## Variables for deployment role
+
+# Force running of deployment code
+deployment_force                    : True
+# don't use resolver (donwload) the code
+deployment_resolver                 : none
+# Dont create directory structure
+deployment_directory_structure      : False
+# Use a bogus gaurd file
+deployment_guard_file               : "/tmp/deployment_first_boot_file"
+# Safely ignore github fingerprint
+deployment_ssh_fingerprints_deploy  : True
+# Path to project
+deployment_work_dir                 : "{{ project_abs_path }}"
+
+## Run composer
+deployment_dependency               : "composer"
+deployment_dependency_composer_args :
+               working_dir          : "{{ deployment_work_dir }}"
+               command              : "install"
+               no_dev               : True
+               ignore_platform_reqs : True 

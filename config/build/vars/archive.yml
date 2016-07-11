@@ -1,0 +1,7 @@
+---
+
+archive_name             : "{{ project_name }}-{{ git_hash }}.tar.gz"
+archive_src              : "{{ project_abs_path }}"
+archive_dest             : "/tmp"
+
+archive_exclude_pattern  : ".git"
