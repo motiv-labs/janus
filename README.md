@@ -29,36 +29,6 @@ Blacklist/Whitelist/Ignored endpoint access - Enforce strict security models on 
 
 The API Gateway is written in Go, which makes it fast and easy to set up. Its only dependencies are a Mongo database (for analytics) and Redis, though it can be deployed without either (not recommended).
 
-
-## Setup instructions
-
-First, make sure you have the [HelloFresh VM](https://github.com/hellofresh/webdev) up and running.
-Then clone this repository into your shared directory. `ssh` into the VM. Then on the root folder of `webdev`:
-
-```bash
-# Spin up the docker containers
-docker-compose -f docker-compose.ops.yml up -d
-# Login in the container
-tools/shell.sh location-service
-
-# Install dependencies
-godep restore
-
-exit
-```
-
-Please add the following to the hosts file in your laptop:
-
-```
-10.10.10.103  location.hellofresh.dev 
-```
-
-## Technology Stack
-
-* Golang
-* Docker
-* MongoDB container
-
 ## Contributing
 
 To start contributing, please check https://github.com/hellofresh/api-gateway/blob/master/.github/CONTRIBUTING.md.
