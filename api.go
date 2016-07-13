@@ -3,6 +3,7 @@ package main
 import (
 	"gopkg.in/mgo.v2/bson"
 	"time"
+	"github.com/RangelReale/osin"
 )
 
 type APIDefinition struct {
@@ -12,20 +13,13 @@ type APIDefinition struct {
 	Name           string                      `bson:"name" json:"name"`
 	Slug           string                      `bson:"slug" json:"slug"`
 	Active         bool                        `bson:"active" json:"active"`
-	Auth           Auth                        `bson:"auth" json:"auth"`
 	UseBasicAuth   bool                        `bson:"use_basic_auth" json:"use_basic_auth"`
 	Domain         string                      `bson:"domain" json:"domain"`
 	Proxy          Proxy                       `bson:"proxy" json:"proxy"`
 	AllowedIPs     []string                    `mapstructure:"allowed_ips" bson:"allowed_ips" json:"allowed_ips"`
-	CircuitBreaker CircuitBreakerMeta        `bson:"circuit_breakers" json:"circuit_breakers"`
-}
-
-type Auth struct {
-	UseParam       bool   `mapstructure:"use_param" bson:"use_param" json:"use_param"`
-	ParamName      string `mapstructure:"param_name" bson:"param_name" json:"param_name"`
-	UseCookie      bool   `mapstructure:"use_cookie" bson:"use_cookie" json:"use_cookie"`
-	CookieName     string `mapstructure:"cookie_name" bson:"cookie_name" json:"cookie_name"`
-	AuthHeaderName string `mapstructure:"auth_header_name" bson:"auth_header_name" json:"auth_header_name"`
+	CircuitBreaker CircuitBreakerMeta          `bson:"circuit_breakers" json:"circuit_breakers"`
+	UseOauth2      bool                        `bson:"use_oauth2" json:"use_oauth2"`
+	Oauth2Meta     Oauth2Meta                  `bson:"oauth_meta" json:"oauth_meta"`
 }
 
 type Proxy struct {
@@ -43,4 +37,10 @@ type CircuitBreakerMeta struct {
 	ThresholdPercent     float64 `bson:"threshold_percent" json:"threshold_percent"`
 	Samples              int64   `bson:"samples" json:"samples"`
 	ReturnToServiceAfter int     `bson:"return_to_service_after" json:"return_to_service_after"`
+}
+
+type Oauth2Meta       struct {
+	AllowedAccessTypes     []osin.AccessRequestType    `bson:"allowed_access_types" json:"allowed_access_types"`
+	AllowedAuthorizeTypes  []osin.AuthorizeRequestType `bson:"allowed_authorize_types" json:"allowed_authorize_types"`
+	AuthorizeLoginRedirect string                      `bson:"auth_login_redirect" json:"auth_login_redirect"`
 }

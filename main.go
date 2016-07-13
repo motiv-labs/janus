@@ -62,8 +62,6 @@ func getAPISpecs(accessor *storage.DatabaseAccessor, dbConfig storage.Database) 
 func loadApps(apiSpecs []*APIDefinition) {
 	log.Info("Loading API configurations.")
 
-	proxyRegister := NewProxyRegister()
-
 	for _, referenceSpec := range apiSpecs {
 		var skip bool
 
@@ -78,8 +76,10 @@ func loadApps(apiSpecs []*APIDefinition) {
 		}
 
 		if !skip {
-			proxyRegister.Register(referenceSpec.Proxy)
+			proxyRegister := NewProxyRegister()
+
 			cb := NewCircuitBreaker(referenceSpec)
+			proxyRegister.Register(referenceSpec.Proxy, cb)
 
 			log.Debug("Proxy registered")
 		}

@@ -11,8 +11,8 @@ type ExtendedCircuitBreakerMeta struct {
 	CB *circuit.Breaker
 }
 
-func NewCircuitBreaker(apiSpec APIDefinition) ExtendedCircuitBreakerMeta {
-	breakerMeta := ExtendedCircuitBreakerMeta{CircuitBreakerMeta: apiSpec.CircuitBreakerMeta}
+func NewCircuitBreaker(apiSpec *APIDefinition) ExtendedCircuitBreakerMeta {
+	breakerMeta := ExtendedCircuitBreakerMeta{CircuitBreakerMeta: apiSpec.CircuitBreaker}
 	breakerMeta.CB = circuit.NewRateBreaker(apiSpec.CircuitBreaker.ThresholdPercent, apiSpec.CircuitBreaker.Samples)
 
 	events := breakerMeta.CB.Subscribe()

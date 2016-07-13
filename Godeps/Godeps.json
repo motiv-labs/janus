@@ -8,6 +8,10 @@
 			"Rev": "db4d7e4f68708c5020c392b380e3565df2132840"
 		},
 		{
+			"ImportPath": "github.com/RangelReale/osin",
+			"Rev": "4f10152eca12dd6663009dc2e9377f2fe4b18a78"
+		},
+		{
 			"ImportPath": "github.com/Sirupsen/logrus",
 			"Comment": "v0.9.0-17-ga26f435",
 			"Rev": "a26f43589d737684363ff856c5a0f9f24b946510"
@@ -37,6 +41,11 @@
 			"Rev": "a2232af10b53ef1ae5a767f5178db3a6c1dab655"
 		},
 		{
+			"ImportPath": "github.com/cenkalti/backoff",
+			"Comment": "v1.0.0-7-gcdf48bb",
+			"Rev": "cdf48bbc1eb78d1349cbda326a4a037f7ba565c6"
+		},
+		{
 			"ImportPath": "github.com/davecgh/go-spew/spew",
 			"Rev": "5215b55f46b2b919f50a1df0eaa5886afe4e3b3d"
 		},
@@ -47,6 +56,10 @@
 		{
 			"ImportPath": "github.com/eknkc/amber/parser",
 			"Rev": "91774f050c1453128146169b626489e60108ec03"
+		},
+		{
+			"ImportPath": "github.com/facebookgo/clock",
+			"Rev": "600d898af40aa09a7a93ecb9265d87b0504b6f03"
 		},
 		{
 			"ImportPath": "github.com/fatih/color",
@@ -263,8 +276,18 @@
 			"Rev": "b1479103caacaa39319f75e7f57fc545287fca0d"
 		},
 		{
+			"ImportPath": "github.com/pborman/uuid",
+			"Comment": "v1.0-11-gc55201b",
+			"Rev": "c55201b036063326c5b1b89ccfe45a184973d073"
+		},
+		{
 			"ImportPath": "github.com/pmezard/go-difflib/difflib",
 			"Rev": "792786c7400a136282c1664665ae0a8db921c6c2"
+		},
+		{
+			"ImportPath": "github.com/rubyist/circuitbreaker",
+			"Comment": "v2.1.6-1-g5869dac",
+			"Rev": "5869daca94c0dd5159cc6e7195c213e9c07ee8a3"
 		},
 		{
 			"ImportPath": "github.com/russross/blackfriday",
