@@ -7,6 +7,8 @@ import (
 	"github.com/kataras/iris"
 	"github.com/hellofresh/api-gateway/storage"
 	"strings"
+	"gopkg.in/redis.v3"
+	"github.com/etcinit/speedbump"
 )
 
 var APILoader = APIDefinitionLoader{}
@@ -16,6 +18,13 @@ type Specification struct {
 	storage.Database
 	Port  int                 `envconfig:"PORT"`
 	Debug bool                `envconfig:"DEBUG"`
+	RedisSpecification
+}
+
+type RedisSpecification struct {
+	DSN      string                `envconfig:"REDIS_DSN"`
+	Password string                `envconfig:"REDIS_PASSWORD"`
+	DB       int64                 `envconfig:"REDIS_DB"`
 }
 
 func loadConfigEnv() Specification {
@@ -29,7 +38,7 @@ func loadConfigEnv() Specification {
 	return s
 }
 
-// initializeDatabase Initialize DB connection
+// initializeDatabase initializes a DB connection
 func initializeDatabase(dbConfig storage.Database) *storage.DatabaseAccessor {
 	accessor, err := storage.NewServer(dbConfig)
 	if err != nil {
@@ -40,6 +49,16 @@ func initializeDatabase(dbConfig storage.Database) *storage.DatabaseAccessor {
 	iris.Use(NewDatabase(*accessor))
 
 	return accessor
+}
+
+// initializeRedis initializes a Redis connection
+func initializeRedis(spec RedisSpecification) *redis.Client {
+	log.Infof("Trying to connect to %s", spec.DSN)
+	return redis.NewClient(&redis.Options{
+		Addr:     spec.DSN,
+		Password: spec.Password,
+		DB:       spec.DB,
+	})
 }
 
 func loadAPIEndpoints(proxyRegister *ProxyRegister) {
@@ -59,7 +78,7 @@ func getAPISpecs(accessor *storage.DatabaseAccessor, dbConfig storage.Database) 
 	return APISpecs;
 }
 
-func loadApps(apiSpecs []*APIDefinition) {
+func loadApps(apiSpecs []*APIDefinition, redisClient *redis.Client) {
 	log.Info("Loading API configurations.")
 
 	for _, referenceSpec := range apiSpecs {
@@ -76,11 +95,17 @@ func loadApps(apiSpecs []*APIDefinition) {
 		}
 
 		if !skip {
-			proxyRegister := NewProxyRegister()
+			var middleware []iris.Handler
 
+			if referenceSpec.RateLimit.Enabled {
+				rateLimit := NewRateLimitMiddleware(redisClient, speedbump.PerSecondHasher{}, referenceSpec.RateLimit.Limit)
+				middleware = append(middleware, rateLimit)
+			}
+
+			// Circuit Breaker Middleware
 			cb := NewCircuitBreaker(referenceSpec)
-			proxyRegister.Register(referenceSpec.Proxy, cb)
-
+			proxyRegister := NewProxyRegister()
+			proxyRegister.Register(referenceSpec.Proxy, cb, middleware...)
 			log.Debug("Proxy registered")
 		}
 	}
@@ -93,8 +118,11 @@ func main() {
 	accessor := initializeDatabase(s.Database)
 	defer accessor.Close()
 
+	redis := initializeRedis(s.RedisSpecification)
+	defer redis.Close()
+
 	specs := getAPISpecs(accessor, s.Database)
-	loadApps(specs)
+	loadApps(specs, redis)
 
 	proxyRegister := NewProxyRegister()
 	loadAPIEndpoints(proxyRegister)

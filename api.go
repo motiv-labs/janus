@@ -20,6 +20,7 @@ type APIDefinition struct {
 	CircuitBreaker CircuitBreakerMeta          `bson:"circuit_breakers" json:"circuit_breakers"`
 	UseOauth2      bool                        `bson:"use_oauth2" json:"use_oauth2"`
 	Oauth2Meta     Oauth2Meta                  `bson:"oauth_meta" json:"oauth_meta"`
+	RateLimit      RateLimitMeta               `bson:"rate_limit" json:"rate_limit"`
 }
 
 type Proxy struct {
@@ -43,4 +44,9 @@ type Oauth2Meta       struct {
 	AllowedAccessTypes     []osin.AccessRequestType    `bson:"allowed_access_types" json:"allowed_access_types"`
 	AllowedAuthorizeTypes  []osin.AuthorizeRequestType `bson:"allowed_authorize_types" json:"allowed_authorize_types"`
 	AuthorizeLoginRedirect string                      `bson:"auth_login_redirect" json:"auth_login_redirect"`
+}
+
+type RateLimitMeta struct {
+	Enabled bool        `bson:"enabled" json:"enabled"`
+	Limit   int64       `bson:"limit" json:"limit"`
 }
