@@ -11,22 +11,24 @@ import (
 
 type transport struct {
 	http.RoundTripper
-	breakerConf ExtendedCircuitBreakerMeta
+	breaker ExtendedCircuitBreakerMeta
 }
 
 func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
 
+	breakerEnforced := true
+
 	if breakerEnforced {
-		if t.breakerConf.CB.Ready() {
-			log.Debug("ON REQUEST: Breaker status: ", t.breakerConf.CB.Ready())
+		if t.breaker.CB.Ready() {
+			log.Debug("ON REQUEST: Breaker status: ", t.breaker.CB.Ready())
 			resp, err = t.RoundTripper.RoundTrip(req)
 
 			if err != nil {
-				t.breakerConf.CB.Fail()
+				t.breaker.CB.Fail()
 			} else if resp.StatusCode == 500 {
-				t.breakerConf.CB.Fail()
+				t.breaker.CB.Fail()
 			} else {
-				t.breakerConf.CB.Success()
+				t.breaker.CB.Success()
 			}
 		}
 	} else {
@@ -38,27 +40,25 @@ func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 
 var _ http.RoundTripper = &transport{}
 
-type ProxyRegister struct {
-	breaker ExtendedCircuitBreakerMeta
+type ProxyRegister struct{}
+
+func NewProxyRegister() *ProxyRegister {
+	return &ProxyRegister{}
 }
 
-func NewProxyRegister(cb ExtendedCircuitBreakerMeta) *ProxyRegister {
-	return &ProxyRegister{cb}
-}
-
-func (p *ProxyRegister) RegisterMany(proxies []Proxy) {
+func (p *ProxyRegister) RegisterMany(proxies []Proxy, breaker ExtendedCircuitBreakerMeta) {
 	for _, proxy := range proxies {
-		p.Register(proxy)
+		p.Register(proxy, breaker)
 	}
 }
 
-func (p *ProxyRegister) Register(proxy Proxy) {
-	handler := p.createHandler(proxy)
+func (p *ProxyRegister) Register(proxy Proxy, breaker ExtendedCircuitBreakerMeta) {
+	handler := p.createHandler(proxy, breaker)
 
 	iris.Handle("", proxy.ListenPath, iris.ToHandler(handler))
 }
 
-func (p *ProxyRegister) createHandler(proxy Proxy) *httputil.ReverseProxy {
+func (p *ProxyRegister) createHandler(proxy Proxy, breaker ExtendedCircuitBreakerMeta) *httputil.ReverseProxy {
 	target, _ := url.Parse(proxy.TargetURL)
 
 	director := func(req *http.Request) {
@@ -89,7 +89,7 @@ func (p *ProxyRegister) createHandler(proxy Proxy) *httputil.ReverseProxy {
 		log.Debug("Done proxy")
 	}
 
-	return &httputil.ReverseProxy{Director: director, Transport: &transport{http.DefaultTransport}}
+	return &httputil.ReverseProxy{Director: director, Transport: &transport{http.DefaultTransport, breaker}}
 }
 
 func singleJoiningSlash(a, b string) string {
