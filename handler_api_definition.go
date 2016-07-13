@@ -38,7 +38,7 @@ func (u AppsAPI) GetBy(id string) {
 }
 
 // PUT /apps/:id
-func (u AppsAPI) Put(id string) {
+func (u AppsAPI) PutBy(id string) {
 	repo := u.getRepository()
 	apiSpec, err := repo.FindByID(id)
 
@@ -56,7 +56,7 @@ func (u AppsAPI) Put(id string) {
 	repo.Add(apiSpec)
 	u.registerApiOnProxy(apiSpec)
 
-	u.Response.SetStatusCode(iris.StatusOK)
+	u.JSON(iris.StatusCreated, apiSpec)
 }
 
 // POST /apps

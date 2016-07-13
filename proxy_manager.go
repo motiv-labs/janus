@@ -16,25 +16,19 @@ type transport struct {
 
 func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
 
-	breakerEnforced := true
-
-	if breakerEnforced {
-		if t.breaker.CB.Ready() {
-			log.Debug("ON REQUEST: Breaker status: ", t.breaker.CB.Ready())
-			resp, err = t.RoundTripper.RoundTrip(req)
-
-			if err != nil {
-				t.breaker.CB.Fail()
-			} else if resp.StatusCode == 500 {
-				t.breaker.CB.Fail()
-			} else {
-				t.breaker.CB.Success()
-			}
-		}
-	} else {
+	if t.breaker.CB.Ready() {
+		log.Debug("ON REQUEST: Breaker status: ", t.breaker.CB.Ready())
 		resp, err = t.RoundTripper.RoundTrip(req)
-	}
 
+		if err != nil {
+			t.breaker.CB.Fail()
+		} else if resp.StatusCode == 500 {
+			t.breaker.CB.Fail()
+		} else {
+			t.breaker.CB.Success()
+		}
+	}
+	
 	return resp, nil
 }
 
