@@ -13,7 +13,7 @@ type AppsAPI struct {
 
 // GET /apps
 func (u AppsAPI) Get() {
-	repo := u.GetRepository()
+	repo := u.getRepository()
 	data, err := repo.FindAll()
 
 	if err != nil {
@@ -26,7 +26,7 @@ func (u AppsAPI) Get() {
 
 // GET /apps/:param1 which its value passed to the id argument
 func (u AppsAPI) GetBy(id string) {
-	repo := u.GetRepository()
+	repo := u.getRepository()
 	data, err := repo.FindByID(id)
 
 	if err != nil {
@@ -39,43 +39,45 @@ func (u AppsAPI) GetBy(id string) {
 
 // PUT /apps/:id
 func (u AppsAPI) Put(id string) {
-	repo := u.GetRepository()
-	app, err := repo.FindByID(id)
+	repo := u.getRepository()
+	apiSpec, err := repo.FindByID(id)
 
 	if err != nil {
 		log.Errorf(err.Error())
 		u.JSON(iris.StatusInternalServerError, err.Error())
 	}
 
-	err = u.ReadJSON(app)
+	err = u.ReadJSON(apiSpec)
 
 	if err != nil {
 		log.Errorf("Error when reading json: %s", err.Error())
 	}
 
-	repo.Add(app)
+	repo.Add(apiSpec)
+	u.registerApiOnProxy(apiSpec)
+
 	u.Response.SetStatusCode(iris.StatusOK)
 }
 
 // POST /apps
 func (u AppsAPI) Post() {
-	repo := u.GetRepository()
-	definition := &APIDefinition{}
-	err := u.ReadJSON(definition)
+	repo := u.getRepository()
+	apiSpec := &APIDefinition{}
+	err := u.ReadJSON(apiSpec)
 
 	if err != nil {
 		log.Errorf("Error when reading json: %s", err.Error())
 	}
 
-	repo.Add(definition)
-	u.proxyRegister.Register(definition.Proxy)
+	repo.Add(apiSpec)
+	u.registerApiOnProxy(apiSpec)
 
-	u.JSON(iris.StatusCreated, definition)
+	u.JSON(iris.StatusCreated, apiSpec)
 }
 
 // DELETE /apps/:param1
 func (u AppsAPI) DeleteBy(id string) {
-	repo := u.GetRepository()
+	repo := u.getRepository()
 	err := repo.Remove(id)
 
 	if err != nil {
@@ -87,7 +89,7 @@ func (u AppsAPI) DeleteBy(id string) {
 }
 
 // GetRepository gets the repository for the handlers
-func (u AppsAPI) GetRepository() *MongoAPISpecRepository {
+func (u AppsAPI) getRepository() *MongoAPISpecRepository {
 	db := u.Context.Get("db").(*mgo.Database)
 	repo, err := NewMongoAppRepository(db)
 
@@ -96,4 +98,10 @@ func (u AppsAPI) GetRepository() *MongoAPISpecRepository {
 	}
 
 	return repo
+}
+
+//registerApiOnProxy creates a new circuit breaker and register the api def on the proxy manager
+func (u AppsAPI) registerApiOnProxy(apiSpec *APIDefinition) {
+	cb := NewCircuitBreaker(apiSpec)
+	u.proxyRegister.Register(apiSpec.Proxy, cb)
 }
