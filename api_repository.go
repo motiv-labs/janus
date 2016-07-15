@@ -9,8 +9,8 @@ import (
 
 // AppRepository defines the behaviour of a country repository
 type APISpecRepository interface {
-	FindAll() ([]*APIDefinition, error)
-	FindByID(id string) (*APIDefinition, error)
+	FindAll() ([]APIDefinition, error)
+	FindByID(id string) (APIDefinition, error)
 	Add(app *APIDefinition) error
 	Remove(id string) error
 }
@@ -28,8 +28,8 @@ func NewMongoAppRepository(db *mgo.Database) (*MongoAPISpecRepository, error) {
 }
 
 // FindAll fetches all the countries available
-func (r MongoAPISpecRepository) FindAll() ([]*APIDefinition, error) {
-	result := []*APIDefinition{}
+func (r MongoAPISpecRepository) FindAll() ([]APIDefinition, error) {
+	result := []APIDefinition{}
 	err := r.coll.Find(nil).All(&result)
 
 	if err != nil {
@@ -40,9 +40,9 @@ func (r MongoAPISpecRepository) FindAll() ([]*APIDefinition, error) {
 }
 
 // FindByID find a country by the iso2code provided
-func (r MongoAPISpecRepository) FindByID(id string) (*APIDefinition, error) {
-	result := &APIDefinition{}
-	err := r.coll.FindId(bson.ObjectIdHex(id)).One(result)
+func (r MongoAPISpecRepository) FindByID(id string) (APIDefinition, error) {
+	result := APIDefinition{}
+	err := r.coll.FindId(bson.ObjectIdHex(id)).One(&result)
 	if err != nil {
 		return result, err
 	}

@@ -53,8 +53,7 @@ func (u AppsAPI) PutBy(id string) {
 		log.Errorf("Error when reading json: %s", err.Error())
 	}
 
-	repo.Add(apiSpec)
-	u.registerApiOnProxy(apiSpec)
+	repo.Add(&apiSpec)
 
 	u.JSON(iris.StatusCreated, apiSpec)
 }
@@ -70,7 +69,6 @@ func (u AppsAPI) Post() {
 	}
 
 	repo.Add(apiSpec)
-	u.registerApiOnProxy(apiSpec)
 
 	u.JSON(iris.StatusCreated, apiSpec)
 }
@@ -98,10 +96,4 @@ func (u AppsAPI) getRepository() *MongoAPISpecRepository {
 	}
 
 	return repo
-}
-
-//registerApiOnProxy creates a new circuit breaker and register the api def on the proxy manager
-func (u AppsAPI) registerApiOnProxy(apiSpec *APIDefinition) {
-	cb := NewCircuitBreaker(apiSpec)
-	u.proxyRegister.Register(apiSpec.Proxy, cb)
 }
