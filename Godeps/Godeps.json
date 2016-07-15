@@ -58,6 +58,11 @@
 			"Rev": "91774f050c1453128146169b626489e60108ec03"
 		},
 		{
+			"ImportPath": "github.com/etcinit/speedbump",
+			"Comment": "v0.2.0-4-gc3101e8",
+			"Rev": "c3101e81c4065d20d981c3a73ff33bb20aaee664"
+		},
+		{
 			"ImportPath": "github.com/facebookgo/clock",
 			"Rev": "600d898af40aa09a7a93ecb9265d87b0504b6f03"
 		},
@@ -368,6 +373,10 @@
 			"Rev": "a408501be4d17ee978c04a618e7a1b22af058c0e"
 		},
 		{
+			"ImportPath": "gopkg.in/bsm/ratelimit.v1",
+			"Rev": "db14e161995a5177acef654cb0dd785e8ee8bc22"
+		},
+		{
 			"ImportPath": "gopkg.in/mgo.v2",
 			"Comment": "r2016.02.04",
 			"Rev": "d90005c5262a3463800497ea5a89aed5fe22c886"
@@ -386,6 +395,31 @@
 			"ImportPath": "gopkg.in/mgo.v2/internal/scram",
 			"Comment": "r2016.02.04",
 			"Rev": "d90005c5262a3463800497ea5a89aed5fe22c886"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v3",
+			"Comment": "v3.6.4",
+			"Rev": "b5e368500d0a508ef8f16e9c2d4025a8a46bcc29"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v3/internal",
+			"Comment": "v3.6.4",
+			"Rev": "b5e368500d0a508ef8f16e9c2d4025a8a46bcc29"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v3/internal/consistenthash",
+			"Comment": "v3.6.4",
+			"Rev": "b5e368500d0a508ef8f16e9c2d4025a8a46bcc29"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v3/internal/hashtag",
+			"Comment": "v3.6.4",
+			"Rev": "b5e368500d0a508ef8f16e9c2d4025a8a46bcc29"
+		},
+		{
+			"ImportPath": "gopkg.in/redis.v3/internal/pool",
+			"Comment": "v3.6.4",
+			"Rev": "b5e368500d0a508ef8f16e9c2d4025a8a46bcc29"
 		}
 	]
 }

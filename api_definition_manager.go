@@ -2,7 +2,6 @@ package main
 
 import (
 	"gopkg.in/mgo.v2"
-	"github.com/hellofresh/api-gateway/storage"
 	log "github.com/Sirupsen/logrus"
 )
 
@@ -14,18 +13,31 @@ func (a *APIDefinitionLoader) LoadDefinitions(dir string) {
 
 }
 
-func (a *APIDefinitionLoader) LoadDefinitionsFromDatastore(dbSession *mgo.Session, dbConfig  storage.Database) []*APIDefinition {
-	repo, err := NewMongoAppRepository(dbSession.DB(dbConfig.Name))
+func (a *APIDefinitionLoader) LoadDefinitionsFromDatastore(dbSession *mgo.Session) []*APISpec {
+	repo, err := NewMongoAppRepository(dbSession.DB(config.Database.Name))
 
 	if err != nil {
 		log.Panic(err)
 	}
 
-	apiSpecs, err := repo.FindAll()
+	definitions, err := repo.FindAll()
 
 	if err != nil {
 		log.Panic(err)
 	}
 
-	return apiSpecs;
+	var APISpecs = []*APISpec{}
+	for _, definition := range definitions {
+		newAppSpec := a.MakeSpec(definition)
+		APISpecs = append(APISpecs, &newAppSpec)
+	}
+
+	return APISpecs;
+}
+
+func (a *APIDefinitionLoader) MakeSpec(definition APIDefinition) APISpec {
+	newAppSpec := APISpec{}
+	newAppSpec.APIDefinition = definition
+
+	return newAppSpec
 }

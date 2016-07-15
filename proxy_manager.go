@@ -11,7 +11,7 @@ import (
 
 type transport struct {
 	http.RoundTripper
-	breaker ExtendedCircuitBreakerMeta
+	breaker *ExtendedCircuitBreakerMeta
 }
 
 func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
@@ -21,6 +21,7 @@ func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 		resp, err = t.RoundTripper.RoundTrip(req)
 
 		if err != nil {
+			log.Error("Circuit Breaker Failed")
 			t.breaker.CB.Fail()
 		} else if resp.StatusCode == 500 {
 			t.breaker.CB.Fail()
@@ -28,7 +29,7 @@ func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 			t.breaker.CB.Success()
 		}
 	}
-	
+
 	return resp, nil
 }
 
@@ -40,19 +41,14 @@ func NewProxyRegister() *ProxyRegister {
 	return &ProxyRegister{}
 }
 
-func (p *ProxyRegister) RegisterMany(proxies []Proxy, breaker ExtendedCircuitBreakerMeta) {
-	for _, proxy := range proxies {
-		p.Register(proxy, breaker)
-	}
-}
-
-func (p *ProxyRegister) Register(proxy Proxy, breaker ExtendedCircuitBreakerMeta) {
+func (p *ProxyRegister) Register(proxy Proxy, breaker *ExtendedCircuitBreakerMeta, handlers ...iris.Handler) {
 	handler := p.createHandler(proxy, breaker)
+	handlers = append(handlers, iris.ToHandler(handler))
 
-	iris.Handle("", proxy.ListenPath, iris.ToHandler(handler))
+	iris.Handle("", proxy.ListenPath, handlers...)
 }
 
-func (p *ProxyRegister) createHandler(proxy Proxy, breaker ExtendedCircuitBreakerMeta) *httputil.ReverseProxy {
+func (p *ProxyRegister) createHandler(proxy Proxy, breaker *ExtendedCircuitBreakerMeta) *httputil.ReverseProxy {
 	target, _ := url.Parse(proxy.TargetURL)
 
 	director := func(req *http.Request) {

@@ -6,6 +6,11 @@ import (
 	"github.com/RangelReale/osin"
 )
 
+type APISpec struct {
+	APIDefinition
+	OAuthManager *OAuthManager
+}
+
 type APIDefinition struct {
 	ID             bson.ObjectId               `bson:"_id,omitempty" json:"id,omitempty"`
 	CreatedAt      time.Time                   `bson:"created_at" json:"created_at"`
@@ -20,6 +25,7 @@ type APIDefinition struct {
 	CircuitBreaker CircuitBreakerMeta          `bson:"circuit_breakers" json:"circuit_breakers"`
 	UseOauth2      bool                        `bson:"use_oauth2" json:"use_oauth2"`
 	Oauth2Meta     Oauth2Meta                  `bson:"oauth_meta" json:"oauth_meta"`
+	RateLimit      RateLimitMeta               `bson:"rate_limit" json:"rate_limit"`
 }
 
 type Proxy struct {
@@ -30,7 +36,6 @@ type Proxy struct {
 	EnableLoadBalancing         bool                          `bson:"enable_load_balancing" json:"enable_load_balancing"`
 	TargetList                  []string                      `bson:"target_list" json:"target_list"`
 	CheckHostAgainstUptimeTests bool                          `bson:"check_host_against_uptime_tests" json:"check_host_against_uptime_tests"`
-	//ServiceDiscovery            ServiceDiscoveryConfiguration `bson:"service_discovery" json:"service_discovery"`
 }
 
 type CircuitBreakerMeta struct {
@@ -43,4 +48,9 @@ type Oauth2Meta       struct {
 	AllowedAccessTypes     []osin.AccessRequestType    `bson:"allowed_access_types" json:"allowed_access_types"`
 	AllowedAuthorizeTypes  []osin.AuthorizeRequestType `bson:"allowed_authorize_types" json:"allowed_authorize_types"`
 	AuthorizeLoginRedirect string                      `bson:"auth_login_redirect" json:"auth_login_redirect"`
+}
+
+type RateLimitMeta struct {
+	Enabled bool        `bson:"enabled" json:"enabled"`
+	Limit   int64       `bson:"limit" json:"limit"`
 }

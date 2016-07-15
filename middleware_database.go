@@ -1,23 +1,22 @@
 package main
 
 import (
-	"github.com/kataras/iris"
 	"github.com/hellofresh/api-gateway/storage"
+	"github.com/valyala/fasthttp"
+	"github.com/kataras/iris"
 )
 
 // a silly example
 type Database struct {
-	dba storage.DatabaseAccessor
-}
-
-func NewDatabase(server storage.DatabaseAccessor) *Database {
-	return &Database{server}
+	*Middleware
+	dba *storage.DatabaseAccessor
 }
 
 //Important staff, iris middleware must implement the iris.Handler interface which is:
-func (d Database) Serve(c *iris.Context) {
+func (d Database) ProcessRequest(req fasthttp.Request, resp fasthttp.Response, c *iris.Context) (error, int) {
 	reqSession := d.dba.Clone()
 	defer reqSession.Close()
 	d.dba.Set(c, reqSession)
-	c.Next()
+
+	return nil, fasthttp.StatusOK
 }
