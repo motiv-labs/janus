@@ -74,6 +74,10 @@ func loadApps(apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.
 		}
 
 		if !skip {
+			cb := NewCircuitBreaker(referenceSpec)
+			proxyRegister := NewProxyRegister()
+			proxyRegister.Register(referenceSpec.Proxy, cb)
+			
 			hasher := speedbump.PerSecondHasher{}
 			limit := referenceSpec.RateLimit.Limit
 			limiter := speedbump.NewLimiter(redisClient, hasher, limit)
@@ -81,10 +85,8 @@ func loadApps(apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.
 			mw := &Middleware{referenceSpec}
 			CreateMiddleware(&Database{mw, accessor}, mw)
 			CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}, mw)
+			CreateMiddleware(&OauthProxy{mw, proxyRegister}, mw)
 
-			cb := NewCircuitBreaker(referenceSpec)
-			proxyRegister := NewProxyRegister()
-			proxyRegister.Register(referenceSpec.Proxy, cb)
 			log.Debug("Proxy registered")
 		}
 	}

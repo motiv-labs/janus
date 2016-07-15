@@ -45,9 +45,22 @@ type CircuitBreakerMeta struct {
 }
 
 type Oauth2Meta       struct {
+	OauthEndpoints                                     `bson:"oauth_endpoints" json:"oauth_endpoints"`
+	OauthClientEndpoints                               `bson:"oauth_client_endpoints" json:"oauth_client_endpoints"`
 	AllowedAccessTypes     []osin.AccessRequestType    `bson:"allowed_access_types" json:"allowed_access_types"`
 	AllowedAuthorizeTypes  []osin.AuthorizeRequestType `bson:"allowed_authorize_types" json:"allowed_authorize_types"`
 	AuthorizeLoginRedirect string                      `bson:"auth_login_redirect" json:"auth_login_redirect"`
+}
+
+type OauthEndpoints struct {
+	Authorize Proxy `bson:"authorize" json:"authorize"`
+	Token     Proxy `bson:"token" json:"token"`
+	Info      Proxy `bson:"info" json:"info"`
+}
+
+type OauthClientEndpoints struct {
+	Create Proxy `bson:"create" json:"create"`
+	Remove Proxy `bson:"remove" json:"remove"`
 }
 
 type RateLimitMeta struct {

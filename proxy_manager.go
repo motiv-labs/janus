@@ -41,6 +41,12 @@ func NewProxyRegister() *ProxyRegister {
 	return &ProxyRegister{}
 }
 
+func (p *ProxyRegister) registerMany(proxies []Proxy, breaker *ExtendedCircuitBreakerMeta, handlers ...iris.Handler) {
+	for _, proxy := range proxies {
+		p.Register(proxy, breaker, handlers...)
+	}
+}
+
 func (p *ProxyRegister) Register(proxy Proxy, breaker *ExtendedCircuitBreakerMeta, handlers ...iris.Handler) {
 	handler := p.createHandler(proxy, breaker)
 	handlers = append(handlers, iris.ToHandler(handler))
