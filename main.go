@@ -12,52 +12,35 @@ import (
 )
 
 var APILoader = APIDefinitionLoader{}
-
-// Specification for basic configurations
-type Specification struct {
-	storage.Database
-	Port  int                 `envconfig:"PORT"`
-	Debug bool                `envconfig:"DEBUG"`
-	RedisSpecification
-}
-
-type RedisSpecification struct {
-	DSN      string                `envconfig:"REDIS_DSN"`
-	Password string                `envconfig:"REDIS_PASSWORD"`
-	DB       int64                 `envconfig:"REDIS_DB"`
-}
+var config = Specification{}
 
 func loadConfigEnv() Specification {
-	var s Specification
-	err := envconfig.Process("", &s)
+	err := envconfig.Process("", &config)
 
 	if err != nil {
 		log.Fatal(err.Error())
 	}
 
-	return s
+	return config
 }
 
 // initializeDatabase initializes a DB connection
-func initializeDatabase(dbConfig storage.Database) *storage.DatabaseAccessor {
-	accessor, err := storage.NewServer(dbConfig)
+func initializeDatabase() *storage.DatabaseAccessor {
+	accessor, err := storage.NewServer(config.Database)
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	//Use the middleware
-	iris.Use(NewDatabase(*accessor))
 
 	return accessor
 }
 
 // initializeRedis initializes a Redis connection
-func initializeRedis(spec RedisSpecification) *redis.Client {
-	log.Infof("Trying to connect to %s", spec.DSN)
+func initializeRedis() *redis.Client {
+	log.Infof("Trying to connect to %s", config.Storage.DSN)
 	return redis.NewClient(&redis.Options{
-		Addr:     spec.DSN,
-		Password: spec.Password,
-		DB:       spec.DB,
+		Addr:     config.Storage.DSN,
+		Password: config.Storage.Password,
+		DB:       config.Storage.Database,
 	})
 }
 
@@ -69,16 +52,12 @@ func loadAPIEndpoints(proxyRegister *ProxyRegister) {
 	}
 }
 
-func getAPISpecs(accessor *storage.DatabaseAccessor, dbConfig storage.Database) []*APIDefinition {
-	var APISpecs []*APIDefinition
-
+func getAPISpecs(accessor *storage.DatabaseAccessor) []*APISpec {
 	log.Debug("Using App Configuration from Mongo DB")
-	APISpecs = APILoader.LoadDefinitionsFromDatastore(accessor.Session, dbConfig)
-
-	return APISpecs;
+	return APILoader.LoadDefinitionsFromDatastore(accessor.Session)
 }
 
-func loadApps(apiSpecs []*APIDefinition, redisClient *redis.Client) {
+func loadApps(apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.DatabaseAccessor) {
 	log.Info("Loading API configurations.")
 
 	for _, referenceSpec := range apiSpecs {
@@ -95,17 +74,17 @@ func loadApps(apiSpecs []*APIDefinition, redisClient *redis.Client) {
 		}
 
 		if !skip {
-			var middleware []iris.Handler
+			hasher := speedbump.PerSecondHasher{}
+			limit := referenceSpec.RateLimit.Limit
+			limiter := speedbump.NewLimiter(redisClient, hasher, limit)
 
-			if referenceSpec.RateLimit.Enabled {
-				rateLimit := NewRateLimitMiddleware(redisClient, speedbump.PerSecondHasher{}, referenceSpec.RateLimit.Limit)
-				middleware = append(middleware, rateLimit)
-			}
+			mw := &Middleware{referenceSpec}
+			CreateMiddleware(&Database{mw, accessor}, mw)
+			CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}, mw)
 
-			// Circuit Breaker Middleware
 			cb := NewCircuitBreaker(referenceSpec)
 			proxyRegister := NewProxyRegister()
-			proxyRegister.Register(referenceSpec.Proxy, cb, middleware...)
+			proxyRegister.Register(referenceSpec.Proxy, cb)
 			log.Debug("Proxy registered")
 		}
 	}
@@ -113,19 +92,19 @@ func loadApps(apiSpecs []*APIDefinition, redisClient *redis.Client) {
 
 func main() {
 	log.SetLevel(log.DebugLevel)
+	loadConfigEnv()
 
-	s := loadConfigEnv()
-	accessor := initializeDatabase(s.Database)
+	accessor := initializeDatabase()
 	defer accessor.Close()
 
-	redis := initializeRedis(s.RedisSpecification)
-	defer redis.Close()
+	redisStorage := initializeRedis()
+	defer redisStorage.Close()
 
-	specs := getAPISpecs(accessor, s.Database)
-	loadApps(specs, redis)
+	specs := getAPISpecs(accessor)
+	loadApps(specs, redisStorage, accessor)
 
 	proxyRegister := NewProxyRegister()
 	loadAPIEndpoints(proxyRegister)
 
-	iris.Listen(fmt.Sprintf(":%v", s.Port))
+	iris.Listen(fmt.Sprintf(":%v", config.Port))
 }

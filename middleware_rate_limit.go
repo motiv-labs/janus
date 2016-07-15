@@ -2,27 +2,29 @@ package main
 
 import (
 	"github.com/kataras/iris"
-	"gopkg.in/redis.v3"
 	"net"
 	"time"
 	"github.com/etcinit/speedbump"
 	log "github.com/Sirupsen/logrus"
 	"strconv"
+	"github.com/valyala/fasthttp"
+	"errors"
 )
 
 type RateLimitMiddleware struct {
+	*Middleware
 	limiter *speedbump.RateLimiter
 	hasher  speedbump.RateHasher
 	limit   int64
 }
 
-func NewRateLimitMiddleware(client *redis.Client, hasher speedbump.RateHasher, max int64) *RateLimitMiddleware {
-	limiter := speedbump.NewLimiter(client, hasher, max)
-	return &RateLimitMiddleware{limiter, hasher, max}
-}
-
 //Important staff, iris middleware must implement the iris.Handler interface which is:
-func (m RateLimitMiddleware) Serve(c *iris.Context) {
+func (m RateLimitMiddleware) ProcessRequest(req fasthttp.Request, resp fasthttp.Response, c *iris.Context) (error, int) {
+
+	if !m.Spec.RateLimit.Enabled {
+		return nil, fasthttp.StatusOK
+	}
+
 	ip, _, _ := net.SplitHostPort(c.RemoteAddr())
 	ok, err := m.limiter.Attempt(ip)
 	if err != nil {
@@ -37,12 +39,12 @@ func (m RateLimitMiddleware) Serve(c *iris.Context) {
 			log.Panic(err)
 		}
 
-		c.Response.Header.Add("X-Rate-Limit-Limit", strconv.FormatInt(m.limit, 10))
-		c.Response.Header.Add("X-Rate-Limit-Remaining", strconv.FormatInt(left, 10))
-		c.Response.Header.Add("X-Rate-Limit-Reset", nextTime.String())
+		resp.Header.Add("X-Rate-Limit-Limit", strconv.FormatInt(m.limit, 10))
+		resp.Header.Add("X-Rate-Limit-Remaining", strconv.FormatInt(left, 10))
+		resp.Header.Add("X-Rate-Limit-Reset", nextTime.String())
 
-		c.JSON(iris.StatusTooManyRequests, map[string]string{"error": "Rate limit exceeded. Try again in " + nextTime.String()})
+		return errors.New("Rate limit exceeded. Try again in " + nextTime.String()), iris.StatusTooManyRequests
 	} else {
-		c.Next()
+		return nil, fasthttp.StatusOK
 	}
 }

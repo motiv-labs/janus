@@ -6,6 +6,11 @@ import (
 	"github.com/RangelReale/osin"
 )
 
+type APISpec struct {
+	APIDefinition
+	OAuthManager *OAuthManager
+}
+
 type APIDefinition struct {
 	ID             bson.ObjectId               `bson:"_id,omitempty" json:"id,omitempty"`
 	CreatedAt      time.Time                   `bson:"created_at" json:"created_at"`
@@ -31,7 +36,6 @@ type Proxy struct {
 	EnableLoadBalancing         bool                          `bson:"enable_load_balancing" json:"enable_load_balancing"`
 	TargetList                  []string                      `bson:"target_list" json:"target_list"`
 	CheckHostAgainstUptimeTests bool                          `bson:"check_host_against_uptime_tests" json:"check_host_against_uptime_tests"`
-	//ServiceDiscovery            ServiceDiscoveryConfiguration `bson:"service_discovery" json:"service_discovery"`
 }
 
 type CircuitBreakerMeta struct {
