@@ -2,7 +2,7 @@
 # Use env interpreter for python and PHP
 ansible_python_interpreter : "/usr/bin/env python"
 
-project_name               : "ops-gateway"
+project_name               : "api-gateway"
 
 # Build paths
 project_relative_root_dir  : "{{ lookup('pipe', 'pwd') }}../../../"
