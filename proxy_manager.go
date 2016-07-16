@@ -63,13 +63,13 @@ func (p *ProxyRegister) createHandler(proxy Proxy, breaker *ExtendedCircuitBreak
 		targetQuery := target.RawQuery
 
 		if proxy.StripListenPath {
-			log.Debug("Stripping: ", proxy.ListenPath)
+			log.Debugf("Stripping: %s", proxy.ListenPath)
 			listenPath := strings.Replace(proxy.ListenPath, "/*randomName", "", -1)
 
 			path = singleJoiningSlash(target.Path, req.URL.Path)
 			path = strings.Replace(path, listenPath, "", -1)
 
-			log.Debug("Upstream Path is: ", path)
+			log.Debugf("Upstream Path is: %s", path)
 		}
 
 		req.URL.Scheme = target.Scheme
