@@ -36,7 +36,7 @@ func initializeDatabase() *storage.DatabaseAccessor {
 
 // initializeRedis initializes a Redis connection
 func initializeRedis() *redis.Client {
-	log.Infof("Trying to connect to %s", config.Storage.DSN)
+	log.Infof("Trying to connect to redis instance: %s", config.Storage.DSN)
 	return redis.NewClient(&redis.Options{
 		Addr:     config.Storage.DSN,
 		Password: config.Storage.Password,
@@ -45,6 +45,7 @@ func initializeRedis() *redis.Client {
 }
 
 func loadAPIEndpoints(proxyRegister *ProxyRegister) {
+	log.Debug("Loading API Endpoints")
 	group := iris.Party("/apis")
 	{
 		appHandler := AppsAPI{proxyRegister: proxyRegister}
@@ -57,27 +58,20 @@ func getAPISpecs(accessor *storage.DatabaseAccessor) []*APISpec {
 	return APILoader.LoadDefinitionsFromDatastore(accessor.Session)
 }
 
-func loadApps(apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.DatabaseAccessor) {
-	log.Info("Loading API configurations.")
+func loadApps(proxyRegister *ProxyRegister, apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.DatabaseAccessor) {
+	log.Debug("Loading API configurations")
 
 	for _, referenceSpec := range apiSpecs {
-		var skip bool
+		skip := validateProxy(referenceSpec.Proxy)
+		cb := NewCircuitBreaker(referenceSpec)
 
-		if referenceSpec.Proxy.ListenPath == "" {
-			log.Error("Listen path is empty, skipping API ID: ", referenceSpec.ID)
-			skip = true
+		if referenceSpec.UseOauth2 {
+			loadOAuth(proxyRegister, referenceSpec.Oauth2Meta, cb)
 		}
 
-		if strings.Contains(referenceSpec.Proxy.ListenPath, " ") {
-			log.Error("Listen path contains spaces, is invalid, skipping API ID: ", referenceSpec.ID)
-			skip = true
-		}
-
-		if !skip {
-			cb := NewCircuitBreaker(referenceSpec)
-			proxyRegister := NewProxyRegister()
+		if skip {
 			proxyRegister.Register(referenceSpec.Proxy, cb)
-			
+
 			hasher := speedbump.PerSecondHasher{}
 			limit := referenceSpec.RateLimit.Limit
 			limiter := speedbump.NewLimiter(redisClient, hasher, limit)
@@ -85,11 +79,49 @@ func loadApps(apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.
 			mw := &Middleware{referenceSpec}
 			CreateMiddleware(&Database{mw, accessor}, mw)
 			CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}, mw)
-			CreateMiddleware(&OauthProxy{mw, proxyRegister}, mw)
 
 			log.Debug("Proxy registered")
+		} else {
+			log.Error("Listen path is empty, skipping API ID: ", referenceSpec.ID)
 		}
 	}
+}
+
+func loadOAuth(proxyRegister *ProxyRegister, oauthMeta Oauth2Meta, cb *ExtendedCircuitBreakerMeta) {
+	log.Debug("Loading oauth configuration")
+	var proxies []Proxy
+
+	//oauth proxy
+	log.Debug("Registering authorize endpoint")
+	proxies = append(proxies, oauthMeta.OauthEndpoints.Authorize)
+
+	log.Debug("Registering token endpoint")
+	proxies = append(proxies, oauthMeta.OauthEndpoints.Token)
+
+	log.Debug("Registering info endpoint")
+	proxies = append(proxies, oauthMeta.OauthEndpoints.Info)
+
+	log.Debug("Registering create client endpoint")
+	proxies = append(proxies, oauthMeta.OauthClientEndpoints.Create)
+
+	log.Debug("Registering remove client endpoint")
+	proxies = append(proxies, oauthMeta.OauthClientEndpoints.Remove)
+
+	proxyRegister.registerMany(proxies, cb)
+}
+
+func validateProxy(proxy Proxy) bool {
+	if proxy.ListenPath == "" {
+		log.Error("Listen path is empty")
+		return false
+	}
+
+	if strings.Contains(proxy.ListenPath, " ") {
+		log.Error("Listen path contains spaces, is invalid")
+		return false
+	}
+
+	return true
 }
 
 func main() {
@@ -102,10 +134,10 @@ func main() {
 	redisStorage := initializeRedis()
 	defer redisStorage.Close()
 
-	specs := getAPISpecs(accessor)
-	loadApps(specs, redisStorage, accessor)
-
 	proxyRegister := NewProxyRegister()
+
+	specs := getAPISpecs(accessor)
+	loadApps(proxyRegister, specs, redisStorage, accessor)
 	loadAPIEndpoints(proxyRegister)
 
 	iris.Listen(fmt.Sprintf(":%v", config.Port))
