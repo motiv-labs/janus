@@ -1,7 +1,10 @@
-# hellofresh/api-gateway
+<p align="center">
+  <a href="https://hellofresh.com">
+    <img width="120" src="https://www.hellofresh.de/images/hellofresh/press/HelloFresh_Logo.png">
+  </a>
+</p>
 
-# owner
-https://github.com/italolelis
+# hellofresh/api-gateway
 
 This is a lightweight, API Gateway and Management Platform enables you to control who accesses your API, 
 when they access it and how they access it. API Gateway will also record detailed analytics on how your 
@@ -29,7 +32,7 @@ The API Gateway is written in Go, which makes it fast and easy to set up. Its on
 
 ## Contributing
 
-To start contributing, please check https://github.com/hellofresh/api-gateway/blob/master/.github/CONTRIBUTING.md.
+To start contributing, please check [CONTRIBUTING](CONTRIBUTING.md).
 
 ## Documentation
 * Go lang: https://golang.org/
