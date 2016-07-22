@@ -8,7 +8,6 @@ import (
 
 type AppsAPI struct {
 	*iris.Context
-	proxyRegister *ProxyRegister
 }
 
 // GET /apps
