@@ -14,6 +14,7 @@ import (
 var APILoader = APIDefinitionLoader{}
 var config = Specification{}
 
+//loadConfigEnv loads environment variables
 func loadConfigEnv() Specification {
 	err := envconfig.Process("", &config)
 
@@ -44,30 +45,31 @@ func initializeRedis() *redis.Client {
 	})
 }
 
-func loadAPIEndpoints(proxyRegister *ProxyRegister) {
+//loadAPIEndpoints register api endpoints
+func loadAPIEndpoints() {
 	log.Debug("Loading API Endpoints")
 	group := iris.Party("/apis")
 	{
-		appHandler := AppsAPI{proxyRegister: proxyRegister}
+		appHandler := AppsAPI{}
 		group.API("/", appHandler)
 	}
 }
 
+//getAPISpecs Load application specs from source
 func getAPISpecs(accessor *storage.DatabaseAccessor) []*APISpec {
 	log.Debug("Using App Configuration from Mongo DB")
 	return APILoader.LoadDefinitionsFromDatastore(accessor.Session)
 }
 
-func loadApps(proxyRegister *ProxyRegister, apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.DatabaseAccessor) {
+//loadApps load application middleware
+func loadApps(apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.DatabaseAccessor) {
 	log.Debug("Loading API configurations")
+
+	proxyRegister := NewProxyRegister()
 
 	for _, referenceSpec := range apiSpecs {
 		skip := validateProxy(referenceSpec.Proxy)
 		cb := NewCircuitBreaker(referenceSpec)
-
-		if referenceSpec.UseOauth2 {
-			loadOAuth(proxyRegister, referenceSpec.Oauth2Meta, cb)
-		}
 
 		if skip {
 			proxyRegister.Register(referenceSpec.Proxy, cb)
@@ -80,6 +82,14 @@ func loadApps(proxyRegister *ProxyRegister, apiSpecs []*APISpec, redisClient *re
 			CreateMiddleware(&Database{mw, accessor}, mw)
 			CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}, mw)
 
+			if referenceSpec.UseOauth2 {
+				log.Debug("Loading OAuth Manager")
+				referenceSpec.OAuthManager = &OAuthManager{redisClient}
+				addOAuthHandlers(proxyRegister, referenceSpec, cb)
+				CreateMiddleware(Oauth2KeyExists{mw}, mw)
+				log.Debug("Done loading OAuth Manager")
+			}
+
 			log.Debug("Proxy registered")
 		} else {
 			log.Error("Listen path is empty, skipping API ID: ", referenceSpec.ID)
@@ -87,29 +97,57 @@ func loadApps(proxyRegister *ProxyRegister, apiSpecs []*APISpec, redisClient *re
 	}
 }
 
-func loadOAuth(proxyRegister *ProxyRegister, oauthMeta Oauth2Meta, cb *ExtendedCircuitBreakerMeta) {
-	log.Debug("Loading oauth configuration")
+//addOAuthHandlers loads configured oauth endpoints
+func addOAuthHandlers(proxyRegister *ProxyRegister, spec *APISpec, cb *ExtendedCircuitBreakerMeta) {
+	log.Info("Loading oauth configuration")
 	var proxies []Proxy
+	oauthMeta := spec.Oauth2Meta
 
 	//oauth proxy
 	log.Debug("Registering authorize endpoint")
-	proxies = append(proxies, oauthMeta.OauthEndpoints.Authorize)
+	authorizeProxy := oauthMeta.OauthEndpoints.Authorize
+	if validateProxy(authorizeProxy) {
+		proxies = append(proxies, authorizeProxy)
+	} else {
+		log.Debug("No authorize endpoint")
+	}
 
 	log.Debug("Registering token endpoint")
-	proxies = append(proxies, oauthMeta.OauthEndpoints.Token)
+	tokenProxy := oauthMeta.OauthEndpoints.Token
+	if validateProxy(tokenProxy) {
+		proxies = append(proxies, tokenProxy)
+	} else {
+		log.Debug("No token endpoint")
+	}
 
 	log.Debug("Registering info endpoint")
-	proxies = append(proxies, oauthMeta.OauthEndpoints.Info)
+	infoProxy := oauthMeta.OauthEndpoints.Info
+	if validateProxy(infoProxy) {
+		proxies = append(proxies, infoProxy)
+	} else {
+		log.Debug("No info endpoint")
+	}
 
 	log.Debug("Registering create client endpoint")
-	proxies = append(proxies, oauthMeta.OauthClientEndpoints.Create)
+	createProxy := oauthMeta.OauthClientEndpoints.Create
+	if validateProxy(createProxy) {
+		proxies = append(proxies, createProxy)
+	} else {
+		log.Debug("No client create endpoint")
+	}
 
 	log.Debug("Registering remove client endpoint")
-	proxies = append(proxies, oauthMeta.OauthClientEndpoints.Remove)
+	removeProxy := oauthMeta.OauthClientEndpoints.Remove
+	if validateProxy(removeProxy) {
+		proxies = append(proxies, removeProxy)
+	} else {
+		log.Debug("No client remove endpoint")
+	}
 
-	proxyRegister.registerMany(proxies, cb)
+	proxyRegister.registerMany(proxies, cb, OAuthHandler{spec})
 }
 
+//validateProxy validates proxy data
 func validateProxy(proxy Proxy) bool {
 	if proxy.ListenPath == "" {
 		log.Error("Listen path is empty")
@@ -134,11 +172,9 @@ func main() {
 	redisStorage := initializeRedis()
 	defer redisStorage.Close()
 
-	proxyRegister := NewProxyRegister()
-
 	specs := getAPISpecs(accessor)
-	loadApps(proxyRegister, specs, redisStorage, accessor)
-	loadAPIEndpoints(proxyRegister)
+	loadApps(specs, redisStorage, accessor)
+	loadAPIEndpoints()
 
 	iris.Listen(fmt.Sprintf(":%v", config.Port))
 }
