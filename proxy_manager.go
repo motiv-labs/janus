@@ -15,7 +15,6 @@ type transport struct {
 }
 
 func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-
 	if t.breaker.CB.Ready() {
 		log.Debug("ON REQUEST: Breaker status: ", t.breaker.CB.Ready())
 		resp, err = t.RoundTripper.RoundTrip(req)
@@ -49,7 +48,8 @@ func (p *ProxyRegister) registerMany(proxies []Proxy, breaker *ExtendedCircuitBr
 
 func (p *ProxyRegister) Register(proxy Proxy, breaker *ExtendedCircuitBreakerMeta, handlers ...iris.Handler) {
 	handler := p.createHandler(proxy, breaker)
-	handlers = append(handlers, iris.ToHandler(handler))
+	defaultHandler := []iris.Handler{ToHandler(handler)}
+	handlers = append(defaultHandler, handlers...)
 
 	iris.Handle("", proxy.ListenPath, handlers...)
 }
