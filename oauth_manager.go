@@ -18,10 +18,9 @@ func (o OAuthManager) KeyExists(accessToken string) bool {
 
 func (o OAuthManager) Set(accessToken string, session SessionState, resetTTLTo int64) error {
 	value, _ := json.Marshal(session)
-	expireDuration := time.Duration(resetTTLTo)
-	expireTime := expireDuration * time.Second
+	expireDuration := time.Duration(resetTTLTo) * time.Second
 
-	log.Debugf("Storing key %s for %d seconds", accessToken, expireTime)
+	log.Debugf("Storing key %s for %d seconds", accessToken, expireDuration)
 	go o.storage.Set(accessToken, string(value), expireDuration)
 	return nil
 }

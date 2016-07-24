@@ -48,14 +48,5 @@ func (o Middleware) CheckSessionAndIdentityForValidKey(key string) (SessionState
 	}
 
 	// 2. If not there, get it from the AuthorizationHandler
-	thisSession, found := o.Spec.OAuthManager.IsKeyAuthorised(key)
-	if found {
-		// If not in Session, and got it from AuthHandler, create a session with a new TTL
-		log.Info("Recreating session for key: ", key)
-
-		// cache it
-		o.Spec.OAuthManager.Set(key, thisSession, thisSession.ExpiresIn)
-	}
-
-	return thisSession, found
+	return o.Spec.OAuthManager.IsKeyAuthorised(key)
 }
