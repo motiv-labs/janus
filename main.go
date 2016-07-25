@@ -14,6 +14,7 @@ import (
 var APILoader = APIDefinitionLoader{}
 var config = Specification{}
 
+//loadConfigEnv loads environment variables
 func loadConfigEnv() Specification {
 	err := envconfig.Process("", &config)
 
@@ -36,7 +37,7 @@ func initializeDatabase() *storage.DatabaseAccessor {
 
 // initializeRedis initializes a Redis connection
 func initializeRedis() *redis.Client {
-	log.Infof("Trying to connect to %s", config.Storage.DSN)
+	log.Infof("Trying to connect to redis instance: %s", config.Storage.DSN)
 	return redis.NewClient(&redis.Options{
 		Addr:     config.Storage.DSN,
 		Password: config.Storage.Password,
@@ -44,36 +45,35 @@ func initializeRedis() *redis.Client {
 	})
 }
 
-func loadAPIEndpoints(proxyRegister *ProxyRegister) {
+//loadAPIEndpoints register api endpoints
+func loadAPIEndpoints() {
+	log.Debug("Loading API Endpoints")
 	group := iris.Party("/apis")
 	{
-		appHandler := AppsAPI{proxyRegister: proxyRegister}
+		appHandler := AppsAPI{}
 		group.API("/", appHandler)
 	}
 }
 
+//getAPISpecs Load application specs from source
 func getAPISpecs(accessor *storage.DatabaseAccessor) []*APISpec {
 	log.Debug("Using App Configuration from Mongo DB")
 	return APILoader.LoadDefinitionsFromDatastore(accessor.Session)
 }
 
+//loadApps load application middleware
 func loadApps(apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.DatabaseAccessor) {
-	log.Info("Loading API configurations.")
+	log.Debug("Loading API configurations")
+
+	proxyRegister := NewProxyRegister()
 
 	for _, referenceSpec := range apiSpecs {
-		var skip bool
+		skip := validateProxy(referenceSpec.Proxy)
+		cb := NewCircuitBreaker(referenceSpec)
 
-		if referenceSpec.Proxy.ListenPath == "" {
-			log.Error("Listen path is empty, skipping API ID: ", referenceSpec.ID)
-			skip = true
-		}
+		if skip {
+			proxyRegister.Register(referenceSpec.Proxy, cb)
 
-		if strings.Contains(referenceSpec.Proxy.ListenPath, " ") {
-			log.Error("Listen path contains spaces, is invalid, skipping API ID: ", referenceSpec.ID)
-			skip = true
-		}
-
-		if !skip {
 			hasher := speedbump.PerSecondHasher{}
 			limit := referenceSpec.RateLimit.Limit
 			limiter := speedbump.NewLimiter(redisClient, hasher, limit)
@@ -82,12 +82,84 @@ func loadApps(apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.
 			CreateMiddleware(&Database{mw, accessor}, mw)
 			CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}, mw)
 
-			cb := NewCircuitBreaker(referenceSpec)
-			proxyRegister := NewProxyRegister()
-			proxyRegister.Register(referenceSpec.Proxy, cb)
+			if referenceSpec.UseOauth2 {
+				log.Debug("Loading OAuth Manager")
+				referenceSpec.OAuthManager = &OAuthManager{redisClient}
+				addOAuthHandlers(proxyRegister, referenceSpec, cb)
+				CreateMiddleware(Oauth2KeyExists{mw}, mw)
+				log.Debug("Done loading OAuth Manager")
+			}
+
 			log.Debug("Proxy registered")
+		} else {
+			log.Error("Listen path is empty, skipping API ID: ", referenceSpec.ID)
 		}
 	}
+}
+
+//addOAuthHandlers loads configured oauth endpoints
+func addOAuthHandlers(proxyRegister *ProxyRegister, spec *APISpec, cb *ExtendedCircuitBreakerMeta) {
+	log.Info("Loading oauth configuration")
+	var proxies []Proxy
+	oauthMeta := spec.Oauth2Meta
+
+	//oauth proxy
+	log.Debug("Registering authorize endpoint")
+	authorizeProxy := oauthMeta.OauthEndpoints.Authorize
+	if validateProxy(authorizeProxy) {
+		proxies = append(proxies, authorizeProxy)
+	} else {
+		log.Debug("No authorize endpoint")
+	}
+
+	log.Debug("Registering token endpoint")
+	tokenProxy := oauthMeta.OauthEndpoints.Token
+	if validateProxy(tokenProxy) {
+		proxies = append(proxies, tokenProxy)
+	} else {
+		log.Debug("No token endpoint")
+	}
+
+	log.Debug("Registering info endpoint")
+	infoProxy := oauthMeta.OauthEndpoints.Info
+	if validateProxy(infoProxy) {
+		proxies = append(proxies, infoProxy)
+	} else {
+		log.Debug("No info endpoint")
+	}
+
+	log.Debug("Registering create client endpoint")
+	createProxy := oauthMeta.OauthClientEndpoints.Create
+	if validateProxy(createProxy) {
+		proxies = append(proxies, createProxy)
+	} else {
+		log.Debug("No client create endpoint")
+	}
+
+	log.Debug("Registering remove client endpoint")
+	removeProxy := oauthMeta.OauthClientEndpoints.Remove
+	if validateProxy(removeProxy) {
+		proxies = append(proxies, removeProxy)
+	} else {
+		log.Debug("No client remove endpoint")
+	}
+
+	proxyRegister.registerMany(proxies, cb, OAuthHandler{spec})
+}
+
+//validateProxy validates proxy data
+func validateProxy(proxy Proxy) bool {
+	if proxy.ListenPath == "" {
+		log.Error("Listen path is empty")
+		return false
+	}
+
+	if strings.Contains(proxy.ListenPath, " ") {
+		log.Error("Listen path contains spaces, is invalid")
+		return false
+	}
+
+	return true
 }
 
 func main() {
@@ -102,9 +174,7 @@ func main() {
 
 	specs := getAPISpecs(accessor)
 	loadApps(specs, redisStorage, accessor)
-
-	proxyRegister := NewProxyRegister()
-	loadAPIEndpoints(proxyRegister)
+	loadAPIEndpoints()
 
 	iris.Listen(fmt.Sprintf(":%v", config.Port))
 }

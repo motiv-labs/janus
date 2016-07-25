@@ -15,7 +15,6 @@ type transport struct {
 }
 
 func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-
 	if t.breaker.CB.Ready() {
 		log.Debug("ON REQUEST: Breaker status: ", t.breaker.CB.Ready())
 		resp, err = t.RoundTripper.RoundTrip(req)
@@ -41,9 +40,16 @@ func NewProxyRegister() *ProxyRegister {
 	return &ProxyRegister{}
 }
 
+func (p *ProxyRegister) registerMany(proxies []Proxy, breaker *ExtendedCircuitBreakerMeta, handlers ...iris.Handler) {
+	for _, proxy := range proxies {
+		p.Register(proxy, breaker, handlers...)
+	}
+}
+
 func (p *ProxyRegister) Register(proxy Proxy, breaker *ExtendedCircuitBreakerMeta, handlers ...iris.Handler) {
 	handler := p.createHandler(proxy, breaker)
-	handlers = append(handlers, iris.ToHandler(handler))
+	defaultHandler := []iris.Handler{ToHandler(handler)}
+	handlers = append(defaultHandler, handlers...)
 
 	iris.Handle("", proxy.ListenPath, handlers...)
 }
@@ -57,13 +63,13 @@ func (p *ProxyRegister) createHandler(proxy Proxy, breaker *ExtendedCircuitBreak
 		targetQuery := target.RawQuery
 
 		if proxy.StripListenPath {
-			log.Debug("Stripping: ", proxy.ListenPath)
+			log.Debugf("Stripping: %s", proxy.ListenPath)
 			listenPath := strings.Replace(proxy.ListenPath, "/*randomName", "", -1)
 
 			path = singleJoiningSlash(target.Path, req.URL.Path)
 			path = strings.Replace(path, listenPath, "", -1)
 
-			log.Debug("Upstream Path is: ", path)
+			log.Debugf("Upstream Path is: %s", path)
 		}
 
 		req.URL.Scheme = target.Scheme

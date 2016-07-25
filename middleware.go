@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/kataras/iris"
 	"github.com/valyala/fasthttp"
+	log "github.com/Sirupsen/logrus"
 )
 
 // Middleware wraps up the APIDefinition object to be included in a
@@ -24,7 +25,7 @@ func CreateMiddleware(mw MiddlewareImplementation, tykMwSuper *Middleware) {
 		reqErr, errCode := mw.ProcessRequest(req, res, c)
 
 		if reqErr != nil {
-			c.Error(reqErr.Error(), errCode)
+			c.JSON(errCode, reqErr.Error())
 			return
 		}
 
@@ -33,4 +34,19 @@ func CreateMiddleware(mw MiddlewareImplementation, tykMwSuper *Middleware) {
 	}
 
 	iris.UseFunc(irisHandler)
+}
+
+func (o Middleware) CheckSessionAndIdentityForValidKey(key string) (SessionState, bool) {
+	var thisSession SessionState
+	oAuthManager := o.Spec.OAuthManager
+
+	//Checks if the key is present on the cache and if it didn't expire yet
+	log.Debug("Querying keystore")
+	if !oAuthManager.KeyExists(key) {
+		log.Debug("Key not found in keystore")
+		return thisSession, false
+	}
+
+	// 2. If not there, get it from the AuthorizationHandler
+	return o.Spec.OAuthManager.IsKeyAuthorised(key)
 }

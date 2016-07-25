@@ -19,7 +19,6 @@ func (m Oauth2KeyExists) ProcessRequest(req fasthttp.Request, resp fasthttp.Resp
 		"origin": c.RemoteAddr(),
 	}
 
-
 	// We're using OAuth, start checking for access keys
 	authHeaderValue := string(req.Header.Peek("Authorization"))
 	parts := strings.Split(authHeaderValue, " ")
@@ -36,8 +35,7 @@ func (m Oauth2KeyExists) ProcessRequest(req fasthttp.Request, resp fasthttp.Resp
 	}
 
 	accessToken := parts[1]
-	keyExists := true;
-	//thisSessionState, keyExists := k.TykMiddleware.CheckSessionAndIdentityForValidKey(accessToken)
+	thisSessionState, keyExists := m.CheckSessionAndIdentityForValidKey(accessToken)
 
 	if !keyExists {
 		log.WithFields(log.Fields{
@@ -48,6 +46,9 @@ func (m Oauth2KeyExists) ProcessRequest(req fasthttp.Request, resp fasthttp.Resp
 
 		return errors.New("Key not authorised"), fasthttp.StatusForbidden
 	}
+
+	c.Set(SessionData, thisSessionState)
+	c.Set(AuthHeaderValue, accessToken)
 
 	return nil, fasthttp.StatusOK
 }

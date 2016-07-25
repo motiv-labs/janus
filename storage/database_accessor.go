@@ -12,11 +12,11 @@ type DatabaseAccessor struct {
 }
 
 func NewServer(config Database) (*DatabaseAccessor, error) {
-	log.Infof("Trying to connect to %s", config.DSN)
+	log.Debugf("Trying to connect to %s", config.DSN)
 	session, err := mgo.Dial(config.DSN)
 
 	if err == nil {
-		log.Info("Connected to session")
+		log.Debug("Connected to session")
 		session.SetMode(mgo.Monotonic, true)
 		return &DatabaseAccessor{session, config}, nil
 	} else {

@@ -8,7 +8,6 @@ import (
 
 type AppsAPI struct {
 	*iris.Context
-	proxyRegister *ProxyRegister
 }
 
 // GET /apps
@@ -47,7 +46,7 @@ func (u AppsAPI) PutBy(id string) {
 		u.JSON(iris.StatusInternalServerError, err.Error())
 	}
 
-	err = u.ReadJSON(apiSpec)
+	err = u.ReadJSON(&apiSpec)
 
 	if err != nil {
 		log.Errorf("Error when reading json: %s", err.Error())
