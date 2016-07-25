@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/kelseyhightower/envconfig"
-	log "github.com/Sirupsen/logrus"
 	"fmt"
-	"github.com/kataras/iris"
-	"github.com/hellofresh/api-gateway/storage"
 	"strings"
-	"gopkg.in/redis.v3"
+
+	log "github.com/Sirupsen/logrus"
 	"github.com/etcinit/speedbump"
+	"github.com/hellofresh/api-gateway/storage"
+	"github.com/kataras/iris"
+	"github.com/kelseyhightower/envconfig"
+	"gopkg.in/redis.v3"
 )
 
 var APILoader = APIDefinitionLoader{}

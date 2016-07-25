@@ -1,8 +1,8 @@
 package main
 
 import (
-	"gopkg.in/mgo.v2"
 	log "github.com/Sirupsen/logrus"
+	"gopkg.in/mgo.v2"
 )
 
 // APIDefinitionLoader will load an Api definition from a storage system. It has two methods LoadDefinitionsFromMongo()
@@ -32,7 +32,7 @@ func (a *APIDefinitionLoader) LoadDefinitionsFromDatastore(dbSession *mgo.Sessio
 		APISpecs = append(APISpecs, &newAppSpec)
 	}
 
-	return APISpecs;
+	return APISpecs
 }
 
 func (a *APIDefinitionLoader) MakeSpec(definition APIDefinition) APISpec {

@@ -1,10 +1,11 @@
 package main
 
 import (
-	"gopkg.in/redis.v3"
 	"encoding/json"
-	log "github.com/Sirupsen/logrus"
 	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"gopkg.in/redis.v3"
 )
 
 type OAuthManager struct {

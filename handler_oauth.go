@@ -1,16 +1,17 @@
 package main
 
 import (
-	"github.com/kataras/iris"
-	log "github.com/Sirupsen/logrus"
 	"encoding/json"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/kataras/iris"
 )
 
 type OAuthHandler struct {
 	spec *APISpec
 }
 
-func (h OAuthHandler)Serve(c *iris.Context) {
+func (h OAuthHandler) Serve(c *iris.Context) {
 	var newSession SessionState
 
 	body := string(c.Response.Body())

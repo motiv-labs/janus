@@ -1,9 +1,9 @@
 package main
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"github.com/kataras/iris"
 	"github.com/valyala/fasthttp"
-	log "github.com/Sirupsen/logrus"
 )
 
 // Middleware wraps up the APIDefinition object to be included in a

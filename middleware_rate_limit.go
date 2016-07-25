@@ -1,14 +1,15 @@
 package main
 
 import (
-	"github.com/kataras/iris"
-	"net"
-	"time"
-	"github.com/etcinit/speedbump"
-	log "github.com/Sirupsen/logrus"
-	"strconv"
-	"github.com/valyala/fasthttp"
 	"errors"
+	"net"
+	"strconv"
+	"time"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/etcinit/speedbump"
+	"github.com/kataras/iris"
+	"github.com/valyala/fasthttp"
 )
 
 type RateLimitMiddleware struct {

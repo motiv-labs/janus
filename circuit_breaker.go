@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/rubyist/circuitbreaker"
 	"time"
+
 	log "github.com/Sirupsen/logrus"
+	"github.com/rubyist/circuitbreaker"
 )
 
 type ExtendedCircuitBreakerMeta struct {

@@ -1,8 +1,8 @@
 package main
 
 import (
-	"github.com/kataras/iris"
 	log "github.com/Sirupsen/logrus"
+	"github.com/kataras/iris"
 	"gopkg.in/mgo.v2"
 )
 

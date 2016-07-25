@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/valyala/fasthttp"
-	"github.com/kataras/iris"
 	"net/http"
+
+	"github.com/kataras/iris"
+	"github.com/valyala/fasthttp"
 	"github.com/valyala/fasthttp/fasthttpadaptor"
 )
 

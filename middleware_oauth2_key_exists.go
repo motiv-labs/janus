@@ -1,11 +1,12 @@
 package main
 
 import (
-	"github.com/kataras/iris"
-	log "github.com/Sirupsen/logrus"
-	"strings"
-	"github.com/valyala/fasthttp"
 	"errors"
+	"strings"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/kataras/iris"
+	"github.com/valyala/fasthttp"
 )
 
 type Oauth2KeyExists struct {

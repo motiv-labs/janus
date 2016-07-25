@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/kataras/iris"
-	"net/url"
-	"net/http/httputil"
-	"strings"
 	"net/http"
+	"net/http/httputil"
+	"net/url"
+	"strings"
+
 	log "github.com/Sirupsen/logrus"
+	"github.com/kataras/iris"
 )
 
 type transport struct {

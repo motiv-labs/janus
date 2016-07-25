@@ -1,13 +1,14 @@
 package main
 
 import (
-	"gopkg.in/mgo.v2/bson"
-	"gopkg.in/mgo.v2"
 	"time"
+
 	log "github.com/Sirupsen/logrus"
+	"gopkg.in/mgo.v2"
+	"gopkg.in/mgo.v2/bson"
 )
 
-// AppRepository defines the behaviour of a country repository
+// APISpecRepository defines the behaviour of a country repository
 type APISpecRepository interface {
 	FindAll() ([]APIDefinition, error)
 	FindByID(id string) (APIDefinition, error)
@@ -15,12 +16,12 @@ type APISpecRepository interface {
 	Remove(id string) error
 }
 
-// MongoAppRepository represents a mongodb repository
+// MongoAPISpecRepository represents a mongodb repository
 type MongoAPISpecRepository struct {
 	coll *mgo.Collection
 }
 
-// NewMongoCountryRepository creates a mongo country repo
+// NewMongoAppRepository creates a mongo country repo
 func NewMongoAppRepository(db *mgo.Database) (*MongoAPISpecRepository, error) {
 	coll := db.C("api_specs")
 

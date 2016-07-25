@@ -2,8 +2,8 @@ package main
 
 import (
 	"github.com/hellofresh/api-gateway/storage"
-	"github.com/valyala/fasthttp"
 	"github.com/kataras/iris"
+	"github.com/valyala/fasthttp"
 )
 
 // a silly example
