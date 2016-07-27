@@ -41,18 +41,30 @@ func NewProxyRegister() *ProxyRegister {
 	return &ProxyRegister{}
 }
 
-func (p *ProxyRegister) registerMany(proxies []Proxy, breaker *ExtendedCircuitBreakerMeta, handlers ...iris.Handler) {
+func (p *ProxyRegister) registerMany(proxies []Proxy, breaker *ExtendedCircuitBreakerMeta, beforeHandlers []iris.Handler, afterHandlers []iris.Handler) {
 	for _, proxy := range proxies {
-		p.Register(proxy, breaker, handlers...)
+		p.Register(proxy, breaker, beforeHandlers, afterHandlers)
 	}
 }
 
-func (p *ProxyRegister) Register(proxy Proxy, breaker *ExtendedCircuitBreakerMeta, handlers ...iris.Handler) {
+func (p *ProxyRegister) Register(proxy Proxy, breaker *ExtendedCircuitBreakerMeta, beforeHandlers []iris.Handler, afterHandlers []iris.Handler) {
+	var handlers []iris.Handler
+
 	handler := p.createHandler(proxy, breaker)
 	defaultHandler := []iris.Handler{ToHandler(handler)}
 	handlers = append(defaultHandler, handlers...)
 
-	iris.Handle("", proxy.ListenPath, handlers...)
+	if (len(beforeHandlers) > 0) {
+		handlers = append(beforeHandlers, handlers...)
+	}
+
+	if (len(afterHandlers) > 0) {
+		handlers = append(handlers, afterHandlers...)
+	}
+
+	if nil == iris.Lookup(proxy.ListenPath) {
+		iris.Handle("", proxy.ListenPath, handlers...)
+	}
 }
 
 func (p *ProxyRegister) createHandler(proxy Proxy, breaker *ExtendedCircuitBreakerMeta) *httputil.ReverseProxy {

@@ -1,7 +1,6 @@
 package main
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/kataras/iris"
 	"github.com/valyala/fasthttp"
 )
@@ -9,31 +8,36 @@ import (
 // Middleware wraps up the APIDefinition object to be included in a
 // middleware handler, this can probably be handled better.
 type Middleware struct {
-	Spec *APISpec
+	Spec   *APISpec
+	Logger *Logger
 }
 
 type MiddlewareImplementation interface {
 	ProcessRequest(req fasthttp.Request, resp fasthttp.Response, c *iris.Context) (error, int)
 }
 
-// Generic middleware caller to make extension easier
-func CreateMiddleware(mw MiddlewareImplementation, tykMwSuper *Middleware) {
-	irisHandler := func(c *iris.Context) {
-		req := c.Request
-		res := c.Response
+type IrisMiddleware struct {
+	mw MiddlewareImplementation
+}
 
-		reqErr, errCode := mw.ProcessRequest(req, res, c)
+func (m IrisMiddleware) Serve(c *iris.Context) {
+	req := c.Request
+	res := c.Response
 
-		if reqErr != nil {
-			c.JSON(errCode, reqErr.Error())
-			return
-		}
+	reqErr, errCode := m.mw.ProcessRequest(req, res, c)
 
-		c.SetStatusCode(errCode)
-		c.Next()
+	if reqErr != nil {
+		c.JSON(errCode, reqErr.Error())
+		return
 	}
 
-	iris.UseFunc(irisHandler)
+	c.SetStatusCode(errCode)
+	c.Next()
+}
+
+// Generic middleware caller to make extension easier
+func CreateMiddleware(mw MiddlewareImplementation) iris.Handler {
+	return IrisMiddleware{mw}
 }
 
 func (o Middleware) CheckSessionAndIdentityForValidKey(key string) (SessionState, bool) {
@@ -41,9 +45,9 @@ func (o Middleware) CheckSessionAndIdentityForValidKey(key string) (SessionState
 	oAuthManager := o.Spec.OAuthManager
 
 	//Checks if the key is present on the cache and if it didn't expire yet
-	log.Debug("Querying keystore")
+	o.Logger.Debug("Querying keystore")
 	if !oAuthManager.KeyExists(key) {
-		log.Debug("Key not found in keystore")
+		o.Logger.Debug("Key not found in keystore")
 		return thisSession, false
 	}
 
