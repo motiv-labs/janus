@@ -13,10 +13,12 @@ type Database struct {
 }
 
 //Important staff, iris middleware must implement the iris.Handler interface which is:
-func (d Database) ProcessRequest(req fasthttp.Request, resp fasthttp.Response, c *iris.Context) (error, int) {
-	reqSession := d.dba.Clone()
+func (m Database) ProcessRequest(req fasthttp.Request, resp fasthttp.Response, c *iris.Context) (error, int) {
+	m.Logger.Debug("Starting Database middleware")
+
+	reqSession := m.dba.Clone()
 	defer reqSession.Close()
-	d.dba.Set(c, reqSession)
+	m.dba.Set(c, reqSession)
 
 	return nil, fasthttp.StatusOK
 }
