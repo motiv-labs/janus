@@ -10,6 +10,7 @@ import (
 	"github.com/kataras/iris"
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/redis.v3"
+	"os"
 )
 
 var APILoader = APIDefinitionLoader{}
@@ -69,83 +70,101 @@ func loadApps(apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.
 	proxyRegister := NewProxyRegister()
 
 	for _, referenceSpec := range apiSpecs {
-		skip := validateProxy(referenceSpec.Proxy)
-		cb := NewCircuitBreaker(referenceSpec)
+		var skip bool
+
+		//Define fields to log
+		logger := createContextualLogger(referenceSpec)
+
+		//Validates the proxy
+		skip = validateProxy(referenceSpec.Proxy)
+
+		if false == referenceSpec.Active {
+			logger.Info("API is not active, skiping...")
+			skip = false
+		}
 
 		if skip {
-			proxyRegister.Register(referenceSpec.Proxy, cb)
+			cb := NewCircuitBreaker(referenceSpec)
 
 			hasher := speedbump.PerSecondHasher{}
 			limit := referenceSpec.RateLimit.Limit
 			limiter := speedbump.NewLimiter(redisClient, hasher, limit)
 
-			mw := &Middleware{referenceSpec}
-			CreateMiddleware(&Database{mw, accessor}, mw)
-			CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}, mw)
+			mw := &Middleware{referenceSpec, logger}
 
-			if referenceSpec.UseOauth2 {
-				log.Debug("Loading OAuth Manager")
-				referenceSpec.OAuthManager = &OAuthManager{redisClient}
-				addOAuthHandlers(proxyRegister, referenceSpec, cb)
-				CreateMiddleware(Oauth2KeyExists{mw}, mw)
-				log.Debug("Done loading OAuth Manager")
+			iris.Use(CreateMiddleware(&Database{mw, accessor}))
+
+			var beforeHandlers = []iris.Handler{
+				CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}),
 			}
 
-			log.Debug("Proxy registered")
+			if referenceSpec.UseOauth2 {
+				logger.Debug("Loading OAuth Manager")
+				referenceSpec.OAuthManager = &OAuthManager{redisClient}
+				addOAuthHandlers(proxyRegister, referenceSpec, cb, logger)
+				beforeHandlers = append(beforeHandlers, CreateMiddleware(Oauth2KeyExists{mw}))
+				logger.Debug("Done loading OAuth Manager")
+			}
+
+			proxyRegister.Register(referenceSpec.Proxy, cb, beforeHandlers, nil)
+			logger.Debug("Proxy registered")
 		} else {
-			log.Error("Listen path is empty, skipping API ID: ", referenceSpec.ID)
+			logger.Error("Listen path is empty, skipping...")
 		}
 	}
 }
 
 //addOAuthHandlers loads configured oauth endpoints
-func addOAuthHandlers(proxyRegister *ProxyRegister, spec *APISpec, cb *ExtendedCircuitBreakerMeta) {
-	log.Info("Loading oauth configuration")
+func addOAuthHandlers(proxyRegister *ProxyRegister, spec *APISpec, cb *ExtendedCircuitBreakerMeta, logger *Logger) {
+	logger.Info("Loading oauth configuration")
 	var proxies []Proxy
+	var handlers []iris.Handler
+
 	oauthMeta := spec.Oauth2Meta
 
 	//oauth proxy
-	log.Debug("Registering authorize endpoint")
+	logger.Debug("Registering authorize endpoint")
 	authorizeProxy := oauthMeta.OauthEndpoints.Authorize
 	if validateProxy(authorizeProxy) {
 		proxies = append(proxies, authorizeProxy)
 	} else {
-		log.Debug("No authorize endpoint")
+		logger.Debug("No authorize endpoint")
 	}
 
-	log.Debug("Registering token endpoint")
+	logger.Debug("Registering token endpoint")
 	tokenProxy := oauthMeta.OauthEndpoints.Token
 	if validateProxy(tokenProxy) {
 		proxies = append(proxies, tokenProxy)
 	} else {
-		log.Debug("No token endpoint")
+		logger.Debug("No token endpoint")
 	}
 
-	log.Debug("Registering info endpoint")
+	logger.Debug("Registering info endpoint")
 	infoProxy := oauthMeta.OauthEndpoints.Info
 	if validateProxy(infoProxy) {
 		proxies = append(proxies, infoProxy)
 	} else {
-		log.Debug("No info endpoint")
+		logger.Debug("No info endpoint")
 	}
 
-	log.Debug("Registering create client endpoint")
+	logger.Debug("Registering create client endpoint")
 	createProxy := oauthMeta.OauthClientEndpoints.Create
 	if validateProxy(createProxy) {
 		proxies = append(proxies, createProxy)
 	} else {
-		log.Debug("No client create endpoint")
+		logger.Debug("No client create endpoint")
 	}
 
-	log.Debug("Registering remove client endpoint")
+	logger.Debug("Registering remove client endpoint")
 	removeProxy := oauthMeta.OauthClientEndpoints.Remove
 	if validateProxy(removeProxy) {
 		proxies = append(proxies, removeProxy)
 	} else {
-		log.Debug("No client remove endpoint")
+		logger.Debug("No client remove endpoint")
 	}
 
-	proxyRegister.registerMany(proxies, cb, OAuthHandler{spec})
+	handlers = append(handlers, OAuthHandler{spec})
+	proxyRegister.registerMany(proxies, cb, nil, handlers)
 }
 
 //validateProxy validates proxy data
@@ -164,6 +183,7 @@ func validateProxy(proxy Proxy) bool {
 }
 
 func main() {
+	log.SetOutput(os.Stderr)
 	log.SetLevel(log.DebugLevel)
 	loadConfigEnv()
 
