@@ -2,92 +2,113 @@ package main
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/kataras/iris"
 	"gopkg.in/mgo.v2"
+	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
-type AppsAPI struct {
-	*iris.Context
-}
+type AppsAPI struct{}
 
 // GET /apps
-func (u AppsAPI) Get() {
-	repo := u.getRepository()
-	data, err := repo.FindAll()
+func (u AppsAPI) Get() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		repo := u.getRepository(u.getDatabase(c))
+		data, err := repo.FindAll()
 
-	if err != nil {
-		log.Errorf(err.Error())
-		u.JSON(iris.StatusInternalServerError, err.Error())
+		if err != nil {
+			log.Errorf(err.Error())
+			c.JSON(http.StatusInternalServerError, err.Error())
+		}
+
+		c.JSON(http.StatusOK, data)
 	}
-
-	u.JSON(iris.StatusOK, data)
 }
 
 // GET /apps/:param1 which its value passed to the id argument
-func (u AppsAPI) GetBy(id string) {
-	repo := u.getRepository()
-	data, err := repo.FindByID(id)
+func (u AppsAPI) GetBy() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		repo := u.getRepository(u.getDatabase(c))
+		data, err := repo.FindByID(id)
 
-	if err != nil {
-		log.Errorf(err.Error())
-		u.JSON(iris.StatusInternalServerError, err.Error())
+		if err != nil {
+			log.Errorf(err.Error())
+			c.JSON(http.StatusInternalServerError, err.Error())
+		}
+
+		c.JSON(http.StatusOK, data)
 	}
-
-	u.JSON(iris.StatusOK, data)
 }
 
 // PUT /apps/:id
-func (u AppsAPI) PutBy(id string) {
-	repo := u.getRepository()
-	apiSpec, err := repo.FindByID(id)
+func (u AppsAPI) PutBy() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		repo := u.getRepository(u.getDatabase(c))
+		apiSpec, err := repo.FindByID(id)
 
-	if err != nil {
-		log.Errorf(err.Error())
-		u.JSON(iris.StatusInternalServerError, err.Error())
+		if err != nil {
+			log.Errorf(err.Error())
+			c.JSON(http.StatusInternalServerError, err.Error())
+		}
+
+		err = c.BindJSON(&apiSpec)
+
+		if err != nil {
+			log.Errorf("Error when reading json: %s", err.Error())
+		}
+
+		repo.Add(&apiSpec)
+
+		c.JSON(http.StatusCreated, apiSpec)
 	}
-
-	err = u.ReadJSON(&apiSpec)
-
-	if err != nil {
-		log.Errorf("Error when reading json: %s", err.Error())
-	}
-
-	repo.Add(&apiSpec)
-
-	u.JSON(iris.StatusCreated, apiSpec)
 }
 
 // POST /apps
-func (u AppsAPI) Post() {
-	repo := u.getRepository()
-	apiSpec := &APIDefinition{}
-	err := u.ReadJSON(apiSpec)
+func (u AppsAPI) Post() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		repo := u.getRepository(u.getDatabase(c))
+		apiSpec := &APIDefinition{}
+		err := c.BindJSON(apiSpec)
 
-	if err != nil {
-		log.Errorf("Error when reading json: %s", err.Error())
+		if err != nil {
+			log.Errorf("Error when reading json: %s", err.Error())
+		}
+
+		repo.Add(apiSpec)
+
+		c.JSON(http.StatusCreated, apiSpec)
 	}
-
-	repo.Add(apiSpec)
-
-	u.JSON(iris.StatusCreated, apiSpec)
 }
 
 // DELETE /apps/:param1
-func (u AppsAPI) DeleteBy(id string) {
-	repo := u.getRepository()
-	err := repo.Remove(id)
+func (u AppsAPI) DeleteBy() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		id := c.Param("id")
+		repo := u.getRepository(u.getDatabase(c))
+		err := repo.Remove(id)
 
-	if err != nil {
-		log.Errorf(err.Error())
-		u.JSON(iris.StatusInternalServerError, err.Error())
+		if err != nil {
+			log.Errorf(err.Error())
+			c.JSON(http.StatusInternalServerError, err.Error())
+		}
+
+		c.Status(http.StatusNoContent)
+	}
+}
+
+func (u AppsAPI) getDatabase(c *gin.Context) *mgo.Database {
+	db, exists := c.Get("db")
+
+	if false == exists {
+		log.Error("DB context was not set for this request")
 	}
 
-	u.Response.SetStatusCode(iris.StatusNoContent)
+	return db.(*mgo.Database)
 }
 
 // GetRepository gets the repository for the handlers
-func (u AppsAPI) getRepository() *MongoAPISpecRepository {
-	db := u.Context.Get("db").(*mgo.Database)
+func (u AppsAPI) getRepository(db *mgo.Database) *MongoAPISpecRepository {
 	repo, err := NewMongoAppRepository(db)
 
 	if err != nil {

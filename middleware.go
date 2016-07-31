@@ -1,8 +1,9 @@
 package main
 
 import (
-	"github.com/kataras/iris"
-	"github.com/valyala/fasthttp"
+	"github.com/gin-gonic/gin"
+	log "github.com/Sirupsen/logrus"
+	"net/http"
 )
 
 // Middleware wraps up the APIDefinition object to be included in a
@@ -13,31 +14,23 @@ type Middleware struct {
 }
 
 type MiddlewareImplementation interface {
-	ProcessRequest(req fasthttp.Request, resp fasthttp.Response, c *iris.Context) (error, int)
-}
-
-type IrisMiddleware struct {
-	mw MiddlewareImplementation
-}
-
-func (m IrisMiddleware) Serve(c *iris.Context) {
-	req := c.Request
-	res := c.Response
-
-	reqErr, errCode := m.mw.ProcessRequest(req, res, c)
-
-	if reqErr != nil {
-		c.JSON(errCode, reqErr.Error())
-		return
-	}
-
-	c.SetStatusCode(errCode)
-	c.Next()
+	ProcessRequest(req *http.Request, c *gin.Context) (error, int)
 }
 
 // Generic middleware caller to make extension easier
-func CreateMiddleware(mw MiddlewareImplementation) iris.Handler {
-	return IrisMiddleware{mw}
+func CreateMiddleware(mw MiddlewareImplementation) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		reqErr, errCode := mw.ProcessRequest(c.Request, c)
+
+		if reqErr != nil {
+			log.Error(reqErr)
+			c.JSON(errCode, reqErr.Error())
+			c.Abort()
+		} else {
+			c.Status(errCode)
+			c.Next()
+		}
+	}
 }
 
 func (o Middleware) CheckSessionAndIdentityForValidKey(key string) (SessionState, bool) {

@@ -5,8 +5,9 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/kataras/iris"
-	"github.com/valyala/fasthttp"
+	"net/http"
+	"github.com/gin-gonic/gin"
+	"github.com/gorilla/context"
 )
 
 type Oauth2KeyExists struct {
@@ -14,27 +15,27 @@ type Oauth2KeyExists struct {
 }
 
 //Important staff, iris middleware must implement the iris.Handler interface which is:
-func (m Oauth2KeyExists) ProcessRequest(req fasthttp.Request, resp fasthttp.Response, c *iris.Context) (error, int) {
+func (m Oauth2KeyExists) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
 	m.Logger.Debug("Starting Oauth2KeyExists middleware")
 
 	if false == m.Spec.UseOauth2 {
 		m.Logger.Debug("OAuth2 not enabled")
-		return nil, fasthttp.StatusOK
+		return nil, http.StatusOK
 	}
 
 	// We're using OAuth, start checking for access keys
-	authHeaderValue := string(req.Header.Peek("Authorization"))
+	authHeaderValue := string(req.Header.Get("Authorization"))
 	parts := strings.Split(authHeaderValue, " ")
 	if len(parts) < 2 {
 		m.Logger.Info("Attempted access with malformed header, no auth header found.")
 
-		return errors.New("Authorization field missing"), fasthttp.StatusBadRequest
+		return errors.New("Authorization field missing"), http.StatusBadRequest
 	}
 
 	if strings.ToLower(parts[0]) != "bearer" {
 		m.Logger.Info("Bearer token malformed")
 
-		return errors.New("Bearer token malformed"), fasthttp.StatusBadRequest
+		return errors.New("Bearer token malformed"), http.StatusBadRequest
 	}
 
 	accessToken := parts[1]
@@ -42,16 +43,16 @@ func (m Oauth2KeyExists) ProcessRequest(req fasthttp.Request, resp fasthttp.Resp
 
 	if !keyExists {
 		m.Logger.WithFields(log.Fields{
-			"path":   c.PathString(),
-			"origin": c.RemoteAddr(),
+			"path":  req.RequestURI,
+			"origin": req.RemoteAddr	,
 			"key":    accessToken,
 		}).Info("Attempted access with non-existent key.")
 
-		return errors.New("Key not authorised"), fasthttp.StatusForbidden
+		return errors.New("Key not authorised"), http.StatusForbidden
 	}
 
-	c.Set(SessionData, thisSessionState)
-	c.Set(AuthHeaderValue, accessToken)
+	context.Set(req, SessionData, thisSessionState)
+	context.Set(req, AuthHeaderValue, accessToken)
 
-	return nil, fasthttp.StatusOK
+	return nil, http.StatusOK
 }

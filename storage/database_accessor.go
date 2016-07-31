@@ -2,8 +2,8 @@ package storage
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/kataras/iris"
 	"gopkg.in/mgo.v2"
+	"github.com/gin-gonic/gin"
 )
 
 // DatabaseAccessor represents a mongo database encapsulation
@@ -27,7 +27,7 @@ func NewServer(config Database) (*DatabaseAccessor, error) {
 }
 
 // Set a session to a context
-func (da *DatabaseAccessor) Set(c *iris.Context, session *mgo.Session) {
+func (da *DatabaseAccessor) Set(c *gin.Context, session *mgo.Session) {
 	db := da.DB(da.config.Name)
 	c.Set("db", db)
 	c.Set("mgoSession", session)

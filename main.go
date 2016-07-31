@@ -7,10 +7,10 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/etcinit/speedbump"
 	"github.com/hellofresh/api-gateway/storage"
-	"github.com/kataras/iris"
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/redis.v3"
 	"os"
+	"github.com/gin-gonic/gin"
 )
 
 var APILoader = APIDefinitionLoader{}
@@ -48,12 +48,18 @@ func initializeRedis() *redis.Client {
 }
 
 //loadAPIEndpoints register api endpoints
-func loadAPIEndpoints() {
+func loadAPIEndpoints(router *gin.Engine) {
 	log.Debug("Loading API Endpoints")
-	group := iris.Party("/apis")
+
+	handler := AppsAPI{}
+
+	group := router.Group("/apis")
 	{
-		appHandler := AppsAPI{}
-		group.API("/", appHandler)
+		group.GET("/", handler.Get())
+		group.POST("/", handler.Post())
+		group.GET("/:id", handler.GetBy())
+		group.PUT("/:id", handler.PutBy())
+		group.DELETE("/:id", handler.DeleteBy())
 	}
 }
 
@@ -64,10 +70,10 @@ func getAPISpecs(accessor *storage.DatabaseAccessor) []*APISpec {
 }
 
 //loadApps load application middleware
-func loadApps(apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.DatabaseAccessor) {
+func loadApps(router *gin.Engine, apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.DatabaseAccessor) {
 	log.Debug("Loading API configurations")
 
-	proxyRegister := NewProxyRegister()
+	proxyRegister := &ProxyRegister{router}
 
 	for _, referenceSpec := range apiSpecs {
 		var skip bool
@@ -92,16 +98,16 @@ func loadApps(apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.
 
 			mw := &Middleware{referenceSpec, logger}
 
-			iris.Use(CreateMiddleware(&Database{mw, accessor}))
+			router.Use(CreateMiddleware(&Database{mw, accessor}))
 
-			var beforeHandlers = []iris.Handler{
+			var beforeHandlers = []gin.HandlerFunc{
 				CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}),
 			}
 
 			if referenceSpec.UseOauth2 {
 				logger.Debug("Loading OAuth Manager")
 				referenceSpec.OAuthManager = &OAuthManager{redisClient}
-				addOAuthHandlers(proxyRegister, referenceSpec, cb, logger)
+				addOAuthHandlers(proxyRegister, mw, cb, logger)
 				beforeHandlers = append(beforeHandlers, CreateMiddleware(Oauth2KeyExists{mw}))
 				logger.Debug("Done loading OAuth Manager")
 			}
@@ -115,12 +121,12 @@ func loadApps(apiSpecs []*APISpec, redisClient *redis.Client, accessor *storage.
 }
 
 //addOAuthHandlers loads configured oauth endpoints
-func addOAuthHandlers(proxyRegister *ProxyRegister, spec *APISpec, cb *ExtendedCircuitBreakerMeta, logger *Logger) {
+func addOAuthHandlers(proxyRegister *ProxyRegister, mw *Middleware, cb *ExtendedCircuitBreakerMeta, logger *Logger) {
 	logger.Info("Loading oauth configuration")
 	var proxies []Proxy
-	var handlers []iris.Handler
+	var handlers []gin.HandlerFunc
 
-	oauthMeta := spec.Oauth2Meta
+	oauthMeta := mw.Spec.Oauth2Meta
 
 	//oauth proxy
 	logger.Debug("Registering authorize endpoint")
@@ -163,7 +169,7 @@ func addOAuthHandlers(proxyRegister *ProxyRegister, spec *APISpec, cb *ExtendedC
 		logger.Debug("No client remove endpoint")
 	}
 
-	handlers = append(handlers, OAuthHandler{spec})
+	handlers = append(handlers, CreateMiddleware(OAuthMiddleware{mw}))
 	proxyRegister.registerMany(proxies, cb, nil, handlers)
 }
 
@@ -187,6 +193,8 @@ func main() {
 	log.SetLevel(log.DebugLevel)
 	loadConfigEnv()
 
+	router := gin.Default()
+
 	accessor := initializeDatabase()
 	defer accessor.Close()
 
@@ -194,8 +202,8 @@ func main() {
 	defer redisStorage.Close()
 
 	specs := getAPISpecs(accessor)
-	loadApps(specs, redisStorage, accessor)
-	loadAPIEndpoints()
+	loadApps(router, specs, redisStorage, accessor)
+	loadAPIEndpoints(router)
 
-	iris.Listen(fmt.Sprintf(":%v", config.Port))
+	router.Run(fmt.Sprintf(":%v", config.Port))
 }
