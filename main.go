@@ -189,9 +189,16 @@ func validateProxy(proxy Proxy) bool {
 }
 
 func main() {
-	log.SetOutput(os.Stderr)
-	log.SetLevel(log.DebugLevel)
 	loadConfigEnv()
+	log.SetOutput(os.Stderr)
+
+	if config.Debug {
+		log.SetLevel(log.DebugLevel)
+		gin.SetMode(gin.DebugMode)
+	} else {
+		log.SetLevel(log.InfoLevel)
+		gin.SetMode(gin.ReleaseMode)
+	}
 
 	router := gin.Default()
 
