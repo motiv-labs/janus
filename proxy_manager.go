@@ -30,28 +30,28 @@ func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 			t.breaker.CB.Fail()
 		} else {
 			t.breaker.CB.Success()
+
+			//This is useful for the middlewares
+			var bodyBytes []byte
+
+			if resp.Body != nil {
+				defer resp.Body.Close()
+				bodyBytes, _ = ioutil.ReadAll(resp.Body)
+			}
+
+			// Restore the io.ReadCloser to its original state
+			resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+			// Use the content
+			log.WithFields(log.Fields{
+				"req": req,
+			}).Info("Setting body")
+
+			t.context.Set("body", bodyBytes)
 		}
 	}
 
-	//This is useful for the middlewares
-	var bodyBytes []byte
-
-	if resp.Body != nil {
-		defer resp.Body.Close()
-		bodyBytes, _ = ioutil.ReadAll(resp.Body)
-	}
-
-	// Restore the io.ReadCloser to its original state
-	resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-
-	// Use the content
-	log.WithFields(log.Fields{
-		"req": req,
-	}).Info("Setting body")
-
-	t.context.Set("body", bodyBytes)
-
-	return resp, nil
+	return resp, err
 }
 
 var _ http.RoundTripper = &transport{}
@@ -110,15 +110,15 @@ func (p *ProxyRegister) createHandler(proxy Proxy, breaker *ExtendedCircuitBreak
 		path := target.Path
 		targetQuery := target.RawQuery
 
+		listenPath := strings.Replace(proxy.ListenPath, "/*randomName", "", -1)
+		path = singleJoiningSlash(target.Path, req.URL.Path)
+
 		if proxy.StripListenPath {
 			log.Debugf("Stripping: %s", proxy.ListenPath)
-			listenPath := strings.Replace(proxy.ListenPath, "/*randomName", "", -1)
-
-			path = singleJoiningSlash(target.Path, req.URL.Path)
-			path = strings.Replace(path, listenPath, "", -1)
-
-			log.Debugf("Upstream Path is: %s", path)
+			path = strings.Replace(path, listenPath, "", 1)
 		}
+
+		log.Debugf("Upstream Path is: %s", path)
 
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
