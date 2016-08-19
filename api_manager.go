@@ -16,6 +16,13 @@ type APIManager struct {
 	accessor      *storage.DatabaseAccessor
 }
 
+// NewAPIManager creates a new instance of the api manager
+func NewAPIManager(router *gin.Engine, redisClient *redis.Client, accessor *storage.DatabaseAccessor) *APIManager {
+	proxyRegister := &ProxyRegister{router}
+	return &APIManager{proxyRegister, redisClient, accessor}
+}
+
+// Load loads all api specs from a datasource
 func (m APIManager) Load() {
 	specs := m.getAPISpecs()
 	go m.LoadApps(specs)
@@ -121,7 +128,7 @@ func (m APIManager) addOAuthHandlers(mw *Middleware, cb *ExtendedCircuitBreakerM
 	m.proxyRegister.registerMany(proxies, cb, nil, handlers)
 }
 
-//getAPISpecs Load application specs from source
+//getAPISpecs Load application specs from datasource
 func (m APIManager) getAPISpecs() []*APISpec {
 	log.Debug("Using App Configuration from Mongo DB")
 	return APILoader.LoadDefinitionsFromDatastore(m.accessor.Session)

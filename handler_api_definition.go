@@ -7,7 +7,9 @@ import (
 	"net/http"
 )
 
-type AppsAPI struct{}
+type AppsAPI struct {
+	apiManager *APIManager
+}
 
 // GET /apps
 func (u AppsAPI) Get() gin.HandlerFunc {
@@ -59,6 +61,7 @@ func (u AppsAPI) PutBy() gin.HandlerFunc {
 		}
 
 		repo.Add(&apiSpec)
+		u.apiManager.Load()
 
 		c.JSON(http.StatusCreated, apiSpec)
 	}
@@ -76,6 +79,7 @@ func (u AppsAPI) Post() gin.HandlerFunc {
 		}
 
 		repo.Add(apiSpec)
+		u.apiManager.Load()
 
 		c.JSON(http.StatusCreated, apiSpec)
 	}
@@ -86,13 +90,14 @@ func (u AppsAPI) DeleteBy() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		repo := u.getRepository(u.getDatabase(c))
-		err := repo.Remove(id)
 
+		err := repo.Remove(id)
 		if err != nil {
 			log.Errorf(err.Error())
 			c.JSON(http.StatusInternalServerError, err.Error())
 		}
 
+		u.apiManager.Load()
 		c.Status(http.StatusNoContent)
 	}
 }

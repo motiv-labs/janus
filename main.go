@@ -45,10 +45,10 @@ func initializeRedis() *redis.Client {
 }
 
 //loadAPIEndpoints register api endpoints
-func loadAPIEndpoints(router *gin.Engine) {
+func loadAPIEndpoints(router *gin.Engine, apiManager *APIManager) {
 	log.Debug("Loading API Endpoints")
 
-	handler := AppsAPI{}
+	handler := AppsAPI{apiManager}
 	group := router.Group("/apis")
 	{
 		group.GET("/", handler.Get())
@@ -80,10 +80,9 @@ func main() {
 	redisStorage := initializeRedis()
 	defer redisStorage.Close()
 
-	proxyRegister := &ProxyRegister{router}
-	apiManager := APIManager{proxyRegister, redisStorage, accessor}
+	apiManager := NewAPIManager(router, redisStorage, accessor)
 	apiManager.Load()
-	loadAPIEndpoints(router)
+	loadAPIEndpoints(router, apiManager)
 
 	router.Run(fmt.Sprintf(":%v", config.Port))
 }
