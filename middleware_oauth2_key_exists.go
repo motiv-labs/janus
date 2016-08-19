@@ -44,11 +44,11 @@ func (m Oauth2KeyExists) ProcessRequest(req *http.Request, c *gin.Context) (erro
 	if !keyExists {
 		m.Logger.WithFields(log.Fields{
 			"path":  req.RequestURI,
-			"origin": req.RemoteAddr	,
+			"origin": req.RemoteAddr,
 			"key":    accessToken,
 		}).Info("Attempted access with non-existent key.")
 
-		return errors.New("Key not authorised"), http.StatusForbidden
+		return errors.New("Key not authorised"), http.StatusUnauthorized
 	}
 
 	context.Set(req, SessionData, thisSessionState)
