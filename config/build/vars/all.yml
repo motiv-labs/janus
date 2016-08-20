@@ -7,7 +7,7 @@ project_name               : "api-gateway"
 # Build paths
 project_relative_root_dir  : "{{ lookup('pipe', 'pwd') }}../../../"
 project_command_abs_path   : 'cd "{{ project_relative_root_dir }}"; pwd'
-project_abs_path           : "~/location-service-bin/"
+project_abs_path           : "~/api-gateway-bin/"
 
 # Code ship has ENV variable COMMIT_ID
 git_hash                   : "{{ lookup('env', 'COMMIT_ID') }}"
