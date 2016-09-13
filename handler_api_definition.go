@@ -1,10 +1,11 @@
 package main
 
 import (
-	log "github.com/Sirupsen/logrus"
-	"gopkg.in/mgo.v2"
-	"github.com/gin-gonic/gin"
 	"net/http"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/gin-gonic/gin"
+	"gopkg.in/mgo.v2"
 )
 
 type AppsAPI struct {
@@ -31,11 +32,17 @@ func (u AppsAPI) GetBy() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Param("id")
 		repo := u.getRepository(u.getDatabase(c))
+
 		data, err := repo.FindByID(id)
+		if data.ID == "" {
+			c.JSON(http.StatusNotFound, "Application not found")
+			return
+		}
 
 		if err != nil {
 			log.Errorf(err.Error())
 			c.JSON(http.StatusInternalServerError, err.Error())
+			return
 		}
 
 		c.JSON(http.StatusOK, data)
@@ -45,25 +52,32 @@ func (u AppsAPI) GetBy() gin.HandlerFunc {
 // PUT /apps/:id
 func (u AppsAPI) PutBy() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var err error
+
 		id := c.Param("id")
 		repo := u.getRepository(u.getDatabase(c))
-		apiSpec, err := repo.FindByID(id)
+		definition, err := repo.FindByID(id)
+		if definition.ID == "" {
+			c.JSON(http.StatusNotFound, "Application not found")
+			return
+		}
 
 		if err != nil {
 			log.Errorf(err.Error())
 			c.JSON(http.StatusInternalServerError, err.Error())
+			return
 		}
 
-		err = c.BindJSON(&apiSpec)
-
+		err = c.BindJSON(definition)
 		if err != nil {
 			log.Errorf("Error when reading json: %s", err.Error())
+			return
 		}
 
-		repo.Add(&apiSpec)
+		repo.Add(definition)
 		u.apiManager.Load()
 
-		c.JSON(http.StatusCreated, apiSpec)
+		c.JSON(http.StatusOK, definition)
 	}
 }
 
@@ -71,17 +85,21 @@ func (u AppsAPI) PutBy() gin.HandlerFunc {
 func (u AppsAPI) Post() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		repo := u.getRepository(u.getDatabase(c))
-		apiSpec := &APIDefinition{}
-		err := c.BindJSON(apiSpec)
+		definition := &APIDefinition{}
 
+		err := c.BindJSON(definition)
 		if err != nil {
-			log.Errorf("Error when reading json: %s", err.Error())
+			log.Fatalf("Error when reading json: %s", err.Error())
 		}
 
-		repo.Add(apiSpec)
-		u.apiManager.Load()
+		err = repo.Add(definition)
+		if err != nil {
+			c.JSON(http.StatusBadRequest, err)
+			return
+		}
 
-		c.JSON(http.StatusCreated, apiSpec)
+		u.apiManager.Load()
+		c.JSON(http.StatusCreated, definition)
 	}
 }
 
@@ -93,8 +111,8 @@ func (u AppsAPI) DeleteBy() gin.HandlerFunc {
 
 		err := repo.Remove(id)
 		if err != nil {
-			log.Errorf(err.Error())
 			c.JSON(http.StatusInternalServerError, err.Error())
+			return
 		}
 
 		u.apiManager.Load()

@@ -2,12 +2,13 @@ package main
 
 import (
 	"fmt"
+	"os"
+
 	log "github.com/Sirupsen/logrus"
+	"github.com/gin-gonic/gin"
 	"github.com/hellofresh/api-gateway/storage"
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/redis.v3"
-	"os"
-	"github.com/gin-gonic/gin"
 )
 
 var APILoader = APIDefinitionLoader{}
