@@ -4,6 +4,7 @@ import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/asaskevich/govalidator"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -41,38 +42,43 @@ func (r MongoAPISpecRepository) FindAll() ([]APIDefinition, error) {
 }
 
 // FindByID find a country by the iso2code provided
-func (r MongoAPISpecRepository) FindByID(id string) (APIDefinition, error) {
-	result := APIDefinition{}
-	err := r.coll.FindId(bson.ObjectIdHex(id)).One(&result)
-	if err != nil {
-		return result, err
-	}
+func (r MongoAPISpecRepository) FindByID(id string) (*APIDefinition, error) {
+	result := &APIDefinition{}
+	err := r.coll.FindId(bson.ObjectIdHex(id)).One(result)
 
-	return result, nil
+	return result, err
 }
 
 // Add adds a country to the repository
-func (r MongoAPISpecRepository) Add(apiSpec *APIDefinition) error {
+func (r MongoAPISpecRepository) Add(definition *APIDefinition) error {
 	var id bson.ObjectId
 
-	if len(apiSpec.ID) == 0 {
+	if len(definition.ID) == 0 {
 		id = bson.NewObjectId()
-		apiSpec.CreatedAt = time.Now()
+		definition.CreatedAt = time.Now()
 	} else {
-		id = apiSpec.ID
-		apiSpec.UpdatedAt = time.Now()
+		id = definition.ID
+		definition.UpdatedAt = time.Now()
 	}
 
-	_, err := r.coll.UpsertId(id, apiSpec)
+	definition.ID = id
 
+	isValid, err := govalidator.ValidateStruct(definition)
+	if false == isValid && err != nil {
+		fields := log.Fields{
+			"errors": err.Error(),
+		}
+		log.WithFields(fields).Error("Validation errors")
+		return err
+	}
+
+	_, err = r.coll.UpsertId(id, definition)
 	if err != nil {
 		log.Errorf("There was an error adding the resource %s", id)
 		return err
 	}
 
-	apiSpec.ID = id
 	log.Infof("Resource %s added", id)
-
 	return nil
 }
 

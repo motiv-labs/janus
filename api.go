@@ -15,27 +15,27 @@ type APISpec struct {
 
 // APIDefinition Represents an API that you want to proxy
 type APIDefinition struct {
-	ID             bson.ObjectId      `bson:"_id,omitempty" json:"id,omitempty"`
-	CreatedAt      time.Time          `bson:"created_at" json:"created_at"`
-	UpdatedAt      time.Time          `bson:"updated_at" json:"updated_at"`
-	Name           string             `bson:"name" json:"name"`
+	ID             bson.ObjectId      `bson:"_id,omitempty" json:"id,omitempty" valid:"required"`
+	CreatedAt      time.Time          `bson:"created_at" json:"created_at" valid:"-"`
+	UpdatedAt      time.Time          `bson:"updated_at" json:"updated_at" valid:"-"`
+	Name           string             `bson:"name" json:"name" valid:"required"`
 	Slug           string             `bson:"slug" json:"slug"`
 	Active         bool               `bson:"active" json:"active"`
 	UseBasicAuth   bool               `bson:"use_basic_auth" json:"use_basic_auth"`
 	Domain         string             `bson:"domain" json:"domain"`
-	Proxy          Proxy              `bson:"proxy" json:"proxy"`
+	Proxy          Proxy              `bson:"proxy" json:"proxy" valid:"required"`
 	AllowedIPs     []string           `mapstructure:"allowed_ips" bson:"allowed_ips" json:"allowed_ips"`
 	CircuitBreaker CircuitBreakerMeta `bson:"circuit_breakers" json:"circuit_breakers"`
 	UseOauth2      bool               `bson:"use_oauth2" json:"use_oauth2"`
-	Oauth2Meta     Oauth2Meta         `bson:"oauth_meta" json:"oauth_meta"`
-	RateLimit      RateLimitMeta      `bson:"rate_limit" json:"rate_limit"`
+	Oauth2Meta     Oauth2Meta         `bson:"oauth_meta" json:"oauth_meta" valid:"required"`
+	RateLimit      RateLimitMeta      `bson:"rate_limit" json:"rate_limit" valid:"required"`
 }
 
 // Proxy defines proxy rules for a route
 type Proxy struct {
 	PreserveHostHeader          bool     `bson:"preserve_host_header" json:"preserve_host_header"`
-	ListenPath                  string   `bson:"listen_path" json:"listen_path"`
-	TargetURL                   string   `bson:"target_url" json:"target_url"`
+	ListenPath                  string   `bson:"listen_path" json:"listen_path" valid:"required"`
+	TargetURL                   string   `bson:"target_url" json:"target_url" valid:"url,required"`
 	StripListenPath             bool     `bson:"strip_listen_path" json:"strip_listen_path"`
 	EnableLoadBalancing         bool     `bson:"enable_load_balancing" json:"enable_load_balancing"`
 	TargetList                  []string `bson:"target_list" json:"target_list"`
