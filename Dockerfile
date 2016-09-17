@@ -1,24 +1,19 @@
 FROM golang
 
 # Set apps home directory.
-ENV APP_DIR $GOPATH/src/github.com/hellofresh/api-gateway
+ENV APP_DIR /go/src/github.com/hellofresh/api-gateway
+
+# Creates the application directory
+RUN mkdir -p $APP_DIR
 
 # Add sources.
-ADD . $APP_DIR
+COPY . $APP_DIR
 
 # Define current working directory.
 WORKDIR $APP_DIR
 
-# Get gin from main repo
-RUN go get github.com/codegangsta/gin
-
-# Get godeps from main repo
-RUN go get github.com/tools/godep
-
-# Restore godep dependencies
-RUN godep restore
-
-RUN go install github.com/hellofresh/api-gateway
+# Build the go binary
+RUN make
 
 # Expose port 3000 to the host so we can access the gin proxy
 EXPOSE 3000

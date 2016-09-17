@@ -1,0 +1,22 @@
+package: github.com/hellofresh/api-gateway
+import:
+- package: github.com/RangelReale/osin
+- package: github.com/Sirupsen/logrus
+  version: ^0.10.0
+- package: github.com/asaskevich/govalidator
+  version: ^4.0.0
+- package: github.com/etcinit/speedbump
+  version: ^0.2.0
+- package: github.com/gin-gonic/gin
+  version: 9163ee543d3f1fab9b0ad8cdf6dc2a6ec2c07dbb
+- package: github.com/gorilla/context
+  version: ^1.1.0
+- package: github.com/kelseyhightower/envconfig
+  version: ^1.1.0
+- package: github.com/rubyist/circuitbreaker
+  version: ^2.2.0
+- package: gopkg.in/mgo.v2
+  subpackages:
+  - bson
+- package: gopkg.in/redis.v3
+  version: ^3.6.4
