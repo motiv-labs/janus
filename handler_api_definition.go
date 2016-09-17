@@ -30,7 +30,7 @@ func (u AppsAPI) Get() gin.HandlerFunc {
 // GET /apps/:param1 which its value passed to the id argument
 func (u AppsAPI) GetBy() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id := c.Param("id")
+		id := c.Params.ByName("id")
 		repo := u.getRepository(u.getDatabase(c))
 
 		data, err := repo.FindByID(id)
@@ -54,7 +54,7 @@ func (u AppsAPI) PutBy() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var err error
 
-		id := c.Param("id")
+		id := c.Params.ByName("id")
 		repo := u.getRepository(u.getDatabase(c))
 		definition, err := repo.FindByID(id)
 		if definition.ID == "" {
@@ -68,8 +68,8 @@ func (u AppsAPI) PutBy() gin.HandlerFunc {
 			return
 		}
 
-		err = c.BindJSON(definition)
-		if err != nil {
+		err = c.Bind(definition)
+		if nil != err {
 			log.Errorf("Error when reading json: %s", err.Error())
 			return
 		}
@@ -87,13 +87,13 @@ func (u AppsAPI) Post() gin.HandlerFunc {
 		repo := u.getRepository(u.getDatabase(c))
 		definition := &APIDefinition{}
 
-		err := c.BindJSON(definition)
-		if err != nil {
-			log.Fatalf("Error when reading json: %s", err.Error())
+		err := c.Bind(definition)
+		if nil != err {
+			log.Fatal("Error when reading json")
 		}
 
 		err = repo.Add(definition)
-		if err != nil {
+		if nil != err {
 			c.JSON(http.StatusBadRequest, err)
 			return
 		}
@@ -106,7 +106,7 @@ func (u AppsAPI) Post() gin.HandlerFunc {
 // DELETE /apps/:param1
 func (u AppsAPI) DeleteBy() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		id := c.Param("id")
+		id := c.Params.ByName("id")
 		repo := u.getRepository(u.getDatabase(c))
 
 		err := repo.Remove(id)
@@ -116,7 +116,7 @@ func (u AppsAPI) DeleteBy() gin.HandlerFunc {
 		}
 
 		u.apiManager.Load()
-		c.Status(http.StatusNoContent)
+		c.Request.Response.StatusCode = http.StatusNoContent
 	}
 }
 

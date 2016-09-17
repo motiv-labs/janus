@@ -6,18 +6,17 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	"github.com/hellofresh/api-gateway/storage"
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/redis.v3"
 )
 
 var APILoader = APIDefinitionLoader{}
-var config = Specification{}
+var config Specification
 
 //loadConfigEnv loads environment variables
 func loadConfigEnv() Specification {
 	err := envconfig.Process("", &config)
-
+	log.Info(config)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -26,8 +25,8 @@ func loadConfigEnv() Specification {
 }
 
 // initializeDatabase initializes a DB connection
-func initializeDatabase() *storage.DatabaseAccessor {
-	accessor, err := storage.NewServer(config.Database)
+func initializeDatabase() *DatabaseAccessor {
+	accessor, err := NewServer(config.DatabaseDSN)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -37,11 +36,9 @@ func initializeDatabase() *storage.DatabaseAccessor {
 
 // initializeRedis initializes a Redis connection
 func initializeRedis() *redis.Client {
-	log.Infof("Trying to connect to redis instance: %s", config.Storage.DSN)
+	log.Infof("Trying to connect to redis instance: %s", config.StorageDSN)
 	return redis.NewClient(&redis.Options{
-		Addr:     config.Storage.DSN,
-		Password: config.Storage.Password,
-		DB:       config.Storage.Database,
+		Addr: config.StorageDSN,
 	})
 }
 

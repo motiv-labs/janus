@@ -1,24 +1,24 @@
 package main
 
 import (
-	"github.com/etcinit/speedbump"
-	log "github.com/Sirupsen/logrus"
-	"gopkg.in/redis.v3"
-	"github.com/gin-gonic/gin"
-	"github.com/hellofresh/api-gateway/storage"
 	"strings"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/etcinit/speedbump"
+	"github.com/gin-gonic/gin"
+	"gopkg.in/redis.v3"
 )
 
 // APIManager handles the creation and configuration of an api definition
 type APIManager struct {
 	proxyRegister *ProxyRegister
 	redisClient   *redis.Client
-	accessor      *storage.DatabaseAccessor
+	accessor      *DatabaseAccessor
 }
 
 // NewAPIManager creates a new instance of the api manager
-func NewAPIManager(router *gin.Engine, redisClient *redis.Client, accessor *storage.DatabaseAccessor) *APIManager {
-	proxyRegister := &ProxyRegister{router}
+func NewAPIManager(router *gin.Engine, redisClient *redis.Client, accessor *DatabaseAccessor) *APIManager {
+	proxyRegister := &ProxyRegister{Engine: router}
 	return &APIManager{proxyRegister, redisClient, accessor}
 }
 
@@ -73,7 +73,6 @@ func (m APIManager) LoadApps(apiSpecs []*APISpec) {
 		}
 	}
 }
-
 
 //addOAuthHandlers loads configured oauth endpoints
 func (m APIManager) addOAuthHandlers(mw *Middleware, cb *ExtendedCircuitBreakerMeta, logger *Logger) {

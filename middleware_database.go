@@ -1,14 +1,13 @@
 package main
 
 import (
-	"github.com/hellofresh/api-gateway/storage"
-	"github.com/gin-gonic/gin"
 	log "github.com/Sirupsen/logrus"
+	"github.com/gin-gonic/gin"
 )
 
-// a silly example
+// Database represents a database connection
 type Database struct {
-	dba *storage.DatabaseAccessor
+	dba *DatabaseAccessor
 }
 
 //Middleware is the gin middleware for the database, this is different from the others since it's a

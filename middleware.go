@@ -1,9 +1,10 @@
 package main
 
 import (
-	"github.com/gin-gonic/gin"
-	log "github.com/Sirupsen/logrus"
 	"net/http"
+
+	log "github.com/Sirupsen/logrus"
+	"github.com/gin-gonic/gin"
 )
 
 // Middleware wraps up the APIDefinition object to be included in a
@@ -27,7 +28,7 @@ func CreateMiddleware(mw MiddlewareImplementation) gin.HandlerFunc {
 			c.JSON(errCode, reqErr.Error())
 			c.Abort()
 		} else {
-			c.Status(errCode)
+			c.Request.Response.StatusCode = errCode
 			c.Next()
 		}
 	}

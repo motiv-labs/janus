@@ -6,10 +6,11 @@ import (
 	"net/url"
 	"strings"
 
+	"bytes"
+	"io/ioutil"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	"io/ioutil"
-	"bytes"
 )
 
 type transport struct {
@@ -56,8 +57,10 @@ func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 
 var _ http.RoundTripper = &transport{}
 
+// ProxyRegister represents a register proxy
 type ProxyRegister struct {
-	engine *gin.Engine
+	Engine  *gin.Engine
+	proxies []Proxy
 }
 
 func (p *ProxyRegister) registerMany(proxies []Proxy, breaker *ExtendedCircuitBreakerMeta, beforeHandlers []gin.HandlerFunc, afterHandlers []gin.HandlerFunc) {
@@ -66,28 +69,31 @@ func (p *ProxyRegister) registerMany(proxies []Proxy, breaker *ExtendedCircuitBr
 	}
 }
 
+// Register register a new proxy
 func (p *ProxyRegister) Register(proxy Proxy, breaker *ExtendedCircuitBreakerMeta, beforeHandlers []gin.HandlerFunc, afterHandlers []gin.HandlerFunc) {
 	var handlers []gin.HandlerFunc
 
 	defaultHandler := []gin.HandlerFunc{p.ToHandler(proxy, breaker)}
 	handlers = append(defaultHandler, handlers...)
 
-	if (len(beforeHandlers) > 0) {
+	if len(beforeHandlers) > 0 {
 		handlers = append(beforeHandlers, handlers...)
 	}
 
-	if (len(afterHandlers) > 0) {
+	if len(afterHandlers) > 0 {
 		handlers = append(handlers, afterHandlers...)
 	}
 
 	if false == p.Exists(proxy) {
-		p.engine.Any(proxy.ListenPath, handlers...)
+		p.Engine.Any(proxy.ListenPath, handlers...)
+		p.proxies = append(p.proxies, proxy)
 	}
 }
 
+// Exists checks if a proxy is already registered in the manager
 func (p *ProxyRegister) Exists(proxy Proxy) bool {
-	for _, route := range p.engine.Routes() {
-		if route.Path == proxy.ListenPath {
+	for _, route := range p.proxies {
+		if route.ListenPath == proxy.ListenPath {
 			return true
 		}
 	}
@@ -95,6 +101,7 @@ func (p *ProxyRegister) Exists(proxy Proxy) bool {
 	return false
 }
 
+// ToHandler turns a proxy configuration into a handler
 func (p *ProxyRegister) ToHandler(proxy Proxy, breaker *ExtendedCircuitBreakerMeta) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		handler := p.createHandler(proxy, breaker, c)
