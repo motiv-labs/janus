@@ -28,7 +28,7 @@ func CreateMiddleware(mw MiddlewareImplementation) gin.HandlerFunc {
 			c.JSON(errCode, reqErr.Error())
 			c.Abort()
 		} else {
-			c.Request.Response.StatusCode = errCode
+			c.String(errCode, "")
 			c.Next()
 		}
 	}

@@ -116,7 +116,7 @@ func (u AppsAPI) DeleteBy() gin.HandlerFunc {
 		}
 
 		u.apiManager.Load()
-		c.Request.Response.StatusCode = http.StatusNoContent
+		c.String(http.StatusNoContent, "")
 	}
 }
 
