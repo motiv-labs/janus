@@ -20,7 +20,7 @@ integrating an API gateway is a faster, more secure route that writing your own 
 
 ## Key Features 
 
-This API Gateway offers powerful, yet lightweight features that allow fine gained control over your API ecosystem.
+This API Gateway offers powerful, yet lightweight features that allow fine gained control over your API ecosystem. 
 
 * **RESTFul API** - Full programatic access to the internals makes it easy to manage your API users, keys and Api Configuration from within your systems
 * **Multiple access protocols** - Out of the box, we support Token-based, Basic Auth and Keyless access methods
