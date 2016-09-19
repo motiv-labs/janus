@@ -1,0 +1,190 @@
+---
+resource_types    :
+  - name          : pull-request
+    type          : docker-image
+    source        :
+      repository  : jtarchie/pr
+
+  - name          : slack-notification
+    type          : docker-image
+    source        :
+      repository  : quay.io/hellofresh/slack-notification-resource
+
+
+###############################
+# Resources
+###############################
+resources:
+- name: api-gateway
+  type: git
+  source:
+    uri: {{uri}}
+    access_token: {{oauth_token}}
+    branch: master
+
+- name          : prequest
+  type          : pull-request
+  source        :
+    uri         : {{uri}}
+    access_token: {{oauth_token}}
+    repo        : hellofresh/api-gateway
+
+- name          : api-gateway-rc
+  type          : github-release
+  source        :
+    user        : "hellofresh"
+    repository  : "api-gateway"
+    access_token: {{oauth_token}}
+
+
+- name              : semantic-rc-version
+  type              : semver
+  source            :
+    driver          : git
+    initial_version : 0.0.0-rc.1
+    uri             : {{uri}}
+    branch          : version
+    file            : version
+
+- name              : automation-release
+  type              : github-release
+  source            :
+    user            : hellofresh
+    repository      : automation
+    access_token    : {{oauth_token}}
+
+- name              : slack-alert
+  type              : slack-notification
+  source            :
+    url             : {{slack_url}}
+
+###############################
+# Jobs
+###############################
+jobs:
+
+#
+# Merge to master
+#
+- name: master-test-suite
+  plan:
+  - get: api-gateway
+    trigger: true
+
+  - aggregate:
+    - task: master unit test
+      file: api-gateway/ci/tasks/unit-tests-master.yml
+      params:
+        PROJECT_SRC: api-gateway
+
+- name: release-a-new-version
+  public: false
+  serial: true
+  plan:
+  - get: api-gateway
+    trigger: true
+    passed: ["master-test-suite"]
+
+  - put: semantic-rc-version
+    params:
+        pre: 'rc'
+
+  - put: api-gateway-rc
+    params:
+      name: semantic-rc-version/version
+      tag : semantic-rc-version/version
+
+- name: deploy-to-staging
+  public: false
+  serial: true
+  plan:
+  - get: api-gateway-rc
+    trigger: true
+    passed: ["release-a-new-version"]
+  - get: api-gateway
+    trigger: false
+  - get: automation-release
+    trigger: false
+  - task: deploy to staging
+    file: api-gateway/ci/tasks/deploy-staging.yml
+    on_failure:
+        put: slack-alert
+        params:
+          channel: '#deployments'
+          text: |
+              The build for csi failed. Check it out at:
+              http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+              or at:
+              http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
+    on_success:
+        put: slack-alert
+        params:
+          channel: '#deployments'
+          text: |
+              The build for the csi was successful. Check it out at:
+              http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+              or at:
+              http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
+    params:
+      INPUT: automation-release
+      ANSIBLE_REMOTE_USER: jenkins
+      VPASS: {{vpass}}
+      PRIVATE_KEY: {{private_key}}
+      ANSIBLE_PRIVATE_KEY_FILE: /root/.ssh/ansible_id_rsa
+      TAR_FILE: automation-release/automation-artifcat.tar.gz
+      CI_INVENTORY: "staging.ini"
+      GROUP_NAME: "ops-gateway"
+      VERSION_FILE: 'api-gateway-rc/version'
+
+#
+# PR
+#
+- name: pullrequest
+  plan: 
+  - get: prequest
+    trigger: true
+
+  - put: prequest
+    params:
+        path: prequest
+        context: unit-tests
+        status: pending
+
+  - put: prequest
+    params:
+        path: prequest
+        context: api-tests
+        status: pending
+
+  - aggregate:
+    - task: pullrequest unit test
+      file: prequest/ci/tasks/unit-tests-pr.yml
+      on_failure:
+          put: prequest
+          params:
+              path: prequest
+              context: unit-tests
+              status: failure
+      on_success:
+          put: prequest
+          params:
+              path: prequest
+              context: unit-tests
+              status: success
+      params:
+        PROJECT_SRC: prequest
+
+    - task: pullrequest api test
+      file: prequest/ci/tasks/api-tests-pr.yml
+      on_failure:
+          put: prequest
+          params:
+              path: prequest
+              context: api-tests
+              status: failure
+      on_success:
+          put: prequest
+          params:
+              path: prequest
+              context: api-tests
+              status: success
