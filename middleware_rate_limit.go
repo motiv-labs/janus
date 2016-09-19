@@ -6,9 +6,10 @@ import (
 	"strconv"
 	"time"
 
+	"net/http"
+
 	"github.com/etcinit/speedbump"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 type RateLimitMiddleware struct {
@@ -46,7 +47,7 @@ func (m RateLimitMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (
 	if !ok {
 		m.Logger.Debug("Rate limit exceeded.")
 		return errors.New("Rate limit exceeded. Try again in " + nextTime.String()), http.StatusTooManyRequests
-	} else {
-		return nil, http.StatusOK
 	}
+
+	return nil, http.StatusOK
 }
