@@ -1,6 +1,6 @@
 #!/bin/sh
 set -e
-base_path="/go/bin"
+base_path="$(pwd)"
 # Requires $GROUP_NAME to be defined
 # Requires $TAR_FILE to be defined
 # Optional $INPUT defaults to release

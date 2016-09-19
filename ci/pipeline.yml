@@ -126,8 +126,7 @@ jobs:
             username: {{quay_username}}
             password: {{quay_password}}
       run:
-        path: ./ci/tasks/deploy-staging.sh
-        dir: api-gateway
+        path: ./api-gateway/ci/tasks/deploy-staging.sh
       inputs:
         - name: automation-release
         - name: api-gateway-rc
@@ -137,7 +136,7 @@ jobs:
         params:
           channel: '#deployments'
           text: |
-              The build for csi failed. Check it out at:
+              The build for api-gateway failed. Check it out at:
               http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
               or at:
               http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
@@ -146,7 +145,7 @@ jobs:
         params:
           channel: '#deployments'
           text: |
-              The build for the csi was successful. Check it out at:
+              The build for the api-gateway was successful. Check it out at:
               http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
               or at:
               http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
