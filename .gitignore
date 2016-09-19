@@ -25,3 +25,6 @@ _testmain.go
 gin-bin
 
 /vendor
+
+# HF config files
+ci/vars_enc.yml

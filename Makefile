@@ -28,6 +28,9 @@ install:
 	@echo "$(OK_COLOR)==> Installing project$(NO_COLOR)"
 	go install -v
 
+test:
+	go test -v
+	
 # Cleans our project: deletes binaries
 clean:
 	@echo "$(OK_COLOR)==> Cleaning project$(NO_COLOR)"
