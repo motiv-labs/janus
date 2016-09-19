@@ -16,7 +16,6 @@ var config Specification
 //loadConfigEnv loads environment variables
 func loadConfigEnv() Specification {
 	err := envconfig.Process("", &config)
-	log.Info(config)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -72,6 +71,7 @@ func main() {
 
 	accessor := initializeDatabase()
 	defer accessor.Close()
+
 	database := Database{accessor}
 	router.Use(database.Middleware())
 
