@@ -73,9 +73,20 @@ jobs:
 
   - aggregate:
     - task: master unit test
-      file: api-gateway/ci/tasks/unit-tests-master.yml
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source: 
+              repository: quay.io/hellofresh/api-gateway
+              username: {{quay_username}}
+              password: {{quay_password}}
+        run:
+          path: api-gateway/ci/tasks/unit-tests.sh
+        inputs:
+        - name: api-gateway
       params:
-        PROJECT_SRC: api-gateway
+        PROJECT_SRC: {{project_src}}
 
 - name: release-a-new-version
   public: false
@@ -106,7 +117,20 @@ jobs:
   - get: automation-release
     trigger: false
   - task: deploy to staging
-    file: api-gateway/ci/tasks/deploy-staging.yml
+    config:
+      platform: linux
+      image_resource:
+        type: docker-image
+        source:
+            repository: quay.io/hellofresh/api-gateway
+            username: {{quay_username}}
+            password: {{quay_password}}
+      run:
+        path: ./ci/tasks/deploy-staging.sh
+      inputs:
+        - name: automation-release
+        - name: api-gateway-rc
+        - name: api-gateway
     on_failure:
         put: slack-alert
         params:
@@ -184,4 +208,8 @@ jobs:
               context: unit-tests
               status: success
       params:
+<<<<<<< Updated upstream
         PROJECT_SRC: prequest
+=======
+        PROJECT_SRC: {{project_src}}
+>>>>>>> Stashed changes
