@@ -32,8 +32,8 @@ func NewMongoAppRepository(db *mgo.Database) (*MongoAPISpecRepository, error) {
 // FindAll fetches all the countries available
 func (r MongoAPISpecRepository) FindAll() ([]APIDefinition, error) {
 	result := []APIDefinition{}
-	err := r.coll.Find(nil).All(&result)
 
+	err := r.coll.Find(nil).All(&result)
 	if err != nil {
 		return result, err
 	}
@@ -44,6 +44,11 @@ func (r MongoAPISpecRepository) FindAll() ([]APIDefinition, error) {
 // FindByID find a country by the iso2code provided
 func (r MongoAPISpecRepository) FindByID(id string) (*APIDefinition, error) {
 	result := &APIDefinition{}
+
+	if false == bson.IsObjectIdHex(id) {
+		return result, ErrInvalidID
+	}
+
 	err := r.coll.FindId(bson.ObjectIdHex(id)).One(result)
 
 	return result, err
@@ -84,6 +89,10 @@ func (r MongoAPISpecRepository) Add(definition *APIDefinition) error {
 
 // Remove removes a country from the repository
 func (r MongoAPISpecRepository) Remove(id string) error {
+	if false == bson.IsObjectIdHex(id) {
+		return ErrInvalidID
+	}
+
 	err := r.coll.RemoveId(bson.ObjectIdHex(id))
 	if err != nil {
 		log.Errorf("There was an error removing the resource %s", id)

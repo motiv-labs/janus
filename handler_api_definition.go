@@ -27,7 +27,7 @@ func (u AppsAPI) Get() gin.HandlerFunc {
 	}
 }
 
-// GET /apps/:param1 which its value passed to the id argument
+// GetBy gets an application by its id
 func (u AppsAPI) GetBy() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Params.ByName("id")
