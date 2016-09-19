@@ -127,6 +127,7 @@ jobs:
             password: {{quay_password}}
       run:
         path: ./ci/tasks/deploy-staging.sh
+        dir: api-gateway
       inputs:
         - name: automation-release
         - name: api-gateway-rc
