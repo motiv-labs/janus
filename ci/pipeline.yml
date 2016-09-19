@@ -174,12 +174,6 @@ jobs:
         context: unit-tests
         status: pending
 
-  - put: prequest
-    params:
-        path: prequest
-        context: api-tests
-        status: pending
-
   - aggregate:
     - task: pullrequest unit test
       config:
@@ -191,7 +185,7 @@ jobs:
               username: {{quay_username}}
               password: {{quay_password}}
         run:
-          path: ci/tasks/unit-tests.sh
+          path: ./ci/tasks/unit-tests.sh
           dir: prequest
         inputs:
         - name: prequest
@@ -209,3 +203,4 @@ jobs:
               status: success
       params:
         PROJECT_SRC: {{project_src}}
+
