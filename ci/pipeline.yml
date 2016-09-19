@@ -150,12 +150,6 @@ jobs:
         context: unit-tests
         status: pending
 
-  - put: prequest
-    params:
-        path: prequest
-        context: api-tests
-        status: pending
-
   - aggregate:
     - task: pullrequest unit test
       config:
@@ -169,7 +163,7 @@ jobs:
         run:
           path: make
           args: ["test"]
-          dir: prequest
+          dir: /go/src/github.com/hellofresh/api-gateway
         inputs:
         - name: prequest
       on_failure:
