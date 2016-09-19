@@ -208,8 +208,4 @@ jobs:
               context: unit-tests
               status: success
       params:
-<<<<<<< Updated upstream
-        PROJECT_SRC: prequest
-=======
         PROJECT_SRC: {{project_src}}
->>>>>>> Stashed changes
