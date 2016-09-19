@@ -161,9 +161,8 @@ jobs:
               username: {{quay_username}}
               password: {{quay_password}}
         run:
-          path: make
-          args: ["test"]
-          dir: /go/src/github.com/hellofresh/api-gateway
+          path: ./ci/tasks/unit-tests.sh
+          dir: prequest
         inputs:
         - name: prequest
       on_failure:
@@ -178,3 +177,5 @@ jobs:
               path: prequest
               context: unit-tests
               status: success
+      params:
+        PROJECT_SRC: /go/src/github.com/hellofresh/api-gateway
