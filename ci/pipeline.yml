@@ -167,7 +167,8 @@ jobs:
               username: {{quay_username}}
               password: {{quay_password}}
         run:
-          path: ci/tasks/unit-tests.sh
+          path: make
+          args: ["test"]
           dir: prequest
         inputs:
         - name: prequest
@@ -183,5 +184,3 @@ jobs:
               path: prequest
               context: unit-tests
               status: success
-      params:
-        PROJECT_SRC: prequest
