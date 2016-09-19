@@ -18,7 +18,7 @@ services instead of implementing management infrastructure. For example if you h
 web service that provides geolocation data for all the cats in NYC, and you want to make it public, 
 integrating an API gateway is a faster, more secure route that writing your own authorisation middleware.
 
-## Key Features
+## Key Features 
 
 This API Gateway offers powerful, yet lightweight features that allow fine gained control over your API ecosystem.
 
