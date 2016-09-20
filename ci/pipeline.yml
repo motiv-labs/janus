@@ -88,6 +88,36 @@ jobs:
       params:
         PROJECT_SRC: {{project_src}}
 
+- name: build
+  public: false
+  serial: true
+  plan:
+  - get: api-gateway
+    trigger: true
+    passed: ["master-test-suite"]
+
+  - task: build go app
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source: 
+              repository: quay.io/hellofresh/api-gateway
+              username: {{quay_username}}
+              password: {{quay_password}}
+        run:
+          path: api-gateway/ci/tasks/build.sh
+        inputs:
+        - name: api-gateway
+      params:
+        PROJECT_SRC: {{project_src}}
+
+  - put: api-gateway-rc
+    params:
+      name: semantic-rc-version/version
+      tag : semantic-rc-version/version
+
+
 - name: release-a-new-version
   public: false
   serial: true
