@@ -127,7 +127,7 @@ jobs:
       name: semantic-rc-version/version
       tag : semantic-rc-version/version
       globs:
-      - artifacts/api-gateway
+      - artifacts/*.tar.gz
 
 # - name: deploy-to-staging
 #   public: false
