@@ -97,7 +97,7 @@ jobs:
     passed: ["master-test-suite"]
 
   - task: build go app
-      config:
+    config:
         platform: linux
         image_resource:
           type: docker-image
@@ -106,11 +106,13 @@ jobs:
               username: {{quay_username}}
               password: {{quay_password}}
         run:
-          path: api-gateway/ci/tasks/build.sh
+          path: ./api-gateway/ci/tasks/build.sh
         inputs:
         - name: api-gateway
-      params:
-        PROJECT_SRC: {{project_src}}
+        outputs:
+        - name: artifacts
+        params:
+          PROJECT_SRC: {{project_src}}
 
   - put: api-gateway-rc
     params:
