@@ -10,6 +10,10 @@ resource_types    :
     source        :
       repository  : quay.io/hellofresh/slack-notification-resource
 
+  - name          : hf-github-releases
+    type          : docker-image
+    source        :
+      repository  : quay.io/hellofresh/gh-status-dynamic
 
 ###############################
 # Resources
@@ -29,13 +33,13 @@ resources:
     access_token: {{oauth_token}}
     repo        : hellofresh/api-gateway
 
-- name          : api-gateway-rc
-  type          : github-release
+- name          : gh-release-rc
+  type          : hf-github-releases
   source        :
     user        : "hellofresh"
     repository  : "api-gateway"
     access_token: {{oauth_token}}
-
+    pre_release : true
 
 - name              : semantic-rc-version
   type              : semver
@@ -88,7 +92,7 @@ jobs:
       params:
         PROJECT_SRC: {{project_src}}
 
-- name: build
+- name: build and release
   public: false
   serial: true
   plan:
@@ -114,70 +118,58 @@ jobs:
         params:
           PROJECT_SRC: {{project_src}}
 
-  - put: api-gateway-rc
-    params:
-      name: semantic-rc-version/version
-      tag : semantic-rc-version/version
-
-
-- name: release-a-new-version
-  public: false
-  serial: true
-  plan:
-  - get: api-gateway
-    trigger: true
-    passed: ["master-test-suite"]
-
   - put: semantic-rc-version
     params:
         pre: 'rc'
 
-  - put: api-gateway-rc
+  - put: gh-release-rc
     params:
       name: semantic-rc-version/version
       tag : semantic-rc-version/version
+      globs:
+      - artifacts/api-gateway
 
-- name: deploy-to-staging
-  public: false
-  serial: true
-  plan:
-  - get: api-gateway-rc
-    trigger: true
-    passed: ["release-a-new-version"]
-  - get: api-gateway
-    trigger: false
-  - get: automation-release
-    trigger: false
-  - task: deploy to staging
-    file: api-gateway/ci/tasks/deploy-staging.yml
-    on_failure:
-        put: slack-alert
-        params:
-          channel: '#deployments'
-          text: |
-              The build for api-gateway failed. Check it out at:
-              http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-              or at:
-              http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
-    on_success:
-        put: slack-alert
-        params:
-          channel: '#deployments'
-          text: |
-              The build for the api-gateway was successful. Check it out at:
-              http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-              or at:
-              http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
-    params:
-      INPUT: automation-release
-      ANSIBLE_REMOTE_USER: jenkins
-      VPASS: {{vpass}}
-      PRIVATE_KEY: {{private_key}}
-      ANSIBLE_PRIVATE_KEY_FILE: /root/.ssh/ansible_id_rsa
-      TAR_FILE: automation-release/automation-artifcat.tar.gz
-      CI_INVENTORY: "staging.ini"
-      GROUP_NAME: "ops-gateway"
-      VERSION_FILE: 'api-gateway-rc/version'
+# - name: deploy-to-staging
+#   public: false
+#   serial: true
+#   plan:
+#   - get: gh-release-rc
+#     trigger: true
+#     passed: ["release-a-new-version"]
+#   - get: api-gateway
+#     trigger: false
+#   - get: automation-release
+#     trigger: false
+#   - task: deploy to staging
+#     file: api-gateway/ci/tasks/deploy-staging.yml
+#     on_failure:
+#         put: slack-alert
+#         params:
+#           channel: '#deployments'
+#           text: |
+#               The build for api-gateway failed. Check it out at:
+#               http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+#               or at:
+#               http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
+#     on_success:
+#         put: slack-alert
+#         params:
+#           channel: '#deployments'
+#           text: |
+#               The build for the api-gateway was successful. Check it out at:
+#               http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+#               or at:
+#               http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
+#     params:
+#       INPUT: automation-release
+#       ANSIBLE_REMOTE_USER: jenkins
+#       VPASS: {{vpass}}
+#       PRIVATE_KEY: {{private_key}}
+#       ANSIBLE_PRIVATE_KEY_FILE: /root/.ssh/ansible_id_rsa
+#       TAR_FILE: automation-release/automation-artifcat.tar.gz
+#       CI_INVENTORY: "staging.ini"
+#       GROUP_NAME: "ops-gateway"
+#       VERSION_FILE: 'gh-release-rc/version'
 
 #
 # PR
