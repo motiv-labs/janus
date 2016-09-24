@@ -63,6 +63,27 @@ resources:
     url             : {{slack_url}}
 
 ###############################
+# Groups
+###############################
+groups:
+- name: All
+  jobs:
+    - master-test-suite
+    - build and release
+    - pullrequest
+    # - deploy-to-staging
+
+- name: Pullrequest
+  jobs:
+    - pullrequest
+
+- name: Master
+  jobs:
+    - master-test-suite
+    - build and release
+    # - deploy-to-staging
+
+###############################
 # Jobs
 ###############################
 jobs:
