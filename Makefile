@@ -4,7 +4,8 @@ ERROR_COLOR=\033[31;01m
 WARN_COLOR=\033[33;01m
 
 # This how we want to name the binary output
-BINARY=auth-service
+BINARY=api-gateway
+BUILD_PATH=${GOPATH}/bin
 
 .PHONY: all clean deps install
 
@@ -19,9 +20,15 @@ deps:
 	@glide install
 
 # Builds the project
-build:
-	@echo "$(OK_COLOR)==> Building project$(NO_COLOR)"
-	@go build -o ${BINARY}
+build: build-linux build-osx
+
+build-linux:
+	@echo "$(OK_COLOR)==> Building Linux amd64"
+	@env GOOS=linux GOARCH=amd64 go build -o ${BUILD_PATH}/linux_amd64/${BINARY}
+
+build-osx:
+	@echo "$(OK_COLOR)==> Building OSX amd64"
+	@env GOOS=darwin GOARCH=amd64 go build -o ${BUILD_PATH}/darwin_amd64/${BINARY}
 
 # Installs our project: copies binaries
 install:
