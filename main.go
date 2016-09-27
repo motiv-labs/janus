@@ -7,6 +7,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/kelseyhightower/envconfig"
+	"gopkg.in/redis.v3"
 )
 
 var APILoader = APIDefinitionLoader{}
