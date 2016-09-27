@@ -6,6 +6,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+	"github.com/itsjamie/gin-cors"
 	"github.com/kelseyhightower/envconfig"
 	"gopkg.in/redis.v3"
 )
@@ -68,6 +69,16 @@ func main() {
 		log.SetLevel(log.InfoLevel)
 		gin.SetMode(gin.ReleaseMode)
 	}
+
+	// Set up CORS
+	router.Use(cors.Middleware(cors.Config{
+		Origins:         "*",
+		Methods:         "GET, PUT, POST, DELETE",
+		RequestHeaders:  "Origin, Authorization, Content-Type",
+		ExposedHeaders:  "",
+		Credentials:     true,
+		ValidateHeaders: false,
+	}))
 
 	accessor := initializeDatabase()
 	defer accessor.Close()
