@@ -17,4 +17,4 @@ set -x
 zcat ${TAR_FILE} | tar -xf -
 cd "automation-artifcat/plays"
 export ANSIBLE_FORCE_COLOR=true
-ansible-playbook -i ../${CI_INVENTORY} ${GROUP_NAME}.yml -u policy -vvvv -t deployment -e deployment_force=true -e deployment_version=${RC_VERSION}
+ansible-playbook -i ../${CI_INVENTORY} ${GROUP_NAME}.yml -u policy -vvvv -t deployment -e deployment_force=true

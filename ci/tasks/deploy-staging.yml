@@ -11,5 +11,5 @@ run:
 
 inputs:
   - name: automation-release
-  - name: git-release-rc
+  - name: gh-release-rc
   - name: api-gateway
