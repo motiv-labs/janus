@@ -6,7 +6,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/etcinit/speedbump"
 	"github.com/gin-gonic/gin"
-	"gopkg.in/redis.v3"
 )
 
 // APIManager handles the creation and configuration of an api definition
@@ -56,6 +55,7 @@ func (m APIManager) LoadApps(apiSpecs []*APISpec) {
 			mw := &Middleware{referenceSpec, logger}
 			var beforeHandlers = []gin.HandlerFunc{
 				CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}),
+				CreateMiddleware(&CorsMiddleware{mw}),
 			}
 
 			if referenceSpec.UseOauth2 {
