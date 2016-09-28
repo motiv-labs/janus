@@ -22,3 +22,5 @@ import:
   version: ^3.6.4
 - package: github.com/itsjamie/gin-cors
   version: ^1.0.0
+- package: github.com/onsi/ginkgo
+  version: ^1.2.0

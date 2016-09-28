@@ -1,5 +1,5 @@
-hash: 5562c6fb62e7be2851eee6c6e789fc4950f1fa69c3ed690adac3a322e653021d
-updated: 2016-09-27T11:40:57.995022202Z
+hash: 44849882db938ce68b92fbd74a9e3af68be3d779b657724f13a73b071663a102
+updated: 2016-09-28T12:10:25.637708296+02:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
@@ -26,6 +26,23 @@ imports:
   version: 043ae16291351db8465272edf465c9f388161627
 - name: github.com/mattn/go-isatty
   version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
+- name: github.com/onsi/ginkgo
+  version: 462326b1628e124b23f42e87a8f2750e3c4e2d24
+  subpackages:
+  - config
+  - internal/codelocation
+  - internal/containernode
+  - internal/failer
+  - internal/leafnodes
+  - internal/remote
+  - internal/spec
+  - internal/specrunner
+  - internal/suite
+  - internal/testingtproxy
+  - internal/writer
+  - reporters
+  - reporters/stenographer
+  - types
 - name: github.com/pborman/uuid
   version: c55201b036063326c5b1b89ccfe45a184973d073
 - name: github.com/RangelReale/osin
@@ -61,23 +78,6 @@ imports:
   - internal/hashtag
   - internal/pool
 testImports:
-- name: github.com/onsi/ginkgo
-  version: 45a5f6ffb2a14e4f29698c16ae4c0a34018a8951
-  subpackages:
-  - config
-  - internal/codelocation
-  - internal/containernode
-  - internal/failer
-  - internal/leafnodes
-  - internal/remote
-  - internal/spec
-  - internal/specrunner
-  - internal/suite
-  - internal/testingtproxy
-  - internal/writer
-  - reporters
-  - reporters/stenographer
-  - types
 - name: github.com/onsi/gomega
   version: d59fa0ac68bb5dd932ee8d24eed631cdd519efc3
   subpackages:
