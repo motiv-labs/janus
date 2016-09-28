@@ -209,6 +209,8 @@ jobs:
   - aggregate:
     - task: pullrequest unit test
       file: prequest/ci/tasks/prequest-unit-tests.yml
+      params:
+        PROJECT_SRC: {{project_src}}
       on_failure:
           put: prequest
           params:
