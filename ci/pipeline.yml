@@ -202,7 +202,7 @@ jobs:
 
   - put: prequest
     params:
-        path: {{project_src}}
+        path: prequest
         context: unit-tests
         status: pending
 
@@ -212,13 +212,12 @@ jobs:
       on_failure:
           put: prequest
           params:
-              path: {{project_src}}
+              path: prequest
               context: unit-tests
               status: failure
       on_success:
           put: prequest
           params:
-              path: {{project_src}}
+              path: prequest
               context: unit-tests
               status: success
-

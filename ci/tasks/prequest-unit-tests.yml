@@ -7,7 +7,7 @@ image_resource:
 
 run:
   path: ./ci/tasks/unit-tests.sh
-  dir: {{project_src}}
+  dir: prequest
 
 inputs:
   - name: prequest
