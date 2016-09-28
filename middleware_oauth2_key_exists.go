@@ -5,16 +5,15 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"net/http"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/context"
+	"net/http"
 )
 
 type Oauth2KeyExists struct {
 	*Middleware
 }
 
-//Important staff, iris middleware must implement the iris.Handler interface which is:
 func (m Oauth2KeyExists) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
 	m.Logger.Debug("Starting Oauth2KeyExists middleware")
 
@@ -43,7 +42,7 @@ func (m Oauth2KeyExists) ProcessRequest(req *http.Request, c *gin.Context) (erro
 
 	if !keyExists {
 		m.Logger.WithFields(log.Fields{
-			"path":  req.RequestURI,
+			"path":   req.RequestURI,
 			"origin": req.RemoteAddr,
 			"key":    accessToken,
 		}).Info("Attempted access with non-existent key.")

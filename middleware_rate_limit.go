@@ -19,7 +19,6 @@ type RateLimitMiddleware struct {
 	limit   int64
 }
 
-//Important staff, iris middleware must implement the iris.Handler interface which is:
 func (m RateLimitMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
 	m.Logger.Debug("Rate Limit middleware started")
 

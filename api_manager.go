@@ -56,6 +56,7 @@ func (m APIManager) LoadApps(apiSpecs []*APISpec) {
 			mw := &Middleware{referenceSpec, logger}
 			var beforeHandlers = []gin.HandlerFunc{
 				CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}),
+				CreateMiddleware(&CorsMiddleware{mw}),
 			}
 
 			if referenceSpec.UseOauth2 {

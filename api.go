@@ -29,6 +29,7 @@ type APIDefinition struct {
 	UseOauth2      bool               `bson:"use_oauth2" json:"use_oauth2"`
 	Oauth2Meta     Oauth2Meta         `bson:"oauth_meta" json:"oauth_meta" valid:"required"`
 	RateLimit      RateLimitMeta      `bson:"rate_limit" json:"rate_limit" valid:"required"`
+	CorsMeta       CorsMeta           `bson:"cors_meta" json:"cors_meta" valid:"cors_meta"`
 }
 
 // Proxy defines proxy rules for a route
@@ -40,6 +41,15 @@ type Proxy struct {
 	EnableLoadBalancing         bool     `bson:"enable_load_balancing" json:"enable_load_balancing"`
 	TargetList                  []string `bson:"target_list" json:"target_list"`
 	CheckHostAgainstUptimeTests bool     `bson:"check_host_against_uptime_tests" json:"check_host_against_uptime_tests"`
+}
+
+// CorsMeta defines config for CORS routes
+type CorsMeta struct {
+	Domains        []string `mapstructure:"domains" bson:"domains" json:"domains"`
+	Methods        []string `mapstructure:"methods" bson:"methods" json:"methods"`
+	RequestHeaders []string `mapstructure:"request_headers" bson:"request_headers" json:"request_headers"`
+	ExposedHeaders []string `mapstructure:"exposed_headers" bson:"exposed_headers" json:"exposed_headers"`
+	Enabled        bool     `bson:"enabled" json:"enabled"`
 }
 
 // CircuitBreakerMeta holds the configuration for a circuit breaker
