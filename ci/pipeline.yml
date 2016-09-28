@@ -202,37 +202,23 @@ jobs:
 
   - put: prequest
     params:
-        path: prequest
+        path: {{project_src}}
         context: unit-tests
         status: pending
 
   - aggregate:
     - task: pullrequest unit test
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source: 
-              repository: quay.io/hellofresh/api-gateway
-              username: {{quay_username}}
-              password: {{quay_password}}
-        run:
-          path: ./ci/tasks/unit-tests.sh
-          dir: prequest
-        inputs:
-        - name: prequest
+      file: api-gateway/ci/tasks/prequest-unit-tests.yml
       on_failure:
           put: prequest
           params:
-              path: prequest
+              path: {{project_src}}
               context: unit-tests
               status: failure
       on_success:
           put: prequest
           params:
-              path: prequest
+              path: {{project_src}}
               context: unit-tests
               status: success
-      params:
-        PROJECT_SRC: {{project_src}}
 

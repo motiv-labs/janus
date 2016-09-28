@@ -1,0 +1,13 @@
+---
+platform: linux
+
+image_resource:
+  type: docker-image
+  source: {repository: golang:1.7.1-alpine}
+
+run:
+  path: ./ci/tasks/unit-tests.sh
+  dir: {{project_src}}
+
+inputs:
+  - name: prequest
