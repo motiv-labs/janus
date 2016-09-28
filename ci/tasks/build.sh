@@ -13,8 +13,7 @@ make
 cd /go/bin
 
 echo "* Creating tar.gz"
-pwd
-tar -czf ${DEST}.tar.gz api-gateway-master > /dev/null
+tar -czvf ${DEST}.tar.gz ${DEST}
 
 echo "* copying ${DEST}.tar.gz ${CWD}/artifacts"
 cp ${DEST}.tar.gz ${CWD}/artifacts
