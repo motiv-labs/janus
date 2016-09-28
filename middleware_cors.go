@@ -20,16 +20,17 @@ func (m CorsMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (error
 		return nil, http.StatusOK
 	}
 
-	mw := cors.Middleware(cors.Config{
-		Origins:         strings.Join(m.Spec.CorsMeta.Domains, ','),
-		Methods:         strings.Join(m.Spec.CorsMeta.Methods, ','),
-		RequestHeaders:  strings.Join(m.Spec.CorsMeta.RequestHeaders, ','),
-		ExposedHeaders:  strings.Join(m.Spec.CorsMeta.ExposedHeaders, ','),
+	innerMiddleware := cors.Middleware(cors.Config{
+		Origins:         strings.Join(m.Spec.CorsMeta.Domains, ","),
+		Methods:         strings.Join(m.Spec.CorsMeta.Methods, ","),
+		RequestHeaders:  strings.Join(m.Spec.CorsMeta.RequestHeaders, ","),
+		ExposedHeaders:  strings.Join(m.Spec.CorsMeta.ExposedHeaders, ","),
 		Credentials:     true,
 		ValidateHeaders: false,
 	})
 
-	mw(c)
+	innerMiddleware(c)
+	m.Logger.Debug("CORS inner middleware executed")
 
 	return nil, http.StatusOK
 }
