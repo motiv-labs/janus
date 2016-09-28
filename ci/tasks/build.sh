@@ -5,9 +5,10 @@ CWD=$(pwd)
 DEST=api-gateway
 
 mkdir -p ${PROJECT_SRC}
-cp -r . ${PROJECT_SRC}
+cp -r api-gateway-master/ ${PROJECT_SRC}
 cd ${PROJECT_SRC}
-#build go binary
+
+# build go binary
 make
 
 cd /go/bin
