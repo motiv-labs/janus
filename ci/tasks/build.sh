@@ -11,7 +11,9 @@ cd ${PROJECT_SRC}
 make
 
 cd /go/bin
+
 echo "* Creating tar.gz"
-tar -czf ${DEST}.tar.gz ${DEST} > /dev/null
+tar -czf ${DEST}.tar.gz api-gateway-master > /dev/null
+
 echo "* copying ${DEST}.tar.gz ${CWD}/artifacts"
 cp ${DEST}.tar.gz ${CWD}/artifacts
