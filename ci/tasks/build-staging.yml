@@ -6,8 +6,11 @@ image_resource:
   source: {repository: golang, tag: "1"}
 
 run:
-  path: ./ci/tasks/unit-tests.sh
-  dir: api-gateway-pr
+  path: ./ci/tasks/build.sh
+  dir: api-gateway-master
 
 inputs:
-  - name: api-gateway-pr
+  - name: api-gateway-master
+
+output:
+  - name: artifacts

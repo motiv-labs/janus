@@ -19,14 +19,14 @@ resource_types    :
 # Resources
 ###############################
 resources:
-- name: api-gateway
+- name: api-gateway-master
   type: git
   source:
     uri: {{uri}}
     access_token: {{oauth_token}}
     branch: master
 
-- name          : prequest
+- name          : api-gateway-pr
   type          : pull-request
   source        :
     uri         : {{uri}}
@@ -93,36 +93,23 @@ jobs:
 #
 - name: master-test-suite
   plan:
-  - get: api-gateway
+  - get: api-gateway-master
     trigger: true
-
-  - aggregate:
-    - task: master unit test
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source: 
-              repository: quay.io/hellofresh/api-gateway
-              username: {{quay_username}}
-              password: {{quay_password}}
-        run:
-          path: api-gateway/ci/tasks/unit-tests.sh
-        inputs:
-        - name: api-gateway
-      params:
-        PROJECT_SRC: {{project_src}}
+  - task: master unit test
+    file: api-gateway-master/ci/tasks/master-unit-tests.yml
+    params:
+      PROJECT_SRC: {{project_src}}
 
 - name: build and release
   public: false
   serial: true
   plan:
-  - get: api-gateway
+  - get: api-gateway-master
     trigger: true
     passed: ["master-test-suite"]
 
   - task: build go app
-    file: api-gateway/ci/tasks/master-unit-tests.yml
+    file: api-gateway-master/ci/tasks/build-staging.yml
     params:
       PROJECT_SRC: {{project_src}}
 
@@ -144,18 +131,18 @@ jobs:
   - get: gh-release-rc
     trigger: true
     passed: ["build and release"]
-  - get: api-gateway
+  - get: api-gateway-master
     trigger: false
   - get: automation-release
     trigger: false
   - task: deploy to staging
-    file: api-gateway/ci/tasks/deploy-staging.yml
+    file: api-gateway-master/ci/tasks/deploy-staging.yml
     on_failure:
         put: slack-alert
         params:
           channel: '#deployments'
           text: |
-              The build for api-gateway failed. Check it out at:
+              The build for api-gateway-master failed. Check it out at:
               http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
               or at:
               http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
@@ -164,7 +151,7 @@ jobs:
         params:
           channel: '#deployments'
           text: |
-              The build for the api-gateway was successful. Check it out at:
+              The build for the api-gateway-master was successful. Check it out at:
               http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
               or at:
               http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
@@ -184,29 +171,29 @@ jobs:
 #
 - name: pullrequest
   plan: 
-  - get: prequest
+  - get: api-gateway-pr
     trigger: true
 
-  - put: prequest
+  - put: api-gateway-pr
     params:
-        path: prequest
+        path: api-gateway-pr
         context: unit-tests
         status: pending
 
   - aggregate:
     - task: pullrequest unit test
-      file: prequest/ci/tasks/prequest-unit-tests.yml
+      file: api-gateway-pr/ci/tasks/prequest-unit-tests.yml
       params:
         PROJECT_SRC: {{project_src}}
       on_failure:
-          put: prequest
+          put: api-gateway-pr
           params:
-              path: prequest
+              path: api-gateway-pr
               context: unit-tests
               status: failure
       on_success:
-          put: prequest
+          put: api-gateway-pr
           params:
-              path: prequest
+              path: api-gateway-pr
               context: unit-tests
               status: success

@@ -7,9 +7,9 @@ image_resource:
     repository: quay.io/hellofresh/ci-ansible
 
 run:
-  path: api-gateway/ci/tasks/deploy-staging.sh
+  path: api-gateway-master/ci/tasks/deploy-staging.sh
 
 inputs:
   - name: automation-release
   - name: gh-release-rc
-  - name: api-gateway
+  - name: api-gateway-master
