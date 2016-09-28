@@ -12,5 +12,5 @@ run:
 inputs:
   - name: api-gateway-master
 
-output:
+outputs:
   - name: artifacts
