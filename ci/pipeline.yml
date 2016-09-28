@@ -71,7 +71,7 @@ groups:
     - master-test-suite
     - build and release
     - pullrequest
-    # - deploy-to-staging
+    - deploy-to-staging
 
 - name: Pullrequest
   jobs:
@@ -81,7 +81,7 @@ groups:
   jobs:
     - master-test-suite
     - build and release
-    # - deploy-to-staging
+    - deploy-to-staging
 
 ###############################
 # Jobs
@@ -150,47 +150,47 @@ jobs:
       globs:
       - artifacts/*.tar.gz
 
-# - name: deploy-to-staging
-#   public: false
-#   serial: true
-#   plan:
-#   - get: gh-release-rc
-#     trigger: true
-#     passed: ["release-a-new-version"]
-#   - get: api-gateway
-#     trigger: false
-#   - get: automation-release
-#     trigger: false
-#   - task: deploy to staging
-#     file: api-gateway/ci/tasks/deploy-staging.yml
-#     on_failure:
-#         put: slack-alert
-#         params:
-#           channel: '#deployments'
-#           text: |
-#               The build for api-gateway failed. Check it out at:
-#               http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-#               or at:
-#               http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
-#     on_success:
-#         put: slack-alert
-#         params:
-#           channel: '#deployments'
-#           text: |
-#               The build for the api-gateway was successful. Check it out at:
-#               http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-#               or at:
-#               http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
-#     params:
-#       INPUT: automation-release
-#       ANSIBLE_REMOTE_USER: jenkins
-#       VPASS: {{vpass}}
-#       PRIVATE_KEY: {{private_key}}
-#       ANSIBLE_PRIVATE_KEY_FILE: /root/.ssh/ansible_id_rsa
-#       TAR_FILE: automation-release/automation-artifcat.tar.gz
-#       CI_INVENTORY: "staging.ini"
-#       GROUP_NAME: "ops-gateway"
-#       VERSION_FILE: 'gh-release-rc/version'
+- name: deploy-to-staging
+  public: false
+  serial: true
+  plan:
+  - get: gh-release-rc
+    trigger: true
+    passed: ["build and release"]
+  - get: api-gateway
+    trigger: false
+  - get: automation-release
+    trigger: false
+  - task: deploy to staging
+    file: api-gateway/ci/tasks/deploy-staging.yml
+    on_failure:
+        put: slack-alert
+        params:
+          channel: '#deployments'
+          text: |
+              The build for api-gateway failed. Check it out at:
+              http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+              or at:
+              http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
+    on_success:
+        put: slack-alert
+        params:
+          channel: '#deployments'
+          text: |
+              The build for the api-gateway was successful. Check it out at:
+              http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
+              or at:
+              http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
+    params:
+      INPUT: automation-release
+      ANSIBLE_REMOTE_USER: jenkins
+      VPASS: {{vpass}}
+      PRIVATE_KEY: {{private_key}}
+      ANSIBLE_PRIVATE_KEY_FILE: /root/.ssh/ansible_id_rsa
+      TAR_FILE: automation-release/automation-artifcat.tar.gz
+      CI_INVENTORY: "staging.ini"
+      GROUP_NAME: "ops-gateway"
+      VERSION_FILE: 'gh-release-rc/version'
 
 #
 # PR
