@@ -208,7 +208,7 @@ jobs:
 
   - aggregate:
     - task: pullrequest unit test
-      file: api-gateway/ci/tasks/prequest-unit-tests.yml
+      file: prequest/ci/tasks/prequest-unit-tests.yml
       on_failure:
           put: prequest
           params:
