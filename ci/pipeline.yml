@@ -96,7 +96,7 @@ jobs:
   - get: api-gateway-master
     trigger: true
   - task: master unit test
-    file: api-gateway-master/ci/tasks/master-unit-tests.yml
+    file: api-gateway-master/ci/tasks/master-unit-test.yml
     params:
       PROJECT_SRC: {{project_src}}
 
