@@ -4,17 +4,18 @@ import (
 	"errors"
 	"strings"
 
+	"net/http"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/context"
-	"net/http"
 )
 
 type Oauth2KeyExists struct {
 	*Middleware
 }
 
-func (m Oauth2KeyExists) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
+func (m *Oauth2KeyExists) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
 	m.Logger.Debug("Starting Oauth2KeyExists middleware")
 
 	if false == m.Spec.UseOauth2 {

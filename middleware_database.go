@@ -12,7 +12,7 @@ type Database struct {
 
 //Middleware is the gin middleware for the database, this is different from the others since it's a
 //database handler
-func (m Database) Middleware() gin.HandlerFunc {
+func (m *Database) Middleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		log.Debug("Starting Database middleware")
 
