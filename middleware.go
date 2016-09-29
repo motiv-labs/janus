@@ -3,7 +3,6 @@ package main
 import (
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,12 +23,11 @@ func CreateMiddleware(mw MiddlewareImplementation) gin.HandlerFunc {
 		reqErr, errCode := mw.ProcessRequest(c.Request, c)
 
 		if reqErr != nil {
-			log.Error(reqErr)
-			c.JSON(errCode, reqErr.Error())
 			c.Abort()
+			c.JSON(errCode, reqErr.Error())
 		} else {
-			c.String(errCode, "")
 			c.Next()
+			c.String(errCode, "")
 		}
 	}
 }
