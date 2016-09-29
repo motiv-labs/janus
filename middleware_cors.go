@@ -12,7 +12,7 @@ type CorsMiddleware struct {
 	*Middleware
 }
 
-func (m CorsMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
+func (m *CorsMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
 	m.Logger.Debug("CORS middleware started")
 
 	if !m.Spec.CorsMeta.Enabled {

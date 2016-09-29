@@ -3,17 +3,18 @@ package main
 import (
 	"encoding/json"
 
+	"errors"
+	"net/http"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	"net/http"
-	"errors"
 )
 
 type OAuthMiddleware struct {
 	*Middleware
 }
 
-func (m OAuthMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
+func (m *OAuthMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
 	var newSession SessionState
 
 	log.WithFields(log.Fields{

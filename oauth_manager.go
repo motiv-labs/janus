@@ -12,12 +12,12 @@ type OAuthManager struct {
 	storage *redis.Client
 }
 
-func (o OAuthManager) KeyExists(accessToken string) bool {
+func (o *OAuthManager) KeyExists(accessToken string) bool {
 	log.Debugf("Searching for key %s", accessToken)
 	return o.storage.Exists(accessToken).Val()
 }
 
-func (o OAuthManager) Set(accessToken string, session SessionState, resetTTLTo int64) error {
+func (o *OAuthManager) Set(accessToken string, session SessionState, resetTTLTo int64) error {
 	value, _ := json.Marshal(session)
 	expireDuration := time.Duration(resetTTLTo) * time.Second
 
@@ -26,7 +26,7 @@ func (o OAuthManager) Set(accessToken string, session SessionState, resetTTLTo i
 	return nil
 }
 
-func (o OAuthManager) IsKeyAuthorised(accessToken string) (SessionState, bool) {
+func (o *OAuthManager) IsKeyAuthorised(accessToken string) (SessionState, bool) {
 	var newSession SessionState
 	jsonKeyVal := o.storage.Get(accessToken).Val()
 

@@ -32,7 +32,7 @@ func CreateMiddleware(mw MiddlewareImplementation) gin.HandlerFunc {
 	}
 }
 
-func (o Middleware) CheckSessionAndIdentityForValidKey(key string) (SessionState, bool) {
+func (o *Middleware) CheckSessionAndIdentityForValidKey(key string) (SessionState, bool) {
 	var thisSession SessionState
 	oAuthManager := o.Spec.OAuthManager
 

@@ -13,7 +13,7 @@ type AppsAPI struct {
 }
 
 // GET /apps
-func (u AppsAPI) Get() gin.HandlerFunc {
+func (u *AppsAPI) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		repo := u.getRepository(u.getDatabase(c))
 		data, err := repo.FindAll()
@@ -28,7 +28,7 @@ func (u AppsAPI) Get() gin.HandlerFunc {
 }
 
 // GetBy gets an application by its id
-func (u AppsAPI) GetBy() gin.HandlerFunc {
+func (u *AppsAPI) GetBy() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Params.ByName("id")
 		repo := u.getRepository(u.getDatabase(c))
@@ -50,7 +50,7 @@ func (u AppsAPI) GetBy() gin.HandlerFunc {
 }
 
 // PUT /apps/:id
-func (u AppsAPI) PutBy() gin.HandlerFunc {
+func (u *AppsAPI) PutBy() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var err error
 
@@ -82,7 +82,7 @@ func (u AppsAPI) PutBy() gin.HandlerFunc {
 }
 
 // POST /apps
-func (u AppsAPI) Post() gin.HandlerFunc {
+func (u *AppsAPI) Post() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		repo := u.getRepository(u.getDatabase(c))
 		definition := &APIDefinition{}
@@ -104,7 +104,7 @@ func (u AppsAPI) Post() gin.HandlerFunc {
 }
 
 // DELETE /apps/:param1
-func (u AppsAPI) DeleteBy() gin.HandlerFunc {
+func (u *AppsAPI) DeleteBy() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Params.ByName("id")
 		repo := u.getRepository(u.getDatabase(c))
@@ -120,7 +120,7 @@ func (u AppsAPI) DeleteBy() gin.HandlerFunc {
 	}
 }
 
-func (u AppsAPI) getDatabase(c *gin.Context) *mgo.Database {
+func (u *AppsAPI) getDatabase(c *gin.Context) *mgo.Database {
 	db, exists := c.Get("db")
 
 	if false == exists {
@@ -131,7 +131,7 @@ func (u AppsAPI) getDatabase(c *gin.Context) *mgo.Database {
 }
 
 // GetRepository gets the repository for the handlers
-func (u AppsAPI) getRepository(db *mgo.Database) *MongoAPISpecRepository {
+func (u *AppsAPI) getRepository(db *mgo.Database) *MongoAPISpecRepository {
 	repo, err := NewMongoAppRepository(db)
 
 	if err != nil {

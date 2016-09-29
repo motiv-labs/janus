@@ -23,13 +23,13 @@ func NewAPIManager(router *gin.Engine, redisClient *redis.Client, accessor *Data
 }
 
 // Load loads all api specs from a datasource
-func (m APIManager) Load() {
+func (m *APIManager) Load() {
 	specs := m.getAPISpecs()
 	go m.LoadApps(specs)
 }
 
 // LoadApps load application middleware
-func (m APIManager) LoadApps(apiSpecs []*APISpec) {
+func (m *APIManager) LoadApps(apiSpecs []*APISpec) {
 	log.Debug("Loading API configurations")
 
 	for _, referenceSpec := range apiSpecs {
@@ -63,7 +63,7 @@ func (m APIManager) LoadApps(apiSpecs []*APISpec) {
 				logger.Debug("Loading OAuth Manager")
 				referenceSpec.OAuthManager = &OAuthManager{m.redisClient}
 				m.addOAuthHandlers(mw, cb, logger)
-				beforeHandlers = append(beforeHandlers, CreateMiddleware(Oauth2KeyExists{mw}))
+				beforeHandlers = append(beforeHandlers, CreateMiddleware(&Oauth2KeyExists{mw}))
 				logger.Debug("Done loading OAuth Manager")
 			}
 
@@ -76,7 +76,7 @@ func (m APIManager) LoadApps(apiSpecs []*APISpec) {
 }
 
 //addOAuthHandlers loads configured oauth endpoints
-func (m APIManager) addOAuthHandlers(mw *Middleware, cb *ExtendedCircuitBreakerMeta, logger *Logger) {
+func (m *APIManager) addOAuthHandlers(mw *Middleware, cb *ExtendedCircuitBreakerMeta, logger *Logger) {
 	logger.Info("Loading oauth configuration")
 	var proxies []Proxy
 	var handlers []gin.HandlerFunc
@@ -124,18 +124,18 @@ func (m APIManager) addOAuthHandlers(mw *Middleware, cb *ExtendedCircuitBreakerM
 		logger.Debug("No client remove endpoint")
 	}
 
-	handlers = append(handlers, CreateMiddleware(OAuthMiddleware{mw}))
+	handlers = append(handlers, CreateMiddleware(&OAuthMiddleware{mw}))
 	m.proxyRegister.registerMany(proxies, cb, nil, handlers)
 }
 
 //getAPISpecs Load application specs from datasource
-func (m APIManager) getAPISpecs() []*APISpec {
+func (m *APIManager) getAPISpecs() []*APISpec {
 	log.Debug("Using App Configuration from Mongo DB")
 	return APILoader.LoadDefinitionsFromDatastore(m.accessor.Session)
 }
 
 //validateProxy validates proxy data
-func (m APIManager) validateProxy(proxy Proxy) bool {
+func (m *APIManager) validateProxy(proxy Proxy) bool {
 	if proxy.ListenPath == "" {
 		log.Error("Listen path is empty")
 		return false
