@@ -11,5 +11,5 @@ run:
 
 inputs:
   - name: automation-release
-  - name: gh-release-rc
+  - name: gh-release-final
   - name: api-gateway-master
