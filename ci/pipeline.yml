@@ -88,6 +88,8 @@ groups:
     - build and release
     - pullrequest
     - deploy-to-staging
+    - Do final release and deploy live
+    - deploy-to-live
 
 - name: Pullrequest
   jobs:
@@ -102,6 +104,7 @@ groups:
 - name: Live
   jobs:
     - Do final release and deploy live
+    - deploy-to-live
 
 ###############################
 # Jobs
@@ -283,4 +286,4 @@ jobs:
       TAR_FILE: automation-release/automation-artifcat.tar.gz
       CI_INVENTORY: "live.ini"
       GROUP_NAME: "ops-gateway"
-      VERSION_FILE: 'gh-release-rc/version'
+      VERSION_FILE: 'gh-release-final/version'
