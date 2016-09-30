@@ -27,7 +27,6 @@ func CreateMiddleware(mw MiddlewareImplementation) gin.HandlerFunc {
 			c.JSON(errCode, reqErr.Error())
 		} else {
 			c.Next()
-			c.String(errCode, "")
 		}
 	}
 }
