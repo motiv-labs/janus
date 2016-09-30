@@ -85,9 +85,11 @@ groups:
 - name: All
   jobs:
     - master-test-suite
-    - build and release
+    - build-and-release
     - pullrequest
     - deploy-to-staging
+    - promote-release
+    - deploy-to-live
 
 - name: Pullrequest
   jobs:
@@ -96,12 +98,13 @@ groups:
 - name: Master
   jobs:
     - master-test-suite
-    - build and release
+    - build-and-release
     - deploy-to-staging
 
 - name: Live
   jobs:
-    - Do final release and deploy live
+    - promote-release
+    - deploy-to-live
 
 ###############################
 # Jobs
@@ -120,7 +123,7 @@ jobs:
     params:
       PROJECT_SRC: {{project_src}}
 
-- name: build and release
+- name: build-and-release
   public: false
   serial: true
   plan:
@@ -150,7 +153,7 @@ jobs:
   plan:
   - get: gh-release-rc
     trigger: true
-    passed: ["build and release"]
+    passed: ["build-and-release"]
   - get: api-gateway-master
     trigger: false
   - get: automation-release
@@ -221,7 +224,7 @@ jobs:
 #
 # Final release
 #
-- name: Do final release and deploy live
+- name: promote-release
   serial: true
   plan:
   - get: gh-release-rc
@@ -249,7 +252,7 @@ jobs:
   plan:
   - get: gh-release-final
     trigger: true
-    passed: ["Do final release and deploy live"]
+    passed: ["promote-release"]
   - get: api-gateway-master
     trigger: false
   - get: automation-release
@@ -283,4 +286,4 @@ jobs:
       TAR_FILE: automation-release/automation-artifcat.tar.gz
       CI_INVENTORY: "live.ini"
       GROUP_NAME: "ops-gateway"
-      VERSION_FILE: 'gh-release-rc/version'
+      VERSION_FILE: 'gh-release-final/version'
