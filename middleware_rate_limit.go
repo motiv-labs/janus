@@ -19,7 +19,7 @@ type RateLimitMiddleware struct {
 	limit   int64
 }
 
-func (m RateLimitMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
+func (m *RateLimitMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
 	m.Logger.Debug("Rate Limit middleware started")
 
 	if !m.Spec.RateLimit.Enabled {

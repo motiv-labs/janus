@@ -30,7 +30,7 @@ func NewMongoAppRepository(db *mgo.Database) (*MongoAPISpecRepository, error) {
 }
 
 // FindAll fetches all the countries available
-func (r MongoAPISpecRepository) FindAll() ([]APIDefinition, error) {
+func (r *MongoAPISpecRepository) FindAll() ([]APIDefinition, error) {
 	result := []APIDefinition{}
 
 	err := r.coll.Find(nil).All(&result)
@@ -42,7 +42,7 @@ func (r MongoAPISpecRepository) FindAll() ([]APIDefinition, error) {
 }
 
 // FindByID find a country by the iso2code provided
-func (r MongoAPISpecRepository) FindByID(id string) (*APIDefinition, error) {
+func (r *MongoAPISpecRepository) FindByID(id string) (*APIDefinition, error) {
 	result := &APIDefinition{}
 
 	if false == bson.IsObjectIdHex(id) {
@@ -55,7 +55,7 @@ func (r MongoAPISpecRepository) FindByID(id string) (*APIDefinition, error) {
 }
 
 // Add adds a country to the repository
-func (r MongoAPISpecRepository) Add(definition *APIDefinition) error {
+func (r *MongoAPISpecRepository) Add(definition *APIDefinition) error {
 	var id bson.ObjectId
 
 	if len(definition.ID) == 0 {
@@ -88,7 +88,7 @@ func (r MongoAPISpecRepository) Add(definition *APIDefinition) error {
 }
 
 // Remove removes a country from the repository
-func (r MongoAPISpecRepository) Remove(id string) error {
+func (r *MongoAPISpecRepository) Remove(id string) error {
 	if false == bson.IsObjectIdHex(id) {
 		return ErrInvalidID
 	}
