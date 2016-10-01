@@ -2,7 +2,7 @@
 
 Contributions are **welcome** and will be fully **credited**.
 
-We accept contributions via Pull Requests on [Github](https://github.com/hellofresh/location-service).
+We accept contributions via Pull Requests on [Github](https://github.com/hellofresh/api-service).
 
 ## Pull Requests
 
@@ -18,7 +18,7 @@ We accept contributions via Pull Requests on [Github](https://github.com/hellofr
 
 ## Deployments
 
-Deployments on the location service follows the current flow:
+Deployments on the Api Gateway follows the current flow:
 
 - Any feature that is merged into master a CI build will be triggered and deployed to **staging** automatically (If the tests pass)
 
@@ -31,7 +31,7 @@ Deployments on the location service follows the current flow:
 ## Running Tests
 
 ``` bash
-$ go test -v ./...
+$ make test
 ```
 
 **Happy coding**!
