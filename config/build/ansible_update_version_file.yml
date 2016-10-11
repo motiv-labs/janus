@@ -1,9 +1,0 @@
----
-
- - name: Update version file
-   hosts: all
-   vars_files:
-    - vars/all.yml
-    - vars/s3_file_version.yml
-   roles:
-    - { role: ansible-aws-s3,                    tags: ["s3"]         }

@@ -1,9 +1,0 @@
----
-
-aws_s3           :
-     - bucket    : "{{ project_s3_bucket }}"
-       src       : "{{ archive_dest }}/{{ archive_name }}"
-       object    : "{{ project_name }}/{{ archive_name }}"
-       region    : "{{ project_s3_region }}"
-       mode      : "put"
-       overwrite : False

@@ -1,9 +1,0 @@
----
-
-aws_s3           :
-     - bucket    : "{{ project_s3_bucket }}"
-       src       : "/tmp/version_file.txt"
-       object    : "{{ project_name }}/{{ version_file_name | mandatory }}"
-       region    : "{{ project_s3_region }}"
-       mode      : "put"
-       overwrite : True
