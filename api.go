@@ -41,6 +41,7 @@ type Proxy struct {
 	EnableLoadBalancing         bool     `bson:"enable_load_balancing" json:"enable_load_balancing"`
 	TargetList                  []string `bson:"target_list" json:"target_list"`
 	CheckHostAgainstUptimeTests bool     `bson:"check_host_against_uptime_tests" json:"check_host_against_uptime_tests"`
+	Methods                     []string `bson:"methods" json:"methods"`
 }
 
 // CorsMeta defines config for CORS routes
