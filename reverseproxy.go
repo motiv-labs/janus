@@ -90,6 +90,7 @@ func NewSingleHostReverseProxy(proxy Proxy, transport http.RoundTripper) *httput
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
 		req.URL.Path = path
+		// This is very important to avoid problems with ssl verification for the HOST header
 		req.Host = target.Host
 
 		if targetQuery == "" || req.URL.RawQuery == "" {
