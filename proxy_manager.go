@@ -2,60 +2,10 @@ package main
 
 import (
 	"net/http"
-	"net/http/httputil"
-	"net/url"
-	"strings"
-
-	"bytes"
-	"io/ioutil"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 )
-
-type transport struct {
-	http.RoundTripper
-	breaker *ExtendedCircuitBreakerMeta
-	context *gin.Context
-}
-
-func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	if t.breaker.CB.Ready() {
-		log.Debug("ON REQUEST: Breaker status: ", t.breaker.CB.Ready())
-		resp, err = t.RoundTripper.RoundTrip(req)
-
-		if err != nil {
-			log.Error("Circuit Breaker Failed")
-			t.breaker.CB.Fail()
-		} else if resp.StatusCode == 500 {
-			t.breaker.CB.Fail()
-		} else {
-			t.breaker.CB.Success()
-
-			//This is useful for the middlewares
-			var bodyBytes []byte
-
-			if resp.Body != nil {
-				defer resp.Body.Close()
-				bodyBytes, _ = ioutil.ReadAll(resp.Body)
-			}
-
-			// Restore the io.ReadCloser to its original state
-			resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-
-			// Use the content
-			log.WithFields(log.Fields{
-				"req": req,
-			}).Info("Setting body")
-
-			t.context.Set("body", bodyBytes)
-		}
-	}
-
-	return resp, err
-}
-
-var _ http.RoundTripper = &transport{}
 
 // ProxyRegister represents a register proxy
 type ProxyRegister struct {
@@ -85,6 +35,10 @@ func (p *ProxyRegister) Register(proxy Proxy, breaker *ExtendedCircuitBreakerMet
 	}
 
 	if false == p.Exists(proxy) {
+		log.WithFields(log.Fields{
+			"listen_path": proxy.ListenPath,
+		}).Info("Registering a proxy")
+
 		p.Engine.Any(proxy.ListenPath, handlers...)
 		p.proxies = append(p.proxies, proxy)
 	}
@@ -104,53 +58,8 @@ func (p *ProxyRegister) Exists(proxy Proxy) bool {
 // ToHandler turns a proxy configuration into a handler
 func (p *ProxyRegister) ToHandler(proxy Proxy, breaker *ExtendedCircuitBreakerMeta) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		handler := p.createHandler(proxy, breaker, c)
-		handler.ServeHTTP(c.Writer, c.Request)
+		transport := &transport{http.DefaultTransport, breaker, c}
+		reverseProxy := NewSingleHostReverseProxy(proxy, transport)
+		reverseProxy.ServeHTTP(c.Writer, c.Request)
 	}
-}
-
-func (p *ProxyRegister) createHandler(proxy Proxy, breaker *ExtendedCircuitBreakerMeta, c *gin.Context) *httputil.ReverseProxy {
-	target, _ := url.Parse(proxy.TargetURL)
-
-	director := func(req *http.Request) {
-		log.Debug("Started proxy")
-		path := target.Path
-		targetQuery := target.RawQuery
-
-		listenPath := strings.Replace(proxy.ListenPath, "/*randomName", "", -1)
-		path = singleJoiningSlash(target.Path, req.URL.Path)
-
-		if proxy.StripListenPath {
-			log.Debugf("Stripping: %s", proxy.ListenPath)
-			path = strings.Replace(path, listenPath, "", 1)
-		}
-
-		log.Debugf("Upstream Path is: %s", path)
-
-		req.URL.Scheme = target.Scheme
-		req.URL.Host = target.Host
-		req.URL.Path = path
-
-		if targetQuery == "" || req.URL.RawQuery == "" {
-			req.URL.RawQuery = targetQuery + req.URL.RawQuery
-		} else {
-			req.URL.RawQuery = targetQuery + "&" + req.URL.RawQuery
-		}
-
-		log.Debug("Done proxy")
-	}
-
-	return &httputil.ReverseProxy{Director: director, Transport: &transport{http.DefaultTransport, breaker, c}}
-}
-
-func singleJoiningSlash(a, b string) string {
-	aslash := strings.HasSuffix(a, "/")
-	bslash := strings.HasPrefix(b, "/")
-	switch {
-	case aslash && bslash:
-		return a + b[1:]
-	case !aslash && !bslash:
-		return a + "/" + b
-	}
-	return a + b
 }
