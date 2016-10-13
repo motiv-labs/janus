@@ -15,21 +15,20 @@ type APISpec struct {
 
 // APIDefinition Represents an API that you want to proxy
 type APIDefinition struct {
-	ID             bson.ObjectId      `bson:"_id,omitempty" json:"id,omitempty" valid:"required"`
-	CreatedAt      time.Time          `bson:"created_at" json:"created_at" valid:"-"`
-	UpdatedAt      time.Time          `bson:"updated_at" json:"updated_at" valid:"-"`
-	Name           string             `bson:"name" json:"name" valid:"required"`
-	Slug           string             `bson:"slug" json:"slug"`
-	Active         bool               `bson:"active" json:"active"`
-	UseBasicAuth   bool               `bson:"use_basic_auth" json:"use_basic_auth"`
-	Domain         string             `bson:"domain" json:"domain"`
-	Proxy          Proxy              `bson:"proxy" json:"proxy" valid:"required"`
-	AllowedIPs     []string           `mapstructure:"allowed_ips" bson:"allowed_ips" json:"allowed_ips"`
-	CircuitBreaker CircuitBreakerMeta `bson:"circuit_breakers" json:"circuit_breakers"`
-	UseOauth2      bool               `bson:"use_oauth2" json:"use_oauth2"`
-	Oauth2Meta     Oauth2Meta         `bson:"oauth_meta" json:"oauth_meta" valid:"required"`
-	RateLimit      RateLimitMeta      `bson:"rate_limit" json:"rate_limit" valid:"required"`
-	CorsMeta       CorsMeta           `bson:"cors_meta" json:"cors_meta" valid:"cors_meta"`
+	ID           bson.ObjectId `bson:"_id,omitempty" json:"id,omitempty" valid:"required"`
+	CreatedAt    time.Time     `bson:"created_at" json:"created_at" valid:"-"`
+	UpdatedAt    time.Time     `bson:"updated_at" json:"updated_at" valid:"-"`
+	Name         string        `bson:"name" json:"name" valid:"required"`
+	Slug         string        `bson:"slug" json:"slug"`
+	Active       bool          `bson:"active" json:"active"`
+	UseBasicAuth bool          `bson:"use_basic_auth" json:"use_basic_auth"`
+	Domain       string        `bson:"domain" json:"domain"`
+	Proxy        Proxy         `bson:"proxy" json:"proxy" valid:"required"`
+	AllowedIPs   []string      `mapstructure:"allowed_ips" bson:"allowed_ips" json:"allowed_ips"`
+	UseOauth2    bool          `bson:"use_oauth2" json:"use_oauth2"`
+	Oauth2Meta   Oauth2Meta    `bson:"oauth_meta" json:"oauth_meta" valid:"required"`
+	RateLimit    RateLimitMeta `bson:"rate_limit" json:"rate_limit" valid:"required"`
+	CorsMeta     CorsMeta      `bson:"cors_meta" json:"cors_meta" valid:"cors_meta"`
 }
 
 // Proxy defines proxy rules for a route
@@ -51,13 +50,6 @@ type CorsMeta struct {
 	RequestHeaders []string `mapstructure:"request_headers" bson:"request_headers" json:"request_headers"`
 	ExposedHeaders []string `mapstructure:"exposed_headers" bson:"exposed_headers" json:"exposed_headers"`
 	Enabled        bool     `bson:"enabled" json:"enabled"`
-}
-
-// CircuitBreakerMeta holds the configuration for a circuit breaker
-type CircuitBreakerMeta struct {
-	ThresholdPercent     float64 `bson:"threshold_percent" json:"threshold_percent"`
-	Samples              int64   `bson:"samples" json:"samples"`
-	ReturnToServiceAfter int     `bson:"return_to_service_after" json:"return_to_service_after"`
 }
 
 // Oauth2Meta holds the configuration for oauth proxies

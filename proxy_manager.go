@@ -19,17 +19,17 @@ type ProxyRegister struct {
 }
 
 // RegisterMany registers many proxies at once
-func (p *ProxyRegister) RegisterMany(proxies []Proxy, breaker *ExtendedCircuitBreakerMeta, beforeHandlers []gin.HandlerFunc, afterHandlers []gin.HandlerFunc) {
+func (p *ProxyRegister) RegisterMany(proxies []Proxy, beforeHandlers []gin.HandlerFunc, afterHandlers []gin.HandlerFunc) {
 	for _, proxy := range proxies {
-		p.Register(proxy, breaker, beforeHandlers, afterHandlers)
+		p.Register(proxy, beforeHandlers, afterHandlers)
 	}
 }
 
 // Register register a new proxy
-func (p *ProxyRegister) Register(proxy Proxy, breaker *ExtendedCircuitBreakerMeta, beforeHandlers []gin.HandlerFunc, afterHandlers []gin.HandlerFunc) {
+func (p *ProxyRegister) Register(proxy Proxy, beforeHandlers []gin.HandlerFunc, afterHandlers []gin.HandlerFunc) {
 	var handlers []gin.HandlerFunc
 
-	defaultHandler := []gin.HandlerFunc{p.ToHandler(proxy, breaker)}
+	defaultHandler := []gin.HandlerFunc{p.ToHandler(proxy)}
 	handlers = append(defaultHandler, handlers...)
 
 	if len(beforeHandlers) > 0 {
@@ -69,9 +69,9 @@ func (p *ProxyRegister) Exists(proxy Proxy) bool {
 }
 
 // ToHandler turns a proxy configuration into a handler
-func (p *ProxyRegister) ToHandler(proxy Proxy, breaker *ExtendedCircuitBreakerMeta) gin.HandlerFunc {
+func (p *ProxyRegister) ToHandler(proxy Proxy) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		transport := &transport{http.DefaultTransport, breaker, c}
+		transport := &transport{http.DefaultTransport, c}
 		reverseProxy := NewSingleHostReverseProxy(proxy, transport)
 		reverseProxy.ServeHTTP(c.Writer, c.Request)
 	}

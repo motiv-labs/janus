@@ -14,43 +14,30 @@ import (
 
 type transport struct {
 	http.RoundTripper
-	breaker *ExtendedCircuitBreakerMeta
 	context *gin.Context
 }
 
 func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	if t.breaker.CB.Ready() {
-		log.Debug("ON REQUEST: Breaker status: ", t.breaker.CB.Ready())
-		resp, err = t.RoundTripper.RoundTrip(req)
+	resp, err = t.RoundTripper.RoundTrip(req)
 
-		if err != nil {
-			log.Error("Circuit Breaker Failed")
-			t.breaker.CB.Fail()
-		} else if resp.StatusCode == 500 {
-			t.breaker.CB.Fail()
-		} else {
-			t.breaker.CB.Success()
+	//This is useful for the middlewares
+	var bodyBytes []byte
 
-			//This is useful for the middlewares
-			var bodyBytes []byte
-
-			if resp.Body != nil {
-				defer resp.Body.Close()
-				bodyBytes, _ = ioutil.ReadAll(resp.Body)
-			}
-
-			// Restore the io.ReadCloser to its original state
-			resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-
-			// Use the content
-			log.WithFields(log.Fields{
-				"req":  req,
-				"resp": resp,
-			}).Info("Setting body")
-
-			t.context.Set("body", bodyBytes)
-		}
+	if resp.Body != nil {
+		defer resp.Body.Close()
+		bodyBytes, _ = ioutil.ReadAll(resp.Body)
 	}
+
+	// Restore the io.ReadCloser to its original state
+	resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+	// Use the content
+	log.WithFields(log.Fields{
+		"req":  req,
+		"resp": resp,
+	}).Info("Setting body")
+
+	t.context.Set("body", bodyBytes)
 
 	return resp, err
 }

@@ -1,96 +1,34 @@
-hash: 44849882db938ce68b92fbd74a9e3af68be3d779b657724f13a73b071663a102
-updated: 2016-09-28T13:07:34.463615884+02:00
+hash: d1b1b25c0da3a5ca47d260e6fc3016177b218bd0531f88be30cea6e2a696544b
+updated: 2016-10-13T23:35:12.326490105+02:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
-- name: github.com/cenk/backoff
-  version: 8edc80b07f38c27352fb186d971c628a6c32552b
 - name: github.com/etcinit/speedbump
   version: 0dd4ce600c6cbf0f4d033846269f029dacf30cad
-- name: github.com/facebookgo/clock
-  version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
 - name: github.com/gin-gonic/gin
   version: 9163ee543d3f1fab9b0ad8cdf6dc2a6ec2c07dbb
-  subpackages:
-  - binding
-  - render
 - name: github.com/gorilla/context
   version: 1ea25387ff6f684839d82767c1733ff4d4d15d0a
 - name: github.com/itsjamie/gin-cors
   version: 97b4a9da79331dfa2b6d35f4cdd1e50f5148859c
 - name: github.com/kelseyhightower/envconfig
   version: ac12b1f15efba734211a556d8b125110dc538016
-- name: github.com/manucorporat/sse
-  version: c574f6c50c8594f93d28b03a1bbd87b4a3899093
-- name: github.com/mattn/go-colorable
-  version: 043ae16291351db8465272edf465c9f388161627
-- name: github.com/mattn/go-isatty
-  version: 66b8e73f3f5cda9f96b69efd03dd3d7fc4a5cdb8
 - name: github.com/onsi/ginkgo
   version: 462326b1628e124b23f42e87a8f2750e3c4e2d24
-  subpackages:
-  - config
-  - internal/codelocation
-  - internal/containernode
-  - internal/failer
-  - internal/leafnodes
-  - internal/remote
-  - internal/spec
-  - internal/specrunner
-  - internal/suite
-  - internal/testingtproxy
-  - internal/writer
-  - reporters
-  - reporters/stenographer
-  - types
-- name: github.com/pborman/uuid
-  version: c55201b036063326c5b1b89ccfe45a184973d073
+- name: github.com/opentracing/opentracing-go
+  version: 0c3154a3c2ce79d3271985848659870599dfb77c
 - name: github.com/RangelReale/osin
   version: 4f10152eca12dd6663009dc2e9377f2fe4b18a78
-- name: github.com/rubyist/circuitbreaker
-  version: 7e3e7fbe9c62b943d487af023566a79d9eb22d3b
 - name: github.com/Sirupsen/logrus
   version: 4b6ea7319e214d98c938f12692336f7ca9348d6b
-- name: golang.org/x/net
-  version: 84ba27dd5b2d8135e9da1395277f2c9333a2ffda
-  subpackages:
-  - context
-- name: golang.org/x/sys
-  version: a408501be4d17ee978c04a618e7a1b22af058c0e
-  subpackages:
-  - unix
-- name: gopkg.in/bluesuncorp/validator.v5
-  version: d5acf1dac43705f8bfbb71d878e290e2bed3950b
-- name: gopkg.in/bsm/ratelimit.v1
-  version: db14e161995a5177acef654cb0dd785e8ee8bc22
 - name: gopkg.in/mgo.v2
   version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
   subpackages:
   - bson
-  - internal/json
-  - internal/sasl
-  - internal/scram
 - name: gopkg.in/redis.v3
   version: b5e368500d0a508ef8f16e9c2d4025a8a46bcc29
+- name: sourcegraph.com/sourcegraph/appdash
+  version: 0192d7f0689d8577da4d76d3ed947485f51e32e1
   subpackages:
-  - internal
-  - internal/consistenthash
-  - internal/hashtag
-  - internal/pool
-testImports:
-- name: github.com/onsi/gomega
-  version: d59fa0ac68bb5dd932ee8d24eed631cdd519efc3
-  subpackages:
-  - format
-  - internal/assertion
-  - internal/asyncassertion
-  - internal/oraclematcher
-  - internal/testingtsupport
-  - matchers
-  - matchers/support/goraph/bipartitegraph
-  - matchers/support/goraph/edge
-  - matchers/support/goraph/node
-  - matchers/support/goraph/util
-  - types
-- name: gopkg.in/yaml.v2
-  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
+  - opentracing
+testImports: []

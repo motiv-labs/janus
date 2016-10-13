@@ -47,8 +47,6 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec) {
 		}
 
 		if skip {
-			cb := NewCircuitBreaker(referenceSpec)
-
 			hasher := speedbump.PerSecondHasher{}
 			limit := referenceSpec.RateLimit.Limit
 			limiter := speedbump.NewLimiter(m.redisClient, hasher, limit)
@@ -62,12 +60,12 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec) {
 			if referenceSpec.UseOauth2 {
 				logger.Debug("Loading OAuth Manager")
 				referenceSpec.OAuthManager = &OAuthManager{m.redisClient}
-				m.addOAuthHandlers(mw, cb, logger)
+				m.addOAuthHandlers(mw, logger)
 				beforeHandlers = append(beforeHandlers, CreateMiddleware(&Oauth2KeyExists{mw}))
 				logger.Debug("Done loading OAuth Manager")
 			}
 
-			m.proxyRegister.Register(referenceSpec.Proxy, cb, beforeHandlers, nil)
+			m.proxyRegister.Register(referenceSpec.Proxy, beforeHandlers, nil)
 			logger.Debug("Proxy registered")
 		} else {
 			logger.Error("Listen path is empty, skipping...")
@@ -76,7 +74,7 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec) {
 }
 
 //addOAuthHandlers loads configured oauth endpoints
-func (m *APIManager) addOAuthHandlers(mw *Middleware, cb *ExtendedCircuitBreakerMeta, logger *Logger) {
+func (m *APIManager) addOAuthHandlers(mw *Middleware, logger *Logger) {
 	logger.Info("Loading oauth configuration")
 	var proxies []Proxy
 	var handlers []gin.HandlerFunc
@@ -125,7 +123,7 @@ func (m *APIManager) addOAuthHandlers(mw *Middleware, cb *ExtendedCircuitBreaker
 	}
 
 	handlers = append(handlers, CreateMiddleware(&OAuthMiddleware{mw}))
-	m.proxyRegister.RegisterMany(proxies, cb, nil, handlers)
+	m.proxyRegister.RegisterMany(proxies, nil, handlers)
 }
 
 //getAPISpecs Load application specs from datasource
