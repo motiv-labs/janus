@@ -125,7 +125,7 @@ func (m *APIManager) addOAuthHandlers(mw *Middleware, cb *ExtendedCircuitBreaker
 	}
 
 	handlers = append(handlers, CreateMiddleware(&OAuthMiddleware{mw}))
-	m.proxyRegister.registerMany(proxies, cb, nil, handlers)
+	m.proxyRegister.RegisterMany(proxies, cb, nil, handlers)
 }
 
 //getAPISpecs Load application specs from datasource

@@ -18,7 +18,8 @@ type ProxyRegister struct {
 	proxies []Proxy
 }
 
-func (p *ProxyRegister) registerMany(proxies []Proxy, breaker *ExtendedCircuitBreakerMeta, beforeHandlers []gin.HandlerFunc, afterHandlers []gin.HandlerFunc) {
+// RegisterMany registers many proxies at once
+func (p *ProxyRegister) RegisterMany(proxies []Proxy, breaker *ExtendedCircuitBreakerMeta, beforeHandlers []gin.HandlerFunc, afterHandlers []gin.HandlerFunc) {
 	for _, proxy := range proxies {
 		p.Register(proxy, breaker, beforeHandlers, afterHandlers)
 	}
