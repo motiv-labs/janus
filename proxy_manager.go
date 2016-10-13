@@ -2,9 +2,14 @@ package main
 
 import (
 	"net/http"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+)
+
+const (
+	methodAll = "ALL"
 )
 
 // ProxyRegister represents a register proxy
@@ -39,7 +44,14 @@ func (p *ProxyRegister) Register(proxy Proxy, breaker *ExtendedCircuitBreakerMet
 			"listen_path": proxy.ListenPath,
 		}).Info("Registering a proxy")
 
-		p.Engine.Any(proxy.ListenPath, handlers...)
+		for _, method := range proxy.Methods {
+			if strings.ToUpper(method) == methodAll {
+				p.Engine.Any(proxy.ListenPath, handlers...)
+			}
+
+			p.Engine.Handle(strings.ToUpper(method), proxy.ListenPath, handlers...)
+		}
+
 		p.proxies = append(p.proxies, proxy)
 	}
 }
