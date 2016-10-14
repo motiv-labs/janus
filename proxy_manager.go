@@ -2,9 +2,14 @@ package main
 
 import (
 	"net/http"
+	"strings"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+)
+
+const (
+	methodAll = "ALL"
 )
 
 // ProxyRegister represents a register proxy
@@ -13,17 +18,18 @@ type ProxyRegister struct {
 	proxies []Proxy
 }
 
-func (p *ProxyRegister) registerMany(proxies []Proxy, breaker *ExtendedCircuitBreakerMeta, beforeHandlers []gin.HandlerFunc, afterHandlers []gin.HandlerFunc) {
+// RegisterMany registers many proxies at once
+func (p *ProxyRegister) RegisterMany(proxies []Proxy, beforeHandlers []gin.HandlerFunc, afterHandlers []gin.HandlerFunc) {
 	for _, proxy := range proxies {
-		p.Register(proxy, breaker, beforeHandlers, afterHandlers)
+		p.Register(proxy, beforeHandlers, afterHandlers)
 	}
 }
 
 // Register register a new proxy
-func (p *ProxyRegister) Register(proxy Proxy, breaker *ExtendedCircuitBreakerMeta, beforeHandlers []gin.HandlerFunc, afterHandlers []gin.HandlerFunc) {
+func (p *ProxyRegister) Register(proxy Proxy, beforeHandlers []gin.HandlerFunc, afterHandlers []gin.HandlerFunc) {
 	var handlers []gin.HandlerFunc
 
-	defaultHandler := []gin.HandlerFunc{p.ToHandler(proxy, breaker)}
+	defaultHandler := []gin.HandlerFunc{p.ToHandler(proxy)}
 	handlers = append(defaultHandler, handlers...)
 
 	if len(beforeHandlers) > 0 {
@@ -39,7 +45,14 @@ func (p *ProxyRegister) Register(proxy Proxy, breaker *ExtendedCircuitBreakerMet
 			"listen_path": proxy.ListenPath,
 		}).Info("Registering a proxy")
 
-		p.Engine.Any(proxy.ListenPath, handlers...)
+		for _, method := range proxy.Methods {
+			if strings.ToUpper(method) == methodAll {
+				p.Engine.Any(proxy.ListenPath, handlers...)
+			}
+
+			p.Engine.Handle(strings.ToUpper(method), proxy.ListenPath, handlers...)
+		}
+
 		p.proxies = append(p.proxies, proxy)
 	}
 }
@@ -56,9 +69,9 @@ func (p *ProxyRegister) Exists(proxy Proxy) bool {
 }
 
 // ToHandler turns a proxy configuration into a handler
-func (p *ProxyRegister) ToHandler(proxy Proxy, breaker *ExtendedCircuitBreakerMeta) gin.HandlerFunc {
+func (p *ProxyRegister) ToHandler(proxy Proxy) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		transport := &transport{http.DefaultTransport, breaker, c}
+		transport := &transport{http.DefaultTransport, c}
 		reverseProxy := NewSingleHostReverseProxy(proxy, transport)
 		reverseProxy.ServeHTTP(c.Writer, c.Request)
 	}
