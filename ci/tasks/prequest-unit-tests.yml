@@ -7,7 +7,7 @@ image_resource:
 
 run:
   path: ./ci/tasks/unit-tests.sh
-  dir: api-gateway-pr
+  dir: app-pr
 
 inputs:
-  - name: api-gateway-pr
+  - name: app-pr

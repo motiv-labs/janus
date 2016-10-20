@@ -2,10 +2,10 @@
 CWD=$(pwd)
 
 # Defines the zip name
-DEST=api-gateway
+DEST=janus
 
 # Goes to the application source code
-cd api-gateway-master
+cd app-master
 
 # Creates the project source on the gopath
 mkdir -p ${PROJECT_SRC}

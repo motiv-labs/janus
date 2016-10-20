@@ -1,7 +1,7 @@
 FROM golang
 
 # Set apps home directory.
-ENV APP_DIR /go/src/github.com/hellofresh/api-gateway
+ENV APP_DIR /go/src/github.com/hellofresh/janus
 
 # Creates the application directory
 RUN mkdir -p $APP_DIR

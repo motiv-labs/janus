@@ -19,25 +19,25 @@ resource_types    :
 # Resources
 ###############################
 resources:
-- name: api-gateway-master
+- name: app-master
   type: git
   source:
     uri: {{uri}}
     access_token: {{oauth_token}}
     branch: master
 
-- name          : api-gateway-pr
+- name          : app-pr
   type          : pull-request
   source        :
     uri         : {{uri}}
     access_token: {{oauth_token}}
-    repo        : hellofresh/api-gateway
+    repo        : hellofresh/janus
 
 - name          : gh-release-rc
   type          : hf-github-releases
   source        :
     user        : "hellofresh"
-    repository  : "api-gateway"
+    repository  : "janus"
     access_token: {{oauth_token}}
     pre_release : true
 
@@ -45,7 +45,7 @@ resources:
   type          : hf-github-releases
   source        :
     user        : "hellofresh"
-    repository  : "api-gateway"
+    repository  : "janus"
     access_token: {{oauth_token}}
 
 - name              : semantic-rc-version
@@ -116,10 +116,10 @@ jobs:
 #
 - name: master-test-suite
   plan:
-  - get: api-gateway-master
+  - get: app-master
     trigger: true
   - task: master unit test
-    file: api-gateway-master/ci/tasks/master-unit-test.yml
+    file: app-master/ci/tasks/master-unit-test.yml
     params:
       PROJECT_SRC: {{project_src}}
 
@@ -127,12 +127,12 @@ jobs:
   public: false
   serial: true
   plan:
-  - get: api-gateway-master
+  - get: app-master
     trigger: true
     passed: ["master-test-suite"]
 
   - task: build go app
-    file: api-gateway-master/ci/tasks/build-staging.yml
+    file: app-master/ci/tasks/build-staging.yml
     params:
       PROJECT_SRC: {{project_src}}
 
@@ -154,18 +154,18 @@ jobs:
   - get: gh-release-rc
     trigger: true
     passed: ["build-and-release"]
-  - get: api-gateway-master
+  - get: app-master
     trigger: false
   - get: automation-release
     trigger: false
   - task: deploy to staging
-    file: api-gateway-master/ci/tasks/deploy-staging.yml
+    file: app-master/ci/tasks/deploy-staging.yml
     on_failure:
         put: slack-alert
         params:
           channel: '#deployments'
           text: |
-              The build for api-gateway-master failed. Check it out at:
+              The build for app-master failed. Check it out at:
               http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
               or at:
               http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
@@ -174,7 +174,7 @@ jobs:
         params:
           channel: '#deployments'
           text: |
-              The build for the api-gateway-master was successful. Check it out at:
+              The build for the app-master was successful. Check it out at:
               http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
               or at:
               http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
@@ -194,30 +194,30 @@ jobs:
 #
 - name: pullrequest
   plan: 
-  - get: api-gateway-pr
+  - get: app-pr
     trigger: true
 
-  - put: api-gateway-pr
+  - put: app-pr
     params:
-        path: api-gateway-pr
+        path: app-pr
         context: unit-tests
         status: pending
 
   - aggregate:
     - task: pullrequest unit test
-      file: api-gateway-pr/ci/tasks/prequest-unit-tests.yml
+      file: app-pr/ci/tasks/prequest-unit-tests.yml
       params:
         PROJECT_SRC: {{project_src}}
       on_failure:
-          put: api-gateway-pr
+          put: app-pr
           params:
-              path: api-gateway-pr
+              path: app-pr
               context: unit-tests
               status: failure
       on_success:
-          put: api-gateway-pr
+          put: app-pr
           params:
-              path: api-gateway-pr
+              path: app-pr
               context: unit-tests
               status: success
 
@@ -253,18 +253,18 @@ jobs:
   - get: gh-release-final
     trigger: true
     passed: ["promote-release"]
-  - get: api-gateway-master
+  - get: app-master
     trigger: false
   - get: automation-release
     trigger: false
   - task: deploy to live
-    file: api-gateway-master/ci/tasks/deploy-live.yml
+    file: app-master/ci/tasks/deploy-live.yml
     on_failure:
         put: slack-alert
         params:
           channel: '#deployments'
           text: |
-              The build for api-gateway-master failed. Check it out at:
+              The build for app-master failed. Check it out at:
               http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
               or at:
               http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
@@ -273,7 +273,7 @@ jobs:
         params:
           channel: '#deployments'
           text: |
-              The build for the api-gateway-master was successful. Check it out at:
+              The build for the app-master was successful. Check it out at:
               http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
               or at:
               http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
