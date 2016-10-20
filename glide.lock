@@ -1,10 +1,8 @@
-hash: 44849882db938ce68b92fbd74a9e3af68be3d779b657724f13a73b071663a102
-updated: 2016-09-28T13:07:34.463615884+02:00
+hash: cc2e600a52a6abf804f3a99995cea8db4896037ae253016b14775bddb879dcdb
+updated: 2016-10-14T14:36:33.72332452+02:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
-- name: github.com/cenk/backoff
-  version: 8edc80b07f38c27352fb186d971c628a6c32552b
 - name: github.com/etcinit/speedbump
   version: 0dd4ce600c6cbf0f4d033846269f029dacf30cad
 - name: github.com/facebookgo/clock
@@ -47,8 +45,6 @@ imports:
   version: c55201b036063326c5b1b89ccfe45a184973d073
 - name: github.com/RangelReale/osin
   version: 4f10152eca12dd6663009dc2e9377f2fe4b18a78
-- name: github.com/rubyist/circuitbreaker
-  version: 7e3e7fbe9c62b943d487af023566a79d9eb22d3b
 - name: github.com/Sirupsen/logrus
   version: 4b6ea7319e214d98c938f12692336f7ca9348d6b
 - name: golang.org/x/net
