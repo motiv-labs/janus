@@ -4,7 +4,7 @@
   </a>
 </p>
 
-# hellofresh/api-gateway
+# hellofresh/janus
 
 This is a lightweight, API Gateway and Management Platform enables you to control who accesses your API, 
 when they access it and how they access it. API Gateway will also record detailed analytics on how your 
