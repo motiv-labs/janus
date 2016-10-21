@@ -7,7 +7,7 @@ image_resource:
     repository: quay.io/hellofresh/ci-ansible
 
 run:
-  path: app-master/ci/tasks/deploy.sh
+  path: app-master/ci/scripts/deploy.sh
 
 inputs:
   - name: automation-release

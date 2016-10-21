@@ -48,16 +48,7 @@ resources:
     repository  : "janus"
     access_token: {{oauth_token}}
 
-- name              : semantic-rc-version
-  type              : semver
-  source            :
-    driver          : git
-    initial_version : 0.0.0-rc.1
-    uri             : {{uri}}
-    branch          : version
-    file            : version
-
-- name              : semantic-final-version
+- name              : semantic-version
   type              : semver
   source            :
     driver          : git
@@ -136,14 +127,14 @@ jobs:
     params:
       PROJECT_SRC: {{project_src}}
 
-  - put: semantic-rc-version
+  - put: semantic-version
     params:
         pre: 'rc'
 
   - put: gh-release-rc
     params:
-      name: semantic-rc-version/version
-      tag : semantic-rc-version/version
+      name: semantic-version/version
+      tag : semantic-version/version
       globs:
       - artifacts/*.tar.gz
 
@@ -163,21 +154,13 @@ jobs:
     on_failure:
         put: slack-alert
         params:
-          channel: '#deployments'
-          text: |
-              The build for app-master failed. Check it out at:
-              http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-              or at:
-              http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
+          channel: {{slack_channel}}
+          text: {{slack_message}}
     on_success:
         put: slack-alert
         params:
-          channel: '#deployments'
-          text: |
-              The build for the app-master was successful. Check it out at:
-              http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-              or at:
-              http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
+          channel: {{slack_channel}}
+          text: {{slack_message}}
     params:
       INPUT: automation-release
       ANSIBLE_REMOTE_USER: jenkins
@@ -229,7 +212,7 @@ jobs:
   plan:
   - get: gh-release-rc
 
-  - put: semantic-final-version
+  - put: semantic-version
     params:
       bump: final
 
@@ -238,10 +221,10 @@ jobs:
       # commitish: prerelease/commitish
       globs:
       - gh-release-rc/*.tar.gz
-      name: semantic-final-version/version
-      tag: semantic-final-version/version
+      name: semantic-version/version
+      tag: semantic-version/version
 
-  - put: semantic-final-version
+  - put: semantic-version
     params:
       bump: patch
       pre: rc
@@ -262,21 +245,13 @@ jobs:
     on_failure:
         put: slack-alert
         params:
-          channel: '#deployments'
-          text: |
-              The build for app-master failed. Check it out at:
-              http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-              or at:
-              http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
+          channel: {{slack_channel}}
+          text: {{slack_message}}
     on_success:
         put: slack-alert
         params:
-          channel: '#deployments'
-          text: |
-              The build for the app-master was successful. Check it out at:
-              http://ci000.tools.hellofresh.io:8080/pipelines/$BUILD_PIPELINE_NAME/jobs/$BUILD_JOB_NAME/builds/$BUILD_NAME
-              or at:
-              http://ci000.tools.hellofresh.io:8080/builds/$BUILD_ID
+          channel: {{slack_channel}}
+          text: {{slack_message}}
     params:
       INPUT: automation-release
       ANSIBLE_REMOTE_USER: jenkins

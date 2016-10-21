@@ -6,7 +6,7 @@ image_resource:
   source: {repository: golang, tag: "1"}
 
 run:
-  path: ./ci/tasks/unit-tests.sh
+  path: ./ci/scripts/unit-tests.sh
   dir: app-master
 
 inputs:
