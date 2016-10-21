@@ -4,7 +4,7 @@ ERROR_COLOR=\033[31;01m
 WARN_COLOR=\033[33;01m
 
 # This how we want to name the binary output
-BINARY=api-gateway
+BINARY=janus
 BUILD_PATH=${GOPATH}/bin
 
 .PHONY: all clean deps install
