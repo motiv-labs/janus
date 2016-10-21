@@ -6,7 +6,7 @@ image_resource:
   source: {repository: golang, tag: "1"}
 
 run:
-  path: app-master/ci/tasks/build.sh
+  path: app-master/ci/scripts/build.sh
 
 inputs:
   - name: app-master
