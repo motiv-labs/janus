@@ -1,0 +1,53 @@
+version: '2'
+services:
+    gateway:
+        build:
+            context: .
+        volumes:
+            - ./:/go/src/github.com/hellofresh/janus
+        environment:
+            PORT: 3001
+            DEBUG: "true"
+            DATABASE_DSN: "mongodb://mongo:27017"
+            REDIS_DSN: "redis:6379"
+        ports:
+            - "8888:3000"
+
+    mongo:
+        image: mongo:2.6
+        ports:
+            - "27017:27017"
+    redis:
+        image: redis:3.0
+
+    postgres:
+        image: postgres:9.4
+        environment:
+            POSTGRES_USER: auth
+            POSTGRES_PASSWORD: auth
+            POSTGRES_DB: auth
+        ports:
+            - "5432:5432"
+
+    rabbitmq:
+        image: rabbitmq:3.6.1-management
+
+    auth-service:
+        depends_on:
+        - postgres
+        - rabbitmq
+        image: quay.io/hellofresh/auth-service
+        volumes:
+        - "$GOPATH/src/github.com/hellofresh/auth-service/:/go/src/github.com/hellofresh/auth-service"
+        working_dir: /go/src/github.com/hellofresh/auth-service/cmd/auth
+        ports:
+        - "3000:3000"
+        environment:
+            PORT: 3000
+            DEBUG: "true"
+            DATABASE_DSN: "postgres://auth:auth@postgres:5432/auth?sslmode=disable"
+            AMQP_DSN: "amqp://guest:guest@rabbitmq:5672/"
+            NEWRELIC_APP_NAME: ""
+            NEWRELIC_LICENSE_KEY: ""
+
+
