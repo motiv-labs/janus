@@ -1,5 +1,5 @@
-hash: cc2e600a52a6abf804f3a99995cea8db4896037ae253016b14775bddb879dcdb
-updated: 2016-10-14T14:36:33.72332452+02:00
+hash: 9be4d5a52fbb7e1eb8c4a74c2340e64fd707131109deb50150816b061bda9dc9
+updated: 2016-11-04T15:04:45.806165251Z
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
@@ -17,7 +17,7 @@ imports:
 - name: github.com/itsjamie/gin-cors
   version: 97b4a9da79331dfa2b6d35f4cdd1e50f5148859c
 - name: github.com/kelseyhightower/envconfig
-  version: ac12b1f15efba734211a556d8b125110dc538016
+  version: 9aca109c9aec4633fced9717c4a09ecab3d33111
 - name: github.com/manucorporat/sse
   version: c574f6c50c8594f93d28b03a1bbd87b4a3899093
 - name: github.com/mattn/go-colorable
@@ -46,7 +46,7 @@ imports:
 - name: github.com/RangelReale/osin
   version: 4f10152eca12dd6663009dc2e9377f2fe4b18a78
 - name: github.com/Sirupsen/logrus
-  version: 4b6ea7319e214d98c938f12692336f7ca9348d6b
+  version: d26492970760ca5d33129d2d799e34be5c4782eb
 - name: golang.org/x/net
   version: 84ba27dd5b2d8135e9da1395277f2c9333a2ffda
   subpackages:
