@@ -41,7 +41,7 @@ services:
         - "$GOPATH/src/github.com/hellofresh/auth-service/:/go/src/github.com/hellofresh/auth-service"
         working_dir: /go/src/github.com/hellofresh/auth-service/cmd/auth
         ports:
-        - "3000:3000"
+        - "8887:3000"
         environment:
             PORT: 3000
             DEBUG: "true"
