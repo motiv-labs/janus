@@ -42,3 +42,6 @@ test:
 clean:
 	@echo "$(OK_COLOR)==> Cleaning project$(NO_COLOR)"
 	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
+
+fixture:
+	@./fixture.sh

@@ -1,4 +1,4 @@
-package: github.com/hellofresh/api-gateway
+package: github.com/hellofresh/janus
 import:
 - package: github.com/RangelReale/osin
 - package: github.com/Sirupsen/logrus

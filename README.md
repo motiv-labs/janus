@@ -36,3 +36,12 @@ To start contributing, please check [CONTRIBUTING](CONTRIBUTING.md).
 
 ## Documentation
 * Go lang: https://golang.org/
+
+## Local development
+A few steps are required to set up the gateway for local development:
+- `git clone https://github.com/hellofresh/auth-service $GOPATH/src/gitub.com/hellofresh/auth-service`
+- `git clone https://github.com/hellofresh/janus $GOPATH/src/gitub.com/hellofresh/janus`
+- `cd $GOPATH/src/github.com/hellofresh/janus`
+- `docker-compose up -d`
+- `docker-compose run --rm auth-service bash -c "cd ../../ && make deps && make migrate"`
+- `docker-compose run --rm gateway bash -c "make deps && make fixture"`
