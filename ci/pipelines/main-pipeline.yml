@@ -119,7 +119,7 @@ jobs:
 
   # Create a release artifact
   - task: create-artifact
-    file: source-code-with-dependencies/ci/tasks/create-artifact.yml
+    file: source-code/ci/tasks/create-artifact.yml
     params:
       PROJECT_SRC: {{project_src}}
 
