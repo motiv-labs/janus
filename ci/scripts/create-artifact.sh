@@ -9,7 +9,7 @@ CWD=$(pwd)
 DEST=janus
 
 # Goes to the application source code
-cd source
+cd source-code
 
 # Creates the project source on the gopath
 mkdir -p ${PROJECT_SRC}
