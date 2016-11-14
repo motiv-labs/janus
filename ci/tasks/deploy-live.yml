@@ -6,10 +6,10 @@ image_resource:
   source:
     repository: quay.io/hellofresh/ci-ansible
 
-run:
-  path: app-master/ci/scripts/deploy.sh
-
 inputs:
-  - name: automation-release
-  - name: gh-release-final
-  - name: app-master
+  - name: source-code
+  - name: automation-source-code
+  - name: release
+
+run:
+  path: source-code/ci/scripts/deploy.sh
