@@ -1,4 +1,8 @@
 #!/bin/sh
+
+# Ensure this script fails if anything errors
+set -e
+
 CWD=$(pwd)
 
 # Defines the zip name

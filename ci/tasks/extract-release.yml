@@ -4,12 +4,14 @@ platform: linux
 image_resource:
   type: docker-image
   source:
-    repository: quay.io/hellofresh/ci-ansible
+    repository: quay.io/hellofresh/docker-php-ci
 
 inputs:
   - name: source-code
-  - name: automation-source-code
   - name: release-candidate
 
+outputs:
+  - name: artifacts
+
 run:
-  path: source-code/ci/scripts/deploy.sh
+  path: source-code/ci/scripts/extract-release.sh

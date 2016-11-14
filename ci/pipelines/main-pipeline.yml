@@ -1,0 +1,274 @@
+---
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Resource Types
+#-----------------------------------------------------------------------------------------------------------------------
+resource_types:
+
+- name: slack-notification
+  type: docker-image
+  source:
+    repository: quay.io/hellofresh/slack-notification-resource
+
+- name: github-release
+  type: docker-image
+  source:
+    repository: quay.io/hellofresh/gh-status-dynamic
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Resources
+#-----------------------------------------------------------------------------------------------------------------------
+resources:
+
+- name: source-code
+  type: git
+  source:
+    uri: {{github_repository_uri}}
+    branch: master
+
+- name: quay-image
+  type: docker-image
+  source:
+    repository: {{quay_repository}}
+    username: {{quay_username}}
+    password: {{quay_password}}
+
+- name: slack-alert
+  type: slack-notification
+  source:
+    url: {{slack_url}}
+
+- name: release-candidate
+  type: github-release
+  source:
+    user: {{github_organization}}
+    repository: {{github_repository}}
+    access_token: {{github_access_token}}
+    pre_release: true
+
+- name: release
+  type: github-release
+  source:
+    user: {{github_organization}}
+    repository: {{github_repository}}
+    access_token: {{github_access_token}}
+
+- name: automation-source-code
+  type: github-release
+  source:
+    user: {{github_organization}}
+    repository: automation
+    access_token: {{github_access_token}}
+
+- name: version
+  type: semver
+  source:
+    driver: git
+    initial_version: 0.0.0-rc.1
+    uri: {{github_repository_uri}}
+    branch: version
+    file: version
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Groups
+#-----------------------------------------------------------------------------------------------------------------------
+groups:
+
+- name: staging
+  jobs:
+  - run-unit-tests
+  - create-release-candidate
+  - staging-deployment
+  - quay-deployment
+
+- name: live
+  jobs:
+  - create-release
+  - live-deployment
+
+#-----------------------------------------------------------------------------------------------------------------------
+# Jobs
+#-----------------------------------------------------------------------------------------------------------------------
+jobs:
+
+- name: run-unit-tests
+  serial: true
+  plan:
+
+  # Trigger unit tests when the source code is updated
+  - get: source-code
+    trigger: true
+
+  # Run unit tests
+  - task: unit-tests
+    file: source-code/ci/tasks/run-unit-tests.yml
+    params:
+      PROJECT_SRC: {{project_src}}
+
+# Create Release Candidate
+#-----------------------------------------------------------------------------------------------------------------------
+- name: create-release-candidate
+  public: false
+  serial: true
+  plan:
+
+  # Trigger build on master update
+  - get: source-code
+    trigger: true
+    passed: [run-unit-tests]
+
+  # Create a release artifact
+  - task: create-artifact
+    file: source-code-with-dependencies/ci/tasks/create-artifact.yml
+    params:
+      PROJECT_SRC: {{project_src}}
+
+  # Bump the rc version
+  - put: version
+    params:
+      pre: 'rc'
+
+  # Upload a release candidate to GitHub
+  - put: release-candidate
+    params:
+      name: version/version
+      tag: version/version
+      globs:
+      - artifacts/*.tar.gz
+
+# Create Release
+#-----------------------------------------------------------------------------------------------------------------------
+- name: create-release
+  serial: true
+  plan:
+
+  # Get the latest release candidate
+  - get: release-candidate
+
+  # Bump the version of the release
+  - put: version
+    params:
+      bump: final
+
+  # Upload a release to Github
+  - put: release
+    params:
+      name: version/version
+      tag: version/version
+      globs:
+      - artifacts/*.tar.gz
+
+# Quay Deployments
+#-----------------------------------------------------------------------------------------------------------------------
+- name: quay-deployment
+  public: false
+  serial: true
+  plan:
+
+  # Trigger a deployment to quay after a release candidate has been created
+  - get: release-candidate
+    trigger: true
+    passed: [create-release-candidate]
+
+  # Get the application source for the scripts
+  - get: source-code
+
+  # Extract the release
+  - task: extract-release
+    file: source-code/ci/tasks/extract-release.yml
+
+  # Upload the release to quay.io
+  - put: quay-image
+    params:
+      build: release-artifact
+
+  - put: slack-alert
+    params:
+      channel: {{slack_channel}}
+      text: {{slack_quay_success_text}}
+
+# Staging Deployments
+#-----------------------------------------------------------------------------------------------------------------------
+- name: staging-deployment
+  public: false
+  serial: true
+  plan:
+
+  # Trigger a deployment after a release candidate has been created
+  - get: release-candidate
+    trigger: true
+    passed: [create-release-candidate]
+
+  # Get the application source for the scripts
+  - get: source-code
+
+  # Get automation so that we can deploy to staging
+  - get: automation-source-code
+
+  - aggregate:
+
+    # Deploy the release candidate to staging
+    - task: deploy
+      file: source-code/ci/tasks/deploy-staging.yml
+      params:
+        DEPLOYMENT_PRIVATE_KEY: {{automation_private_key}}
+        DEPLOYMENT_ENVIRONMENT: staging
+        GROUP_NAME: {{automation_group_name}}
+        VPASS: {{automation_vpass}}
+
+      # Notify the slack channel of deployment success
+      on_failure:
+        put: slack-alert
+        params:
+          channel: {{slack_channel}}
+          text: {{slack_staging_failure_text}}
+
+      # Notify the slack channel of deployment failure
+      on_success:
+        put: slack-alert
+        params:
+          channel: {{slack_channel}}
+          text: {{slack_staging_success_text}}
+
+# Live Deployments
+#-----------------------------------------------------------------------------------------------------------------------
+- name: live-deployment
+  public: false
+  serial: true
+  plan:
+
+  # Trigger a deployment to staging after build
+  - get: release
+    trigger: true
+    passed: [create-release]
+
+  # Get the application source for the scripts
+  - get: source-code
+    trigger: false
+
+  # Get automation so that we can deploy to staging
+  - get: automation-source-code
+    trigger: false
+
+  # Deploy the release candidate to staging
+  - task: deploy
+    file: source-code/ci/tasks/deploy-live.yml
+    params:
+      DEPLOYMENT_PRIVATE_KEY: {{automation_private_key}}
+      DEPLOYMENT_ENVIRONMENT: live
+      GROUP_NAME: {{automation_group_name}}
+      VPASS: {{automation_vpass}}
+
+    # Notify the slack channel of deployment success
+    on_failure:
+      put: slack-alert
+      params:
+        channel: {{slack_channel}}
+        text: {{slack_live_failure_text}}
+
+    # Notify the slack channel of deployment failure
+    on_success:
+      put: slack-alert
+      params:
+        channel: {{slack_channel}}
+        text: {{slack_live_success_text}}
