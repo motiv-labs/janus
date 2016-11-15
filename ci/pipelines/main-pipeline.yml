@@ -173,9 +173,6 @@ jobs:
   # Get the application source for the scripts
   - get: source-code
 
-  # Get the application version to use it with the docker image
-  - get: version
-
   - task: prepare-docker-images
     file: source-code/ci/tasks/docker-deployment.yml
 
@@ -185,7 +182,7 @@ jobs:
     - put: docker-image
       params:
         build: docker-images/dev
-        tag: version/version-dev
+        tag: docker-images/dev/version
 
     # Upload the image to quay.io
     - put: docker-image
