@@ -26,7 +26,7 @@ resources:
     uri: {{github_repository_uri}}
     branch: master
 
-- name: quay-image
+- name: docker-image
   type: docker-image
   source:
     repository: {{docker_repository}}
@@ -79,7 +79,7 @@ groups:
   - run-unit-tests
   - create-release-candidate
   - staging-deployment
-  - quay-deployment
+  - docker-deployment
 
 - name: live
   jobs:
@@ -158,9 +158,9 @@ jobs:
       globs:
       - release-candidate/*.tar.gz
 
-# Quay Deployments
+# Docker Deployments
 #-----------------------------------------------------------------------------------------------------------------------
-- name: quay-deployment
+- name: docker-deployment
   public: false
   serial: true
   plan:
@@ -173,15 +173,20 @@ jobs:
   # Get the application source for the scripts
   - get: source-code
 
+  # Get the application version to use it with the docker image
+  - get: version
+
   # Upload the release to quay.io
-  - put: quay-image
+  - put: docker-image
     params:
       build: source-code
+      tag_as_latest: true
+      tag: version/version
 
   - put: slack-alert
     params:
       channel: {{slack_channel}}
-      text: {{slack_quay_success_text}}
+      text: {{slack_docker_success_text}}
 
 # Staging Deployments
 #-----------------------------------------------------------------------------------------------------------------------
