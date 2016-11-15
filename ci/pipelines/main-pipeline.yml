@@ -156,7 +156,7 @@ jobs:
       name: version/version
       tag: version/version
       globs:
-      - artifacts/*.tar.gz
+      - release-candidate/*.tar.gz
 
 # Quay Deployments
 #-----------------------------------------------------------------------------------------------------------------------
