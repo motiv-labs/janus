@@ -8,8 +8,8 @@ mkdir -p docker-images/dev
 mkdir -p docker-images/latest
 
 # Copies code to the image directories
-cp -r source-code docker-images/dev
-cp -r source-code docker-images/latest
+cp -r "source-code/"* docker-images/dev
+cp -r "source-code/"* docker-images/latest
 
 # Copies code to the image directories
 cp docker-images/dev/ci/assets/Dockerfile.dev docker-images/dev/Dockerfile
