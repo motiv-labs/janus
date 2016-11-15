@@ -29,9 +29,9 @@ resources:
 - name: quay-image
   type: docker-image
   source:
-    repository: {{quay_repository}}
-    username: {{quay_username}}
-    password: {{quay_password}}
+    repository: {{docker_repository}}
+    username: {{docker_username}}
+    password: {{docker_password}}
 
 - name: slack-alert
   type: slack-notification
