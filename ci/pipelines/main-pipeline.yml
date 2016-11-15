@@ -173,9 +173,13 @@ jobs:
   # Get the application source for the scripts
   - get: source-code
 
+  # Prepare the dir structure for building the docker images
   - task: prepare-docker-images
     file: source-code/ci/tasks/docker-deployment.yml
 
+  # Get the application version to use it in docker
+  - get: version
+  
   - aggregate:
 
     # Upload the dev image to quay.io
