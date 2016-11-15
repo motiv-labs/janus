@@ -180,7 +180,7 @@ jobs:
   # Upload the release to quay.io
   - put: quay-image
     params:
-      build: release-artifact
+      build: artifacts
 
   - put: slack-alert
     params:
