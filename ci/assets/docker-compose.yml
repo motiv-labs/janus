@@ -1,0 +1,20 @@
+version: '2'
+services:
+
+    janus:
+        image: quay.io/hellofresh/janus
+        ports:
+            - "8080:8080"
+        environment:
+            DEBUG: 'false'
+            PORT: '8080'
+            DATABASE_DSN: 'mongodb://mongodb:27017/janus'
+            REDIS_DSN: 'redis://redis:6379'
+
+    mongodb:
+        image: mongo
+        ports:
+            - "27017:27017"
+
+    redis:
+        image: redis
