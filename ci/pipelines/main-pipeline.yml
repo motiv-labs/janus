@@ -176,17 +176,23 @@ jobs:
   # Get the application version to use it with the docker image
   - get: version
 
-  # Upload the release to quay.io
-  - put: docker-image
-    params:
-      build: source-code
-      tag_as_latest: true
-      tag: version/version
+  - task: prepare-docker-images
+    file: source-code/ci/tasks/docker-deployment.yml
 
-  - put: slack-alert
-    params:
-      channel: {{slack_channel}}
-      text: {{slack_docker_success_text}}
+  - aggregate:
+
+    # Upload the dev image to quay.io
+    - put: docker-image
+      params:
+        build: docker-images/dev
+        tag: version/version-dev
+
+    # Upload the image to quay.io
+    - put: docker-image
+      params:
+        build: docker-images/latest
+        tag_as_latest: true
+        tag: version/version
 
 # Staging Deployments
 #-----------------------------------------------------------------------------------------------------------------------
