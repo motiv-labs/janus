@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Ensure this script fails if anything errors
+set -e
+
 # Creates the project source on the gopath
 mkdir -p ${PROJECT_SRC}
 
