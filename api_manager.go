@@ -43,7 +43,7 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec) {
 		skip = m.validateProxy(referenceSpec.Proxy)
 
 		if false == referenceSpec.Active {
-			logger.Info("API is not active, skiping...")
+			log.Info("API is not active, skiping...")
 			skip = false
 		}
 
