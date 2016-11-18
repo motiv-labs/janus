@@ -6,6 +6,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/etcinit/speedbump"
 	"github.com/gin-gonic/gin"
+	"github.com/hellofresh/ginger-middleware/mongodb"
 	"gopkg.in/redis.v3"
 )
 
@@ -13,11 +14,11 @@ import (
 type APIManager struct {
 	proxyRegister *ProxyRegister
 	redisClient   *redis.Client
-	accessor      *DatabaseAccessor
+	accessor      *mongodb.DatabaseAccessor
 }
 
 // NewAPIManager creates a new instance of the api manager
-func NewAPIManager(router *gin.Engine, redisClient *redis.Client, accessor *DatabaseAccessor) *APIManager {
+func NewAPIManager(router *gin.Engine, redisClient *redis.Client, accessor *mongodb.DatabaseAccessor) *APIManager {
 	proxyRegister := &ProxyRegister{Engine: router}
 	return &APIManager{proxyRegister, redisClient, accessor}
 }
