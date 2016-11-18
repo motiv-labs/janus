@@ -6,38 +6,29 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	"github.com/kelseyhightower/envconfig"
+	"github.com/hellofresh/ginger-middleware/mongodb"
+	"github.com/hellofresh/ginger-middleware/nice"
+	"github.com/hellofresh/janus/config"
 	"gopkg.in/redis.v3"
 )
 
 var APILoader = APIDefinitionLoader{}
-var config Specification
-
-//loadConfigEnv loads environment variables
-func loadConfigEnv() Specification {
-	err := envconfig.Process("", &config)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-
-	return config
-}
 
 // initializeDatabase initializes a DB connection
-func initializeDatabase() *DatabaseAccessor {
-	accessor, err := NewServer(config.DatabaseDSN)
+func initializeDatabase(dsn string) *mongodb.DatabaseAccessor {
+	accessor, err := mongodb.InitDB(dsn)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Couldn't connect to the mongodb database: %s", err.Error())
 	}
 
 	return accessor
 }
 
 // initializeRedis initializes a Redis connection
-func initializeRedis() *redis.Client {
-	log.Infof("Trying to connect to redis instance: %s", config.StorageDSN)
+func initializeRedis(dsn string) *redis.Client {
+	log.Debugf("Trying to connect to redis instance: %s", dsn)
 	return redis.NewClient(&redis.Options{
-		Addr: config.StorageDSN,
+		Addr: dsn,
 	})
 }
 
@@ -57,9 +48,16 @@ func loadAPIEndpoints(router *gin.Engine, apiManager *APIManager) {
 }
 
 func main() {
-	loadConfigEnv()
 	log.SetOutput(os.Stderr)
-	router := gin.Default()
+
+	config, err := config.LoadEnv()
+	if nil != err {
+		log.Panic(err.Error())
+	}
+
+	router := gin.New()
+	router.Use(gin.Logger())
+	router.Use(nice.Recovery(recoveryHandler))
 
 	if config.Debug {
 		log.SetLevel(log.DebugLevel)
@@ -69,13 +67,10 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 
-	accessor := initializeDatabase()
-	defer accessor.Close()
+	accessor := initializeDatabase(config.DatabaseDSN)
+	router.Use(mongodb.Middleware(accessor))
 
-	database := Database{accessor}
-	router.Use(database.Middleware())
-
-	redisStorage := initializeRedis()
+	redisStorage := initializeRedis(config.StorageDSN)
 	defer redisStorage.Close()
 
 	apiManager := NewAPIManager(router, redisStorage, accessor)
