@@ -10,6 +10,8 @@ services:
             PORT: '8080'
             DATABASE_DSN: 'mongodb://mongodb:27017/janus'
             REDIS_DSN: 'redis://redis:6379'
+            STATSD_DSN: 'statsd:8125'
+            STATSD_PREFIX: 'janus-docker.'
 
     mongodb:
         image: mongo
@@ -18,3 +20,11 @@ services:
 
     redis:
         image: redis
+
+    statsd:
+        image: hopsoft/graphite-statsd
+        ports:
+          - "8010:80"
+          - "2003:2003"
+          - "8125:8125/udp"
+          - "8126:8126"

@@ -1,5 +1,5 @@
-hash: fdcc58eaba6c355535535fd7afc38cba0b69a3607f943c4e3dc5711ef21f30a6
-updated: 2016-11-18T14:32:26.654263265+01:00
+hash: 05df1d71d1d27d55bafc29d6f22238cfecf7141c90acea167996b8bafd2d87fa
+updated: 2016-11-18T16:37:29.842139654+01:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
@@ -43,6 +43,8 @@ imports:
   version: a408501be4d17ee978c04a618e7a1b22af058c0e
   subpackages:
   - unix
+- name: gopkg.in/alexcesaro/statsd.v2
+  version: 7fea3f0d2fab1ad973e641e51dba45443a311a90
 - name: gopkg.in/bsm/ratelimit.v1
   version: db14e161995a5177acef654cb0dd785e8ee8bc22
 - name: gopkg.in/go-playground/validator.v8
@@ -82,11 +84,12 @@ testImports:
   - reporters/stenographer
   - types
 - name: github.com/onsi/gomega
-  version: a78ae492d53aad5a7a232d0d0462c14c400e3ee7
+  version: d59fa0ac68bb5dd932ee8d24eed631cdd519efc3
   subpackages:
   - format
   - internal/assertion
   - internal/asyncassertion
+  - internal/oraclematcher
   - internal/testingtsupport
   - matchers
   - matchers/support/goraph/bipartitegraph

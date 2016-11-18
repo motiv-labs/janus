@@ -9,6 +9,7 @@ import (
 	"github.com/hellofresh/ginger-middleware/mongodb"
 	"github.com/hellofresh/ginger-middleware/nice"
 	"github.com/hellofresh/janus/config"
+	"gopkg.in/alexcesaro/statsd.v2"
 	"gopkg.in/redis.v3"
 )
 
@@ -30,6 +31,34 @@ func initializeRedis(dsn string) *redis.Client {
 	return redis.NewClient(&redis.Options{
 		Addr: dsn,
 	})
+}
+
+// Initializes new StatsD client if it enabled
+func initializeStatsd(dsn, prefix string) *statsd.Client {
+	var options []statsd.Option
+
+	if len(dsn) == 0 {
+		options = append(options, statsd.Mute(true))
+	} else {
+		options = append(options, statsd.Address(dsn))
+	}
+
+	if len(prefix) > 0 {
+		options = append(options, statsd.Prefix(prefix))
+	}
+
+	client, err := statsd.New(options...)
+
+	if err != nil {
+		log.WithError(err).
+			WithFields(log.Fields{
+				"dsn":    dsn,
+				"prefix": prefix,
+			}).
+			Warning("An error occurred while connecting to StatsD. Client will be muted.")
+	}
+
+	return client
 }
 
 //loadAPIEndpoints register api endpoints
@@ -73,7 +102,10 @@ func main() {
 	redisStorage := initializeRedis(config.StorageDSN)
 	defer redisStorage.Close()
 
-	apiManager := NewAPIManager(router, redisStorage, accessor)
+	statsdClient := initializeStatsd(config.StatsdDSN, config.StatsdPrefix)
+	defer statsdClient.Close()
+
+	apiManager := NewAPIManager(router, redisStorage, accessor, statsdClient)
 	apiManager.Load()
 	loadAPIEndpoints(router, apiManager)
 
