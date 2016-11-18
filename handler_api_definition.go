@@ -3,8 +3,8 @@ package main
 import (
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+	"github.com/hellofresh/janus/errors"
 	"gopkg.in/mgo.v2"
 )
 
@@ -16,11 +16,10 @@ type AppsAPI struct {
 func (u *AppsAPI) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		repo := u.getRepository(u.getDatabase(c))
-		data, err := repo.FindAll()
 
+		data, err := repo.FindAll()
 		if err != nil {
-			log.Errorf(err.Error())
-			c.JSON(http.StatusInternalServerError, err.Error())
+			panic(err.Error())
 		}
 
 		c.JSON(http.StatusOK, data)
@@ -35,14 +34,11 @@ func (u *AppsAPI) GetBy() gin.HandlerFunc {
 
 		data, err := repo.FindByID(id)
 		if data.ID == "" {
-			c.JSON(http.StatusNotFound, "Application not found")
-			return
+			panic(errors.New(http.StatusNotFound, "Application not found"))
 		}
 
 		if err != nil {
-			log.Errorf(err.Error())
-			c.JSON(http.StatusInternalServerError, err.Error())
-			return
+			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
 		c.JSON(http.StatusOK, data)
@@ -58,20 +54,16 @@ func (u *AppsAPI) PutBy() gin.HandlerFunc {
 		repo := u.getRepository(u.getDatabase(c))
 		definition, err := repo.FindByID(id)
 		if definition.ID == "" {
-			c.JSON(http.StatusNotFound, "Application not found")
-			return
+			panic(errors.New(http.StatusNotFound, "Application not found"))
 		}
 
 		if err != nil {
-			log.Errorf(err.Error())
-			c.JSON(http.StatusInternalServerError, err.Error())
-			return
+			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
 		err = c.Bind(definition)
 		if nil != err {
-			log.Errorf("Error when reading json: %s", err.Error())
-			return
+			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
 		repo.Add(definition)
@@ -89,13 +81,12 @@ func (u *AppsAPI) Post() gin.HandlerFunc {
 
 		err := c.Bind(definition)
 		if nil != err {
-			log.Fatal("Error when reading json")
+			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
 		err = repo.Add(definition)
 		if nil != err {
-			c.JSON(http.StatusBadRequest, err)
-			return
+			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
 		u.apiManager.Load()
@@ -111,8 +102,7 @@ func (u *AppsAPI) DeleteBy() gin.HandlerFunc {
 
 		err := repo.Remove(id)
 		if err != nil {
-			c.JSON(http.StatusInternalServerError, err.Error())
-			return
+			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
 		u.apiManager.Load()
@@ -124,7 +114,7 @@ func (u *AppsAPI) getDatabase(c *gin.Context) *mgo.Database {
 	db, exists := c.Get("db")
 
 	if false == exists {
-		log.Error("DB context was not set for this request")
+		panic(errors.New(http.StatusInternalServerError, "DB context was not set for this request"))
 	}
 
 	return db.(*mgo.Database)
@@ -133,9 +123,8 @@ func (u *AppsAPI) getDatabase(c *gin.Context) *mgo.Database {
 // GetRepository gets the repository for the handlers
 func (u *AppsAPI) getRepository(db *mgo.Database) *MongoAPISpecRepository {
 	repo, err := NewMongoAppRepository(db)
-
 	if err != nil {
-		log.Panic(err)
+		panic(errors.New(http.StatusInternalServerError, err.Error()))
 	}
 
 	return repo
