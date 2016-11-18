@@ -7,6 +7,7 @@ import (
 	"github.com/etcinit/speedbump"
 	"github.com/gin-gonic/gin"
 	"github.com/hellofresh/ginger-middleware/mongodb"
+	"gopkg.in/alexcesaro/statsd.v2"
 	"gopkg.in/redis.v3"
 )
 
@@ -18,8 +19,8 @@ type APIManager struct {
 }
 
 // NewAPIManager creates a new instance of the api manager
-func NewAPIManager(router *gin.Engine, redisClient *redis.Client, accessor *mongodb.DatabaseAccessor) *APIManager {
-	proxyRegister := &ProxyRegister{Engine: router}
+func NewAPIManager(router *gin.Engine, redisClient *redis.Client, accessor *mongodb.DatabaseAccessor, statsdClient *statsd.Client) *APIManager {
+	proxyRegister := &ProxyRegister{Engine: router, statsdClient: statsdClient}
 	return &APIManager{proxyRegister, redisClient, accessor}
 }
 

@@ -1,4 +1,4 @@
-package: github.com/hellofresh/api-gateway
+package: github.com/hellofresh/janus
 license: MIT
 owners:
 - name: Italo Lelis de Vietro
@@ -22,6 +22,8 @@ import:
 - package: github.com/itsjamie/gin-cors
   version: ^1.0.0
 - package: github.com/hellofresh/ginger-middleware
+- package: gopkg.in/alexcesaro/statsd.v2
+  version: ~2.0.0
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.2.0
