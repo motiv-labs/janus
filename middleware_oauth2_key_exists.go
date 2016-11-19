@@ -8,7 +8,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	"github.com/gorilla/context"
 )
 
 type Oauth2KeyExists struct {
@@ -16,10 +15,10 @@ type Oauth2KeyExists struct {
 }
 
 func (m *Oauth2KeyExists) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
-	m.Logger.Debug("Starting Oauth2KeyExists middleware")
+	log.Debug("Starting Oauth2KeyExists middleware")
 
 	if false == m.Spec.UseOauth2 {
-		m.Logger.Debug("OAuth2 not enabled")
+		log.Debug("OAuth2 not enabled")
 		return nil, http.StatusOK
 	}
 
@@ -27,14 +26,12 @@ func (m *Oauth2KeyExists) ProcessRequest(req *http.Request, c *gin.Context) (err
 	authHeaderValue := string(req.Header.Get("Authorization"))
 	parts := strings.Split(authHeaderValue, " ")
 	if len(parts) < 2 {
-		m.Logger.Info("Attempted access with malformed header, no auth header found.")
-
+		log.Info("Attempted access with malformed header, no auth header found.")
 		return errors.New("Authorization field missing"), http.StatusBadRequest
 	}
 
 	if strings.ToLower(parts[0]) != "bearer" {
-		m.Logger.Info("Bearer token malformed")
-
+		log.Info("Bearer token malformed")
 		return errors.New("Bearer token malformed"), http.StatusBadRequest
 	}
 
@@ -42,7 +39,7 @@ func (m *Oauth2KeyExists) ProcessRequest(req *http.Request, c *gin.Context) (err
 	thisSessionState, keyExists := m.CheckSessionAndIdentityForValidKey(accessToken)
 
 	if !keyExists {
-		m.Logger.WithFields(log.Fields{
+		log.WithFields(log.Fields{
 			"path":   req.RequestURI,
 			"origin": req.RemoteAddr,
 			"key":    accessToken,
@@ -51,8 +48,8 @@ func (m *Oauth2KeyExists) ProcessRequest(req *http.Request, c *gin.Context) (err
 		return errors.New("Key not authorised"), http.StatusUnauthorized
 	}
 
-	context.Set(req, SessionData, thisSessionState)
-	context.Set(req, AuthHeaderValue, accessToken)
+	c.Set(SessionData, thisSessionState)
+	c.Set(AuthHeaderValue, accessToken)
 
 	return nil, http.StatusOK
 }

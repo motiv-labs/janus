@@ -3,14 +3,14 @@ package main
 import (
 	"net/http"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 )
 
 // Middleware wraps up the APIDefinition object to be included in a
 // middleware handler, this can probably be handled better.
 type Middleware struct {
-	Spec   *APISpec
-	Logger *Logger
+	Spec *APISpec
 }
 
 type MiddlewareImplementation interface {
@@ -20,11 +20,11 @@ type MiddlewareImplementation interface {
 // Generic middleware caller to make extension easier
 func CreateMiddleware(mw MiddlewareImplementation) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		reqErr, errCode := mw.ProcessRequest(c.Request, c)
+		err, errCode := mw.ProcessRequest(c.Request, c)
 
-		if reqErr != nil {
+		if err != nil {
 			c.Abort()
-			c.JSON(errCode, reqErr.Error())
+			c.JSON(errCode, err.Error())
 		} else {
 			c.Next()
 		}
@@ -36,9 +36,9 @@ func (o *Middleware) CheckSessionAndIdentityForValidKey(key string) (SessionStat
 	oAuthManager := o.Spec.OAuthManager
 
 	//Checks if the key is present on the cache and if it didn't expire yet
-	o.Logger.Debug("Querying keystore")
+	log.Debug("Querying keystore")
 	if !oAuthManager.KeyExists(key) {
-		o.Logger.Debug("Key not found in keystore")
+		log.Debug("Key not found in keystore")
 		return thisSession, false
 	}
 

@@ -83,7 +83,7 @@ func (r *MongoAPISpecRepository) Add(definition *APIDefinition) error {
 		return err
 	}
 
-	log.Infof("Resource %s added", id)
+	log.Debugf("Resource %s added", id)
 	return nil
 }
 
@@ -99,6 +99,6 @@ func (r *MongoAPISpecRepository) Remove(id string) error {
 		return err
 	}
 
-	log.Infof("Resource %s removed", id)
+	log.Debugf("Resource %s removed", id)
 	return nil
 }

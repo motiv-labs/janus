@@ -15,13 +15,11 @@ func (a *APIDefinitionLoader) LoadDefinitions(dir string) {
 
 func (a *APIDefinitionLoader) LoadDefinitionsFromDatastore(dbSession *mgo.Session) []*APISpec {
 	repo, err := NewMongoAppRepository(dbSession.DB(""))
-
 	if err != nil {
 		log.Panic(err)
 	}
 
 	definitions, err := repo.FindAll()
-
 	if err != nil {
 		log.Panic(err)
 	}

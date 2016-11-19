@@ -31,8 +31,7 @@ func (o *OAuthManager) IsKeyAuthorised(accessToken string) (SessionState, bool) 
 	jsonKeyVal := o.storage.Get(accessToken).Val()
 
 	if marshalErr := json.Unmarshal([]byte(jsonKeyVal), &newSession); marshalErr != nil {
-		log.Error("Couldn't unmarshal session object")
-		log.Error(marshalErr)
+		log.Errorf("Couldn't unmarshal session object: %s", marshalErr.Error())
 		return newSession, false
 	}
 

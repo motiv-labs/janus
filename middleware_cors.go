@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 	"github.com/itsjamie/gin-cors"
 )
@@ -13,10 +14,10 @@ type CorsMiddleware struct {
 }
 
 func (m *CorsMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
-	m.Logger.Debug("CORS middleware started")
+	log.Debug("CORS middleware started")
 
 	if !m.Spec.CorsMeta.Enabled {
-		m.Logger.Debug("CORS is not enabled")
+		log.Debug("CORS is not enabled")
 		return nil, http.StatusOK
 	}
 
@@ -30,7 +31,7 @@ func (m *CorsMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (erro
 	})
 
 	innerMiddleware(c)
-	m.Logger.Debug("CORS inner middleware executed")
+	log.Debug("CORS inner middleware executed")
 
 	return nil, http.StatusOK
 }
