@@ -6,6 +6,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/alexcesaro/statsd.v2"
 )
 
 const (
@@ -14,8 +15,9 @@ const (
 
 // ProxyRegister represents a register proxy
 type ProxyRegister struct {
-	Engine  *gin.Engine
-	proxies []Proxy
+	Engine       *gin.Engine
+	proxies      []Proxy
+	statsdClient *statsd.Client
 }
 
 // RegisterMany registers many proxies at once
@@ -71,7 +73,7 @@ func (p *ProxyRegister) Exists(proxy Proxy) bool {
 // ToHandler turns a proxy configuration into a handler
 func (p *ProxyRegister) ToHandler(proxy Proxy) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		transport := &transport{http.DefaultTransport, c}
+		transport := &transport{http.DefaultTransport, c, p.statsdClient}
 		reverseProxy := NewSingleHostReverseProxy(proxy, transport)
 		reverseProxy.ServeHTTP(c.Writer, c.Request)
 	}

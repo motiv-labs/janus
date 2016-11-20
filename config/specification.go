@@ -4,10 +4,12 @@ import "github.com/kelseyhightower/envconfig"
 
 // Specification for basic configurations
 type Specification struct {
-	DatabaseDSN string `envconfig:"DATABASE_DSN"`
-	Port        int    `envconfig:"PORT"`
-	Debug       bool   `envconfig:"DEBUG"`
-	StorageDSN  string `envconfig:"REDIS_DSN"`
+	DatabaseDSN  string `envconfig:"DATABASE_DSN"`
+	Port         int    `envconfig:"PORT"`
+	Debug        bool   `envconfig:"DEBUG"`
+	StatsdDSN    string `envconfig:"STATSD_DSN"`
+	StatsdPrefix string `envconfig:"STATSD_PREFIX"`
+	StorageDSN   string `envconfig:"REDIS_DSN"`
 }
 
 //LoadEnv loads environment variables

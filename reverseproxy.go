@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
@@ -10,15 +11,19 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
+	"gopkg.in/alexcesaro/statsd.v2"
 )
 
 type transport struct {
 	http.RoundTripper
-	context *gin.Context
+	context      *gin.Context
+	statsdClient *statsd.Client
 }
 
 func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+	timing := t.statsdClient.NewTiming()
 	resp, err = t.RoundTripper.RoundTrip(req)
+	timing.Send(getStatsdMetricName(req))
 
 	//This is useful for the middlewares
 	var bodyBytes []byte
@@ -88,4 +93,18 @@ func NewSingleHostReverseProxy(proxy Proxy, transport http.RoundTripper) *httput
 	}
 
 	return &httputil.ReverseProxy{Director: director, Transport: transport}
+}
+
+// Returns metric name for StatsD in "<request method>.<request path>" format
+func getStatsdMetricName(req *http.Request) string {
+	return fmt.Sprintf(
+		"%s.%s",
+		strings.ToLower(req.Method),
+		strings.Replace(
+			// Double underscores
+			strings.Replace(req.URL.Path, "_", "__", -1),
+			// and replace dots with single underscore
+			".",
+			"_",
+			-1))
 }
