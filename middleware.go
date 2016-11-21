@@ -3,7 +3,6 @@ package main
 import (
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
 )
 
@@ -29,19 +28,4 @@ func CreateMiddleware(mw MiddlewareImplementation) gin.HandlerFunc {
 			c.Next()
 		}
 	}
-}
-
-func (o *Middleware) CheckSessionAndIdentityForValidKey(key string) (SessionState, bool) {
-	var thisSession SessionState
-	oAuthManager := o.Spec.OAuthManager
-
-	//Checks if the key is present on the cache and if it didn't expire yet
-	log.Debug("Querying keystore")
-	if !oAuthManager.KeyExists(key) {
-		log.Debug("Key not found in keystore")
-		return thisSession, false
-	}
-
-	// 2. If not there, get it from the AuthorizationHandler
-	return o.Spec.OAuthManager.IsKeyAuthorised(key)
 }

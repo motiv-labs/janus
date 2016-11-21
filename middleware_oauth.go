@@ -11,11 +11,13 @@ import (
 )
 
 type OAuthMiddleware struct {
-	*Middleware
+	oauthManager *OAuthManager
+	oauthSpec    *OAuthSpec
 }
 
 func (m *OAuthMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
 	var newSession SessionState
+	newSession.OAuthServerID = m.oauthSpec.ID
 
 	log.WithFields(log.Fields{
 		"req": req,
@@ -33,7 +35,7 @@ func (m *OAuthMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (err
 		return marshalErr, http.StatusInternalServerError
 	}
 
-	m.Spec.OAuthManager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
+	m.oauthManager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
 
 	return nil, http.StatusOK
 }
