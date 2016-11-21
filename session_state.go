@@ -1,4 +1,4 @@
-package main
+package janus
 
 import "gopkg.in/mgo.v2/bson"
 

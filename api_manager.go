@@ -1,4 +1,4 @@
-package main
+package janus
 
 import (
 	log "github.com/Sirupsen/logrus"
@@ -9,7 +9,8 @@ import (
 	"gopkg.in/redis.v3"
 )
 
-// APIManager handles the creation and configuration of an api definition
+var APILoader = APIDefinitionLoader{}
+
 type APIManager struct {
 	proxyRegister *ProxyRegister
 	redisClient   *redis.Client

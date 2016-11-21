@@ -8,13 +8,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/hellofresh/ginger-middleware/mongodb"
 	"github.com/hellofresh/ginger-middleware/nice"
+	"github.com/hellofresh/janus"
 	"github.com/hellofresh/janus/config"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 	"gopkg.in/appleboy/gin-jwt.v2"
 	"gopkg.in/redis.v3"
 )
-
-var APILoader = APIDefinitionLoader{}
 
 // initializeDatabase initializes a DB connection
 func initializeDatabase(dsn string) *mongodb.DatabaseAccessor {
@@ -65,10 +64,10 @@ func initializeStatsd(dsn, prefix string) *statsd.Client {
 }
 
 //loadDefaultEndpoints register api endpoints
-func loadDefaultEndpoints(router *gin.Engine, apiManager *APIManager, authMiddleware *jwt.GinJWTMiddleware) {
+func loadDefaultEndpoints(router *gin.Engine, apiManager *janus.APIManager, authMiddleware *jwt.GinJWTMiddleware) {
 	log.Debug("Loading Default Endpoints")
 
-	handler := AppsAPI{apiManager}
+	handler := janus.AppsAPI{apiManager}
 	group := router.Group("/apis")
 	group.Use(authMiddleware.MiddlewareFunc())
 	{
@@ -79,7 +78,7 @@ func loadDefaultEndpoints(router *gin.Engine, apiManager *APIManager, authMiddle
 		group.DELETE("/:id", handler.DeleteBy())
 	}
 
-	oAuthHandler := OAuthAPI{}
+	oAuthHandler := janus.OAuthAPI{}
 	oauthGroup := router.Group("/oauth/servers")
 	oauthGroup.Use(authMiddleware.MiddlewareFunc())
 	{
@@ -112,7 +111,7 @@ func main() {
 
 	router := gin.New()
 	router.Use(gin.Logger())
-	router.Use(nice.Recovery(recoveryHandler))
+	router.Use(nice.Recovery(janus.RecoveryHandler))
 
 	if config.Debug {
 		log.SetLevel(log.DebugLevel)
@@ -131,10 +130,10 @@ func main() {
 	statsdClient := initializeStatsd(config.StatsdDSN, config.StatsdPrefix)
 	defer statsdClient.Close()
 
-	apiManager := NewAPIManager(router, redisStorage, accessor, statsdClient)
+	apiManager := janus.NewAPIManager(router, redisStorage, accessor, statsdClient)
 	apiManager.Load()
 
-	authMiddleware := NewJwt(&Credentials{
+	authMiddleware := janus.NewJwt(&janus.Credentials{
 		Secret:   config.Credentials.Secret,
 		Username: config.Credentials.Username,
 		Password: config.Credentials.Password,

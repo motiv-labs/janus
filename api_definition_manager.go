@@ -1,4 +1,4 @@
-package main
+package janus
 
 import (
 	log "github.com/Sirupsen/logrus"

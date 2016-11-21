@@ -1,4 +1,4 @@
-package main
+package janus
 
 import (
 	"net/http"
@@ -9,7 +9,7 @@ import (
 )
 
 type AppsAPI struct {
-	apiManager *APIManager
+	ApiManager *APIManager
 }
 
 // GET /apps
@@ -67,7 +67,7 @@ func (u *AppsAPI) PutBy() gin.HandlerFunc {
 		}
 
 		repo.Add(definition)
-		u.apiManager.Load()
+		u.ApiManager.Load()
 
 		c.JSON(http.StatusOK, definition)
 	}
@@ -89,7 +89,7 @@ func (u *AppsAPI) Post() gin.HandlerFunc {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		u.apiManager.Load()
+		u.ApiManager.Load()
 		c.JSON(http.StatusCreated, definition)
 	}
 }
@@ -105,7 +105,7 @@ func (u *AppsAPI) DeleteBy() gin.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		u.apiManager.Load()
+		u.ApiManager.Load()
 		c.String(http.StatusNoContent, "")
 	}
 }

@@ -3,32 +3,36 @@ OK_COLOR=\033[32;01m
 ERROR_COLOR=\033[31;01m
 WARN_COLOR=\033[33;01m
 
+REPO=github.com/hellofresh/janus
+GO_LINKER_FLAGS=-ldflags="-s -w"
+
 # This how we want to name the binary output
+DIR_OUT=$(CURDIR)/out
+PROJECT_SRC=$(REPO)/cmd/janus
 BINARY=janus
-BUILD_PATH=${GOPATH}/bin
 
-.PHONY: all clean deps install
+.PHONY: all clean deps build
 
-all: clean deps install
+all: clean deps build
 
-deps: 
-	@echo "$(OK_COLOR)==> Installing gin proxy$(NO_COLOR)"
-	@go get github.com/codegangsta/gin
-
+deps:
 	@echo "$(OK_COLOR)==> Installing glide dependencies$(NO_COLOR)"
 	@curl https://glide.sh/get | sh
 	@glide install
 
 # Builds the project
-build: build-linux build-osx
+build: build-ensure-dir build-linux build-osx
+
+build-ensure-dir:
+	@mkdir -p ${DIR_OUT}
 
 build-linux:
 	@echo "$(OK_COLOR)==> Building Linux amd64"
-	@env GOOS=linux GOARCH=amd64 go build -o ${BUILD_PATH}/linux_amd64/${BINARY}
+	@env GOOS=linux GOARCH=amd64 go build -o ${DIR_OUT}/${BINARY}-linux ${GO_LINKER_FLAGS} ${PROJECT_SRC}
 
 build-osx:
 	@echo "$(OK_COLOR)==> Building OSX amd64"
-	@env GOOS=darwin GOARCH=amd64 go build -o ${BUILD_PATH}/darwin_amd64/${BINARY}
+	@env GOOS=darwin GOARCH=amd64 go build -o ${DIR_OUT}/${BINARY}-darwin ${GO_LINKER_FLAGS} ${PROJECT_SRC}
 
 # Installs our project: copies binaries
 install:
