@@ -1,4 +1,4 @@
-package main
+package janus
 
 import (
 	"encoding/json"
@@ -23,6 +23,7 @@ func (o *OAuthManager) Set(accessToken string, session SessionState, resetTTLTo 
 
 	log.Debugf("Storing key %s for %d seconds", accessToken, expireDuration)
 	go o.storage.Set(accessToken, string(value), expireDuration)
+
 	return nil
 }
 

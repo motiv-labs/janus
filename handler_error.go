@@ -1,4 +1,4 @@
-package main
+package janus
 
 import (
 	"net/http"
@@ -11,8 +11,8 @@ import (
 // ErrInvalidID represents an invalid ID
 var ErrInvalidID = errors.New(http.StatusBadRequest, "Please provide a valid ID")
 
-// Recovery handler for the apis
-func recoveryHandler(c *gin.Context, err interface{}) {
+// RecoveryHandler handler for the apis
+func RecoveryHandler(c *gin.Context, err interface{}) {
 	switch err.(type) {
 	case *errors.Error:
 		internalErr := err.(*errors.Error)

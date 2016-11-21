@@ -1,5 +1,7 @@
 FROM golang
 
+RUN go get github.com/codegangsta/gin
+
 # Set apps home directory.
 ENV APP_DIR /go/src/github.com/hellofresh/janus
 

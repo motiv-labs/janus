@@ -8,12 +8,9 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-type AppsAPI struct {
-	ApiManager *APIManager
-}
+type OAuthAPI struct{}
 
-// GET /apps
-func (u *AppsAPI) Get() gin.HandlerFunc {
+func (u *OAuthAPI) Get() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		repo := u.getRepository(u.getDatabase(c))
 
@@ -26,15 +23,15 @@ func (u *AppsAPI) Get() gin.HandlerFunc {
 	}
 }
 
-// GetBy gets an application by its id
-func (u *AppsAPI) GetBy() gin.HandlerFunc {
+// GetBy gets an oauth server by its id
+func (u *OAuthAPI) GetBy() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Params.ByName("id")
 		repo := u.getRepository(u.getDatabase(c))
 
 		data, err := repo.FindByID(id)
 		if data.ID == "" {
-			panic(errors.New(http.StatusNotFound, "Application not found"))
+			panic(errors.New(http.StatusNotFound, "OAuth server not found"))
 		}
 
 		if err != nil {
@@ -45,8 +42,7 @@ func (u *AppsAPI) GetBy() gin.HandlerFunc {
 	}
 }
 
-// PUT /apps/:id
-func (u *AppsAPI) PutBy() gin.HandlerFunc {
+func (u *OAuthAPI) PutBy() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		var err error
 
@@ -54,7 +50,7 @@ func (u *AppsAPI) PutBy() gin.HandlerFunc {
 		repo := u.getRepository(u.getDatabase(c))
 		definition, err := repo.FindByID(id)
 		if definition.ID == "" {
-			panic(errors.New(http.StatusNotFound, "Application not found"))
+			panic(errors.New(http.StatusNotFound, "OAuth server not found"))
 		}
 
 		if err != nil {
@@ -67,35 +63,30 @@ func (u *AppsAPI) PutBy() gin.HandlerFunc {
 		}
 
 		repo.Add(definition)
-		u.ApiManager.Load()
-
 		c.JSON(http.StatusOK, definition)
 	}
 }
 
-// POST /apps
-func (u *AppsAPI) Post() gin.HandlerFunc {
+func (u *OAuthAPI) Post() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		repo := u.getRepository(u.getDatabase(c))
-		definition := &APIDefinition{}
+		var oauth OAuth
 
-		err := c.Bind(definition)
+		err := c.Bind(&oauth)
 		if nil != err {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		err = repo.Add(definition)
+		err = repo.Add(&oauth)
 		if nil != err {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		u.ApiManager.Load()
-		c.JSON(http.StatusCreated, definition)
+		c.JSON(http.StatusCreated, oauth)
 	}
 }
 
-// DELETE /apps/:param1
-func (u *AppsAPI) DeleteBy() gin.HandlerFunc {
+func (u *OAuthAPI) DeleteBy() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		id := c.Params.ByName("id")
 		repo := u.getRepository(u.getDatabase(c))
@@ -105,12 +96,11 @@ func (u *AppsAPI) DeleteBy() gin.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		u.ApiManager.Load()
 		c.String(http.StatusNoContent, "")
 	}
 }
 
-func (u *AppsAPI) getDatabase(c *gin.Context) *mgo.Database {
+func (u *OAuthAPI) getDatabase(c *gin.Context) *mgo.Database {
 	db, exists := c.Get("db")
 
 	if false == exists {
@@ -121,8 +111,8 @@ func (u *AppsAPI) getDatabase(c *gin.Context) *mgo.Database {
 }
 
 // GetRepository gets the repository for the handlers
-func (u *AppsAPI) getRepository(db *mgo.Database) *MongoAPISpecRepository {
-	repo, err := NewMongoAppRepository(db)
+func (u *OAuthAPI) getRepository(db *mgo.Database) *MongoOAuthRepository {
+	repo, err := NewMongoOAuthRepository(db)
 	if err != nil {
 		panic(errors.New(http.StatusInternalServerError, err.Error()))
 	}
