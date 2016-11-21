@@ -5,6 +5,8 @@ WARN_COLOR=\033[33;01m
 
 REPO=github.com/hellofresh/janus
 GO_LINKER_FLAGS=-ldflags="-s -w"
+GO_PROJECT_FILES=`go list -f '{{.Dir}}' ./... | grep -v /vendor/ | sed -n '1!p'`
+GO_PROJECT_PACKAGES=`go list ./... | grep -v /vendor/`
 
 # This how we want to name the binary output
 DIR_OUT=$(CURDIR)/out
@@ -40,9 +42,9 @@ install:
 	go install -v
 
 test:
-	go test -v
+	go test ${GO_PROJECT_PACKAGES} -v
 	
 # Cleans our project: deletes binaries
 clean:
 	@echo "$(OK_COLOR)==> Cleaning project$(NO_COLOR)"
-	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
+	if [ -d ${DIR_OUT} ] ; then rm -f ${DIR_OUT}/* ; fi
