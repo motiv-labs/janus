@@ -4,13 +4,10 @@
 set -e
 
 CWD=$(pwd)
-BINARY_DEFAULT=janus
-BINARY_LINUX=${BINARY_DEFAULT}-linux
-BINARY_OSX=${BINARY_DEFAULT}-darwin
+BINARY=janus
 
 # Goes to the application source code
 cd source-code/
-
 # Creates the project source on the gopath
 mkdir -p ${PROJECT_SRC}
 # Copies the current source code from the app to the gopath
@@ -22,13 +19,9 @@ make
 # Goes to the generated go binaries
 cd out/
 
-echo "Creating the default binary"
-cp ${BINARY_LINUX} ${BINARY_DEFAULT} # This ensures that we have a binary that will be called janus
-
 echo "Creating tar.gz"
-tar -czf ${BINARY_DEFAULT}.tar.gz ${BINARY_DEFAULT}
-tar -czf darwin_amd64.tar.gz ${BINARY_OSX}
-tar -czf linux_amd64.tar.gz ${BINARY_LINUX}
+tar -C darwin_amd64 -czf darwin_amd64.tar.gz ${BINARY}
+tar -C linux_amd64 -czf linux_amd64.tar.gz ${BINARY}
 
 # Copies the tar to the artifact folder so its available to the next step of the pipeline
 echo "Copying *.tar.gz ${CWD}/artifacts"

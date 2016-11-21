@@ -30,11 +30,11 @@ build-ensure-dir:
 
 build-linux:
 	@echo "$(OK_COLOR)==> Building Linux amd64"
-	@env GOOS=linux GOARCH=amd64 go build -o ${DIR_OUT}/${BINARY}-linux ${GO_LINKER_FLAGS} ${PROJECT_SRC}
+	@env GOOS=linux GOARCH=amd64 go build -o ${DIR_OUT}/linux_amd64/${BINARY} ${GO_LINKER_FLAGS} ${PROJECT_SRC}
 
 build-osx:
 	@echo "$(OK_COLOR)==> Building OSX amd64"
-	@env GOOS=darwin GOARCH=amd64 go build -o ${DIR_OUT}/${BINARY}-darwin ${GO_LINKER_FLAGS} ${PROJECT_SRC}
+	@env GOOS=darwin GOARCH=amd64 go build -o ${DIR_OUT}/darwin_amd64/${BINARY} ${GO_LINKER_FLAGS} ${PROJECT_SRC}
 
 # Installs our project: copies binaries
 install:
