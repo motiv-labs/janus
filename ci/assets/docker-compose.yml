@@ -9,7 +9,7 @@ services:
             DEBUG: 'false'
             PORT: '8080'
             DATABASE_DSN: 'mongodb://mongodb:27017/janus'
-            REDIS_DSN: 'redis://redis:6379'
+            REDIS_DSN: 'redis:6379'
             STATSD_DSN: 'statsd:8125'
             STATSD_PREFIX: 'janus-docker.'
 
@@ -20,6 +20,8 @@ services:
 
     redis:
         image: redis
+        ports:
+            - "6379:6379"
 
     statsd:
         image: hopsoft/graphite-statsd
