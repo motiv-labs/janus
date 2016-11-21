@@ -28,3 +28,5 @@ gin-bin
 
 # HF config files
 ci/vars_enc.yml
+/out
+debug
