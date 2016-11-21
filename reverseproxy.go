@@ -1,4 +1,4 @@
-package main
+package janus
 
 import (
 	"bytes"
@@ -11,7 +11,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
-	"gopkg.in/alexcesaro/statsd.v2"
+	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
 type transport struct {
@@ -24,6 +24,12 @@ func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 	timing := t.statsdClient.NewTiming()
 	resp, err = t.RoundTripper.RoundTrip(req)
 	timing.Send(getStatsdMetricName(req))
+
+	if resp.StatusCode >= 400 {
+		t.statsdClient.Increment("error_request")
+	} else {
+		t.statsdClient.Increment("success_request")
+	}
 
 	//This is useful for the middlewares
 	var bodyBytes []byte
