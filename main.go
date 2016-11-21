@@ -64,21 +64,31 @@ func initializeStatsd(dsn, prefix string) *statsd.Client {
 	return client
 }
 
-//loadAPIEndpoints register api endpoints
-func loadAPIEndpoints(router *gin.Engine, apiManager *APIManager, authMiddleware *jwt.GinJWTMiddleware) {
-	log.Debug("Loading API Endpoints")
+//loadDefaultEndpoints register api endpoints
+func loadDefaultEndpoints(router *gin.Engine, apiManager *APIManager, authMiddleware *jwt.GinJWTMiddleware) {
+	log.Debug("Loading Default Endpoints")
 
 	handler := AppsAPI{apiManager}
 	group := router.Group("/apis")
 	group.Use(authMiddleware.MiddlewareFunc())
 	{
-		group.GET("/", handler.Get())
+		group.GET("", handler.Get())
 		group.POST("/", handler.Post())
 		group.GET("/:id", handler.GetBy())
 		group.PUT("/:id", handler.PutBy())
 		group.DELETE("/:id", handler.DeleteBy())
 	}
 
+	oAuthHandler := OAuthAPI{}
+	oauthGroup := router.Group("/oauth/servers")
+	oauthGroup.Use(authMiddleware.MiddlewareFunc())
+	{
+		oauthGroup.GET("", oAuthHandler.Get())
+		oauthGroup.POST("/", oAuthHandler.Post())
+		oauthGroup.GET("/:id", oAuthHandler.GetBy())
+		oauthGroup.PUT("/:id", oAuthHandler.PutBy())
+		oauthGroup.DELETE("/:id", oAuthHandler.DeleteBy())
+	}
 }
 
 func loadAuthEndpoints(router *gin.Engine, authMiddleware *jwt.GinJWTMiddleware) {
@@ -131,7 +141,7 @@ func main() {
 	})
 
 	loadAuthEndpoints(router, authMiddleware)
-	loadAPIEndpoints(router, apiManager, authMiddleware)
+	loadDefaultEndpoints(router, apiManager, authMiddleware)
 
 	router.Run(fmt.Sprintf(":%v", config.Port))
 }
