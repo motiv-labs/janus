@@ -26,16 +26,31 @@ func (a *APIDefinitionLoader) LoadDefinitionsFromDatastore(dbSession *mgo.Sessio
 
 	var APISpecs = []*APISpec{}
 	for _, definition := range definitions {
-		newAppSpec := a.MakeSpec(definition)
+		newAppSpec := APISpec{}
+		newAppSpec.APIDefinition = definition
 		APISpecs = append(APISpecs, &newAppSpec)
 	}
 
 	return APISpecs
 }
 
-func (a *APIDefinitionLoader) MakeSpec(definition APIDefinition) APISpec {
-	newAppSpec := APISpec{}
-	newAppSpec.APIDefinition = definition
+func (a *APIDefinitionLoader) LoadOauthServersFromDatastore(dbSession *mgo.Session) []*OAuthSpec {
+	repo, err := NewMongoOAuthRepository(dbSession.DB(""))
+	if err != nil {
+		log.Panic(err)
+	}
 
-	return newAppSpec
+	oauthServers, err := repo.FindAll()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	var oAuthSpecs []*OAuthSpec
+	for _, oauth := range oauthServers {
+		var spec OAuthSpec
+		spec.OAuth = oauth
+		oAuthSpecs = append(oAuthSpecs, &spec)
+	}
+
+	return oAuthSpecs
 }

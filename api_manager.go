@@ -1,8 +1,6 @@
 package main
 
 import (
-	"strings"
-
 	log "github.com/Sirupsen/logrus"
 	"github.com/etcinit/speedbump"
 	"github.com/gin-gonic/gin"
@@ -26,20 +24,24 @@ func NewAPIManager(router *gin.Engine, redisClient *redis.Client, accessor *mong
 
 // Load loads all api specs from a datasource
 func (m *APIManager) Load() {
+	oauthManager := &OAuthManager{m.redisClient}
+
+	oAuthServers := m.getOAuthServers()
+	go m.LoadOAuthServers(oAuthServers, oauthManager)
+
 	specs := m.getAPISpecs()
-	go m.LoadApps(specs)
+	go m.LoadApps(specs, oauthManager)
 }
 
 // LoadApps load application middleware
-func (m *APIManager) LoadApps(apiSpecs []*APISpec) {
+func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *OAuthManager) {
 	log.Debug("Loading API configurations")
 
 	for _, referenceSpec := range apiSpecs {
 		var skip bool
 
 		//Validates the proxy
-		skip = m.validateProxy(referenceSpec.Proxy)
-
+		skip = validateProxy(referenceSpec.Proxy)
 		if false == referenceSpec.Active {
 			log.Debug("API is not active, skiping...")
 			skip = false
@@ -57,11 +59,7 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec) {
 			}
 
 			if referenceSpec.UseOauth2 {
-				log.Debug("Loading OAuth Manager")
-				referenceSpec.OAuthManager = &OAuthManager{m.redisClient}
-				m.addOAuthHandlers(mw)
-				beforeHandlers = append(beforeHandlers, CreateMiddleware(&Oauth2KeyExists{mw}))
-				log.Debug("Done loading OAuth Manager")
+				beforeHandlers = append(beforeHandlers, CreateMiddleware(&Oauth2KeyExists{mw, oauthManager}))
 			}
 
 			m.proxyRegister.Register(referenceSpec.Proxy, beforeHandlers, nil)
@@ -72,57 +70,21 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec) {
 	}
 }
 
-//addOAuthHandlers loads configured oauth endpoints
-func (m *APIManager) addOAuthHandlers(mw *Middleware) {
-	log.Debug("Loading oauth configuration")
-	var proxies []Proxy
+// LoadOAuthServers loads and register the oauth servers
+func (m *APIManager) LoadOAuthServers(oauthServers []*OAuthSpec, oauthManager *OAuthManager) {
+	log.Debug("Loading OAuth servers configurations")
+
 	var handlers []gin.HandlerFunc
+	oauthRegister := &OAuthRegister{}
 
-	oauthMeta := mw.Spec.Oauth2Meta
-
-	//oauth proxy
-	log.Debug("Registering authorize endpoint")
-	authorizeProxy := oauthMeta.OauthEndpoints.Authorize
-	if m.validateProxy(authorizeProxy) {
-		proxies = append(proxies, authorizeProxy)
-	} else {
-		log.Debug("No authorize endpoint")
+	for _, oauthServer := range oauthServers {
+		handlers = append(handlers, CreateMiddleware(&OAuthMiddleware{oauthManager, oauthServer}))
+		oauthServer.OAuthManager = &OAuthManager{m.redisClient}
+		proxies := oauthRegister.GetProxiesForServer(oauthServer.OAuth)
+		m.proxyRegister.RegisterMany(proxies, nil, handlers)
 	}
 
-	log.Debug("Registering token endpoint")
-	tokenProxy := oauthMeta.OauthEndpoints.Token
-	if m.validateProxy(tokenProxy) {
-		proxies = append(proxies, tokenProxy)
-	} else {
-		log.Debug("No token endpoint")
-	}
-
-	log.Debug("Registering info endpoint")
-	infoProxy := oauthMeta.OauthEndpoints.Info
-	if m.validateProxy(infoProxy) {
-		proxies = append(proxies, infoProxy)
-	} else {
-		log.Debug("No info endpoint")
-	}
-
-	log.Debug("Registering create client endpoint")
-	createProxy := oauthMeta.OauthClientEndpoints.Create
-	if m.validateProxy(createProxy) {
-		proxies = append(proxies, createProxy)
-	} else {
-		log.Debug("No client create endpoint")
-	}
-
-	log.Debug("Registering remove client endpoint")
-	removeProxy := oauthMeta.OauthClientEndpoints.Remove
-	if m.validateProxy(removeProxy) {
-		proxies = append(proxies, removeProxy)
-	} else {
-		log.Debug("No client remove endpoint")
-	}
-
-	handlers = append(handlers, CreateMiddleware(&OAuthMiddleware{mw}))
-	m.proxyRegister.RegisterMany(proxies, nil, handlers)
+	log.Debug("Done loading OAuth servers configurations")
 }
 
 //getAPISpecs Load application specs from datasource
@@ -131,17 +93,8 @@ func (m *APIManager) getAPISpecs() []*APISpec {
 	return APILoader.LoadDefinitionsFromDatastore(m.accessor.Session)
 }
 
-//validateProxy validates proxy data
-func (m *APIManager) validateProxy(proxy Proxy) bool {
-	if proxy.ListenPath == "" {
-		log.Error("Listen path is empty")
-		return false
-	}
-
-	if strings.Contains(proxy.ListenPath, " ") {
-		log.Error("Listen path contains spaces, is invalid")
-		return false
-	}
-
-	return true
+//getOAuthServers Load oauth servers from datasource
+func (m *APIManager) getOAuthServers() []*OAuthSpec {
+	log.Debug("Using Oauth servers configuration from Mongo DB")
+	return APILoader.LoadOauthServersFromDatastore(m.accessor.Session)
 }
