@@ -10,6 +10,13 @@ type Specification struct {
 	StatsdDSN    string `envconfig:"STATSD_DSN"`
 	StatsdPrefix string `envconfig:"STATSD_PREFIX"`
 	StorageDSN   string `envconfig:"REDIS_DSN"`
+	Credentials  Credentials
+}
+
+type Credentials struct {
+	Secret   string `envconfig:"SECRET"`
+	Username string `envconfig:"ADMIN_USERNAME"`
+	Password string `envconfig:"ADMIN_PASSWORD"`
 }
 
 //LoadEnv loads environment variables

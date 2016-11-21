@@ -9,7 +9,8 @@ import (
 	"github.com/hellofresh/ginger-middleware/mongodb"
 	"github.com/hellofresh/ginger-middleware/nice"
 	"github.com/hellofresh/janus/config"
-	"gopkg.in/alexcesaro/statsd.v2"
+	statsd "gopkg.in/alexcesaro/statsd.v2"
+	"gopkg.in/appleboy/gin-jwt.v2"
 	"gopkg.in/redis.v3"
 )
 
@@ -37,7 +38,9 @@ func initializeRedis(dsn string) *redis.Client {
 func initializeStatsd(dsn, prefix string) *statsd.Client {
 	var options []statsd.Option
 
+	log.Debugf("Trying to connect to statsd instance: %s", dsn)
 	if len(dsn) == 0 {
+		log.Debug("Statsd DSN not provided, client will be muted")
 		options = append(options, statsd.Mute(true))
 	} else {
 		options = append(options, statsd.Address(dsn))
@@ -62,17 +65,30 @@ func initializeStatsd(dsn, prefix string) *statsd.Client {
 }
 
 //loadAPIEndpoints register api endpoints
-func loadAPIEndpoints(router *gin.Engine, apiManager *APIManager) {
+func loadAPIEndpoints(router *gin.Engine, apiManager *APIManager, authMiddleware *jwt.GinJWTMiddleware) {
 	log.Debug("Loading API Endpoints")
 
 	handler := AppsAPI{apiManager}
 	group := router.Group("/apis")
+	group.Use(authMiddleware.MiddlewareFunc())
 	{
 		group.GET("/", handler.Get())
 		group.POST("/", handler.Post())
 		group.GET("/:id", handler.GetBy())
 		group.PUT("/:id", handler.PutBy())
 		group.DELETE("/:id", handler.DeleteBy())
+	}
+
+}
+
+func loadAuthEndpoints(router *gin.Engine, authMiddleware *jwt.GinJWTMiddleware) {
+	log.Debug("Loading Auth Endpoints")
+
+	router.POST("/login", authMiddleware.LoginHandler)
+	authGroup := router.Group("/auth")
+	authGroup.Use(authMiddleware.MiddlewareFunc())
+	{
+		authGroup.GET("/refresh_token", authMiddleware.RefreshHandler)
 	}
 }
 
@@ -107,7 +123,15 @@ func main() {
 
 	apiManager := NewAPIManager(router, redisStorage, accessor, statsdClient)
 	apiManager.Load()
-	loadAPIEndpoints(router, apiManager)
+
+	authMiddleware := NewJwt(&Credentials{
+		Secret:   config.Credentials.Secret,
+		Username: config.Credentials.Username,
+		Password: config.Credentials.Password,
+	})
+
+	loadAuthEndpoints(router, authMiddleware)
+	loadAPIEndpoints(router, apiManager, authMiddleware)
 
 	router.Run(fmt.Sprintf(":%v", config.Port))
 }
