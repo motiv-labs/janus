@@ -14,7 +14,8 @@ WORKDIR $APP_DIR
 
 # Build the go binary
 RUN make
+RUN cp out/linux_amd64/janus ${GOPATH}/bin
+
 EXPOSE 8080
 
 CMD janus
-

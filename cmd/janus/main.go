@@ -72,7 +72,7 @@ func loadDefaultEndpoints(router *gin.Engine, apiManager *janus.APIManager, auth
 	group.Use(authMiddleware.MiddlewareFunc())
 	{
 		group.GET("", handler.Get())
-		group.POST("/", handler.Post())
+		group.POST("", handler.Post())
 		group.GET("/:id", handler.GetBy())
 		group.PUT("/:id", handler.PutBy())
 		group.DELETE("/:id", handler.DeleteBy())
@@ -83,7 +83,7 @@ func loadDefaultEndpoints(router *gin.Engine, apiManager *janus.APIManager, auth
 	oauthGroup.Use(authMiddleware.MiddlewareFunc())
 	{
 		oauthGroup.GET("", oAuthHandler.Get())
-		oauthGroup.POST("/", oAuthHandler.Post())
+		oauthGroup.POST("", oAuthHandler.Post())
 		oauthGroup.GET("/:id", oAuthHandler.GetBy())
 		oauthGroup.PUT("/:id", oAuthHandler.PutBy())
 		oauthGroup.DELETE("/:id", oAuthHandler.DeleteBy())

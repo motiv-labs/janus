@@ -8,10 +8,10 @@ mkdir -p /root/.ssh/ && chmod 0600 /root/.ssh
 echo "${DEPLOYMENT_PRIVATE_KEY}" > /root/.ssh/id_rsa && chmod 0600 /root/.ssh/id_rsa
 
 # Untar the automation release
-zcat automation-source-code/automation-artifcat.tar.gz | tar -xf -
+zcat automation-source-code/automation-artifact.tar.gz | tar -xf -
 
 # Change to plays directory
-cd automation-artifcat/plays
+cd automation-artifact/plays
 
 # Temporary fix for the socket
 sed -i 's/%%h-%%p-%%r/%%h-%%r/g' ansible.cfg
