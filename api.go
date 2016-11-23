@@ -31,6 +31,12 @@ type APIDefinition struct {
 	CorsMeta      CorsMeta      `bson:"cors_meta" json:"cors_meta" valid:"cors_meta"`
 }
 
+func NewApiDefinition() *APIDefinition {
+	return &APIDefinition{
+		OAuthServerID: bson.NewObjectId(),
+	}
+}
+
 // Proxy defines proxy rules for a route
 type Proxy struct {
 	PreserveHostHeader          bool     `bson:"preserve_host_header" json:"preserve_host_header"`

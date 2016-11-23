@@ -25,12 +25,10 @@ integrating an API gateway is a faster, more secure route that writing your own 
 This API Gateway offers powerful, yet lightweight features that allow fine gained control over your API ecosystem.
 
 * **RESTFul API** - Full programatic access to the internals makes it easy to manage your API users, keys and Api Configuration from within your systems
-* **Multiple access protocols** - Out of the box, we support Token-based, Basic Auth and Keyless access methods
+* **Multiple access protocols** - Out of the box, we support JWT, OAtuh2, Basic Auth and Keyless access methods
 * **Rate Limiting** - Easily rate limit your API users, rate limiting is granular and can be applied on a per-key basis
 * **API Versioning** - API Versions can be easily set and deprecated at a specific time and date
 * **Analytics logging** - Record detailed usage data on who is using your API's (raw data only)
-
-The API Gateway is written in Go, which makes it fast and easy to set up. Its only dependencies are a Mongo database (for analytics) and Redis, though it can be deployed without either (not recommended).
 
 ## Installation
 
@@ -46,16 +44,13 @@ docker-compose up -d
 Now you should be able to get a response from the gateway, try the following command:
 
 ```sh
-curl http://localhost:8080/apis/
+curl http://localhost:8080/
 ```
 
 ### Manual
 
 You can get the binary and play with it in your own enviroment (or even deploy it whereever you like it).
-
-```sh
-go get github.com/hellofresh/janus
-```
+Just go the [releases](https://github.com/hellofresh/janus/releases) and download the latest one for your platform.
 
 Make sure you have the following dependencies installed in your enviroment:
  - Mongodb - For storing the proxies configurations
@@ -64,9 +59,52 @@ Make sure you have the following dependencies installed in your enviroment:
 And then just define where your dependencies are located
 
 ```sh
-export DATABASE_DSN: 'mongodb://localhost:27017/janus'
-export REDIS_DSN: 'redis://localhost:6379'
+export DATABASE_DSN="mongodb://localhost:27017/janus"
+export REDIS_DSN="redis://localhost:6379"
 ```
+
+If you want you can have a stastd server so you can have some metrics about your gateway. For that just define:
+
+```sh
+export STATSD_DSN="statsd:8125"
+```
+
+## Getting Started
+
+After you have *janus* up and running we need to setup our first proxy. Everything that we want to do on the gateway 
+we do it through a REST API, since all endpoints are protected we need to login first.
+
+```sh
+http -v --json POST localhost:3000/login username=admin password=admin
+```
+
+The username and password are defined in a enviroment variable called `ADMIN_USERNAME` and `ADMIN_PASSWORD`, it defaults to *admin*/*admin*.
+This request will return something like this:
+
+```
+{
+    "expire": "2016-11-23T11:54:47+01:00",
+    "token": "yourToken"
+}
+```
+
+### Creating a proxy
+
+The main feature of the API Gateway is to proxy the requests to a different service, so lets do this.
+Now that you are authenticate you can send a request to `/apis` to create a proxy.
+
+```
+http -v --json POST localhost:3000/apis "Authorization:Bearer yourToken" "Content-Type: application/json" < example/api.json
+```
+
+This will create a proxy to `https://jsonplaceholder.typicode.com/posts/1` when you hit the api gateway on `GET /posts`.
+Now just make a request to `GET /posts`
+
+```
+http -v --json GET http://localhost:3000/posts/1
+```
+
+Done! You just made your first request through the gateway.
 
 ## Contributing
 
