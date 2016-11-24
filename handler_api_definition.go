@@ -77,7 +77,7 @@ func (u *AppsAPI) PutBy() gin.HandlerFunc {
 func (u *AppsAPI) Post() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		repo := u.getRepository(u.getDatabase(c))
-		definition := NewApiDefinition()
+		definition := NewAPIDefinition()
 
 		err := c.Bind(definition)
 		if nil != err {

@@ -31,7 +31,8 @@ type APIDefinition struct {
 	CorsMeta      CorsMeta      `bson:"cors_meta" json:"cors_meta" valid:"cors_meta"`
 }
 
-func NewApiDefinition() *APIDefinition {
+// NewAPIDefinition creates a new API Definition with default values
+func NewAPIDefinition() *APIDefinition {
 	return &APIDefinition{
 		OAuthServerID: bson.NewObjectId(),
 	}
