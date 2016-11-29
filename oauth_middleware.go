@@ -3,7 +3,6 @@ package janus
 import (
 	"encoding/json"
 
-	"errors"
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
@@ -26,7 +25,7 @@ func (m *OAuthMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (err
 	data, exists := c.Get("body")
 
 	if false == exists {
-		return errors.New("Body from the proxy doesn't exists"), http.StatusInternalServerError
+		return nil, http.StatusInternalServerError
 	}
 
 	body := data.([]byte)

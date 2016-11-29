@@ -29,26 +29,26 @@ func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 		t.statsdClient.Increment("error_request")
 	} else {
 		t.statsdClient.Increment("success_request")
+
+		//This is useful for the middlewares
+		var bodyBytes []byte
+
+		if resp.Body != nil {
+			defer resp.Body.Close()
+			bodyBytes, _ = ioutil.ReadAll(resp.Body)
+		}
+
+		// Restore the io.ReadCloser to its original state
+		resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+		// Use the content
+		log.WithFields(log.Fields{
+			"req":  req,
+			"resp": resp,
+		}).Info("Setting body")
+
+		t.context.Set("body", bodyBytes)
 	}
-
-	//This is useful for the middlewares
-	var bodyBytes []byte
-
-	if resp.Body != nil {
-		defer resp.Body.Close()
-		bodyBytes, _ = ioutil.ReadAll(resp.Body)
-	}
-
-	// Restore the io.ReadCloser to its original state
-	resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-
-	// Use the content
-	log.WithFields(log.Fields{
-		"req":  req,
-		"resp": resp,
-	}).Info("Setting body")
-
-	t.context.Set("body", bodyBytes)
 
 	return resp, err
 }
