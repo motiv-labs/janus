@@ -78,11 +78,15 @@ func NewSingleHostReverseProxy(proxy Proxy, transport http.RoundTripper) *httput
 
 	director := func(req *http.Request) {
 		listenPath := strings.Replace(proxy.ListenPath, "/*randomName", "", -1)
-		path := singleJoiningSlash(target.Path, req.URL.Path)
+		path := singleJoiningSlash(target.Path, listenPath)
 
 		if proxy.StripListenPath {
-			log.Debugf("Stripping: %s", proxy.ListenPath)
+			log.Debugf("Stripping: %s", req.URL.Path)
+			hasSuffix := strings.HasSuffix(target.Path, "/")
 			path = strings.Replace(path, listenPath, "", 1)
+			if hasSuffix {
+				path += "/"
+			}
 		}
 
 		req.URL.Scheme = target.Scheme
