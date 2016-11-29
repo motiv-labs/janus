@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"regexp"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -53,18 +54,6 @@ func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 	return resp, err
 }
 
-func singleJoiningSlash(a, b string) string {
-	aslash := strings.HasSuffix(a, "/")
-	bslash := strings.HasPrefix(b, "/")
-	switch {
-	case aslash && bslash:
-		return a + b[1:]
-	case !aslash && !bslash:
-		return a + "/" + b
-	}
-	return a + b
-}
-
 // NewSingleHostReverseProxy returns a new ReverseProxy that routes
 // URLs to the scheme, host, and base path provided in target. If the
 // target's path is "/base" and the incoming request was for "/dir",
@@ -77,24 +66,32 @@ func NewSingleHostReverseProxy(proxy Proxy, transport http.RoundTripper) *httput
 	targetQuery := target.RawQuery
 
 	director := func(req *http.Request) {
-		listenPath := strings.Replace(proxy.ListenPath, "/*randomName", "", -1)
-		path := singleJoiningSlash(target.Path, listenPath)
+		req.URL.Scheme = target.Scheme
+		req.URL.Host = target.Host
+		path := target.Path
 
 		if proxy.StripListenPath {
-			log.Debugf("Stripping: %s", req.URL.Path)
-			hasSuffix := strings.HasSuffix(target.Path, "/")
+			path = singleJoiningSlash(target.Path, req.URL.Path)
+
+			listenPath := extractListenPath(proxy.ListenPath)
+			log.Debug("Stripping: ", listenPath)
 			path = strings.Replace(path, listenPath, "", 1)
-			if hasSuffix {
-				path += "/"
+
+			log.Debug("Upstream Path is: ", path)
+
+			if strings.HasSuffix(target.Path, "/") {
+				// path = path + "/"
+			} else {
+				path = path[:len(path)-1]
 			}
 		}
 
-		req.URL.Scheme = target.Scheme
-		req.URL.Host = target.Host
 		req.URL.Path = path
-		// This is very important to avoid problems with ssl verification for the HOST header
-		req.Host = target.Host
 
+		if !proxy.PreserveHostHeader {
+			// This is very important to avoid problems with ssl verification for the HOST header
+			req.Host = target.Host
+		}
 		if targetQuery == "" || req.URL.RawQuery == "" {
 			req.URL.RawQuery = targetQuery + req.URL.RawQuery
 		} else {
@@ -103,6 +100,51 @@ func NewSingleHostReverseProxy(proxy Proxy, transport http.RoundTripper) *httput
 	}
 
 	return &httputil.ReverseProxy{Director: director, Transport: transport}
+}
+
+func extractListenPath(listenPath string) string {
+	var reg = regexp.MustCompile(`(\/\*.+)`)
+	return reg.ReplaceAllString(listenPath, "")
+}
+
+func cleanSlashes(a string) string {
+	endSlash := strings.HasSuffix(a, "//")
+	startSlash := strings.HasPrefix(a, "//")
+
+	if startSlash {
+		a = "/" + strings.TrimPrefix(a, "//")
+	}
+
+	if endSlash {
+		a = strings.TrimSuffix(a, "//") + "/"
+	}
+
+	return a
+}
+
+func singleJoiningSlash(a, b string) string {
+	a = cleanSlashes(a)
+	b = cleanSlashes(b)
+
+	aslash := strings.HasSuffix(a, "/")
+	bslash := strings.HasPrefix(b, "/")
+
+	switch {
+	case aslash && bslash:
+		log.Debug(a + b)
+		return a + b[1:]
+	case !aslash && !bslash:
+		if len(b) > 0 {
+			log.Debug(a + b)
+			return a + "/" + b
+		}
+
+		log.Debug(a + b)
+		return a
+	}
+
+	log.Debug(a + b)
+	return a + b
 }
 
 // Returns metric name for StatsD in "<request method>.<request path>" format
