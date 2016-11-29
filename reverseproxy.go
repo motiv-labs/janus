@@ -82,7 +82,7 @@ func NewSingleHostReverseProxy(proxy Proxy, transport http.RoundTripper) *httput
 
 		if proxy.StripListenPath {
 			log.Debugf("Stripping: %s", proxy.ListenPath)
-			path = strings.TrimSuffix(strings.Replace(path, listenPath, "", 1), "/")
+			path = strings.Replace(path, listenPath, "", 1)
 		}
 
 		req.URL.Scheme = target.Scheme
