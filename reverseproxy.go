@@ -79,17 +79,17 @@ func NewSingleHostReverseProxy(proxy Proxy, transport http.RoundTripper) *httput
 
 			log.Debug("Upstream Path is: ", path)
 
-			if strings.HasSuffix(target.Path, "/") {
-				// path = path + "/"
-			} else {
+			if strings.HasSuffix(target.Path, "/") && !strings.HasSuffix(path, "/") {
+				path = path + "/"
+			} else if !strings.HasSuffix(target.Path, "/") && strings.HasSuffix(path, "/") {
 				path = path[:len(path)-1]
 			}
 		}
 
 		req.URL.Path = path
 
+		// This is very important to avoid problems with ssl verification for the HOST header
 		if !proxy.PreserveHostHeader {
-			// This is very important to avoid problems with ssl verification for the HOST header
 			req.Host = target.Host
 		}
 		if targetQuery == "" || req.URL.RawQuery == "" {
