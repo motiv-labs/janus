@@ -87,14 +87,13 @@ http -v --json POST localhost:3000/login username=admin password=admin
 ```
 
 The username and password are defined in a enviroment variable called `ADMIN_USERNAME` and `ADMIN_PASSWORD`, it defaults to *admin*/*admin*.
-This request will return something like this:
 
-```
-{
-    "expire": "2016-11-23T11:54:47+01:00",
-    "token": "yourToken"
-}
-```
+<p align="center">
+  <a href="http://g.recordit.co/dDjkyDKobL.gif">
+    <img src="http://g.recordit.co/dDjkyDKobL.gif">
+  </a>
+</p>
+
 
 ### Creating a proxy
 
@@ -102,8 +101,14 @@ The main feature of the API Gateway is to proxy the requests to a different serv
 Now that you are authenticate you can send a request to `/apis` to create a proxy.
 
 ```
-http -v --json POST localhost:3000/apis "Authorization:Bearer yourToken" "Content-Type: application/json" < example/api.json
+http -v --json POST localhost:3000/apis "Authorization:Bearer yourToken" "Content-Type: application/json" < examples/api.json
 ```
+
+<p align="center">
+  <a href="http://g.recordit.co/Hi7SX8s5IA.gif">
+    <img src="http://g.recordit.co/Hi7SX8s5IA.gif">
+  </a>
+</p>
 
 This will create a proxy to `https://jsonplaceholder.typicode.com/posts/1` when you hit the api gateway on `GET /posts`.
 Now just make a request to `GET /posts`
@@ -111,6 +116,11 @@ Now just make a request to `GET /posts`
 ```
 http -v --json GET http://localhost:3000/posts/1
 ```
+<p align="center">
+  <a href="http://g.recordit.co/vufeMjwEfg.gif">
+    <img src="http://g.recordit.co/vufeMjwEfg.gif">
+  </a>
+</p>
 
 Done! You just made your first request through the gateway.
 
