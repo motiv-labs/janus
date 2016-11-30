@@ -11,6 +11,12 @@ type Specification struct {
 	StatsdPrefix string `envconfig:"STATSD_PREFIX"`
 	StorageDSN   string `envconfig:"REDIS_DSN"`
 	Credentials  Credentials
+	Application  Application
+}
+
+type Application struct {
+	Name    string `envconfig:"APP_NAME" default:"Janus"`
+	Version string `envconfig:"APP_VERSION" default:"1.0"`
 }
 
 type Credentials struct {

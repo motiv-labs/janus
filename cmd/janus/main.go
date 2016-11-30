@@ -64,9 +64,13 @@ func initializeStatsd(dsn, prefix string) *statsd.Client {
 }
 
 //loadDefaultEndpoints register api endpoints
-func loadDefaultEndpoints(router *gin.Engine, apiManager *janus.APIManager, authMiddleware *jwt.GinJWTMiddleware) {
+func loadDefaultEndpoints(router *gin.Engine, apiManager *janus.APIManager, authMiddleware *jwt.GinJWTMiddleware, config *config.Specification) {
 	log.Debug("Loading Default Endpoints")
 
+	// Home endpoint for the gateway
+	router.GET("/", janus.Home(config.Application))
+
+	// Apis endpoints
 	handler := janus.AppsAPI{apiManager}
 	group := router.Group("/apis")
 	group.Use(authMiddleware.MiddlewareFunc())
@@ -78,6 +82,7 @@ func loadDefaultEndpoints(router *gin.Engine, apiManager *janus.APIManager, auth
 		group.DELETE("/:id", handler.DeleteBy())
 	}
 
+	// Oauth servers endpoints
 	oAuthHandler := janus.OAuthAPI{}
 	oauthGroup := router.Group("/oauth/servers")
 	oauthGroup.Use(authMiddleware.MiddlewareFunc())
@@ -140,7 +145,7 @@ func main() {
 	})
 
 	loadAuthEndpoints(router, authMiddleware)
-	loadDefaultEndpoints(router, apiManager, authMiddleware)
+	loadDefaultEndpoints(router, apiManager, authMiddleware, config)
 
 	router.Run(fmt.Sprintf(":%v", config.Port))
 }
