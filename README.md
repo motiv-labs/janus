@@ -110,7 +110,7 @@ http -v --json POST localhost:3000/apis "Authorization:Bearer yourToken" "Conten
   </a>
 </p>
 
-This will create a proxy to `https://jsonplaceholder.typicode.com/posts/1` when you hit the api gateway on `GET /posts`.
+This will create a proxy to `https://jsonplaceholder.typicode.com/posts` when you hit the api gateway on `GET /posts`.
 Now just make a request to `GET /posts`
 
 ```
