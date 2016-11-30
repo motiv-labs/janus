@@ -11,7 +11,7 @@
         "methods": [
             "GET"
         ],
-        "preserve_host_header": true,
+        "preserve_host_header": false,
         "strip_listen_path": true,
         "target_list": [],
         "target_url": "https://jsonplaceholder.typicode.com/posts"
@@ -22,7 +22,6 @@
     },
     "use_basic_auth": false,
     "use_oauth2": false,
-    // "oauth_server_id": "",
     "cors_meta": {
         "domains": [
             "*"
