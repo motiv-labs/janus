@@ -17,17 +17,21 @@ type Oauth2KeyExists struct {
 
 func (m *Oauth2KeyExists) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
 	log.Debug("Starting Oauth2KeyExists middleware")
-
+	logger := log.WithFields(log.Fields{
+		"path":   req.RequestURI,
+		"origin": req.RemoteAddr,
+	})
 	// We're using OAuth, start checking for access keys
-	authHeaderValue := string(req.Header.Get("Authorization"))
+	authHeaderValue := req.Header.Get("Authorization")
 	parts := strings.Split(authHeaderValue, " ")
 	if len(parts) < 2 {
-		log.Info("Attempted access with malformed header, no auth header found.")
+		logger.Info("Attempted access with malformed header, no auth header found.")
+
 		return errors.New("Authorization field missing"), http.StatusBadRequest
 	}
 
 	if strings.ToLower(parts[0]) != "bearer" {
-		log.Info("Bearer token malformed")
+		logger.Info("Bearer token malformed")
 		return errors.New("Bearer token malformed"), http.StatusBadRequest
 	}
 
