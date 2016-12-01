@@ -28,16 +28,14 @@ func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 
 	if resp.StatusCode >= 400 {
 		t.statsdClient.Increment("error_request")
-	} else {
+	} else if resp.StatusCode < 300 && resp.Body != nil {
 		t.statsdClient.Increment("success_request")
 
 		//This is useful for the middlewares
 		var bodyBytes []byte
 
-		if resp.Body != nil {
-			defer resp.Body.Close()
-			bodyBytes, _ = ioutil.ReadAll(resp.Body)
-		}
+		defer resp.Body.Close()
+		bodyBytes, _ = ioutil.ReadAll(resp.Body)
 
 		// Restore the io.ReadCloser to its original state
 		resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
@@ -49,6 +47,8 @@ func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 		}).Info("Setting body")
 
 		t.context.Set("body", bodyBytes)
+	} else {
+		t.statsdClient.Increment("success_request")
 	}
 
 	return resp, err
