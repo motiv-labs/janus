@@ -47,7 +47,7 @@ func (r *MongoOAuthRepository) FindByID(id string) (*OAuth, error) {
 		return result, ErrInvalidID
 	}
 
-	err := r.coll.FindId(bson.ObjectIdHex(id)).One(result)
+	err := r.coll.FindId(bson.ObjectIdHex(id)).One(&result)
 
 	return result, err
 }

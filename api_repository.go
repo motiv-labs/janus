@@ -43,13 +43,13 @@ func (r *MongoAPISpecRepository) FindAll() ([]APIDefinition, error) {
 
 // FindByID find a country by the iso2code provided
 func (r *MongoAPISpecRepository) FindByID(id string) (*APIDefinition, error) {
-	result := &APIDefinition{}
+	var result *APIDefinition
 
 	if false == bson.IsObjectIdHex(id) {
 		return result, ErrInvalidID
 	}
 
-	err := r.coll.FindId(bson.ObjectIdHex(id)).One(result)
+	err := r.coll.FindId(bson.ObjectIdHex(id)).One(&result)
 
 	return result, err
 }

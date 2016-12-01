@@ -79,9 +79,7 @@ func NewSingleHostReverseProxy(proxy Proxy, transport http.RoundTripper) *httput
 
 			log.Debug("Upstream Path is: ", path)
 
-			if strings.HasSuffix(target.Path, "/") && !strings.HasSuffix(path, "/") {
-				path = path + "/"
-			} else if !strings.HasSuffix(target.Path, "/") && strings.HasSuffix(path, "/") {
+			if !strings.HasSuffix(target.Path, "/") && strings.HasSuffix(path, "/") {
 				path = path[:len(path)-1]
 			}
 		}
