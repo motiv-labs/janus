@@ -80,7 +80,7 @@ func (m *APIManager) LoadOAuthServers(oauthServers []*OAuthSpec, oauthManager *O
 	oauthRegister := &OAuthRegister{}
 
 	for _, oauthServer := range oauthServers {
-		beforeHandlers= append(beforeHandlers, CreateMiddleware(&Oauth2Secret{oauthServer}))
+		beforeHandlers = append(beforeHandlers, CreateMiddleware(&Oauth2Secret{oauthServer}))
 		handlers = append(handlers, CreateMiddleware(&OAuthMiddleware{oauthManager, oauthServer}))
 		oauthServer.OAuthManager = &OAuthManager{m.redisClient}
 		proxies := oauthRegister.GetProxiesForServer(oauthServer.OAuth)
