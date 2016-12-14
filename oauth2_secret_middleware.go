@@ -43,6 +43,5 @@ func (m *Oauth2Secret) ProcessRequest(req *http.Request, c *gin.Context) (error,
 func (m *Oauth2Secret) ChangeRequest(req *http.Request, clientID, clientSecret string) {
 	log.Debug("Modifying request")
 	authString := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", clientID, clientSecret)))
-	log.Debug(authString)
 	req.Header.Set("Authorization", fmt.Sprintf("Basic %s", authString))
 }
