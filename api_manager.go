@@ -75,14 +75,16 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *OAuthManager) {
 func (m *APIManager) LoadOAuthServers(oauthServers []*OAuthSpec, oauthManager *OAuthManager) {
 	log.Debug("Loading OAuth servers configurations")
 
+	var beforeHandlers []gin.HandlerFunc
 	var handlers []gin.HandlerFunc
 	oauthRegister := &OAuthRegister{}
 
 	for _, oauthServer := range oauthServers {
+		beforeHandlers= append(beforeHandlers, CreateMiddleware(&Oauth2Secret{oauthServer}))
 		handlers = append(handlers, CreateMiddleware(&OAuthMiddleware{oauthManager, oauthServer}))
 		oauthServer.OAuthManager = &OAuthManager{m.redisClient}
 		proxies := oauthRegister.GetProxiesForServer(oauthServer.OAuth)
-		m.proxyRegister.RegisterMany(proxies, nil, handlers)
+		m.proxyRegister.RegisterMany(proxies, beforeHandlers, handlers)
 	}
 
 	log.Debug("Done loading OAuth servers configurations")

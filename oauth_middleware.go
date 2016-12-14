@@ -23,7 +23,6 @@ func (m *OAuthMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (err
 	}).Info("Getting body")
 
 	data, exists := c.Get("body")
-
 	if false == exists {
 		return nil, http.StatusInternalServerError
 	}
