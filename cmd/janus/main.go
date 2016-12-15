@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/gin-gonic/gin"
@@ -10,6 +11,7 @@ import (
 	"github.com/hellofresh/ginger-middleware/nice"
 	"github.com/hellofresh/janus"
 	"github.com/hellofresh/janus/config"
+	"github.com/itsjamie/gin-cors"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 	"gopkg.in/appleboy/gin-jwt.v2"
 	"gopkg.in/redis.v3"
@@ -98,9 +100,19 @@ func loadDefaultEndpoints(router *gin.Engine, apiManager *janus.APIManager, auth
 func loadAuthEndpoints(router *gin.Engine, authMiddleware *jwt.GinJWTMiddleware) {
 	log.Debug("Loading Auth Endpoints")
 
+	corsConfig := cors.Config{
+		Origins:         "*",
+		Methods:         "GET, PUT, POST, DELETE",
+		RequestHeaders:  "Origin, Authorization, Content-Type",
+		ExposedHeaders:  "",
+		MaxAge:          50 * time.Second,
+		Credentials:     true,
+		ValidateHeaders: false,
+	}
+
 	router.POST("/login", authMiddleware.LoginHandler)
 	authGroup := router.Group("/auth")
-	authGroup.Use(authMiddleware.MiddlewareFunc())
+	authGroup.Use(authMiddleware.MiddlewareFunc(), cors.Middleware(corsConfig))
 	{
 		authGroup.GET("/refresh_token", authMiddleware.RefreshHandler)
 	}
