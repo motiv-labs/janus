@@ -10,23 +10,23 @@ import (
 
 // CorsMiddleware adds CORS headers to a response.
 type CorsMiddleware struct {
-	*Middleware
+	corsMeta CorsMeta
 }
 
 // ProcessRequest is the middleware method.
 func (m *CorsMiddleware) ProcessRequest(rw http.ResponseWriter, req *http.Request) (int, error) {
 	log.Debug("CORS middleware started")
 
-	if !m.Spec.CorsMeta.Enabled {
+	if !m.corsMeta.Enabled {
 		log.Debug("CORS is not enabled for this API")
 		return http.StatusOK, nil
 	}
 
 	c := cors.New(cors.Options{
-		AllowedOrigins:   m.Spec.CorsMeta.Domains,
-		AllowedMethods:   m.Spec.CorsMeta.Methods,
-		AllowedHeaders:   m.Spec.CorsMeta.RequestHeaders,
-		ExposedHeaders:   m.Spec.CorsMeta.ExposedHeaders,
+		AllowedOrigins:   m.corsMeta.Domains,
+		AllowedMethods:   m.corsMeta.Methods,
+		AllowedHeaders:   m.corsMeta.RequestHeaders,
+		ExposedHeaders:   m.corsMeta.ExposedHeaders,
 		AllowCredentials: true,
 	})
 

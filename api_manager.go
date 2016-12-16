@@ -55,7 +55,7 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *OAuthManager) {
 			mw := &Middleware{referenceSpec}
 			var beforeHandlers = []HandlerFunc{
 				CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}),
-				CreateMiddleware(&CorsMiddleware{mw}),
+				CreateMiddleware(&CorsMiddleware{referenceSpec.CorsMeta}),
 			}
 
 			if referenceSpec.UseOauth2 {
@@ -80,6 +80,7 @@ func (m *APIManager) LoadOAuthServers(oauthServers []*OAuthSpec, oauthManager *O
 
 	for _, oauthServer := range oauthServers {
 		beforeHandlers = append(beforeHandlers, CreateMiddleware(&Oauth2SecretMiddleware{oauthServer}))
+		beforeHandlers = append(beforeHandlers, CreateMiddleware(&CorsMiddleware{oauthServer.CorsMeta}))
 		handlers = append(handlers, CreateMiddleware(&OAuthMiddleware{oauthManager, oauthServer}))
 		oauthServer.OAuthManager = &OAuthManager{m.redisClient}
 		proxies := oauthRegister.GetProxiesForServer(oauthServer.OAuth)
