@@ -12,20 +12,22 @@ type Middleware struct {
 	Spec *APISpec
 }
 
+// MiddlewareImplementation is an interface that defines how middleware should be implemented.
 type MiddlewareImplementation interface {
-	ProcessRequest(rw http.ResponseWriter, r *http.Request) (error, int)
+	ProcessRequest(r *http.Request, rw http.ResponseWriter) (int, error)
 }
 
-// Generic middleware caller to make extension easier
+// CreateMiddleware is a generic middleware caller to make extension easier.
 func CreateMiddleware(mw MiddlewareImplementation) negroni.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
-		err, errCode := mw.ProcessRequest(rw, r)
+	return func(r *http.Request, rw http.ResponseWriter, next http.HandlerFunc) {
+		statusCode, err := mw.ProcessRequest(r, rw)
 
 		if err != nil {
-			c.Abort()
-			c.JSON(errCode, err.Error())
+			// Abort the Request
+			rw.WriteHeader(statusCode)
+			panic(err)
 		} else {
-			next(rw, r)
+			next(r, rw)
 		}
 	}
 }
