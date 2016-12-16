@@ -10,6 +10,8 @@ import (
 	"regexp"
 	"strings"
 
+	"context"
+
 	log "github.com/Sirupsen/logrus"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
@@ -44,7 +46,7 @@ func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 			"resp": resp,
 		}).Info("Setting body")
 
-		t.context.Set("body", bodyBytes)
+		context.WithValue(req.Context(), "body", bodyBytes)
 	} else {
 		t.statsdClient.Increment("success_request")
 	}
