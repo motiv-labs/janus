@@ -1,8 +1,10 @@
-hash: 626ea3d3d277fc264ddd7d53654c1126cd78d7849d2a7cae3e077fc725931e44
-updated: 2016-12-16T15:07:47.188041767+01:00
+hash: 74021592de7953cc8be4e854dba7c3ce792c170639d0c052a8c33af86e9c2651
+updated: 2016-12-16T17:02:36.303785171+01:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
+- name: github.com/dgrijalva/jwt-go
+  version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
 - name: github.com/dimfeld/httppath
   version: c8e499c3ef3c3e272ed8bdcc1ccf39f73c88debc
 - name: github.com/dimfeld/httptreemux

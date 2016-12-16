@@ -22,8 +22,6 @@ import:
 - package: github.com/hellofresh/ginger-middleware
 - package: gopkg.in/alexcesaro/statsd.v2
   version: ~2.0.0
-- package: gopkg.in/appleboy/gin-jwt.v2
-  version: ^2.1.1
 - package: github.com/dimfeld/httptreemux
   version: ^3.5.1
 - package: github.com/urfave/negroni
@@ -32,6 +30,8 @@ import:
   version: ^1.0.0
 - package: github.com/rs/xhandler
   version: ^1.0.0
+- package: github.com/dgrijalva/jwt-go
+  version: ^3.0.0
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.2.0
