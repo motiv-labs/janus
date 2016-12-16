@@ -1,8 +1,10 @@
-hash: 3a660e1c08db346cedcae2ed98e0bf86a6adf60b2d3f09386703e268b8cf97a0
-updated: 2016-12-14T15:42:28.812637568+01:00
+hash: 123cf6672b6a911ed018c6f22e8be7c6155ec3fe4e6c0db145c92e73ba56ad6d
+updated: 2016-12-16T14:45:16.217709061+01:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
+- name: github.com/dimfeld/httppath
+  version: c8e499c3ef3c3e272ed8bdcc1ccf39f73c88debc
 - name: github.com/dimfeld/httptreemux
   version: 5cb0ec25af2dd6a7d3718b5aa05dc48e192473bc
 - name: github.com/etcinit/speedbump
@@ -23,8 +25,6 @@ imports:
   subpackages:
   - mongodb
   - nice
-- name: github.com/itsjamie/gin-cors
-  version: 97b4a9da79331dfa2b6d35f4cdd1e50f5148859c
 - name: github.com/kelseyhightower/envconfig
   version: 9aca109c9aec4633fced9717c4a09ecab3d33111
 - name: github.com/manucorporat/sse
@@ -33,6 +33,8 @@ imports:
   version: c55201b036063326c5b1b89ccfe45a184973d073
 - name: github.com/RangelReale/osin
   version: 4f10152eca12dd6663009dc2e9377f2fe4b18a78
+- name: github.com/rs/cors
+  version: a62a804a8a009876ca59105f7899938a1349f4b3
 - name: github.com/Sirupsen/logrus
   version: d26492970760ca5d33129d2d799e34be5c4782eb
 - name: github.com/urfave/negroni
