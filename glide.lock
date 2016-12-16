@@ -1,5 +1,5 @@
-hash: 123cf6672b6a911ed018c6f22e8be7c6155ec3fe4e6c0db145c92e73ba56ad6d
-updated: 2016-12-16T14:45:16.217709061+01:00
+hash: 626ea3d3d277fc264ddd7d53654c1126cd78d7849d2a7cae3e077fc725931e44
+updated: 2016-12-16T15:07:47.188041767+01:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
@@ -35,6 +35,8 @@ imports:
   version: 4f10152eca12dd6663009dc2e9377f2fe4b18a78
 - name: github.com/rs/cors
   version: a62a804a8a009876ca59105f7899938a1349f4b3
+- name: github.com/rs/xhandler
+  version: d9d9599b6aaf6a058cb7b1f48291ded2cbd13390
 - name: github.com/Sirupsen/logrus
   version: d26492970760ca5d33129d2d799e34be5c4782eb
 - name: github.com/urfave/negroni
