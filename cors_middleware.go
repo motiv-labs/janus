@@ -5,6 +5,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/rs/cors"
+	"github.com/urfave/negroni"
 )
 
 // CorsMiddleware adds CORS headers to a response.
@@ -13,7 +14,7 @@ type CorsMiddleware struct {
 }
 
 // ProcessRequest is the middleware method.
-func (m *CorsMiddleware) ProcessRequest(req *http.Request, rw *http.ResponseWriter) (int, error) {
+func (m *CorsMiddleware) ProcessRequest(rw http.ResponseWriter, req *http.Request) (int, error) {
 	log.Debug("CORS middleware started")
 
 	if !m.Spec.CorsMeta.Enabled {
@@ -29,8 +30,9 @@ func (m *CorsMiddleware) ProcessRequest(req *http.Request, rw *http.ResponseWrit
 		AllowCredentials: true,
 	})
 
-	handler := c.Handler()
-	handler.ServeHttp(rw, req)
+	innerMiddleware := negroni.New()
+	innerMiddleware.Use(c)
+	innerMiddleware.ServeHTTP(rw, req)
 
 	log.Debug("CORS inner middleware executed")
 	return http.StatusOK, nil

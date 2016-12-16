@@ -21,7 +21,7 @@ type RateLimitMiddleware struct {
 }
 
 // ProcessRequest is the middleware method.
-func (m *RateLimitMiddleware) ProcessRequest(req *http.Request, rw *http.ResponseWriter) (int, error) {
+func (m *RateLimitMiddleware) ProcessRequest(rw http.ResponseWriter, req *http.Request) (int, error) {
 	log.Debug("Rate Limit middleware started")
 
 	if !m.Spec.RateLimit.Enabled {

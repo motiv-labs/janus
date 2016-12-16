@@ -77,7 +77,7 @@ func initializeStatsd(dsn, prefix string) *statsd.Client {
 }
 
 //loadDefaultEndpoints register api endpoints
-func loadDefaultEndpoints(router *gin.Engine, apiManager *janus.APIManager, authMiddleware *jwt.GinJWTMiddleware, config *config.Specification) {
+func loadDefaultEndpoints(router janus.Router, apiManager *janus.APIManager, authMiddleware *jwt.GinJWTMiddleware, config *config.Specification) {
 	log.Debug("Loading Default Endpoints")
 
 	// Home endpoint for the gateway

@@ -3,8 +3,8 @@ package janus
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/etcinit/speedbump"
-	"github.com/gin-gonic/gin"
 	"github.com/hellofresh/ginger-middleware/mongodb"
+	"github.com/urfave/negroni"
 	"gopkg.in/alexcesaro/statsd.v2"
 	"gopkg.in/redis.v3"
 )
@@ -18,8 +18,8 @@ type APIManager struct {
 }
 
 // NewAPIManager creates a new instance of the api manager
-func NewAPIManager(router *http.Engine, redisClient *redis.Client, accessor *mongodb.DatabaseAccessor, statsdClient *statsd.Client) *APIManager {
-	proxyRegister := &ProxyRegister{Engine: router, statsdClient: statsdClient}
+func NewAPIManager(router Router, redisClient *redis.Client, accessor *mongodb.DatabaseAccessor, statsdClient *statsd.Client) *APIManager {
+	proxyRegister := &ProxyRegister{Router: router, statsdClient: statsdClient}
 	return &APIManager{proxyRegister, redisClient, accessor}
 }
 
@@ -54,7 +54,7 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *OAuthManager) {
 			limiter := speedbump.NewLimiter(m.redisClient, hasher, limit)
 
 			mw := &Middleware{referenceSpec}
-			var beforeHandlers = []gin.HandlerFunc{
+			var beforeHandlers = []negroni.HandlerFunc{
 				CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}),
 				CreateMiddleware(&CorsMiddleware{mw}),
 			}
@@ -75,8 +75,8 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *OAuthManager) {
 func (m *APIManager) LoadOAuthServers(oauthServers []*OAuthSpec, oauthManager *OAuthManager) {
 	log.Debug("Loading OAuth servers configurations")
 
-	var beforeHandlers []gin.HandlerFunc
-	var handlers []gin.HandlerFunc
+	var beforeHandlers []negroni.HandlerFunc
+	var handlers []negroni.HandlerFunc
 	oauthRegister := &OAuthRegister{}
 
 	for _, oauthServer := range oauthServers {
