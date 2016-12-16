@@ -1,38 +1,41 @@
 package janus
 
 import (
+	"context"
 	"errors"
 	"strings"
 
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/gin-gonic/gin"
 )
 
-type Oauth2KeyExists struct {
+// Oauth2KeyExistsMiddleware checks the integrity of the provided OAuth headers
+type Oauth2KeyExistsMiddleware struct {
 	*Middleware
 	OAuthManager *OAuthManager
 }
 
-func (m *Oauth2KeyExists) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
+// ProcessRequest is the middleware method.
+func (m *Oauth2KeyExistsMiddleware) ProcessRequest(rw http.ResponseWriter, req *http.Request) (int, error) {
 	log.Debug("Starting Oauth2KeyExists middleware")
 	logger := log.WithFields(log.Fields{
 		"path":   req.RequestURI,
 		"origin": req.RemoteAddr,
 	})
+
 	// We're using OAuth, start checking for access keys
 	authHeaderValue := req.Header.Get("Authorization")
 	parts := strings.Split(authHeaderValue, " ")
 	if len(parts) < 2 {
 		logger.Info("Attempted access with malformed header, no auth header found.")
 
-		return errors.New("Authorization field missing"), http.StatusBadRequest
+		return http.StatusBadRequest, errors.New("Authorization field missing")
 	}
 
 	if strings.ToLower(parts[0]) != "bearer" {
 		logger.Info("Bearer token malformed")
-		return errors.New("Bearer token malformed"), http.StatusBadRequest
+		return http.StatusBadRequest, errors.New("Bearer token malformed")
 	}
 
 	accessToken := parts[1]
@@ -45,25 +48,26 @@ func (m *Oauth2KeyExists) ProcessRequest(req *http.Request, c *gin.Context) (err
 			"key":    accessToken,
 		}).Info("Attempted access with non-existent key.")
 
-		return errors.New("Key not authorised"), http.StatusUnauthorized
+		return http.StatusUnauthorized, errors.New("Key not authorised")
 	}
 
-	c.Set(SessionData, thisSessionState)
-	c.Set(AuthHeaderValue, accessToken)
+	context.WithValue(req.Context(), SessionData, thisSessionState)
+	context.WithValue(req.Context(), AuthHeaderValue, accessToken)
 
-	return nil, http.StatusOK
+	return http.StatusOK, nil
 }
 
-func (o *Oauth2KeyExists) CheckSessionAndIdentityForValidKey(key string) (SessionState, bool) {
+// CheckSessionAndIdentityForValidKey ensures we have the valid key in the session store
+func (m *Oauth2KeyExistsMiddleware) CheckSessionAndIdentityForValidKey(key string) (SessionState, bool) {
 	var thisSession SessionState
 
-	//Checks if the key is present on the cache and if it didn't expire yet
+	// Checks if the key is present on the cache and if it didn't expire yet
 	log.Debug("Querying keystore")
-	if !o.OAuthManager.KeyExists(key) {
+	if !m.OAuthManager.KeyExists(key) {
 		log.Debug("Key not found in keystore")
 		return thisSession, false
 	}
 
 	// 2. If not there, get it from the AuthorizationHandler
-	return o.OAuthManager.IsKeyAuthorised(key)
+	return m.OAuthManager.IsKeyAuthorised(key)
 }
