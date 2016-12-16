@@ -3,7 +3,7 @@ package janus
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
+	"github.com/urfave/negroni"
 )
 
 // Middleware wraps up the APIDefinition object to be included in a
@@ -13,19 +13,19 @@ type Middleware struct {
 }
 
 type MiddlewareImplementation interface {
-	ProcessRequest(req *http.Request, c *gin.Context) (error, int)
+	ProcessRequest(rw http.ResponseWriter, r *http.Request) (error, int)
 }
 
 // Generic middleware caller to make extension easier
-func CreateMiddleware(mw MiddlewareImplementation) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		err, errCode := mw.ProcessRequest(c.Request, c)
+func CreateMiddleware(mw MiddlewareImplementation) negroni.HandlerFunc {
+	return func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+		err, errCode := mw.ProcessRequest(rw, r)
 
 		if err != nil {
 			c.Abort()
 			c.JSON(errCode, err.Error())
 		} else {
-			c.Next()
+			next(rw, r)
 		}
 	}
 }

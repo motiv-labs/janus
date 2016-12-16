@@ -1,8 +1,10 @@
-hash: 56da7de8426dad2315350f7cfb375744648a3d8a4f7ed789b7af785fa6fc9099
-updated: 2016-11-21T11:45:35.502662227+01:00
+hash: 3a660e1c08db346cedcae2ed98e0bf86a6adf60b2d3f09386703e268b8cf97a0
+updated: 2016-12-14T15:42:28.812637568+01:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
+- name: github.com/dimfeld/httptreemux
+  version: 5cb0ec25af2dd6a7d3718b5aa05dc48e192473bc
 - name: github.com/etcinit/speedbump
   version: 0dd4ce600c6cbf0f4d033846269f029dacf30cad
 - name: github.com/facebookgo/clock
@@ -33,6 +35,8 @@ imports:
   version: 4f10152eca12dd6663009dc2e9377f2fe4b18a78
 - name: github.com/Sirupsen/logrus
   version: d26492970760ca5d33129d2d799e34be5c4782eb
+- name: github.com/urfave/negroni
+  version: fde5e16d32adc7ad637e9cd9ad21d4ebc6192535
 - name: golang.org/x/net
   version: f315505cf3349909cdf013ea56690da34e96a451
   subpackages:

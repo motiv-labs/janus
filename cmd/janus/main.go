@@ -13,7 +13,20 @@ import (
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 	"gopkg.in/appleboy/gin-jwt.v2"
 	"gopkg.in/redis.v3"
+	"github.com/dimfeld/httptreemux"
+	"github.com/urfave/negroni"
 )
+
+// initLogger initializes the logger config
+func initLogger(config *config.Specification) {
+	// log.SetFormatter(&logstash.LogstashFormatter{Type: config.Application.Name})
+
+	if config.Debug {
+		log.SetLevel(log.DebugLevel)
+	} else {
+		log.SetLevel(log.InfoLevel)
+	}
+}
 
 // initializeDatabase initializes a DB connection
 func initializeDatabase(dsn string) *mongodb.DatabaseAccessor {
@@ -113,21 +126,14 @@ func main() {
 	if nil != err {
 		log.Panic(err.Error())
 	}
+	initLogger(config)
 
-	router := gin.New()
-	router.Use(gin.Logger())
-	router.Use(nice.Recovery(janus.RecoveryHandler))
-
-	if config.Debug {
-		log.SetLevel(log.DebugLevel)
-		gin.SetMode(gin.DebugMode)
-	} else {
-		log.SetLevel(log.InfoLevel)
-		gin.SetMode(gin.ReleaseMode)
-	}
+	router = janus.NewHttpTreeMuxRouter()
+	n := negroni.New() // Includes some default middlewares
+  	n.UseHandler(router)
 
 	accessor := initializeDatabase(config.DatabaseDSN)
-	router.Use(mongodb.Middleware(accessor))
+	n.Use(negroni.NewLogger(), middleware.Recovery(janus.RecoveryHandler), middleware.MongoSession(accessor))
 
 	redisStorage := initializeRedis(config.StorageDSN)
 	defer redisStorage.Close()
@@ -144,8 +150,8 @@ func main() {
 		Password: config.Credentials.Password,
 	})
 
-	loadAuthEndpoints(router, authMiddleware)
-	loadDefaultEndpoints(router, apiManager, authMiddleware, config)
+	loadAuthEndpoints(n, authMiddleware)
+	loadDefaultEndpoints(n, apiManager, authMiddleware, config)
 
-	router.Run(fmt.Sprintf(":%v", config.Port))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.Port), n)
 }

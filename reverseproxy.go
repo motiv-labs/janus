@@ -11,13 +11,11 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/gin-gonic/gin"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
 type transport struct {
 	http.RoundTripper
-	context      *gin.Context
 	statsdClient *statsd.Client
 }
 

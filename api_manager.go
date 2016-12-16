@@ -18,7 +18,7 @@ type APIManager struct {
 }
 
 // NewAPIManager creates a new instance of the api manager
-func NewAPIManager(router *gin.Engine, redisClient *redis.Client, accessor *mongodb.DatabaseAccessor, statsdClient *statsd.Client) *APIManager {
+func NewAPIManager(router *http.Engine, redisClient *redis.Client, accessor *mongodb.DatabaseAccessor, statsdClient *statsd.Client) *APIManager {
 	proxyRegister := &ProxyRegister{Engine: router, statsdClient: statsdClient}
 	return &APIManager{proxyRegister, redisClient, accessor}
 }

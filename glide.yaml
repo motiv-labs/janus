@@ -26,6 +26,10 @@ import:
   version: ~2.0.0
 - package: gopkg.in/appleboy/gin-jwt.v2
   version: ^2.1.1
+- package: github.com/dimfeld/httptreemux
+  version: ^3.5.1
+- package: github.com/urfave/negroni
+  version: ^0.2.0
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.2.0
