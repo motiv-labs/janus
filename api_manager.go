@@ -4,7 +4,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/etcinit/speedbump"
 	"github.com/hellofresh/ginger-middleware/mongodb"
-	"github.com/urfave/negroni"
 	"gopkg.in/alexcesaro/statsd.v2"
 	"gopkg.in/redis.v3"
 )
@@ -54,7 +53,7 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *OAuthManager) {
 			limiter := speedbump.NewLimiter(m.redisClient, hasher, limit)
 
 			mw := &Middleware{referenceSpec}
-			var beforeHandlers = []negroni.HandlerFunc{
+			var beforeHandlers = []HandlerFunc{
 				CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}),
 				CreateMiddleware(&CorsMiddleware{mw}),
 			}
@@ -75,8 +74,8 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *OAuthManager) {
 func (m *APIManager) LoadOAuthServers(oauthServers []*OAuthSpec, oauthManager *OAuthManager) {
 	log.Debug("Loading OAuth servers configurations")
 
-	var beforeHandlers []negroni.HandlerFunc
-	var handlers []negroni.HandlerFunc
+	var beforeHandlers []HandlerFunc
+	var handlers []HandlerFunc
 	oauthRegister := &OAuthRegister{}
 
 	for _, oauthServer := range oauthServers {

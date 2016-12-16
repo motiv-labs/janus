@@ -3,8 +3,9 @@ package janus
 import (
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/hellofresh/janus/errors"
+	"github.com/hellofresh/janus/request"
+	"github.com/hellofresh/janus/response"
 	"gopkg.in/mgo.v2"
 )
 
@@ -13,24 +14,24 @@ type AppsAPI struct {
 }
 
 // GET /apps
-func (u *AppsAPI) Get() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		repo := u.getRepository(u.getDatabase(c))
+func (u *AppsAPI) Get() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		repo := u.getRepository(u.getDatabase(r))
 
 		data, err := repo.FindAll()
 		if err != nil {
 			panic(err.Error())
 		}
 
-		c.JSON(http.StatusOK, data)
+		response.JSON(w, http.StatusOK, data)
 	}
 }
 
 // GetBy gets an application by its id
-func (u *AppsAPI) GetBy() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Params.ByName("id")
-		repo := u.getRepository(u.getDatabase(c))
+func (u *AppsAPI) GetBy() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := FromContext(r.Context()).ByName("id")
+		repo := u.getRepository(u.getDatabase(r))
 
 		data, err := repo.FindByID(id)
 		if data.ID == "" {
@@ -41,17 +42,17 @@ func (u *AppsAPI) GetBy() gin.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		c.JSON(http.StatusOK, data)
+		response.JSON(w, http.StatusOK, data)
 	}
 }
 
 // PUT /apps/:id
-func (u *AppsAPI) PutBy() gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (u *AppsAPI) PutBy() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
-		id := c.Params.ByName("id")
-		repo := u.getRepository(u.getDatabase(c))
+		id := FromContext(r.Context()).ByName("id")
+		repo := u.getRepository(u.getDatabase(r))
 		definition, err := repo.FindByID(id)
 		if definition.ID == "" {
 			panic(errors.New(http.StatusNotFound, "Application not found"))
@@ -61,7 +62,7 @@ func (u *AppsAPI) PutBy() gin.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		err = c.Bind(definition)
+		err = request.BindJSON(r, definition)
 		if nil != err {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
@@ -69,17 +70,17 @@ func (u *AppsAPI) PutBy() gin.HandlerFunc {
 		repo.Add(definition)
 		u.ApiManager.Load()
 
-		c.JSON(http.StatusOK, definition)
+		response.JSON(w, http.StatusOK, definition)
 	}
 }
 
 // POST /apps
-func (u *AppsAPI) Post() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		repo := u.getRepository(u.getDatabase(c))
+func (u *AppsAPI) Post() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		repo := u.getRepository(u.getDatabase(r))
 		definition := NewAPIDefinition()
 
-		err := c.Bind(definition)
+		err := request.BindJSON(r, definition)
 		if nil != err {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
@@ -90,15 +91,15 @@ func (u *AppsAPI) Post() gin.HandlerFunc {
 		}
 
 		u.ApiManager.Load()
-		c.JSON(http.StatusCreated, definition)
+		response.JSON(w, http.StatusOK, definition)
 	}
 }
 
 // DELETE /apps/:param1
-func (u *AppsAPI) DeleteBy() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		id := c.Params.ByName("id")
-		repo := u.getRepository(u.getDatabase(c))
+func (u *AppsAPI) DeleteBy() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		id := FromContext(r.Context()).ByName("id")
+		repo := u.getRepository(u.getDatabase(r))
 
 		err := repo.Remove(id)
 		if err != nil {
@@ -106,14 +107,14 @@ func (u *AppsAPI) DeleteBy() gin.HandlerFunc {
 		}
 
 		u.ApiManager.Load()
-		c.String(http.StatusNoContent, "")
+		response.JSON(w, http.StatusNoContent, nil)
 	}
 }
 
-func (u *AppsAPI) getDatabase(c *gin.Context) *mgo.Database {
-	db, exists := c.Get("db")
+func (u *AppsAPI) getDatabase(r *http.Request) *mgo.Database {
+	db := r.Context().Value("db")
 
-	if false == exists {
+	if nil == db {
 		panic(errors.New(http.StatusInternalServerError, "DB context was not set for this request"))
 	}
 

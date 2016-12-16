@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/urfave/negroni"
 	"gopkg.in/alexcesaro/statsd.v2"
 )
 
@@ -21,20 +20,16 @@ type ProxyRegister struct {
 }
 
 // RegisterMany registers many proxies at once
-func (p *ProxyRegister) RegisterMany(proxies []Proxy, beforeHandlers []negroni.HandlerFunc, afterHandlers []negroni.HandlerFunc) {
+func (p *ProxyRegister) RegisterMany(proxies []Proxy, beforeHandlers []HandlerFunc, afterHandlers []HandlerFunc) {
 	for _, proxy := range proxies {
 		p.Register(proxy, beforeHandlers, afterHandlers)
 	}
 }
 
 // Register register a new proxy
-func (p *ProxyRegister) Register(proxy Proxy, beforeHandlers []negroni.HandlerFunc, afterHandlers []negroni.HandlerFunc) {
-	var handlers []negroni.HandlerFunc
-
-	router := negroni.New()
-	p.registerHandlers(router, beforeHandlers)
-	router.UseHandlerFunc(p.ToHandler(proxy))
-	p.registerHandlers(router, afterHandlers)
+func (p *ProxyRegister) Register(proxy Proxy, beforeHandlers []HandlerFunc, afterHandlers []HandlerFunc) {
+	handler := p.ToHandler(proxy)
+	p.registerHandlers(beforeHandlers)
 
 	if false == p.Exists(proxy) {
 		log.WithFields(log.Fields{
@@ -43,14 +38,16 @@ func (p *ProxyRegister) Register(proxy Proxy, beforeHandlers []negroni.HandlerFu
 
 		for _, method := range proxy.Methods {
 			if strings.ToUpper(method) == methodAll {
-				p.Router.Any(proxy.ListenPath, router.ServeHTTP)
+				p.Router.Any(proxy.ListenPath, handler)
 			}
 
-			p.Router.Handle(strings.ToUpper(method), proxy.ListenPath, router.ServeHTTP)
+			p.Router.Handle(strings.ToUpper(method), proxy.ListenPath, handler)
 		}
 
 		p.proxies = append(p.proxies, proxy)
 	}
+
+	p.registerHandlers(afterHandlers)
 }
 
 // Exists checks if a proxy is already registered in the manager
@@ -73,8 +70,8 @@ func (p *ProxyRegister) ToHandler(proxy Proxy) http.HandlerFunc {
 	}
 }
 
-func (p *ProxyRegister) registerHandlers(router *negroni.Negroni, handlers []negroni.HandlerFunc) {
+func (p *ProxyRegister) registerHandlers(handlers []HandlerFunc) {
 	for _, handler := range handlers {
-		router.UseFunc(handler)
+		p.Router.Use(handler)
 	}
 }
