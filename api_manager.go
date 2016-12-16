@@ -60,7 +60,7 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *OAuthManager) {
 			}
 
 			if referenceSpec.UseOauth2 {
-				beforeHandlers = append(beforeHandlers, CreateMiddleware(&Oauth2KeyExists{mw, oauthManager}))
+				beforeHandlers = append(beforeHandlers, CreateMiddleware(&Oauth2KeyExistsMiddleware{mw, oauthManager}))
 			}
 
 			m.proxyRegister.Register(referenceSpec.Proxy, beforeHandlers, nil)
@@ -80,7 +80,7 @@ func (m *APIManager) LoadOAuthServers(oauthServers []*OAuthSpec, oauthManager *O
 	oauthRegister := &OAuthRegister{}
 
 	for _, oauthServer := range oauthServers {
-		beforeHandlers = append(beforeHandlers, CreateMiddleware(&Oauth2Secret{oauthServer}))
+		beforeHandlers = append(beforeHandlers, CreateMiddleware(&Oauth2SecretMiddleware{oauthServer}))
 		handlers = append(handlers, CreateMiddleware(&OAuthMiddleware{oauthManager, oauthServer}))
 		oauthServer.OAuthManager = &OAuthManager{m.redisClient}
 		proxies := oauthRegister.GetProxiesForServer(oauthServer.OAuth)
