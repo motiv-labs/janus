@@ -2,19 +2,21 @@ package janus
 
 import (
 	"encoding/json"
+	"errors"
 
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/gin-gonic/gin"
 )
 
+// OAuthMiddleware is the after middleware for OAuth routes
 type OAuthMiddleware struct {
 	oauthManager *OAuthManager
 	oauthSpec    *OAuthSpec
 }
 
-func (m *OAuthMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (error, int) {
+// ProcessRequest is the middleware method.
+func (m *OAuthMiddleware) ProcessRequest(rw http.ResponseWriter, req *http.Request) (int, error) {
 	var newSession SessionState
 	newSession.OAuthServerID = m.oauthSpec.ID
 
@@ -22,18 +24,18 @@ func (m *OAuthMiddleware) ProcessRequest(req *http.Request, c *gin.Context) (err
 		"req": req,
 	}).Info("Getting body")
 
-	data, exists := c.Get("body")
-	if false == exists {
-		return nil, http.StatusInternalServerError
+	var body []byte
+	body = req.Context().Value("body").([]byte)
+
+	if nil == body {
+		return http.StatusInternalServerError, errors.New("Request body not present")
 	}
 
-	body := data.([]byte)
-
 	if marshalErr := json.Unmarshal(body, &newSession); marshalErr != nil {
-		return marshalErr, http.StatusInternalServerError
+		return http.StatusInternalServerError, marshalErr
 	}
 
 	m.oauthManager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
 
-	return nil, http.StatusOK
+	return http.StatusOK, nil
 }
