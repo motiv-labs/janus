@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/gin-gonic/gin"
 	"github.com/urfave/negroni"
 	"gopkg.in/alexcesaro/statsd.v2"
 )
@@ -30,7 +29,7 @@ func (p *ProxyRegister) RegisterMany(proxies []Proxy, beforeHandlers []negroni.H
 
 // Register register a new proxy
 func (p *ProxyRegister) Register(proxy Proxy, beforeHandlers []negroni.HandlerFunc, afterHandlers []negroni.HandlerFunc) {
-	var handlers []gin.HandlerFunc
+	var handlers []negroni.HandlerFunc
 
 	router := negroni.New()
 	p.registerHandlers(router, beforeHandlers)
