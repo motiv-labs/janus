@@ -6,7 +6,6 @@ import (
 	"os"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hellofresh/janus"
 	"github.com/hellofresh/janus/api"
 	"github.com/hellofresh/janus/config"
 	"github.com/hellofresh/janus/jwt"
@@ -82,7 +81,7 @@ func loadAPIEndpoints(router router.Router, loader *api.Loader, authMiddleware *
 	log.Debug("Loading API Endpoints")
 
 	// Home endpoint for the gateway
-	router.GET("/", janus.Home(config.Application))
+	router.GET("/", Home(config.Application))
 
 	// Apis endpoints
 	handler := api.API{loader}
@@ -135,7 +134,7 @@ func main() {
 
 	router := router.NewHttpTreeMuxRouter()
 	accessor := initializeDatabase(config.DatabaseDSN)
-	router.Use(middleware.NewLogger().Handler, middleware.NewRecovery(janus.RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
+	router.Use(middleware.NewLogger().Handler, middleware.NewRecovery(RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
 
 	redisStorage := initializeRedis(config.StorageDSN)
 	defer redisStorage.Close()
