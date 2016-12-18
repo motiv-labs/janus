@@ -30,7 +30,7 @@ func (p *ProxyRegister) RegisterMany(proxies []Proxy, handlers ...router.Constru
 func (p *ProxyRegister) Register(proxy Proxy, handlers ...router.Constructor) {
 	if false == p.Exists(proxy) {
 		handler := p.ToHandler(proxy)
-		matcher := NewListenPathMatcher()
+		matcher := router.NewListenPathMatcher()
 		if matcher.Match(proxy.ListenPath) {
 			p.doRegister(matcher.Extract(proxy.ListenPath), handler, proxy.Methods, handlers)
 		}

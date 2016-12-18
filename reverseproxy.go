@@ -8,6 +8,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/request"
+	"github.com/hellofresh/janus/router"
 )
 
 var (
@@ -34,7 +35,7 @@ func NewSingleHostReverseProxy(proxy Proxy, transport http.RoundTripper) *httput
 		if proxy.StripListenPath {
 			path = singleJoiningSlash(target.Path, req.URL.Path)
 
-			matcher := NewListenPathMatcher()
+			matcher := router.NewListenPathMatcher()
 			listenPath := matcher.Extract(proxy.ListenPath)
 
 			log.Debug("Stripping: ", listenPath)
