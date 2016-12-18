@@ -2,7 +2,7 @@ package session
 
 import "gopkg.in/mgo.v2/bson"
 
-// SessionState objects represent a current API session, mainly used for rate limiting.
+// SessionState objects represent a current API session, mainly used for access tokens.
 type SessionState struct {
 	OAuthServerID bson.ObjectId `json:"server_id"`
 	ExpiresIn     int64         `json:"expires_in"`

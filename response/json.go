@@ -7,6 +7,7 @@ import (
 
 type H map[string]interface{}
 
+// JSON writes a json response to ResponseWriter
 func JSON(w http.ResponseWriter, code int, obj interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)

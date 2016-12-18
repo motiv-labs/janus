@@ -8,6 +8,7 @@ import (
 	"github.com/hellofresh/janus/router"
 )
 
+// Loader handles the loading of the api specs
 type Loader struct {
 	proxyRegister *proxy.Register
 	accessor      *middleware.DatabaseAccessor

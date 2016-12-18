@@ -10,8 +10,8 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
-// OAuthRepository defines the behaviour of a authentication repo
-type OAuthRepository interface {
+// Repository defines the behaviour of a authentication repo
+type Repository interface {
 	FindAll() ([]*OAuth, error)
 	FindByID(id string) (*OAuth, error)
 	Add(oauth *OAuth) error

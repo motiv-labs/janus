@@ -16,6 +16,7 @@ type SecretMiddleware struct {
 	oauth *OAuth
 }
 
+// NewSecretMiddleware creates an instance of SecretMiddleware
 func NewSecretMiddleware(oauth *OAuth) *SecretMiddleware {
 	return &SecretMiddleware{oauth}
 }

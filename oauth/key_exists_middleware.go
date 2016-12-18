@@ -24,6 +24,7 @@ type KeyExistsMiddleware struct {
 	manager *Manager
 }
 
+// NewKeyExistsMiddleware creates a new instance of KeyExistsMiddleware
 func NewKeyExistsMiddleware(manager *Manager) *KeyExistsMiddleware {
 	return &KeyExistsMiddleware{manager}
 }

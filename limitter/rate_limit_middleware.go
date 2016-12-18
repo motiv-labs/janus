@@ -19,6 +19,7 @@ type RateLimitMiddleware struct {
 	limit   int64
 }
 
+// NewRateLimitMiddleware creates a new instance of RateLimitMiddleware
 func NewRateLimitMiddleware(limiter *speedbump.RateLimiter, hasher speedbump.RateHasher, limit int64) *RateLimitMiddleware {
 	return &RateLimitMiddleware{limiter, hasher, limit}
 }

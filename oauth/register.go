@@ -5,6 +5,7 @@ import (
 	"github.com/hellofresh/janus/proxy"
 )
 
+// GetProxiesForServer converts an oauth definition into many proxies
 func GetProxiesForServer(oauth *OAuth) []proxy.Proxy {
 	log.Debug("Loading oauth configuration")
 	var proxies []proxy.Proxy
