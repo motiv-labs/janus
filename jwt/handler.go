@@ -1,4 +1,4 @@
-package auth
+package jwt
 
 import (
 	"errors"
@@ -10,9 +10,9 @@ import (
 	"github.com/hellofresh/janus/response"
 )
 
-// JWTHandler struct
-type JWTHandler struct {
-	Config JWTConfig
+// Handler struct
+type Handler struct {
+	Config Config
 }
 
 // Login form structure.
@@ -24,7 +24,7 @@ type Login struct {
 // Login can be used by clients to get a jwt token.
 // Payload needs to be json in the form of {"username": "USERNAME", "password": "PASSWORD"}.
 // Reply will be of the form {"token": "TOKEN"}.
-func (j *JWTHandler) Login() http.HandlerFunc {
+func (j *Handler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var loginVals Login
 
@@ -71,9 +71,9 @@ func (j *JWTHandler) Login() http.HandlerFunc {
 	}
 }
 
-func (j *JWTHandler) Refresh() http.HandlerFunc {
+func (j *Handler) Refresh() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		parser := JWTParser{j.Config}
+		parser := Parser{j.Config}
 		token, _ := parser.Parse(r)
 		claims := token.Claims.(jwt.MapClaims)
 

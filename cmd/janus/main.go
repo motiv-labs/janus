@@ -7,8 +7,8 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus"
-	"github.com/hellofresh/janus/auth"
 	"github.com/hellofresh/janus/config"
+	"github.com/hellofresh/janus/jwt"
 	"github.com/hellofresh/janus/middleware"
 	"github.com/hellofresh/janus/oauth"
 	"github.com/hellofresh/janus/router"
@@ -76,7 +76,7 @@ func initializeStatsd(dsn, prefix string) *statsd.Client {
 }
 
 //loadDefaultEndpoints register api endpoints
-func loadDefaultEndpoints(router router.Router, apiManager *janus.APIManager, authMiddleware *auth.JWTMiddleware, config *config.Specification) {
+func loadDefaultEndpoints(router router.Router, apiManager *janus.APIManager, authMiddleware *jwt.Middleware, config *config.Specification) {
 	log.Debug("Loading Default Endpoints")
 
 	// Home endpoint for the gateway
@@ -107,10 +107,10 @@ func loadDefaultEndpoints(router router.Router, apiManager *janus.APIManager, au
 	}
 }
 
-func loadAuthEndpoints(router router.Router, authMiddleware *auth.JWTMiddleware) {
+func loadAuthEndpoints(router router.Router, authMiddleware *jwt.Middleware) {
 	log.Debug("Loading Auth Endpoints")
 
-	handlers := auth.JWTHandler{Config: authMiddleware.Config}
+	handlers := jwt.Handler{Config: authMiddleware.Config}
 	router.POST("/login", handlers.Login())
 	authGroup := router.Group("/auth")
 	authGroup.Use(authMiddleware.Handler)
@@ -143,8 +143,8 @@ func main() {
 	apiManager := janus.NewAPIManager(router, redisStorage, accessor, proxyRegister)
 	apiManager.Load()
 
-	authConfig := auth.NewJWTConfig(config.Credentials)
-	authMiddleware := auth.NewJWTMiddleware(authConfig)
+	authConfig := jwt.NewConfig(config.Credentials)
+	authMiddleware := jwt.NewMiddleware(authConfig)
 
 	loadAuthEndpoints(router, authMiddleware)
 	loadDefaultEndpoints(router, apiManager, authMiddleware, config)

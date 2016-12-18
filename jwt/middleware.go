@@ -1,4 +1,4 @@
-package auth
+package jwt
 
 import (
 	"errors"
@@ -9,18 +9,18 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-type JWTMiddleware struct {
-	Config JWTConfig
+type Middleware struct {
+	Config Config
 }
 
-func NewJWTMiddleware(config JWTConfig) *JWTMiddleware {
-	return &JWTMiddleware{config}
+func NewMiddleware(config Config) *Middleware {
+	return &Middleware{config}
 }
 
 // Handler implementation
-func (m *JWTMiddleware) Handler(handler http.Handler) http.Handler {
+func (m *Middleware) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		parser := JWTParser{m.Config}
+		parser := Parser{m.Config}
 		token, err := parser.Parse(r)
 
 		if err != nil {

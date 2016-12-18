@@ -1,4 +1,4 @@
-package auth
+package jwt
 
 import (
 	"errors"
@@ -8,12 +8,12 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
-// JWTParser struct
-type JWTParser struct {
-	Config JWTConfig
+// Parser struct
+type Parser struct {
+	Config Config
 }
 
-func (jp *JWTParser) Parse(r *http.Request) (*jwt.Token, error) {
+func (jp *Parser) Parse(r *http.Request) (*jwt.Token, error) {
 	var token string
 	var err error
 
@@ -40,7 +40,7 @@ func (jp *JWTParser) Parse(r *http.Request) (*jwt.Token, error) {
 	})
 }
 
-func (jp *JWTParser) jwtFromHeader(r *http.Request, key string) (string, error) {
+func (jp *Parser) jwtFromHeader(r *http.Request, key string) (string, error) {
 	authHeader := r.Header.Get(key)
 
 	if authHeader == "" {
@@ -55,7 +55,7 @@ func (jp *JWTParser) jwtFromHeader(r *http.Request, key string) (string, error) 
 	return parts[1], nil
 }
 
-func (jp *JWTParser) jwtFromQuery(r *http.Request, key string) (string, error) {
+func (jp *Parser) jwtFromQuery(r *http.Request, key string) (string, error) {
 	token := r.URL.Query().Get(key)
 
 	if token == "" {
@@ -65,7 +65,7 @@ func (jp *JWTParser) jwtFromQuery(r *http.Request, key string) (string, error) {
 	return token, nil
 }
 
-func (jp *JWTParser) jwtFromCookie(r *http.Request, key string) (string, error) {
+func (jp *Parser) jwtFromCookie(r *http.Request, key string) (string, error) {
 	cookie, _ := r.Cookie(key)
 
 	if nil == cookie {

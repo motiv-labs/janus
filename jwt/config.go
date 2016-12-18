@@ -1,4 +1,4 @@
-package auth
+package jwt
 
 import (
 	"time"
@@ -6,8 +6,8 @@ import (
 	"net/http"
 )
 
-// JWTConfig struct
-type JWTConfig struct {
+// Config struct
+type Config struct {
 	// Callback function that should perform the authentication of the user based on userID and
 	// password. Must return true on success, false on failure. Required.
 	// Option return user id, if so, user id will be stored in Claim Array.

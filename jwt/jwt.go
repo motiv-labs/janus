@@ -1,4 +1,4 @@
-package auth
+package jwt
 
 import (
 	"net/http"
@@ -8,8 +8,8 @@ import (
 	"github.com/hellofresh/janus/response"
 )
 
-func NewJWTConfig(cred config.Credentials) JWTConfig {
-	return JWTConfig{
+func NewConfig(cred config.Credentials) Config {
+	return Config{
 		SigningAlgorithm: "HS256",
 		Secret:           []byte(cred.Secret),
 		Timeout:          time.Hour,
