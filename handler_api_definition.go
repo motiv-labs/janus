@@ -4,8 +4,10 @@ import (
 	"net/http"
 
 	"github.com/hellofresh/janus/errors"
+	"github.com/hellofresh/janus/middleware"
 	"github.com/hellofresh/janus/request"
 	"github.com/hellofresh/janus/response"
+	"github.com/hellofresh/janus/router"
 	"gopkg.in/mgo.v2"
 )
 
@@ -30,7 +32,7 @@ func (u *AppsAPI) Get() http.HandlerFunc {
 // GetBy gets an application by its id
 func (u *AppsAPI) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id := FromContext(r.Context()).ByName("id")
+		id := router.FromContext(r.Context()).ByName("id")
 		repo := u.getRepository(u.getDatabase(r))
 
 		data, err := repo.FindByID(id)
@@ -51,7 +53,7 @@ func (u *AppsAPI) PutBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
-		id := FromContext(r.Context()).ByName("id")
+		id := router.FromContext(r.Context()).ByName("id")
 		repo := u.getRepository(u.getDatabase(r))
 		definition, err := repo.FindByID(id)
 		if definition.ID == "" {
@@ -98,7 +100,7 @@ func (u *AppsAPI) Post() http.HandlerFunc {
 // DELETE /apps/:param1
 func (u *AppsAPI) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id := FromContext(r.Context()).ByName("id")
+		id := router.FromContext(r.Context()).ByName("id")
 		repo := u.getRepository(u.getDatabase(r))
 
 		err := repo.Remove(id)
@@ -112,7 +114,7 @@ func (u *AppsAPI) DeleteBy() http.HandlerFunc {
 }
 
 func (u *AppsAPI) getDatabase(r *http.Request) *mgo.Database {
-	db := r.Context().Value("db")
+	db := r.Context().Value(middleware.ContextKeyDatabase)
 
 	if nil == db {
 		panic(errors.New(http.StatusInternalServerError, "DB context was not set for this request"))

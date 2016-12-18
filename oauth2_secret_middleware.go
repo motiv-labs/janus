@@ -9,6 +9,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/errors"
+	"github.com/hellofresh/janus/response"
 )
 
 // Oauth2SecretMiddleware prevents requests to an API from exceeding a specified rate limit.
@@ -16,29 +17,32 @@ type Oauth2SecretMiddleware struct {
 	oauthSpec *OAuthSpec
 }
 
-// ProcessRequest is the middleware method.
-func (m *Oauth2SecretMiddleware) ProcessRequest(rw http.ResponseWriter, req *http.Request) (int, error) {
-	log.Debug("Starting Oauth2Secret middleware")
+// Serve is the middleware method.
+func (m *Oauth2SecretMiddleware) Serve(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Debug("Starting Oauth2Secret middleware")
 
-	if "" != req.Header.Get("Authorization") {
-		log.Debug("Authorization is set, proxying")
-		return http.StatusOK, nil
-	}
+		if "" != r.Header.Get("Authorization") {
+			log.Debug("Authorization is set, proxying")
+			handler.ServeHTTP(w, r)
+		}
 
-	clientID := req.URL.Query().Get("client_id")
-	if "" == clientID {
-		log.Debug("ClientID not set, proxying")
-		return http.StatusOK, nil
-	}
+		clientID := r.URL.Query().Get("client_id")
+		if "" == clientID {
+			log.Debug("ClientID not set, proxying")
+			handler.ServeHTTP(w, r)
+		}
 
-	clientSecret, exists := m.oauthSpec.Secrets[clientID]
-	if false == exists {
-		err := errors.ErrClientIdNotFound
-		return err.Code, err
-	}
+		clientSecret, exists := m.oauthSpec.Secrets[clientID]
+		if false == exists {
+			err := errors.ErrClientIdNotFound
+			response.JSON(w, err.Code, err)
+			return
+		}
 
-	m.ChangeRequest(req, clientID, clientSecret)
-	return http.StatusOK, nil
+		m.ChangeRequest(r, clientID, clientSecret)
+		handler.ServeHTTP(w, r)
+	})
 }
 
 // ChangeRequest modifies the request to add the Authorization headers.

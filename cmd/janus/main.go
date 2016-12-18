@@ -2,23 +2,22 @@ package main
 
 import (
 	"fmt"
+	"net/http"
 	"os"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/gin-gonic/gin"
-	"github.com/hellofresh/ginger-middleware/mongodb"
-	"github.com/hellofresh/ginger-middleware/nice"
 	"github.com/hellofresh/janus"
+	"github.com/hellofresh/janus/auth"
 	"github.com/hellofresh/janus/config"
+	"github.com/hellofresh/janus/middleware"
+	"github.com/hellofresh/janus/router"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
-	"gopkg.in/appleboy/gin-jwt.v2"
 	"gopkg.in/redis.v3"
-	"github.com/dimfeld/httptreemux"
-	"github.com/urfave/negroni"
 )
 
 // initLogger initializes the logger config
 func initLogger(config *config.Specification) {
+	log.SetOutput(os.Stderr)
 	// log.SetFormatter(&logstash.LogstashFormatter{Type: config.Application.Name})
 
 	if config.Debug {
@@ -29,8 +28,8 @@ func initLogger(config *config.Specification) {
 }
 
 // initializeDatabase initializes a DB connection
-func initializeDatabase(dsn string) *mongodb.DatabaseAccessor {
-	accessor, err := mongodb.InitDB(dsn)
+func initializeDatabase(dsn string) *middleware.DatabaseAccessor {
+	accessor, err := middleware.InitDB(dsn)
 	if err != nil {
 		log.Fatalf("Couldn't connect to the mongodb database: %s", err.Error())
 	}
@@ -77,16 +76,17 @@ func initializeStatsd(dsn, prefix string) *statsd.Client {
 }
 
 //loadDefaultEndpoints register api endpoints
-func loadDefaultEndpoints(router janus.Router, apiManager *janus.APIManager, authMiddleware *jwt.GinJWTMiddleware, config *config.Specification) {
+func loadDefaultEndpoints(router router.Router, apiManager *janus.APIManager, authConfig auth.JWTConfig, config *config.Specification) {
 	log.Debug("Loading Default Endpoints")
 
+	middleware := &auth.JWTMiddleware{authConfig}
 	// Home endpoint for the gateway
 	router.GET("/", janus.Home(config.Application))
 
 	// Apis endpoints
 	handler := janus.AppsAPI{apiManager}
 	group := router.Group("/apis")
-	group.Use(authMiddleware.MiddlewareFunc())
+	group.Use(middleware)
 	{
 		group.GET("", handler.Get())
 		group.POST("", handler.Post())
@@ -98,7 +98,7 @@ func loadDefaultEndpoints(router janus.Router, apiManager *janus.APIManager, aut
 	// Oauth servers endpoints
 	oAuthHandler := janus.OAuthAPI{}
 	oauthGroup := router.Group("/oauth/servers")
-	oauthGroup.Use(authMiddleware.MiddlewareFunc())
+	oauthGroup.Use(middleware)
 	{
 		oauthGroup.GET("", oAuthHandler.Get())
 		oauthGroup.POST("", oAuthHandler.Post())
@@ -108,32 +108,34 @@ func loadDefaultEndpoints(router janus.Router, apiManager *janus.APIManager, aut
 	}
 }
 
-func loadAuthEndpoints(router *gin.Engine, authMiddleware *jwt.GinJWTMiddleware) {
+func loadAuthEndpoints(router router.Router, authConfig auth.JWTConfig) {
 	log.Debug("Loading Auth Endpoints")
+	middleware := &auth.JWTMiddleware{authConfig}
 
-	router.POST("/login", authMiddleware.LoginHandler)
+	handlers := auth.JWTHandler{Config: authConfig}
+	router.POST("/login", handlers.Login())
 	authGroup := router.Group("/auth")
-	authGroup.Use(authMiddleware.MiddlewareFunc())
+	authGroup.Use(middleware)
 	{
-		authGroup.GET("/refresh_token", authMiddleware.RefreshHandler)
+		authGroup.GET("/refresh_token", handlers.Refresh())
 	}
 }
 
 func main() {
-	log.SetOutput(os.Stderr)
-
 	config, err := config.LoadEnv()
 	if nil != err {
 		log.Panic(err.Error())
 	}
 	initLogger(config)
 
-	router = janus.NewHttpTreeMuxRouter()
-	n := negroni.New() // Includes some default middlewares
-  	n.UseHandler(router)
-
+	router := router.NewHttpTreeMuxRouter()
 	accessor := initializeDatabase(config.DatabaseDSN)
-	n.Use(negroni.NewLogger(), middleware.Recovery(janus.RecoveryHandler), middleware.MongoSession(accessor))
+	router.Use(middleware.NewLogger())
+	router.Use(middleware.NewRecovery(janus.RecoveryHandler))
+	router.Use(middleware.NewMongoDB(accessor))
+
+	// n := negroni.New() // Includes some default middlewares
+	// n.UseHandler(router)
 
 	redisStorage := initializeRedis(config.StorageDSN)
 	defer redisStorage.Close()
@@ -144,14 +146,10 @@ func main() {
 	apiManager := janus.NewAPIManager(router, redisStorage, accessor, statsdClient)
 	apiManager.Load()
 
-	authMiddleware := janus.NewJwt(&janus.Credentials{
-		Secret:   config.Credentials.Secret,
-		Username: config.Credentials.Username,
-		Password: config.Credentials.Password,
-	})
+	authConfig := auth.NewJWTConfig(config.Credentials)
 
-	loadAuthEndpoints(n, authMiddleware)
-	loadDefaultEndpoints(n, apiManager, authMiddleware, config)
+	loadAuthEndpoints(router, authConfig)
+	loadDefaultEndpoints(router, apiManager, authConfig, config)
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.Port), n)
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.Port), router))
 }

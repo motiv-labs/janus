@@ -13,7 +13,13 @@ import (
 	"context"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/hellofresh/janus/request"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
+)
+
+var (
+	// ContextKeyBody defines the db context key
+	ContextKeyBody = request.ContextKey("body")
 )
 
 type transport struct {
@@ -46,7 +52,7 @@ func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error
 			"resp": resp,
 		}).Info("Setting body")
 
-		context.WithValue(req.Context(), "body", bodyBytes)
+		context.WithValue(req.Context(), ContextKeyBody, bodyBytes)
 	} else {
 		t.statsdClient.Increment("success_request")
 	}

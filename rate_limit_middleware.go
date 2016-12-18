@@ -10,6 +10,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/etcinit/speedbump"
+	"github.com/hellofresh/janus/response"
 )
 
 // RateLimitMiddleware prevents requests to an API from exceeding a specified rate limit.
@@ -21,33 +22,38 @@ type RateLimitMiddleware struct {
 }
 
 // ProcessRequest is the middleware method.
-func (m *RateLimitMiddleware) ProcessRequest(rw http.ResponseWriter, req *http.Request) (int, error) {
-	log.Debug("Rate Limit middleware started")
+func (m *RateLimitMiddleware) Serve(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Debug("Rate Limit middleware started")
 
-	if !m.Spec.RateLimit.Enabled {
-		log.Debug("Rate limit is not enabled")
-		return http.StatusOK, nil
-	}
+		if !m.Spec.RateLimit.Enabled {
+			log.Debug("Rate limit is not enabled")
+			handler.ServeHTTP(w, r)
+		}
 
-	ip, _, _ := net.SplitHostPort(req.RemoteAddr)
-	ok, err := m.limiter.Attempt(ip)
-	if err != nil {
-		return http.StatusInternalServerError, err
-	}
+		ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+		ok, err := m.limiter.Attempt(ip)
+		if err != nil {
+			response.JSON(w, http.StatusInternalServerError, err)
+			return
+		}
 
-	nextTime := time.Now().Add(m.hasher.Duration())
-	left, err := m.limiter.Left(ip)
-	if err != nil {
-		return http.StatusInternalServerError, err
-	}
+		nextTime := time.Now().Add(m.hasher.Duration())
+		left, err := m.limiter.Left(ip)
+		if err != nil {
+			response.JSON(w, http.StatusInternalServerError, err)
+			return
+		}
 
-	rw.Header().Set("X-Rate-Limit-Limit", strconv.FormatInt(m.limit, 10))
-	rw.Header().Set("X-Rate-Limit-Remaining", strconv.FormatInt(left, 10))
-	rw.Header().Set("X-Rate-Limit-Reset", nextTime.String())
+		w.Header().Set("X-Rate-Limit-Limit", strconv.FormatInt(m.limit, 10))
+		w.Header().Set("X-Rate-Limit-Remaining", strconv.FormatInt(left, 10))
+		w.Header().Set("X-Rate-Limit-Reset", nextTime.String())
 
-	if !ok {
-		return http.StatusTooManyRequests, errors.New("Rate limit exceeded. Try again in " + nextTime.String())
-	}
+		if !ok {
+			response.JSON(w, http.StatusTooManyRequests, errors.New("rate limit exceeded. Try again in "+nextTime.String()))
+			return
+		}
 
-	return http.StatusOK, nil
+		handler.ServeHTTP(w, r)
+	})
 }

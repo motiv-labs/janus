@@ -1,9 +1,6 @@
 package middleware
 
 import (
-    "net/http"
-    "context"
-    
 	log "github.com/Sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 )
@@ -25,11 +22,4 @@ func InitDB(dsn string) (*DatabaseAccessor, error) {
 	}
 
 	return nil, err
-}
-
-// Set a session to a context
-func (da *DatabaseAccessor) Set(r *http.Request, session *mgo.Session) {
-	db := da.DB("")
-    context.WithValue(r.Context(), "db", db)
-    context.WithValue(r.Context(), "mgoSession", session)
 }

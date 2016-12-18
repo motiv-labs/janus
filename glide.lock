@@ -1,5 +1,5 @@
-hash: 74021592de7953cc8be4e854dba7c3ce792c170639d0c052a8c33af86e9c2651
-updated: 2016-12-16T17:02:36.303785171+01:00
+hash: 61d206aa59ace931c739bf559b0fd339d31c2a89c9e7e7fe4c44a6abcd328fa0
+updated: 2016-12-17T15:38:32.462881493+01:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
@@ -15,22 +15,12 @@ imports:
   version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
 - name: github.com/gin-gonic/gin
   version: 2dae550eb5392006a4582ce9c90016a9b5a74e8b
-  subpackages:
-  - binding
-  - render
-- name: github.com/golang/protobuf
-  version: 2402d76f3d41f928c7902a765dfc872356dd3aad
-  subpackages:
-  - proto
 - name: github.com/hellofresh/ginger-middleware
   version: ec61f5a5d55ea819c1f9890510d997e558cbdfaa
-  subpackages:
-  - mongodb
-  - nice
+- name: github.com/justinas/alice
+  version: 052b8b6c18edb9db317af86806d8e00ebaa94160
 - name: github.com/kelseyhightower/envconfig
   version: 9aca109c9aec4633fced9717c4a09ecab3d33111
-- name: github.com/manucorporat/sse
-  version: ee05b128a739a0fb76c7ebd3ae4810c1de808d6d
 - name: github.com/pborman/uuid
   version: c55201b036063326c5b1b89ccfe45a184973d073
 - name: github.com/RangelReale/osin
@@ -53,14 +43,8 @@ imports:
   - unix
 - name: gopkg.in/alexcesaro/statsd.v2
   version: 7fea3f0d2fab1ad973e641e51dba45443a311a90
-- name: gopkg.in/appleboy/gin-jwt.v2
-  version: 89be89cdc6ee002b5c9b95fb57963ad7e746a82c
 - name: gopkg.in/bsm/ratelimit.v1
   version: db14e161995a5177acef654cb0dd785e8ee8bc22
-- name: gopkg.in/dgrijalva/jwt-go.v3
-  version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
-- name: gopkg.in/go-playground/validator.v8
-  version: c193cecd124b5cc722d7ee5538e945bdb3348435
 - name: gopkg.in/mgo.v2
   version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
   subpackages:
@@ -75,8 +59,6 @@ imports:
   - internal/consistenthash
   - internal/hashtag
   - internal/pool
-- name: gopkg.in/yaml.v2
-  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
 testImports:
 - name: github.com/onsi/ginkgo
   version: 462326b1628e124b23f42e87a8f2750e3c4e2d24
@@ -109,3 +91,5 @@ testImports:
   - matchers/support/goraph/node
   - matchers/support/goraph/util
   - types
+- name: gopkg.in/yaml.v2
+  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f

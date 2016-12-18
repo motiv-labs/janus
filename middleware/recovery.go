@@ -1,23 +1,23 @@
-package nice
+package middleware
 
-import (
-	"io"
-	
-	"github.com/gin-gonic/gin"
-	"github.com/urfave/negroni"
-)
+import "net/http"
 
-func Recovery(f func(c *gin.Context, err interface{})) gin.HandlerFunc {
-	return RecoveryWithWriter(f, gin.DefaultErrorWriter)
+type Recovery struct {
+	recoverFunc func(w http.ResponseWriter, r *http.Request, err interface{})
 }
 
-func RecoveryWithWriter(f func(c *gin.Context, err interface{}), out io.Writer) negroni.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc) {
+func NewRecovery(recoverFunc func(w http.ResponseWriter, r *http.Request, err interface{})) *Recovery {
+	return &Recovery{recoverFunc}
+}
+
+func (re *Recovery) Serve(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {
-				f(rw, err)
+				re.recoverFunc(w, r, err)
 			}
 		}()
-		next(rw, r)
-	}
+
+		handler.ServeHTTP(w, r)
+	})
 }

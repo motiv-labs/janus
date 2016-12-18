@@ -3,7 +3,8 @@ package janus
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/etcinit/speedbump"
-	"github.com/hellofresh/ginger-middleware/mongodb"
+	"github.com/hellofresh/janus/middleware"
+	"github.com/hellofresh/janus/router"
 	"gopkg.in/alexcesaro/statsd.v2"
 	"gopkg.in/redis.v3"
 )
@@ -13,11 +14,11 @@ var APILoader = APIDefinitionLoader{}
 type APIManager struct {
 	proxyRegister *ProxyRegister
 	redisClient   *redis.Client
-	accessor      *mongodb.DatabaseAccessor
+	accessor      *middleware.DatabaseAccessor
 }
 
 // NewAPIManager creates a new instance of the api manager
-func NewAPIManager(router Router, redisClient *redis.Client, accessor *mongodb.DatabaseAccessor, statsdClient *statsd.Client) *APIManager {
+func NewAPIManager(router router.Router, redisClient *redis.Client, accessor *middleware.DatabaseAccessor, statsdClient *statsd.Client) *APIManager {
 	proxyRegister := &ProxyRegister{Router: router, statsdClient: statsdClient}
 	return &APIManager{proxyRegister, redisClient, accessor}
 }
@@ -53,13 +54,13 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *OAuthManager) {
 			limiter := speedbump.NewLimiter(m.redisClient, hasher, limit)
 
 			mw := &Middleware{referenceSpec}
-			var beforeHandlers = []HandlerFunc{
-				CreateMiddleware(&RateLimitMiddleware{mw, limiter, hasher, limit}),
-				CreateMiddleware(&CorsMiddleware{referenceSpec.CorsMeta}),
-			}
+
+			var beforeHandlers []router.MiddlewareImp
+			beforeHandlers = append(beforeHandlers, &RateLimitMiddleware{mw, limiter, hasher, limit})
+			beforeHandlers = append(beforeHandlers, &CorsMiddleware{referenceSpec.CorsMeta})
 
 			if referenceSpec.UseOauth2 {
-				beforeHandlers = append(beforeHandlers, CreateMiddleware(&Oauth2KeyExistsMiddleware{mw, oauthManager}))
+				beforeHandlers = append(beforeHandlers, &Oauth2KeyExistsMiddleware{mw, oauthManager})
 			}
 
 			m.proxyRegister.Register(referenceSpec.Proxy, beforeHandlers, nil)
@@ -74,17 +75,17 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *OAuthManager) {
 func (m *APIManager) LoadOAuthServers(oauthServers []*OAuthSpec, oauthManager *OAuthManager) {
 	log.Debug("Loading OAuth servers configurations")
 
-	var beforeHandlers []HandlerFunc
-	var handlers []HandlerFunc
+	var beforeHandlers []router.MiddlewareImp
+	var afterHandlers []router.MiddlewareImp
 	oauthRegister := &OAuthRegister{}
 
 	for _, oauthServer := range oauthServers {
-		beforeHandlers = append(beforeHandlers, CreateMiddleware(&Oauth2SecretMiddleware{oauthServer}))
-		beforeHandlers = append(beforeHandlers, CreateMiddleware(&CorsMiddleware{oauthServer.CorsMeta}))
-		handlers = append(handlers, CreateMiddleware(&OAuthMiddleware{oauthManager, oauthServer}))
+		beforeHandlers = append(beforeHandlers, &Oauth2SecretMiddleware{oauthServer})
+		beforeHandlers = append(beforeHandlers, &CorsMiddleware{oauthServer.CorsMeta})
+		afterHandlers = append(beforeHandlers, &OAuthMiddleware{oauthManager, oauthServer})
 		oauthServer.OAuthManager = &OAuthManager{m.redisClient}
 		proxies := oauthRegister.GetProxiesForServer(oauthServer.OAuth)
-		m.proxyRegister.RegisterMany(proxies, beforeHandlers, handlers)
+		m.proxyRegister.RegisterMany(proxies, beforeHandlers, afterHandlers)
 	}
 
 	log.Debug("Done loading OAuth servers configurations")
