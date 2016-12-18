@@ -10,7 +10,7 @@ func NewRecovery(recoverFunc func(w http.ResponseWriter, r *http.Request, err in
 	return &Recovery{recoverFunc}
 }
 
-func (re *Recovery) Serve(handler http.Handler) http.Handler {
+func (re *Recovery) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			if err := recover(); err != nil {

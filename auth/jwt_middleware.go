@@ -13,8 +13,12 @@ type JWTMiddleware struct {
 	Config JWTConfig
 }
 
-// JWTMiddleware implementation
-func (m *JWTMiddleware) Serve(handler http.Handler) http.Handler {
+func NewJWTMiddleware(config JWTConfig) *JWTMiddleware {
+	return &JWTMiddleware{config}
+}
+
+// Handler implementation
+func (m *JWTMiddleware) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		parser := JWTParser{m.Config}
 		token, err := parser.Parse(r)

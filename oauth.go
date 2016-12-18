@@ -10,7 +10,6 @@ import (
 // OAuthSpec Holds an oauth definition and basic options
 type OAuthSpec struct {
 	*OAuth
-	OAuthManager *OAuthManager
 }
 
 // OAuth holds the configuration for oauth proxies

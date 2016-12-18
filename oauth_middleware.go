@@ -7,19 +7,21 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/hellofresh/janus/oauth"
 	"github.com/hellofresh/janus/response"
+	"github.com/hellofresh/janus/session"
 )
 
 // OAuthMiddleware is the after middleware for OAuth routes
 type OAuthMiddleware struct {
-	oauthManager *OAuthManager
+	oauthManager *oauth.OAuthManager
 	oauthSpec    *OAuthSpec
 }
 
 // Serve is the middleware method.
 func (m *OAuthMiddleware) Serve(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		var newSession SessionState
+		var newSession session.SessionState
 		newSession.OAuthServerID = m.oauthSpec.ID
 
 		log.WithFields(log.Fields{

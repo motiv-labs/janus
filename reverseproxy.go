@@ -1,64 +1,19 @@
 package janus
 
 import (
-	"bytes"
-	"fmt"
-	"io/ioutil"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
-	"regexp"
 	"strings"
-
-	"context"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/request"
-	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
 var (
 	// ContextKeyBody defines the db context key
 	ContextKeyBody = request.ContextKey("body")
 )
-
-type transport struct {
-	http.RoundTripper
-	statsdClient *statsd.Client
-}
-
-func (t *transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	timing := t.statsdClient.NewTiming()
-	resp, err = t.RoundTripper.RoundTrip(req)
-	timing.Send(getStatsdMetricName(req))
-
-	if resp.StatusCode >= 400 {
-		t.statsdClient.Increment("error_request")
-	} else if resp.StatusCode < 300 && resp.Body != nil {
-		t.statsdClient.Increment("success_request")
-
-		//This is useful for the middlewares
-		var bodyBytes []byte
-
-		defer resp.Body.Close()
-		bodyBytes, _ = ioutil.ReadAll(resp.Body)
-
-		// Restore the io.ReadCloser to its original state
-		resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
-
-		// Use the content
-		log.WithFields(log.Fields{
-			"req":  req,
-			"resp": resp,
-		}).Info("Setting body")
-
-		context.WithValue(req.Context(), ContextKeyBody, bodyBytes)
-	} else {
-		t.statsdClient.Increment("success_request")
-	}
-
-	return resp, err
-}
 
 // NewSingleHostReverseProxy returns a new ReverseProxy that routes
 // URLs to the scheme, host, and base path provided in target. If the
@@ -79,12 +34,13 @@ func NewSingleHostReverseProxy(proxy Proxy, transport http.RoundTripper) *httput
 		if proxy.StripListenPath {
 			path = singleJoiningSlash(target.Path, req.URL.Path)
 
-			listenPath := extractListenPath(proxy.ListenPath)
+			matcher := NewListenPathMatcher()
+			listenPath := matcher.Extract(proxy.ListenPath)
+
 			log.Debug("Stripping: ", listenPath)
 			path = strings.Replace(path, listenPath, "", 1)
 
 			log.Debug("Upstream Path is: ", path)
-
 			if !strings.HasSuffix(target.Path, "/") && strings.HasSuffix(path, "/") {
 				path = path[:len(path)-1]
 			}
@@ -104,11 +60,6 @@ func NewSingleHostReverseProxy(proxy Proxy, transport http.RoundTripper) *httput
 	}
 
 	return &httputil.ReverseProxy{Director: director, Transport: transport}
-}
-
-func extractListenPath(listenPath string) string {
-	var reg = regexp.MustCompile(`(\/\*.+)`)
-	return reg.ReplaceAllString(listenPath, "")
 }
 
 func cleanSlashes(a string) string {
@@ -149,18 +100,4 @@ func singleJoiningSlash(a, b string) string {
 
 	log.Debug(a + b)
 	return a + b
-}
-
-// Returns metric name for StatsD in "<request method>.<request path>" format
-func getStatsdMetricName(req *http.Request) string {
-	return fmt.Sprintf(
-		"%s.%s",
-		strings.ToLower(req.Method),
-		strings.Replace(
-			// Double underscores
-			strings.Replace(req.URL.Path, "_", "__", -1),
-			// and replace dots with single underscore
-			".",
-			"_",
-			-1))
 }

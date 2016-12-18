@@ -10,6 +10,7 @@ import (
 	"github.com/hellofresh/janus/auth"
 	"github.com/hellofresh/janus/config"
 	"github.com/hellofresh/janus/middleware"
+	"github.com/hellofresh/janus/oauth"
 	"github.com/hellofresh/janus/router"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 	"gopkg.in/redis.v3"
@@ -68,25 +69,23 @@ func initializeStatsd(dsn, prefix string) *statsd.Client {
 			WithFields(log.Fields{
 				"dsn":    dsn,
 				"prefix": prefix,
-			}).
-			Warning("An error occurred while connecting to StatsD. Client will be muted.")
+			}).Warning("An error occurred while connecting to StatsD. Client will be muted.")
 	}
 
 	return client
 }
 
 //loadDefaultEndpoints register api endpoints
-func loadDefaultEndpoints(router router.Router, apiManager *janus.APIManager, authConfig auth.JWTConfig, config *config.Specification) {
+func loadDefaultEndpoints(router router.Router, apiManager *janus.APIManager, authMiddleware *auth.JWTMiddleware, config *config.Specification) {
 	log.Debug("Loading Default Endpoints")
 
-	middleware := &auth.JWTMiddleware{authConfig}
 	// Home endpoint for the gateway
 	router.GET("/", janus.Home(config.Application))
 
 	// Apis endpoints
 	handler := janus.AppsAPI{apiManager}
 	group := router.Group("/apis")
-	group.Use(middleware)
+	group.Use(authMiddleware.Handler)
 	{
 		group.GET("", handler.Get())
 		group.POST("", handler.Post())
@@ -98,7 +97,7 @@ func loadDefaultEndpoints(router router.Router, apiManager *janus.APIManager, au
 	// Oauth servers endpoints
 	oAuthHandler := janus.OAuthAPI{}
 	oauthGroup := router.Group("/oauth/servers")
-	oauthGroup.Use(middleware)
+	oauthGroup.Use(authMiddleware.Handler)
 	{
 		oauthGroup.GET("", oAuthHandler.Get())
 		oauthGroup.POST("", oAuthHandler.Post())
@@ -108,14 +107,13 @@ func loadDefaultEndpoints(router router.Router, apiManager *janus.APIManager, au
 	}
 }
 
-func loadAuthEndpoints(router router.Router, authConfig auth.JWTConfig) {
+func loadAuthEndpoints(router router.Router, authMiddleware *auth.JWTMiddleware) {
 	log.Debug("Loading Auth Endpoints")
-	middleware := &auth.JWTMiddleware{authConfig}
 
-	handlers := auth.JWTHandler{Config: authConfig}
+	handlers := auth.JWTHandler{Config: authMiddleware.Config}
 	router.POST("/login", handlers.Login())
 	authGroup := router.Group("/auth")
-	authGroup.Use(middleware)
+	authGroup.Use(authMiddleware.Handler)
 	{
 		authGroup.GET("/refresh_token", handlers.Refresh())
 	}
@@ -130,12 +128,7 @@ func main() {
 
 	router := router.NewHttpTreeMuxRouter()
 	accessor := initializeDatabase(config.DatabaseDSN)
-	router.Use(middleware.NewLogger())
-	router.Use(middleware.NewRecovery(janus.RecoveryHandler))
-	router.Use(middleware.NewMongoDB(accessor))
-
-	// n := negroni.New() // Includes some default middlewares
-	// n.UseHandler(router)
+	router.Use(middleware.NewLogger().Handler, middleware.NewRecovery(janus.RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
 
 	redisStorage := initializeRedis(config.StorageDSN)
 	defer redisStorage.Close()
@@ -143,13 +136,18 @@ func main() {
 	statsdClient := initializeStatsd(config.StatsdDSN, config.StatsdPrefix)
 	defer statsdClient.Close()
 
-	apiManager := janus.NewAPIManager(router, redisStorage, accessor, statsdClient)
+	oauthManager := &oauth.OAuthManager{redisStorage}
+	transport := &oauth.OAuthAwareTransport{http.DefaultTransport, oauthManager}
+	proxyRegister := &janus.ProxyRegister{Router: router, Transport: transport}
+
+	apiManager := janus.NewAPIManager(router, redisStorage, accessor, proxyRegister)
 	apiManager.Load()
 
 	authConfig := auth.NewJWTConfig(config.Credentials)
+	authMiddleware := auth.NewJWTMiddleware(authConfig)
 
-	loadAuthEndpoints(router, authConfig)
-	loadDefaultEndpoints(router, apiManager, authConfig, config)
+	loadAuthEndpoints(router, authMiddleware)
+	loadDefaultEndpoints(router, apiManager, authMiddleware, config)
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.Port), router))
 }

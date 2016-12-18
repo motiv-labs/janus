@@ -6,7 +6,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/router"
-	"gopkg.in/alexcesaro/statsd.v2"
 )
 
 const (
@@ -15,40 +14,49 @@ const (
 
 // ProxyRegister represents a register proxy
 type ProxyRegister struct {
-	Router       router.Router
-	proxies      []Proxy
-	statsdClient *statsd.Client
+	Router    router.Router
+	proxies   []Proxy
+	Transport http.RoundTripper
 }
 
 // RegisterMany registers many proxies at once
-func (p *ProxyRegister) RegisterMany(proxies []Proxy, beforeHandlers []router.MiddlewareImp, afterHandlers []router.MiddlewareImp) {
+func (p *ProxyRegister) RegisterMany(proxies []Proxy, handlers ...router.Constructor) {
 	for _, proxy := range proxies {
-		p.Register(proxy, beforeHandlers, afterHandlers)
+		p.Register(proxy, handlers...)
 	}
 }
 
 // Register register a new proxy
-func (p *ProxyRegister) Register(proxy Proxy, beforeHandlers []router.MiddlewareImp, afterHandlers []router.MiddlewareImp) {
-	// p.registerHandlers(beforeHandlers)
-
+func (p *ProxyRegister) Register(proxy Proxy, handlers ...router.Constructor) {
 	if false == p.Exists(proxy) {
-		log.WithFields(log.Fields{
-			"listen_path": proxy.ListenPath,
-		}).Info("Registering a proxy")
 		handler := p.ToHandler(proxy)
-
-		for _, method := range proxy.Methods {
-			if strings.ToUpper(method) == methodAll {
-				p.Router.Any(proxy.ListenPath, handler)
-			}
-
-			p.Router.Handle(strings.ToUpper(method), proxy.ListenPath, handler, beforeHandlers...)
+		matcher := NewListenPathMatcher()
+		if matcher.Match(proxy.ListenPath) {
+			p.doRegister(matcher.Extract(proxy.ListenPath), handler, proxy.Methods, handlers)
 		}
 
+		p.doRegister(proxy.ListenPath, handler, proxy.Methods, handlers)
 		p.proxies = append(p.proxies, proxy)
 	}
+}
 
-	// p.registerHandlers(afterHandlers)
+func (p *ProxyRegister) doRegister(
+	listenPath string,
+	handler http.HandlerFunc,
+	methods []string,
+	handlers []router.Constructor,
+) {
+	log.WithFields(log.Fields{
+		"listen_path": listenPath,
+	}).Info("Registering a proxy")
+
+	for _, method := range methods {
+		if strings.ToUpper(method) == methodAll {
+			p.Router.Any(listenPath, handler, handlers...)
+		} else {
+			p.Router.Handle(strings.ToUpper(method), listenPath, handler, handlers...)
+		}
+	}
 }
 
 // Exists checks if a proxy is already registered in the manager
@@ -65,8 +73,7 @@ func (p *ProxyRegister) Exists(proxy Proxy) bool {
 // ToHandler turns a proxy configuration into a handler
 func (p *ProxyRegister) ToHandler(proxy Proxy) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
-		transport := &transport{http.DefaultTransport, p.statsdClient}
-		reverseProxy := NewSingleHostReverseProxy(proxy, transport)
+		reverseProxy := NewSingleHostReverseProxy(proxy, p.Transport)
 		reverseProxy.ServeHTTP(rw, r)
 	}
 }

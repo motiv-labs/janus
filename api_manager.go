@@ -4,8 +4,8 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/etcinit/speedbump"
 	"github.com/hellofresh/janus/middleware"
+	"github.com/hellofresh/janus/oauth"
 	"github.com/hellofresh/janus/router"
-	"gopkg.in/alexcesaro/statsd.v2"
 	"gopkg.in/redis.v3"
 )
 
@@ -18,14 +18,13 @@ type APIManager struct {
 }
 
 // NewAPIManager creates a new instance of the api manager
-func NewAPIManager(router router.Router, redisClient *redis.Client, accessor *middleware.DatabaseAccessor, statsdClient *statsd.Client) *APIManager {
-	proxyRegister := &ProxyRegister{Router: router, statsdClient: statsdClient}
+func NewAPIManager(router router.Router, redisClient *redis.Client, accessor *middleware.DatabaseAccessor, proxyRegister *ProxyRegister) *APIManager {
 	return &APIManager{proxyRegister, redisClient, accessor}
 }
 
 // Load loads all api specs from a datasource
 func (m *APIManager) Load() {
-	oauthManager := &OAuthManager{m.redisClient}
+	oauthManager := &oauth.OAuthManager{m.redisClient}
 
 	oAuthServers := m.getOAuthServers()
 	go m.LoadOAuthServers(oAuthServers, oauthManager)
@@ -35,7 +34,7 @@ func (m *APIManager) Load() {
 }
 
 // LoadApps load application middleware
-func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *OAuthManager) {
+func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *oauth.OAuthManager) {
 	log.Debug("Loading API configurations")
 
 	for _, referenceSpec := range apiSpecs {
@@ -53,17 +52,27 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *OAuthManager) {
 			limit := referenceSpec.RateLimit.Limit
 			limiter := speedbump.NewLimiter(m.redisClient, hasher, limit)
 
-			mw := &Middleware{referenceSpec}
-
-			var beforeHandlers []router.MiddlewareImp
-			beforeHandlers = append(beforeHandlers, &RateLimitMiddleware{mw, limiter, hasher, limit})
-			beforeHandlers = append(beforeHandlers, &CorsMiddleware{referenceSpec.CorsMeta})
-
-			if referenceSpec.UseOauth2 {
-				beforeHandlers = append(beforeHandlers, &Oauth2KeyExistsMiddleware{mw, oauthManager})
+			var handlers []router.Constructor
+			if referenceSpec.RateLimit.Enabled {
+				handlers = append(handlers, NewRateLimitMiddleware(limiter, hasher, limit).Handler)
+			} else {
+				log.Debug("Rate limit is not enabled")
 			}
 
-			m.proxyRegister.Register(referenceSpec.Proxy, beforeHandlers, nil)
+			if referenceSpec.CorsMeta.Enabled {
+				handlers = append(handlers, NewCorsMiddleware(referenceSpec.CorsMeta).Handler)
+			} else {
+				log.Debug("CORS is not enabled")
+			}
+
+			if referenceSpec.UseOauth2 {
+				handlers = append(handlers, NewOauth2KeyExistsMiddleware(oauthManager).Handler)
+			} else {
+				log.Debug("OAuth2 is not enabled")
+			}
+
+			m.proxyRegister.Register(referenceSpec.Proxy, handlers...)
+
 			log.Debug("Proxy registered")
 		} else {
 			log.Error("Listen path is empty, skipping...")
@@ -72,20 +81,17 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *OAuthManager) {
 }
 
 // LoadOAuthServers loads and register the oauth servers
-func (m *APIManager) LoadOAuthServers(oauthServers []*OAuthSpec, oauthManager *OAuthManager) {
+func (m *APIManager) LoadOAuthServers(oauthServers []*OAuthSpec, oauthManager *oauth.OAuthManager) {
 	log.Debug("Loading OAuth servers configurations")
-
-	var beforeHandlers []router.MiddlewareImp
-	var afterHandlers []router.MiddlewareImp
 	oauthRegister := &OAuthRegister{}
 
 	for _, oauthServer := range oauthServers {
-		beforeHandlers = append(beforeHandlers, &Oauth2SecretMiddleware{oauthServer})
-		beforeHandlers = append(beforeHandlers, &CorsMiddleware{oauthServer.CorsMeta})
-		afterHandlers = append(beforeHandlers, &OAuthMiddleware{oauthManager, oauthServer})
-		oauthServer.OAuthManager = &OAuthManager{m.redisClient}
 		proxies := oauthRegister.GetProxiesForServer(oauthServer.OAuth)
-		m.proxyRegister.RegisterMany(proxies, beforeHandlers, afterHandlers)
+		m.proxyRegister.RegisterMany(
+			proxies,
+			NewOauth2SecretMiddleware(oauthServer).Handler,
+			NewCorsMiddleware(oauthServer.CorsMeta).Handler,
+		)
 	}
 
 	log.Debug("Done loading OAuth servers configurations")

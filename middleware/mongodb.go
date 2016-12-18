@@ -21,7 +21,7 @@ func NewMongoDB(accessor *DatabaseAccessor) *MongoDB {
 	return &MongoDB{accessor}
 }
 
-func (m *MongoDB) Serve(handler http.Handler) http.Handler {
+func (m *MongoDB) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Debug("Starting Database middleware")
 
