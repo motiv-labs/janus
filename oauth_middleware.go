@@ -14,8 +14,8 @@ import (
 
 // OAuthMiddleware is the after middleware for OAuth routes
 type OAuthMiddleware struct {
-	oauthManager *oauth.OAuthManager
-	oauthSpec    *OAuthSpec
+	manager   *oauth.Manager
+	oauthSpec *OAuthSpec
 }
 
 // Serve is the middleware method.
@@ -39,7 +39,7 @@ func (m *OAuthMiddleware) Serve(handler http.Handler) http.Handler {
 			return
 		}
 
-		m.oauthManager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
+		m.manager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
 
 		handler.ServeHTTP(w, r)
 	})

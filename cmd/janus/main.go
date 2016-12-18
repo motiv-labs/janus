@@ -136,8 +136,8 @@ func main() {
 	statsdClient := initializeStatsd(config.StatsdDSN, config.StatsdPrefix)
 	defer statsdClient.Close()
 
-	oauthManager := &oauth.OAuthManager{redisStorage}
-	transport := &oauth.OAuthAwareTransport{http.DefaultTransport, oauthManager}
+	manager := &oauth.Manager{redisStorage}
+	transport := oauth.NewAwareTransport(http.DefaultTransport, manager)
 	proxyRegister := &janus.ProxyRegister{Router: router, Transport: transport}
 
 	apiManager := janus.NewAPIManager(router, redisStorage, accessor, proxyRegister)

@@ -24,17 +24,17 @@ func NewAPIManager(router router.Router, redisClient *redis.Client, accessor *mi
 
 // Load loads all api specs from a datasource
 func (m *APIManager) Load() {
-	oauthManager := &oauth.OAuthManager{m.redisClient}
+	manager := &oauth.Manager{m.redisClient}
 
 	oAuthServers := m.getOAuthServers()
-	go m.LoadOAuthServers(oAuthServers, oauthManager)
+	go m.LoadOAuthServers(oAuthServers, manager)
 
 	specs := m.getAPISpecs()
-	go m.LoadApps(specs, oauthManager)
+	go m.LoadApps(specs, manager)
 }
 
 // LoadApps load application middleware
-func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *oauth.OAuthManager) {
+func (m *APIManager) LoadApps(apiSpecs []*APISpec, manager *oauth.Manager) {
 	log.Debug("Loading API configurations")
 
 	for _, referenceSpec := range apiSpecs {
@@ -66,7 +66,7 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *oauth.OAuthMana
 			}
 
 			if referenceSpec.UseOauth2 {
-				handlers = append(handlers, NewOauth2KeyExistsMiddleware(oauthManager).Handler)
+				handlers = append(handlers, NewOauth2KeyExistsMiddleware(manager).Handler)
 			} else {
 				log.Debug("OAuth2 is not enabled")
 			}
@@ -81,7 +81,7 @@ func (m *APIManager) LoadApps(apiSpecs []*APISpec, oauthManager *oauth.OAuthMana
 }
 
 // LoadOAuthServers loads and register the oauth servers
-func (m *APIManager) LoadOAuthServers(oauthServers []*OAuthSpec, oauthManager *oauth.OAuthManager) {
+func (m *APIManager) LoadOAuthServers(oauthServers []*OAuthSpec, manager *oauth.Manager) {
 	log.Debug("Loading OAuth servers configurations")
 	oauthRegister := &OAuthRegister{}
 

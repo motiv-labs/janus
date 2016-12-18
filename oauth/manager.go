@@ -9,16 +9,16 @@ import (
 	"gopkg.in/redis.v3"
 )
 
-type OAuthManager struct {
+type Manager struct {
 	Storage *redis.Client
 }
 
-func (o *OAuthManager) KeyExists(accessToken string) bool {
+func (o *Manager) KeyExists(accessToken string) bool {
 	log.Debugf("Searching for key %s", accessToken)
 	return o.Storage.Exists(accessToken).Val()
 }
 
-func (o *OAuthManager) Set(accessToken string, session session.SessionState, resetTTLTo int64) error {
+func (o *Manager) Set(accessToken string, session session.SessionState, resetTTLTo int64) error {
 	value, _ := json.Marshal(session)
 	expireDuration := time.Duration(resetTTLTo) * time.Second
 
@@ -28,7 +28,7 @@ func (o *OAuthManager) Set(accessToken string, session session.SessionState, res
 	return nil
 }
 
-func (o *OAuthManager) IsKeyAuthorised(accessToken string) (session.SessionState, bool) {
+func (o *Manager) IsKeyAuthorised(accessToken string) (session.SessionState, bool) {
 	var newSession session.SessionState
 	jsonKeyVal := o.Storage.Get(accessToken).Val()
 

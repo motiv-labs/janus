@@ -22,11 +22,11 @@ var (
 
 // Oauth2KeyExistsMiddleware checks the integrity of the provided OAuth headers
 type Oauth2KeyExistsMiddleware struct {
-	OAuthManager *oauth.OAuthManager
+	manager *oauth.Manager
 }
 
-func NewOauth2KeyExistsMiddleware(oAuthManager *oauth.OAuthManager) *Oauth2KeyExistsMiddleware {
-	return &Oauth2KeyExistsMiddleware{oAuthManager}
+func NewOauth2KeyExistsMiddleware(manager *oauth.Manager) *Oauth2KeyExistsMiddleware {
+	return &Oauth2KeyExistsMiddleware{manager}
 }
 
 // Handler is the middleware method.
@@ -78,11 +78,11 @@ func (m *Oauth2KeyExistsMiddleware) CheckSessionAndIdentityForValidKey(key strin
 
 	// Checks if the key is present on the cache and if it didn't expire yet
 	log.Debug("Querying keystore")
-	if !m.OAuthManager.KeyExists(key) {
+	if !m.manager.KeyExists(key) {
 		log.Debug("Key not found in keystore")
 		return thisSession, false
 	}
 
 	// 2. If not there, get it from the AuthorizationHandler
-	return m.OAuthManager.IsKeyAuthorised(key)
+	return m.manager.IsKeyAuthorised(key)
 }

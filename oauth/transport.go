@@ -10,12 +10,16 @@ import (
 	"github.com/hellofresh/janus/session"
 )
 
-type OAuthAwareTransport struct {
+type AwareTransport struct {
 	http.RoundTripper
-	OauthManager *OAuthManager
+	manager *Manager
 }
 
-func (t *OAuthAwareTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+func NewAwareTransport(roundTripper http.RoundTripper, manager *Manager) *AwareTransport {
+	return &AwareTransport{roundTripper, manager}
+}
+
+func (t *AwareTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
 	resp, err = t.RoundTripper.RoundTrip(req)
 	if nil != err {
 		return resp, err
@@ -34,7 +38,7 @@ func (t *OAuthAwareTransport) RoundTrip(req *http.Request) (resp *http.Response,
 		log.Info("Setting body")
 
 		if marshalErr := json.Unmarshal(bodyBytes, &newSession); marshalErr == nil {
-			t.OauthManager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
+			t.manager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
 		}
 
 		// Restore the io.ReadCloser to its original state
