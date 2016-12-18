@@ -12,7 +12,7 @@ import (
 )
 
 type AppsAPI struct {
-	ApiManager *APIManager
+	APIManager *APIManager
 }
 
 // GET /apps
@@ -70,7 +70,7 @@ func (u *AppsAPI) PutBy() http.HandlerFunc {
 		}
 
 		repo.Add(definition)
-		u.ApiManager.Load()
+		u.APIManager.Load()
 
 		response.JSON(w, http.StatusOK, definition)
 	}
@@ -92,7 +92,7 @@ func (u *AppsAPI) Post() http.HandlerFunc {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		u.ApiManager.Load()
+		u.APIManager.Load()
 		response.JSON(w, http.StatusOK, definition)
 	}
 }
@@ -108,7 +108,7 @@ func (u *AppsAPI) DeleteBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		u.ApiManager.Load()
+		u.APIManager.Load()
 		response.JSON(w, http.StatusNoContent, nil)
 	}
 }
