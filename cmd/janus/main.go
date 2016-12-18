@@ -7,10 +7,12 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus"
+	"github.com/hellofresh/janus/api"
 	"github.com/hellofresh/janus/config"
 	"github.com/hellofresh/janus/jwt"
 	"github.com/hellofresh/janus/middleware"
 	"github.com/hellofresh/janus/oauth"
+	"github.com/hellofresh/janus/proxy"
 	"github.com/hellofresh/janus/router"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 	"gopkg.in/redis.v3"
@@ -75,15 +77,15 @@ func initializeStatsd(dsn, prefix string) *statsd.Client {
 	return client
 }
 
-//loadDefaultEndpoints register api endpoints
-func loadDefaultEndpoints(router router.Router, apiManager *janus.APIManager, authMiddleware *jwt.Middleware, config *config.Specification) {
-	log.Debug("Loading Default Endpoints")
+//loadAPIEndpoints register api endpoints
+func loadAPIEndpoints(router router.Router, loader *api.Loader, authMiddleware *jwt.Middleware, config *config.Specification) {
+	log.Debug("Loading API Endpoints")
 
 	// Home endpoint for the gateway
 	router.GET("/", janus.Home(config.Application))
 
 	// Apis endpoints
-	handler := janus.AppsAPI{apiManager}
+	handler := api.API{loader}
 	group := router.Group("/apis")
 	group.Use(authMiddleware.Handler)
 	{
@@ -93,9 +95,14 @@ func loadDefaultEndpoints(router router.Router, apiManager *janus.APIManager, au
 		group.PUT("/:id", handler.PutBy())
 		group.DELETE("/:id", handler.DeleteBy())
 	}
+}
+
+//loadOAuthEndpoints register api endpoints
+func loadOAuthEndpoints(router router.Router, loader *oauth.Loader, authMiddleware *jwt.Middleware) {
+	log.Debug("Loading OAuth Endpoints")
 
 	// Oauth servers endpoints
-	oAuthHandler := janus.OAuthAPI{}
+	oAuthHandler := oauth.API{loader}
 	oauthGroup := router.Group("/oauth/servers")
 	oauthGroup.Use(authMiddleware.Handler)
 	{
@@ -138,16 +145,20 @@ func main() {
 
 	manager := &oauth.Manager{redisStorage}
 	transport := oauth.NewAwareTransport(http.DefaultTransport, manager)
-	proxyRegister := &janus.ProxyRegister{Router: router, Transport: transport}
+	proxyRegister := &proxy.Register{Router: router, Transport: transport}
 
-	apiManager := janus.NewAPIManager(router, redisStorage, accessor, proxyRegister)
-	apiManager.Load()
+	apiLoader := api.NewLoader(router, redisStorage, accessor, proxyRegister, manager)
+	apiLoader.Load()
+
+	oauthLoader := oauth.NewLoader(router, accessor, proxyRegister)
+	oauthLoader.Load()
 
 	authConfig := jwt.NewConfig(config.Credentials)
 	authMiddleware := jwt.NewMiddleware(authConfig)
 
 	loadAuthEndpoints(router, authMiddleware)
-	loadDefaultEndpoints(router, apiManager, authMiddleware, config)
+	loadAPIEndpoints(router, apiLoader, authMiddleware, config)
+	loadOAuthEndpoints(router, oauthLoader, authMiddleware)
 
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.Port), router))
 }

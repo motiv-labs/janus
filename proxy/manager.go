@@ -1,4 +1,4 @@
-package janus
+package proxy
 
 import (
 	"net/http"
@@ -12,22 +12,22 @@ const (
 	methodAll = "ALL"
 )
 
-// ProxyRegister represents a register proxy
-type ProxyRegister struct {
+// Register represents a register proxy
+type Register struct {
 	Router    router.Router
 	proxies   []Proxy
 	Transport http.RoundTripper
 }
 
 // RegisterMany registers many proxies at once
-func (p *ProxyRegister) RegisterMany(proxies []Proxy, handlers ...router.Constructor) {
+func (p *Register) RegisterMany(proxies []Proxy, handlers ...router.Constructor) {
 	for _, proxy := range proxies {
 		p.Register(proxy, handlers...)
 	}
 }
 
 // Register register a new proxy
-func (p *ProxyRegister) Register(proxy Proxy, handlers ...router.Constructor) {
+func (p *Register) Register(proxy Proxy, handlers ...router.Constructor) {
 	if false == p.Exists(proxy) {
 		handler := p.ToHandler(proxy)
 		matcher := router.NewListenPathMatcher()
@@ -40,7 +40,7 @@ func (p *ProxyRegister) Register(proxy Proxy, handlers ...router.Constructor) {
 	}
 }
 
-func (p *ProxyRegister) doRegister(
+func (p *Register) doRegister(
 	listenPath string,
 	handler http.HandlerFunc,
 	methods []string,
@@ -60,7 +60,7 @@ func (p *ProxyRegister) doRegister(
 }
 
 // Exists checks if a proxy is already registered in the manager
-func (p *ProxyRegister) Exists(proxy Proxy) bool {
+func (p *Register) Exists(proxy Proxy) bool {
 	for _, route := range p.proxies {
 		if route.ListenPath == proxy.ListenPath {
 			return true
@@ -71,7 +71,7 @@ func (p *ProxyRegister) Exists(proxy Proxy) bool {
 }
 
 // ToHandler turns a proxy configuration into a handler
-func (p *ProxyRegister) ToHandler(proxy Proxy) http.HandlerFunc {
+func (p *Register) ToHandler(proxy Proxy) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		reverseProxy := NewSingleHostReverseProxy(proxy, p.Transport)
 		reverseProxy.ServeHTTP(rw, r)

@@ -1,4 +1,4 @@
-package janus
+package limitter
 
 import (
 	"net"

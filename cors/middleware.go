@@ -1,8 +1,8 @@
-package janus
+package cors
 
 import "github.com/rs/cors"
 
-func NewCorsMiddleware(corsMeta CorsMeta) *cors.Cors {
+func NewMiddleware(corsMeta Meta) *cors.Cors {
 	return cors.New(cors.Options{
 		AllowedOrigins:   corsMeta.Domains,
 		AllowedMethods:   corsMeta.Methods,

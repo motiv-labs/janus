@@ -1,35 +1,38 @@
-package janus
+package api
 
 import (
 	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
+	"github.com/hellofresh/janus/errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
-// OAuthRepository defines the behaviour of a authentication repo
-type OAuthRepository interface {
-	FindAll() ([]*OAuth, error)
-	FindByID(id string) (*OAuth, error)
-	Add(oauth *OAuth) error
+// APISpecRepository defines the behaviour of a country repository
+type APISpecRepository interface {
+	FindAll() ([]Definition, error)
+	FindByID(id string) (Definition, error)
+	Add(app *Definition) error
 	Remove(id string) error
 }
 
-// MongoOAuthRepository represents a mongodb repository
-type MongoOAuthRepository struct {
+// MongoAPISpecRepository represents a mongodb repository
+type MongoAPISpecRepository struct {
 	coll *mgo.Collection
 }
 
-// NewMongoOAuthRepository creates a mongo country repo
-func NewMongoOAuthRepository(db *mgo.Database) (*MongoOAuthRepository, error) {
-	return &MongoOAuthRepository{db.C("oauth_servers")}, nil
+// NewMongoAppRepository creates a mongo country repo
+func NewMongoAppRepository(db *mgo.Database) (*MongoAPISpecRepository, error) {
+	coll := db.C("api_specs")
+
+	return &MongoAPISpecRepository{coll}, nil
 }
 
 // FindAll fetches all the countries available
-func (r *MongoOAuthRepository) FindAll() ([]*OAuth, error) {
-	var result []*OAuth
+func (r *MongoAPISpecRepository) FindAll() ([]Definition, error) {
+	result := []Definition{}
 
 	err := r.coll.Find(nil).All(&result)
 	if err != nil {
@@ -40,11 +43,11 @@ func (r *MongoOAuthRepository) FindAll() ([]*OAuth, error) {
 }
 
 // FindByID find a country by the iso2code provided
-func (r *MongoOAuthRepository) FindByID(id string) (*OAuth, error) {
-	var result *OAuth
+func (r *MongoAPISpecRepository) FindByID(id string) (*Definition, error) {
+	var result *Definition
 
 	if false == bson.IsObjectIdHex(id) {
-		return result, ErrInvalidID
+		return result, errors.ErrInvalidID
 	}
 
 	err := r.coll.FindId(bson.ObjectIdHex(id)).One(&result)
@@ -53,20 +56,20 @@ func (r *MongoOAuthRepository) FindByID(id string) (*OAuth, error) {
 }
 
 // Add adds a country to the repository
-func (r *MongoOAuthRepository) Add(oauth *OAuth) error {
+func (r *MongoAPISpecRepository) Add(definition *Definition) error {
 	var id bson.ObjectId
 
-	if len(oauth.ID) == 0 {
+	if len(definition.ID) == 0 {
 		id = bson.NewObjectId()
-		oauth.CreatedAt = time.Now()
+		definition.CreatedAt = time.Now()
 	} else {
-		id = oauth.ID
-		oauth.UpdatedAt = time.Now()
+		id = definition.ID
+		definition.UpdatedAt = time.Now()
 	}
 
-	oauth.ID = id
+	definition.ID = id
 
-	isValid, err := govalidator.ValidateStruct(oauth)
+	isValid, err := govalidator.ValidateStruct(definition)
 	if false == isValid && err != nil {
 		fields := log.Fields{
 			"errors": err.Error(),
@@ -75,7 +78,7 @@ func (r *MongoOAuthRepository) Add(oauth *OAuth) error {
 		return err
 	}
 
-	_, err = r.coll.UpsertId(id, oauth)
+	_, err = r.coll.UpsertId(id, definition)
 	if err != nil {
 		log.Errorf("There was an error adding the resource %s", id)
 		return err
@@ -86,9 +89,9 @@ func (r *MongoOAuthRepository) Add(oauth *OAuth) error {
 }
 
 // Remove removes a country from the repository
-func (r *MongoOAuthRepository) Remove(id string) error {
+func (r *MongoAPISpecRepository) Remove(id string) error {
 	if false == bson.IsObjectIdHex(id) {
-		return ErrInvalidID
+		return errors.ErrInvalidID
 	}
 
 	err := r.coll.RemoveId(bson.ObjectIdHex(id))

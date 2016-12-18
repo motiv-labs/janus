@@ -1,4 +1,4 @@
-package janus
+package api
 
 import (
 	"net/http"
@@ -11,9 +11,12 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-type OAuthAPI struct{}
+type API struct {
+	Loader *Loader
+}
 
-func (u *OAuthAPI) Get() http.HandlerFunc {
+// GET /apps
+func (u *API) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		repo := u.getRepository(u.getDatabase(r))
 
@@ -26,15 +29,15 @@ func (u *OAuthAPI) Get() http.HandlerFunc {
 	}
 }
 
-// GetBy gets an oauth server by its id
-func (u *OAuthAPI) GetBy() http.HandlerFunc {
+// GetBy gets an application by its id
+func (u *API) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := router.FromContext(r.Context()).ByName("id")
 		repo := u.getRepository(u.getDatabase(r))
 
 		data, err := repo.FindByID(id)
 		if data.ID == "" {
-			panic(errors.New(http.StatusNotFound, "OAuth server not found"))
+			panic(errors.New(http.StatusNotFound, "Application not found"))
 		}
 
 		if err != nil {
@@ -45,7 +48,8 @@ func (u *OAuthAPI) GetBy() http.HandlerFunc {
 	}
 }
 
-func (u *OAuthAPI) PutBy() http.HandlerFunc {
+// PUT /apps/:id
+func (u *API) PutBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
@@ -53,7 +57,7 @@ func (u *OAuthAPI) PutBy() http.HandlerFunc {
 		repo := u.getRepository(u.getDatabase(r))
 		definition, err := repo.FindByID(id)
 		if definition.ID == "" {
-			panic(errors.New(http.StatusNotFound, "OAuth server not found"))
+			panic(errors.New(http.StatusNotFound, "Application not found"))
 		}
 
 		if err != nil {
@@ -66,30 +70,35 @@ func (u *OAuthAPI) PutBy() http.HandlerFunc {
 		}
 
 		repo.Add(definition)
+		u.Loader.Load()
+
 		response.JSON(w, http.StatusOK, definition)
 	}
 }
 
-func (u *OAuthAPI) Post() http.HandlerFunc {
+// POST /apps
+func (u *API) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		repo := u.getRepository(u.getDatabase(r))
-		var oauth OAuth
+		definition := NewDefinition()
 
-		err := request.BindJSON(r, &oauth)
+		err := request.BindJSON(r, definition)
 		if nil != err {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		err = repo.Add(&oauth)
+		err = repo.Add(definition)
 		if nil != err {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		response.JSON(w, http.StatusCreated, oauth)
+		u.Loader.Load()
+		response.JSON(w, http.StatusOK, definition)
 	}
 }
 
-func (u *OAuthAPI) DeleteBy() http.HandlerFunc {
+// DELETE /apps/:param1
+func (u *API) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := router.FromContext(r.Context()).ByName("id")
 		repo := u.getRepository(u.getDatabase(r))
@@ -99,11 +108,12 @@ func (u *OAuthAPI) DeleteBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
+		u.Loader.Load()
 		response.JSON(w, http.StatusNoContent, nil)
 	}
 }
 
-func (u *OAuthAPI) getDatabase(r *http.Request) *mgo.Database {
+func (u *API) getDatabase(r *http.Request) *mgo.Database {
 	db := r.Context().Value(middleware.ContextKeyDatabase)
 
 	if nil == db {
@@ -114,8 +124,8 @@ func (u *OAuthAPI) getDatabase(r *http.Request) *mgo.Database {
 }
 
 // GetRepository gets the repository for the handlers
-func (u *OAuthAPI) getRepository(db *mgo.Database) *MongoOAuthRepository {
-	repo, err := NewMongoOAuthRepository(db)
+func (u *API) getRepository(db *mgo.Database) *MongoAPISpecRepository {
+	repo, err := NewMongoAppRepository(db)
 	if err != nil {
 		panic(errors.New(http.StatusInternalServerError, err.Error()))
 	}

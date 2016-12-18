@@ -1,4 +1,4 @@
-package janus
+package oauth
 
 import (
 	"context"
@@ -8,7 +8,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/errors"
-	"github.com/hellofresh/janus/oauth"
 	"github.com/hellofresh/janus/request"
 	"github.com/hellofresh/janus/session"
 )
@@ -20,17 +19,17 @@ var (
 	AuthHeaderValue = request.ContextKey("auth_header")
 )
 
-// Oauth2KeyExistsMiddleware checks the integrity of the provided OAuth headers
-type Oauth2KeyExistsMiddleware struct {
-	manager *oauth.Manager
+// KeyExistsMiddleware checks the integrity of the provided OAuth headers
+type KeyExistsMiddleware struct {
+	manager *Manager
 }
 
-func NewOauth2KeyExistsMiddleware(manager *oauth.Manager) *Oauth2KeyExistsMiddleware {
-	return &Oauth2KeyExistsMiddleware{manager}
+func NewKeyExistsMiddleware(manager *Manager) *KeyExistsMiddleware {
+	return &KeyExistsMiddleware{manager}
 }
 
 // Handler is the middleware method.
-func (m *Oauth2KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
+func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Debug("Starting Oauth2KeyExists middleware")
 		logger := log.WithFields(log.Fields{
@@ -73,7 +72,7 @@ func (m *Oauth2KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 }
 
 // CheckSessionAndIdentityForValidKey ensures we have the valid key in the session store
-func (m *Oauth2KeyExistsMiddleware) CheckSessionAndIdentityForValidKey(key string) (session.SessionState, bool) {
+func (m *KeyExistsMiddleware) CheckSessionAndIdentityForValidKey(key string) (session.SessionState, bool) {
 	var thisSession session.SessionState
 
 	// Checks if the key is present on the cache and if it didn't expire yet

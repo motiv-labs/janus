@@ -1,4 +1,4 @@
-package janus
+package oauth
 
 import (
 	"net/http"
@@ -11,12 +11,11 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-type AppsAPI struct {
-	APIManager *APIManager
+type API struct {
+	Loader *Loader
 }
 
-// GET /apps
-func (u *AppsAPI) Get() http.HandlerFunc {
+func (u *API) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		repo := u.getRepository(u.getDatabase(r))
 
@@ -29,15 +28,15 @@ func (u *AppsAPI) Get() http.HandlerFunc {
 	}
 }
 
-// GetBy gets an application by its id
-func (u *AppsAPI) GetBy() http.HandlerFunc {
+// GetBy gets an oauth server by its id
+func (u *API) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := router.FromContext(r.Context()).ByName("id")
 		repo := u.getRepository(u.getDatabase(r))
 
 		data, err := repo.FindByID(id)
 		if data.ID == "" {
-			panic(errors.New(http.StatusNotFound, "Application not found"))
+			panic(errors.New(http.StatusNotFound, "OAuth server not found"))
 		}
 
 		if err != nil {
@@ -48,57 +47,58 @@ func (u *AppsAPI) GetBy() http.HandlerFunc {
 	}
 }
 
-// PUT /apps/:id
-func (u *AppsAPI) PutBy() http.HandlerFunc {
+func (u *API) PutBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
 		id := router.FromContext(r.Context()).ByName("id")
 		repo := u.getRepository(u.getDatabase(r))
-		definition, err := repo.FindByID(id)
-		if definition.ID == "" {
-			panic(errors.New(http.StatusNotFound, "Application not found"))
+		oauth, err := repo.FindByID(id)
+		if oauth.ID == "" {
+			panic(errors.New(http.StatusNotFound, "OAuth server not found"))
 		}
 
 		if err != nil {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		err = request.BindJSON(r, definition)
+		err = request.BindJSON(r, oauth)
 		if nil != err {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		repo.Add(definition)
-		u.APIManager.Load()
-
-		response.JSON(w, http.StatusOK, definition)
-	}
-}
-
-// POST /apps
-func (u *AppsAPI) Post() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		repo := u.getRepository(u.getDatabase(r))
-		definition := NewAPIDefinition()
-
-		err := request.BindJSON(r, definition)
-		if nil != err {
-			panic(errors.New(http.StatusInternalServerError, err.Error()))
-		}
-
-		err = repo.Add(definition)
+		err = repo.Add(oauth)
 		if nil != err {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		u.APIManager.Load()
-		response.JSON(w, http.StatusOK, definition)
+		u.Loader.Load()
+
+		response.JSON(w, http.StatusOK, oauth)
 	}
 }
 
-// DELETE /apps/:param1
-func (u *AppsAPI) DeleteBy() http.HandlerFunc {
+func (u *API) Post() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		repo := u.getRepository(u.getDatabase(r))
+		var oauth OAuth
+
+		err := request.BindJSON(r, &oauth)
+		if nil != err {
+			panic(errors.New(http.StatusInternalServerError, err.Error()))
+		}
+
+		err = repo.Add(&oauth)
+		if nil != err {
+			panic(errors.New(http.StatusBadRequest, err.Error()))
+		}
+
+		u.Loader.Load()
+		response.JSON(w, http.StatusCreated, oauth)
+	}
+}
+
+func (u *API) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := router.FromContext(r.Context()).ByName("id")
 		repo := u.getRepository(u.getDatabase(r))
@@ -108,12 +108,12 @@ func (u *AppsAPI) DeleteBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		u.APIManager.Load()
+		u.Loader.Load()
 		response.JSON(w, http.StatusNoContent, nil)
 	}
 }
 
-func (u *AppsAPI) getDatabase(r *http.Request) *mgo.Database {
+func (u *API) getDatabase(r *http.Request) *mgo.Database {
 	db := r.Context().Value(middleware.ContextKeyDatabase)
 
 	if nil == db {
@@ -124,8 +124,8 @@ func (u *AppsAPI) getDatabase(r *http.Request) *mgo.Database {
 }
 
 // GetRepository gets the repository for the handlers
-func (u *AppsAPI) getRepository(db *mgo.Database) *MongoAPISpecRepository {
-	repo, err := NewMongoAppRepository(db)
+func (u *API) getRepository(db *mgo.Database) *MongoRepository {
+	repo, err := NewMongoRepository(db)
 	if err != nil {
 		panic(errors.New(http.StatusInternalServerError, err.Error()))
 	}

@@ -1,49 +1,50 @@
-package janus
+package oauth
 
-import log "github.com/Sirupsen/logrus"
+import (
+	log "github.com/Sirupsen/logrus"
+	"github.com/hellofresh/janus/proxy"
+)
 
-type OAuthRegister struct{}
-
-func (m *OAuthRegister) GetProxiesForServer(oauth *OAuth) []Proxy {
+func GetProxiesForServer(oauth *OAuth) []proxy.Proxy {
 	log.Debug("Loading oauth configuration")
-	var proxies []Proxy
+	var proxies []proxy.Proxy
 
 	//oauth proxy
 	log.Debug("Registering authorize endpoint")
-	authorizeProxy := oauth.OauthEndpoints.Authorize
-	if validateProxy(authorizeProxy) {
+	authorizeProxy := oauth.Endpoints.Authorize
+	if proxy.Validate(authorizeProxy) {
 		proxies = append(proxies, authorizeProxy)
 	} else {
 		log.Debug("No authorize endpoint")
 	}
 
 	log.Debug("Registering token endpoint")
-	tokenProxy := oauth.OauthEndpoints.Token
-	if validateProxy(tokenProxy) {
+	tokenProxy := oauth.Endpoints.Token
+	if proxy.Validate(tokenProxy) {
 		proxies = append(proxies, tokenProxy)
 	} else {
 		log.Debug("No token endpoint")
 	}
 
 	log.Debug("Registering info endpoint")
-	infoProxy := oauth.OauthEndpoints.Info
-	if validateProxy(infoProxy) {
+	infoProxy := oauth.Endpoints.Info
+	if proxy.Validate(infoProxy) {
 		proxies = append(proxies, infoProxy)
 	} else {
 		log.Debug("No info endpoint")
 	}
 
 	log.Debug("Registering create client endpoint")
-	createProxy := oauth.OauthClientEndpoints.Create
-	if validateProxy(createProxy) {
+	createProxy := oauth.ClientEndpoints.Create
+	if proxy.Validate(createProxy) {
 		proxies = append(proxies, createProxy)
 	} else {
 		log.Debug("No client create endpoint")
 	}
 
 	log.Debug("Registering remove client endpoint")
-	removeProxy := oauth.OauthClientEndpoints.Remove
-	if validateProxy(removeProxy) {
+	removeProxy := oauth.ClientEndpoints.Remove
+	if proxy.Validate(removeProxy) {
 		proxies = append(proxies, removeProxy)
 	} else {
 		log.Debug("No client remove endpoint")

@@ -1,4 +1,4 @@
-package janus
+package oauth
 
 import (
 	"net/http"
@@ -11,17 +11,17 @@ import (
 	"github.com/hellofresh/janus/errors"
 )
 
-// Oauth2SecretMiddleware prevents requests to an API from exceeding a specified rate limit.
-type Oauth2SecretMiddleware struct {
-	oauthSpec *OAuthSpec
+// SecretMiddleware prevents requests to an API from exceeding a specified rate limit.
+type SecretMiddleware struct {
+	oauth *OAuth
 }
 
-func NewOauth2SecretMiddleware(oauthSpec *OAuthSpec) *Oauth2SecretMiddleware {
-	return &Oauth2SecretMiddleware{oauthSpec}
+func NewSecretMiddleware(oauth *OAuth) *SecretMiddleware {
+	return &SecretMiddleware{oauth}
 }
 
 // Handler is the middleware method.
-func (m *Oauth2SecretMiddleware) Handler(handler http.Handler) http.Handler {
+func (m *SecretMiddleware) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Debug("Starting Oauth2Secret middleware")
 
@@ -38,7 +38,7 @@ func (m *Oauth2SecretMiddleware) Handler(handler http.Handler) http.Handler {
 			return
 		}
 
-		clientSecret, exists := m.oauthSpec.Secrets[clientID]
+		clientSecret, exists := m.oauth.Secrets[clientID]
 		if false == exists {
 			panic(errors.ErrClientIdNotFound)
 		}
@@ -49,7 +49,7 @@ func (m *Oauth2SecretMiddleware) Handler(handler http.Handler) http.Handler {
 }
 
 // ChangeRequest modifies the request to add the Authorization headers.
-func (m *Oauth2SecretMiddleware) ChangeRequest(req *http.Request, clientID, clientSecret string) {
+func (m *SecretMiddleware) ChangeRequest(req *http.Request, clientID, clientSecret string) {
 	log.Debug("Modifying request")
 	authString := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", clientID, clientSecret)))
 	req.Header.Set("Authorization", fmt.Sprintf("Basic %s", authString))

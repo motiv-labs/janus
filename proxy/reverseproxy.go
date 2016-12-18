@@ -1,4 +1,4 @@
-package janus
+package proxy
 
 import (
 	"net/http"
