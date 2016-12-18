@@ -9,7 +9,7 @@ import (
 	"gopkg.in/redis.v3"
 )
 
-var APILoader = APIDefinitionLoader{}
+var apiLoader = APILoader{}
 
 type APIManager struct {
 	proxyRegister *ProxyRegister
@@ -100,11 +100,11 @@ func (m *APIManager) LoadOAuthServers(oauthServers []*OAuthSpec, oauthManager *o
 //getAPISpecs Load application specs from datasource
 func (m *APIManager) getAPISpecs() []*APISpec {
 	log.Debug("Using App Configuration from Mongo DB")
-	return APILoader.LoadDefinitionsFromDatastore(m.accessor.Session)
+	return apiLoader.LoadDefinitionsFromDatastore(m.accessor.Session)
 }
 
 //getOAuthServers Load oauth servers from datasource
 func (m *APIManager) getOAuthServers() []*OAuthSpec {
 	log.Debug("Using Oauth servers configuration from Mongo DB")
-	return APILoader.LoadOauthServersFromDatastore(m.accessor.Session)
+	return apiLoader.LoadOauthServersFromDatastore(m.accessor.Session)
 }

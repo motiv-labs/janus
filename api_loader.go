@@ -5,15 +5,15 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-// APIDefinitionLoader will load an Api definition from a storage system. It has two methods LoadDefinitionsFromMongo()
+// APILoader will load an Api definition from a storage system. It has two methods LoadDefinitionsFromMongo()
 // and LoadDefinitions(), each will pull api specifications from different locations.
-type APIDefinitionLoader struct{}
+type APILoader struct{}
 
-func (a *APIDefinitionLoader) LoadDefinitions(dir string) {
+func (a *APILoader) LoadDefinitions(dir string) {
 
 }
 
-func (a *APIDefinitionLoader) LoadDefinitionsFromDatastore(dbSession *mgo.Session) []*APISpec {
+func (a *APILoader) LoadDefinitionsFromDatastore(dbSession *mgo.Session) []*APISpec {
 	repo, err := NewMongoAppRepository(dbSession.DB(""))
 	if err != nil {
 		log.Panic(err)
@@ -34,7 +34,7 @@ func (a *APIDefinitionLoader) LoadDefinitionsFromDatastore(dbSession *mgo.Sessio
 	return APISpecs
 }
 
-func (a *APIDefinitionLoader) LoadOauthServersFromDatastore(dbSession *mgo.Session) []*OAuthSpec {
+func (a *APILoader) LoadOauthServersFromDatastore(dbSession *mgo.Session) []*OAuthSpec {
 	repo, err := NewMongoOAuthRepository(dbSession.DB(""))
 	if err != nil {
 		log.Panic(err)
