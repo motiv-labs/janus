@@ -13,6 +13,7 @@
         ],
         "preserve_host_header": false,
         "strip_listen_path": true,
+        "append_listen_path": false,
         "target_list": [],
         "target_url": "https://jsonplaceholder.typicode.com/posts"
     },
