@@ -59,10 +59,8 @@ func (t *AwareTransport) RoundTrip(req *http.Request) (resp *http.Response, err 
 		defer resp.Body.Close()
 		bodyBytes, _ = ioutil.ReadAll(resp.Body)
 
-		// Use the content
-		log.Info("Setting body")
-
 		if marshalErr := json.Unmarshal(bodyBytes, &newSession); marshalErr == nil {
+			log.Debug("Setting body in the oauth storage")
 			t.manager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
 		}
 

@@ -21,12 +21,12 @@ type Proxy struct {
 //Validate validates proxy data
 func Validate(proxy Proxy) bool {
 	if proxy.ListenPath == "" {
-		log.Error("Listen path is empty")
+		log.Warning("Listen path is empty")
 		return false
 	}
 
 	if strings.Contains(proxy.ListenPath, " ") {
-		log.Error("Listen path contains spaces, is invalid")
+		log.Warning("Listen path contains spaces, is invalid")
 		return false
 	}
 
