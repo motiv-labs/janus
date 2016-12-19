@@ -1,5 +1,5 @@
-hash: 81087b1bf238275a97a16dc2f7b3c698c68e6619c0d03cc8aa2fe42ab56ef46a
-updated: 2016-12-19T10:41:46.939336497+01:00
+hash: eb94fe82c713e7e665df013d5123d14d4c9fd3a53e545b7ee0f9f9695352287d
+updated: 2016-12-19T10:44:01.458583662+01:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
@@ -9,10 +9,6 @@ imports:
   version: 5cb0ec25af2dd6a7d3718b5aa05dc48e192473bc
 - name: github.com/etcinit/speedbump
   version: 0dd4ce600c6cbf0f4d033846269f029dacf30cad
-- name: github.com/gin-gonic/gin
-  version: 2dae550eb5392006a4582ce9c90016a9b5a74e8b
-- name: github.com/hellofresh/ginger-middleware
-  version: ec61f5a5d55ea819c1f9890510d997e558cbdfaa
 - name: github.com/justinas/alice
   version: 052b8b6c18edb9db317af86806d8e00ebaa94160
 - name: github.com/kelseyhightower/envconfig

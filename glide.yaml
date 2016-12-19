@@ -10,8 +10,6 @@ import:
   version: ^4.0.0
 - package: github.com/etcinit/speedbump
   version: ^0.2.0
-- package: github.com/gin-gonic/gin
-  version: v1.0-rc.2
 - package: github.com/kelseyhightower/envconfig
   version: ^1.1.0
 - package: gopkg.in/mgo.v2
@@ -19,7 +17,6 @@ import:
   - bson
 - package: gopkg.in/redis.v3
   version: ^3.6.4
-- package: github.com/hellofresh/ginger-middleware
 - package: gopkg.in/alexcesaro/statsd.v2
   version: ~2.0.0
 - package: github.com/dimfeld/httptreemux
