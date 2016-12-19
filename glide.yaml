@@ -30,6 +30,7 @@ import:
 - package: github.com/justinas/alice
   version: ^1.0.0
 - package: github.com/dimfeld/httppath
+- package: github.com/bshuster-repo/logrus-logstash-hook
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.2.0

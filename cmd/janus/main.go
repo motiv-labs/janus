@@ -6,6 +6,7 @@ import (
 	"os"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/bshuster-repo/logrus-logstash-hook"
 	"github.com/hellofresh/janus/api"
 	"github.com/hellofresh/janus/config"
 	"github.com/hellofresh/janus/jwt"
@@ -20,7 +21,9 @@ import (
 // initLogger initializes the logger config
 func initLogger(config *config.Specification) {
 	log.SetOutput(os.Stderr)
-	// log.SetFormatter(&logstash.LogstashFormatter{Type: config.Application.Name})
+	log.SetFormatter(&logrus_logstash.LogstashFormatter{
+		Type: config.Application.Name,
+	})
 
 	if config.Debug {
 		log.SetLevel(log.DebugLevel)
