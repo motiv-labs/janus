@@ -3,25 +3,30 @@ package oauth
 import (
 	"time"
 
-	"github.com/RangelReale/osin"
 	"github.com/hellofresh/janus/cors"
 	"github.com/hellofresh/janus/proxy"
 	"gopkg.in/mgo.v2/bson"
 )
 
+// AccessRequestType is the type for OAuth param `grant_type`
+type AccessRequestType string
+
+// AuthorizeRequestType is the type for OAuth param `response_type`
+type AuthorizeRequestType string
+
 // OAuth holds the configuration for oauth proxies
 type OAuth struct {
-	ID                     bson.ObjectId               `bson:"_id,omitempty" json:"id,omitempty" valid:"required"`
-	Name                   string                      `bson:"name" json:"name" valid:"required"`
-	CreatedAt              time.Time                   `bson:"created_at" json:"created_at" valid:"-"`
-	UpdatedAt              time.Time                   `bson:"updated_at" json:"updated_at" valid:"-"`
-	Endpoints              Endpoints                   `bson:"oauth_endpoints" json:"oauth_endpoints"`
-	ClientEndpoints        ClientEndpoints             `bson:"oauth_client_endpoints" json:"oauth_client_endpoints"`
-	AllowedAccessTypes     []osin.AccessRequestType    `bson:"allowed_access_types" json:"allowed_access_types"`
-	AllowedAuthorizeTypes  []osin.AuthorizeRequestType `bson:"allowed_authorize_types" json:"allowed_authorize_types"`
-	AuthorizeLoginRedirect string                      `bson:"auth_login_redirect" json:"auth_login_redirect"`
-	Secrets                map[string]string           `bson:"secrets" json:"secrets"`
-	CorsMeta               cors.Meta                   `bson:"cors_meta" json:"cors_meta" valid:"cors_meta"`
+	ID                     bson.ObjectId          `bson:"_id,omitempty" json:"id,omitempty" valid:"required"`
+	Name                   string                 `bson:"name" json:"name" valid:"required"`
+	CreatedAt              time.Time              `bson:"created_at" json:"created_at" valid:"-"`
+	UpdatedAt              time.Time              `bson:"updated_at" json:"updated_at" valid:"-"`
+	Endpoints              Endpoints              `bson:"oauth_endpoints" json:"oauth_endpoints"`
+	ClientEndpoints        ClientEndpoints        `bson:"oauth_client_endpoints" json:"oauth_client_endpoints"`
+	AllowedAccessTypes     []AccessRequestType    `bson:"allowed_access_types" json:"allowed_access_types"`
+	AllowedAuthorizeTypes  []AuthorizeRequestType `bson:"allowed_authorize_types" json:"allowed_authorize_types"`
+	AuthorizeLoginRedirect string                 `bson:"auth_login_redirect" json:"auth_login_redirect"`
+	Secrets                map[string]string      `bson:"secrets" json:"secrets"`
+	CorsMeta               cors.Meta              `bson:"cors_meta" json:"cors_meta" valid:"cors_meta"`
 }
 
 // Endpoints defines the oauth endpoints that wil be proxied
