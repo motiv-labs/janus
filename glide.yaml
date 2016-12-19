@@ -29,6 +29,7 @@ import:
   version: ^3.0.0
 - package: github.com/justinas/alice
   version: ^1.0.0
+- package: github.com/dimfeld/httppath
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.2.0
