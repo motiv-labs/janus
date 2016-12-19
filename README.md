@@ -69,12 +69,16 @@ And then just define where your dependencies are located
 ```sh
 export DATABASE_DSN="mongodb://localhost:27017/janus"
 export REDIS_DSN="redis://localhost:6379"
+export SECRET="yourSecret"
+export ADMIN_USERNAME="admin"
+export ADMIN_PASSWORD="admin"
 ```
 
 If you want you can have a stastd server so you can have some metrics about your gateway. For that just define:
 
 ```sh
 export STATSD_DSN="statsd:8125"
+export STATSD_PREFIX="janus."
 ```
 
 ## Getting Started

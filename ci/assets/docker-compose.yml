@@ -12,6 +12,9 @@ services:
     #         REDIS_DSN: 'redis:6379'
     #         STATSD_DSN: 'statsd:8125'
     #         STATSD_PREFIX: 'janus-docker.'
+    #         SECRET: 'secret key'
+    #         ADMIN_USERNAME: 'admin'
+    #         ADMIN_PASSWORD: 'admin'
 
     mongodb:
         image: mongo
