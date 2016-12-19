@@ -1,36 +1,26 @@
-hash: 56da7de8426dad2315350f7cfb375744648a3d8a4f7ed789b7af785fa6fc9099
-updated: 2016-11-21T11:45:35.502662227+01:00
+hash: 264e3af97fdbea6af31966ad5c4549552b6542d00b960a16aa9d8489f731abf6
+updated: 2016-12-19T11:16:14.338911649+01:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
+- name: github.com/dgrijalva/jwt-go
+  version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
+- name: github.com/dimfeld/httppath
+  version: c8e499c3ef3c3e272ed8bdcc1ccf39f73c88debc
+- name: github.com/dimfeld/httptreemux
+  version: 5cb0ec25af2dd6a7d3718b5aa05dc48e192473bc
 - name: github.com/etcinit/speedbump
   version: 0dd4ce600c6cbf0f4d033846269f029dacf30cad
 - name: github.com/facebookgo/clock
   version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
-- name: github.com/gin-gonic/gin
-  version: 2dae550eb5392006a4582ce9c90016a9b5a74e8b
-  subpackages:
-  - binding
-  - render
-- name: github.com/golang/protobuf
-  version: 2402d76f3d41f928c7902a765dfc872356dd3aad
-  subpackages:
-  - proto
-- name: github.com/hellofresh/ginger-middleware
-  version: ec61f5a5d55ea819c1f9890510d997e558cbdfaa
-  subpackages:
-  - mongodb
-  - nice
-- name: github.com/itsjamie/gin-cors
-  version: 97b4a9da79331dfa2b6d35f4cdd1e50f5148859c
+- name: github.com/justinas/alice
+  version: 052b8b6c18edb9db317af86806d8e00ebaa94160
 - name: github.com/kelseyhightower/envconfig
   version: 9aca109c9aec4633fced9717c4a09ecab3d33111
-- name: github.com/manucorporat/sse
-  version: ee05b128a739a0fb76c7ebd3ae4810c1de808d6d
-- name: github.com/pborman/uuid
-  version: c55201b036063326c5b1b89ccfe45a184973d073
-- name: github.com/RangelReale/osin
-  version: 4f10152eca12dd6663009dc2e9377f2fe4b18a78
+- name: github.com/rs/cors
+  version: a62a804a8a009876ca59105f7899938a1349f4b3
+- name: github.com/rs/xhandler
+  version: d9d9599b6aaf6a058cb7b1f48291ded2cbd13390
 - name: github.com/Sirupsen/logrus
   version: d26492970760ca5d33129d2d799e34be5c4782eb
 - name: golang.org/x/net
@@ -43,14 +33,8 @@ imports:
   - unix
 - name: gopkg.in/alexcesaro/statsd.v2
   version: 7fea3f0d2fab1ad973e641e51dba45443a311a90
-- name: gopkg.in/appleboy/gin-jwt.v2
-  version: 89be89cdc6ee002b5c9b95fb57963ad7e746a82c
 - name: gopkg.in/bsm/ratelimit.v1
   version: db14e161995a5177acef654cb0dd785e8ee8bc22
-- name: gopkg.in/dgrijalva/jwt-go.v3
-  version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
-- name: gopkg.in/go-playground/validator.v8
-  version: c193cecd124b5cc722d7ee5538e945bdb3348435
 - name: gopkg.in/mgo.v2
   version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
   subpackages:
@@ -65,8 +49,6 @@ imports:
   - internal/consistenthash
   - internal/hashtag
   - internal/pool
-- name: gopkg.in/yaml.v2
-  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
 testImports:
 - name: github.com/onsi/ginkgo
   version: 462326b1628e124b23f42e87a8f2750e3c4e2d24
@@ -99,3 +81,5 @@ testImports:
   - matchers/support/goraph/node
   - matchers/support/goraph/util
   - types
+- name: gopkg.in/yaml.v2
+  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
