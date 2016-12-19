@@ -1,6 +1,8 @@
 package api
 
 import (
+	"sync"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/etcinit/speedbump"
 	"github.com/hellofresh/janus/cors"
@@ -13,6 +15,7 @@ import (
 )
 
 type Loader struct {
+	lock          sync.Mutex
 	proxyRegister *proxy.Register
 	redisClient   *redis.Client
 	accessor      *middleware.DatabaseAccessor
@@ -21,7 +24,7 @@ type Loader struct {
 
 // NewLoader creates a new instance of the api manager
 func NewLoader(router router.Router, redisClient *redis.Client, accessor *middleware.DatabaseAccessor, proxyRegister *proxy.Register, manager *oauth.Manager) *Loader {
-	return &Loader{proxyRegister, redisClient, accessor, manager}
+	return &Loader{sync.Mutex{}, proxyRegister, redisClient, accessor, manager}
 }
 
 // Load loads all api specs from a datasource
@@ -32,6 +35,8 @@ func (m *Loader) Load() {
 
 // LoadApps load application middleware
 func (m *Loader) LoadApps(apiSpecs []*Spec) {
+	m.lock.Lock()
+	defer m.lock.Unlock()
 	log.Debug("Loading API configurations")
 
 	for _, referenceSpec := range apiSpecs {
