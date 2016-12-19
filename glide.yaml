@@ -24,8 +24,6 @@ import:
   version: ~2.0.0
 - package: github.com/dimfeld/httptreemux
   version: ^3.5.1
-- package: github.com/urfave/negroni
-  version: ^0.2.0
 - package: github.com/rs/cors
   version: ^1.0.0
 - package: github.com/rs/xhandler
