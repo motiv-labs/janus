@@ -12,6 +12,7 @@ type Proxy struct {
 	ListenPath                  string   `bson:"listen_path" json:"listen_path" valid:"required"`
 	TargetURL                   string   `bson:"target_url" json:"target_url" valid:"url,required"`
 	StripListenPath             bool     `bson:"strip_listen_path" json:"strip_listen_path"`
+	AppendListenPath            bool     `bson:"append_listen_path" json:"append_listen_path"`
 	EnableLoadBalancing         bool     `bson:"enable_load_balancing" json:"enable_load_balancing"`
 	TargetList                  []string `bson:"target_list" json:"target_list"`
 	CheckHostAgainstUptimeTests bool     `bson:"check_host_against_uptime_tests" json:"check_host_against_uptime_tests"`

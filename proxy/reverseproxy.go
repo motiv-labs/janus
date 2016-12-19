@@ -32,27 +32,32 @@ func NewSingleHostReverseProxy(proxy Proxy, transport http.RoundTripper) *httput
 		req.URL.Host = target.Host
 		path := target.Path
 
+		if proxy.AppendListenPath {
+			log.Debug("Appending listen path to the target url")
+			path = singleJoiningSlash(target.Path, req.URL.Path)
+		}
+
 		if proxy.StripListenPath {
 			path = singleJoiningSlash(target.Path, req.URL.Path)
-
 			matcher := router.NewListenPathMatcher()
 			listenPath := matcher.Extract(proxy.ListenPath)
 
-			log.Debug("Stripping: ", listenPath)
+			log.Debugf("Stripping listen path: %s", listenPath)
 			path = strings.Replace(path, listenPath, "", 1)
-
-			log.Debug("Upstream Path is: ", path)
 			if !strings.HasSuffix(target.Path, "/") && strings.HasSuffix(path, "/") {
 				path = path[:len(path)-1]
 			}
 		}
 
+		log.Debugf("Upstream Path is: %s", path)
 		req.URL.Path = path
 
 		// This is very important to avoid problems with ssl verification for the HOST header
 		if !proxy.PreserveHostHeader {
+			log.Debug("Preserving the host header")
 			req.Host = target.Host
 		}
+
 		if targetQuery == "" || req.URL.RawQuery == "" {
 			req.URL.RawQuery = targetQuery + req.URL.RawQuery
 		} else {
