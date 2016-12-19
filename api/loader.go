@@ -20,11 +20,12 @@ type Loader struct {
 	redisClient   *redis.Client
 	accessor      *middleware.DatabaseAccessor
 	manager       *oauth.Manager
+	debug         bool
 }
 
 // NewLoader creates a new instance of the api manager
-func NewLoader(router router.Router, redisClient *redis.Client, accessor *middleware.DatabaseAccessor, proxyRegister *proxy.Register, manager *oauth.Manager) *Loader {
-	return &Loader{sync.Mutex{}, proxyRegister, redisClient, accessor, manager}
+func NewLoader(router router.Router, redisClient *redis.Client, accessor *middleware.DatabaseAccessor, proxyRegister *proxy.Register, manager *oauth.Manager, debug bool) *Loader {
+	return &Loader{sync.Mutex{}, proxyRegister, redisClient, accessor, manager, debug}
 }
 
 // Load loads all api specs from a datasource
@@ -62,7 +63,7 @@ func (m *Loader) LoadApps(apiSpecs []*Spec) {
 			}
 
 			if referenceSpec.CorsMeta.Enabled {
-				handlers = append(handlers, cors.NewMiddleware(referenceSpec.CorsMeta).Handler)
+				handlers = append(handlers, cors.NewMiddleware(referenceSpec.CorsMeta, m.debug).Handler)
 			} else {
 				log.Debug("CORS is not enabled")
 			}

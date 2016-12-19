@@ -134,7 +134,7 @@ func main() {
 
 	router := router.NewHttpTreeMuxRouter()
 	accessor := initializeDatabase(config.DatabaseDSN)
-	router.Use(middleware.NewLogger().Handler, middleware.NewRecovery(RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
+	router.Use(middleware.NewLogger(config.Debug).Handler, middleware.NewRecovery(RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
 
 	redisStorage := initializeRedis(config.StorageDSN)
 	defer redisStorage.Close()
@@ -146,10 +146,10 @@ func main() {
 	transport := oauth.NewAwareTransport(http.DefaultTransport, manager)
 	proxyRegister := &proxy.Register{Router: router, Transport: transport}
 
-	apiLoader := api.NewLoader(router, redisStorage, accessor, proxyRegister, manager)
+	apiLoader := api.NewLoader(router, redisStorage, accessor, proxyRegister, manager, config.Debug)
 	apiLoader.Load()
 
-	oauthLoader := oauth.NewLoader(router, accessor, proxyRegister)
+	oauthLoader := oauth.NewLoader(router, accessor, proxyRegister, config.Debug)
 	oauthLoader.Load()
 
 	authConfig := jwt.NewConfig(config.Credentials)

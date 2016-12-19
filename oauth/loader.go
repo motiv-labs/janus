@@ -12,11 +12,12 @@ import (
 type Loader struct {
 	proxyRegister *proxy.Register
 	accessor      *middleware.DatabaseAccessor
+	debug         bool
 }
 
 // NewLoader creates a new instance of the api manager
-func NewLoader(router router.Router, accessor *middleware.DatabaseAccessor, proxyRegister *proxy.Register) *Loader {
-	return &Loader{proxyRegister, accessor}
+func NewLoader(router router.Router, accessor *middleware.DatabaseAccessor, proxyRegister *proxy.Register, debug bool) *Loader {
+	return &Loader{proxyRegister, accessor, debug}
 }
 
 // Load loads all api specs from a datasource
@@ -34,7 +35,7 @@ func (m *Loader) LoadOAuthServers(oauthServers []*OAuth) {
 		m.proxyRegister.RegisterMany(
 			proxies,
 			NewSecretMiddleware(oauthServer).Handler,
-			cors.NewMiddleware(oauthServer.CorsMeta).Handler,
+			cors.NewMiddleware(oauthServer.CorsMeta, m.debug).Handler,
 		)
 	}
 
