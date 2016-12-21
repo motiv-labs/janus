@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/hellofresh/janus/errors"
+	"github.com/hellofresh/janus/loader"
 	"github.com/hellofresh/janus/middleware"
 	"github.com/hellofresh/janus/request"
 	"github.com/hellofresh/janus/response"
@@ -11,10 +12,18 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-type API struct{}
+// Controller is the api rest controller
+type Controller struct {
+	changeTracker *loader.Tracker
+}
+
+// NewController creates a new instance of Controller
+func NewController(changeTracker *loader.Tracker) *Controller {
+	return &Controller{changeTracker}
+}
 
 // GET /apps
-func (u *API) Get() http.HandlerFunc {
+func (u *Controller) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		repo := u.getRepository(u.getDatabase(r))
 
@@ -28,7 +37,7 @@ func (u *API) Get() http.HandlerFunc {
 }
 
 // GetBy gets an application by its id
-func (u *API) GetBy() http.HandlerFunc {
+func (u *Controller) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := router.FromContext(r.Context()).ByName("id")
 		repo := u.getRepository(u.getDatabase(r))
@@ -47,7 +56,7 @@ func (u *API) GetBy() http.HandlerFunc {
 }
 
 // PUT /apps/:id
-func (u *API) PutBy() http.HandlerFunc {
+func (u *Controller) PutBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
@@ -67,14 +76,17 @@ func (u *API) PutBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		repo.Add(definition)
-
+		err = repo.Add(definition)
+		if nil != err {
+			panic(errors.New(http.StatusBadRequest, err.Error()))
+		}
+		u.changeTracker.Change()
 		response.JSON(w, http.StatusOK, definition)
 	}
 }
 
 // POST /apps
-func (u *API) Post() http.HandlerFunc {
+func (u *Controller) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		repo := u.getRepository(u.getDatabase(r))
 		definition := NewDefinition()
@@ -89,12 +101,13 @@ func (u *API) Post() http.HandlerFunc {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
+		u.changeTracker.Change()
 		response.JSON(w, http.StatusOK, definition)
 	}
 }
 
 // DELETE /apps/:param1
-func (u *API) DeleteBy() http.HandlerFunc {
+func (u *Controller) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := router.FromContext(r.Context()).ByName("id")
 		repo := u.getRepository(u.getDatabase(r))
@@ -104,11 +117,12 @@ func (u *API) DeleteBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
+		u.changeTracker.Change()
 		response.JSON(w, http.StatusNoContent, nil)
 	}
 }
 
-func (u *API) getDatabase(r *http.Request) *mgo.Database {
+func (u *Controller) getDatabase(r *http.Request) *mgo.Database {
 	db := r.Context().Value(middleware.ContextKeyDatabase)
 
 	if nil == db {
@@ -119,7 +133,7 @@ func (u *API) getDatabase(r *http.Request) *mgo.Database {
 }
 
 // GetRepository gets the repository for the handlers
-func (u *API) getRepository(db *mgo.Database) *MongoAPISpecRepository {
+func (u *Controller) getRepository(db *mgo.Database) *MongoAPISpecRepository {
 	repo, err := NewMongoAppRepository(db)
 	if err != nil {
 		panic(errors.New(http.StatusInternalServerError, err.Error()))
