@@ -47,4 +47,4 @@ test:
 # Cleans our project: deletes binaries
 clean:
 	@echo "$(OK_COLOR)==> Cleaning project$(NO_COLOR)"
-	if [ -d ${DIR_OUT} ] ; then rm -f ${DIR_OUT}/* ; fi
+	if [ -d ${DIR_OUT} ] ; then rm -rf ${DIR_OUT}/* ; fi
