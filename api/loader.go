@@ -1,8 +1,6 @@
 package api
 
 import (
-	"sync"
-
 	log "github.com/Sirupsen/logrus"
 	"github.com/etcinit/speedbump"
 	"github.com/hellofresh/janus/cors"
@@ -15,29 +13,26 @@ import (
 )
 
 type Loader struct {
-	lock          sync.Mutex
-	proxyRegister *proxy.Register
-	redisClient   *redis.Client
-	accessor      *middleware.DatabaseAccessor
-	manager       *oauth.Manager
-	debug         bool
+	registerChan *proxy.RegisterChan
+	redisClient  *redis.Client
+	accessor     *middleware.DatabaseAccessor
+	manager      *oauth.Manager
+	debug        bool
 }
 
 // NewLoader creates a new instance of the api manager
-func NewLoader(router router.Router, redisClient *redis.Client, accessor *middleware.DatabaseAccessor, proxyRegister *proxy.Register, manager *oauth.Manager, debug bool) *Loader {
-	return &Loader{sync.Mutex{}, proxyRegister, redisClient, accessor, manager, debug}
+func NewLoader(registerChan *proxy.RegisterChan, redisClient *redis.Client, accessor *middleware.DatabaseAccessor, manager *oauth.Manager, debug bool) *Loader {
+	return &Loader{registerChan, redisClient, accessor, manager, debug}
 }
 
 // Load loads all api specs from a datasource
 func (m *Loader) Load() {
 	specs := m.getAPISpecs()
-	go m.LoadApps(specs)
+	m.LoadApps(specs)
 }
 
 // LoadApps load application middleware
 func (m *Loader) LoadApps(apiSpecs []*Spec) {
-	m.lock.Lock()
-	defer m.lock.Unlock()
 	log.Debug("Loading API configurations")
 
 	for _, referenceSpec := range apiSpecs {
@@ -74,8 +69,7 @@ func (m *Loader) LoadApps(apiSpecs []*Spec) {
 				log.Debug("OAuth2 is not enabled")
 			}
 
-			m.proxyRegister.Register(referenceSpec.Proxy, handlers...)
-
+			m.registerChan.One <- proxy.NewRoute(referenceSpec.Proxy, handlers...)
 			log.Debug("Proxy registered")
 		} else {
 			log.Error("Listen path is empty, skipping...")

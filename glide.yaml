@@ -20,7 +20,7 @@ import:
 - package: gopkg.in/alexcesaro/statsd.v2
   version: ~2.0.0
 - package: github.com/dimfeld/httptreemux
-  version: ^3.5.1
+  version: ^3.6.0
 - package: github.com/rs/cors
   version: ^1.0.0
 - package: github.com/rs/xhandler
@@ -29,8 +29,8 @@ import:
   version: ^3.0.0
 - package: github.com/justinas/alice
   version: ^1.0.0
-- package: github.com/dimfeld/httppath
 - package: github.com/bshuster-repo/logrus-logstash-hook
+- package: github.com/fvbock/endless
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.2.0

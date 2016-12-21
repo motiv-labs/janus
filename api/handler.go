@@ -11,9 +11,7 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-type API struct {
-	Loader *Loader
-}
+type API struct{}
 
 // GET /apps
 func (u *API) Get() http.HandlerFunc {
@@ -70,7 +68,6 @@ func (u *API) PutBy() http.HandlerFunc {
 		}
 
 		repo.Add(definition)
-		u.Loader.Load()
 
 		response.JSON(w, http.StatusOK, definition)
 	}
@@ -92,7 +89,6 @@ func (u *API) Post() http.HandlerFunc {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		u.Loader.Load()
 		response.JSON(w, http.StatusOK, definition)
 	}
 }
@@ -108,7 +104,6 @@ func (u *API) DeleteBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		u.Loader.Load()
 		response.JSON(w, http.StatusNoContent, nil)
 	}
 }

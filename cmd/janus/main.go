@@ -1,15 +1,16 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"net/http"
-	"os"
 
-	log "github.com/Sirupsen/logrus"
-	"github.com/bshuster-repo/logrus-logstash-hook"
+	"github.com/Sirupsen/logrus"
+	"github.com/fvbock/endless"
 	"github.com/hellofresh/janus/api"
 	"github.com/hellofresh/janus/config"
 	"github.com/hellofresh/janus/jwt"
+	"github.com/hellofresh/janus/log"
 	"github.com/hellofresh/janus/middleware"
 	"github.com/hellofresh/janus/oauth"
 	"github.com/hellofresh/janus/proxy"
@@ -18,23 +19,9 @@ import (
 	"gopkg.in/redis.v3"
 )
 
-// initLogger initializes the logger config
-func initLogger(config *config.Specification) {
-	log.SetOutput(os.Stderr)
-	log.SetFormatter(&logrus_logstash.LogstashFormatter{
-		Type: config.Application.Name,
-	})
-
-	if config.Debug {
-		log.SetLevel(log.DebugLevel)
-	} else {
-		log.SetLevel(log.InfoLevel)
-	}
-}
-
 // initializeDatabase initializes a DB connection
-func initializeDatabase(dsn string) *middleware.DatabaseAccessor {
-	accessor, err := middleware.InitDB(dsn)
+func initializeDatabase(config config.Database) *middleware.DatabaseAccessor {
+	accessor, err := middleware.InitDB(config.DSN)
 	if err != nil {
 		log.Fatalf("Couldn't connect to the mongodb database: %s", err.Error())
 	}
@@ -51,28 +38,28 @@ func initializeRedis(dsn string) *redis.Client {
 }
 
 // Initializes new StatsD client if it enabled
-func initializeStatsd(dsn, prefix string) *statsd.Client {
+func initializeStatsd(config config.Statsd) *statsd.Client {
 	var options []statsd.Option
 
-	log.Debugf("Trying to connect to statsd instance: %s", dsn)
-	if len(dsn) == 0 {
+	log.Debugf("Trying to connect to statsd instance: %s", config.DSN)
+	if len(config.DSN) == 0 {
 		log.Debug("Statsd DSN not provided, client will be muted")
 		options = append(options, statsd.Mute(true))
 	} else {
-		options = append(options, statsd.Address(dsn))
+		options = append(options, statsd.Address(config.DSN))
 	}
 
-	if len(prefix) > 0 {
-		options = append(options, statsd.Prefix(prefix))
+	if len(config.Prefix) > 0 {
+		options = append(options, statsd.Prefix(config.Prefix))
 	}
 
 	client, err := statsd.New(options...)
 
 	if err != nil {
 		log.WithError(err).
-			WithFields(log.Fields{
-				"dsn":    dsn,
-				"prefix": prefix,
+			WithFields(logrus.Fields{
+				"dsn":    config.DSN,
+				"prefix": config.Prefix,
 			}).Warning("An error occurred while connecting to StatsD. Client will be muted.")
 	}
 
@@ -80,14 +67,11 @@ func initializeStatsd(dsn, prefix string) *statsd.Client {
 }
 
 //loadAPIEndpoints register api endpoints
-func loadAPIEndpoints(router router.Router, loader *api.Loader, authMiddleware *jwt.Middleware, config *config.Specification) {
+func loadAPIEndpoints(router router.Router, authMiddleware *jwt.Middleware) {
 	log.Debug("Loading API Endpoints")
 
-	// Home endpoint for the gateway
-	router.GET("/", Home(config.Application))
-
 	// Apis endpoints
-	handler := api.API{loader}
+	handler := api.API{}
 	group := router.Group("/apis")
 	group.Use(authMiddleware.Handler)
 	{
@@ -100,11 +84,11 @@ func loadAPIEndpoints(router router.Router, loader *api.Loader, authMiddleware *
 }
 
 //loadOAuthEndpoints register api endpoints
-func loadOAuthEndpoints(router router.Router, loader *oauth.Loader, authMiddleware *jwt.Middleware) {
+func loadOAuthEndpoints(router router.Router, authMiddleware *jwt.Middleware) {
 	log.Debug("Loading OAuth Endpoints")
 
 	// Oauth servers endpoints
-	oAuthHandler := oauth.API{loader}
+	oAuthHandler := oauth.API{}
 	oauthGroup := router.Group("/oauth/servers")
 	oauthGroup.Use(authMiddleware.Handler)
 	{
@@ -129,38 +113,50 @@ func loadAuthEndpoints(router router.Router, authMiddleware *jwt.Middleware) {
 }
 
 func main() {
+	// load global configuration
 	config, err := config.LoadEnv()
 	if nil != err {
 		log.Panic(err.Error())
 	}
-	initLogger(config)
 
-	router := router.NewHttpTreeMuxRouter()
-	accessor := initializeDatabase(config.DatabaseDSN)
-	router.Use(middleware.NewLogger(config.Debug).Handler, middleware.NewRecovery(RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
+	http.DefaultTransport.(*http.Transport).MaxIdleConnsPerHost = config.MaxIdleConnsPerHost
+	if config.InsecureSkipVerify {
+		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+	}
+
+	// logging
+	log.InitLog(config)
+
+	accessor := initializeDatabase(config.Database)
+	defer accessor.Close()
 
 	redisStorage := initializeRedis(config.StorageDSN)
 	defer redisStorage.Close()
 
-	statsdClient := initializeStatsd(config.StatsdDSN, config.StatsdPrefix)
+	statsdClient := initializeStatsd(config.Statsd)
 	defer statsdClient.Close()
+
+	router := router.NewHttpTreeMuxRouter()
+	router.Use(middleware.NewLogger(config.Debug).Handler, middleware.NewRecovery(RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
 
 	manager := &oauth.Manager{redisStorage}
 	transport := oauth.NewAwareTransport(http.DefaultTransport, manager)
-	proxyRegister := &proxy.Register{Router: router, Transport: transport}
+	registerChan := proxy.NewRegisterChan(router, transport)
 
-	apiLoader := api.NewLoader(router, redisStorage, accessor, proxyRegister, manager, config.Debug)
+	apiLoader := api.NewLoader(registerChan, redisStorage, accessor, manager, config.Debug)
 	apiLoader.Load()
 
-	oauthLoader := oauth.NewLoader(router, accessor, proxyRegister, config.Debug)
+	oauthLoader := oauth.NewLoader(registerChan, accessor, config.Debug)
 	oauthLoader.Load()
 
 	authConfig := jwt.NewConfig(config.Credentials)
 	authMiddleware := jwt.NewMiddleware(authConfig)
 
+	// Home endpoint for the gateway
+	router.GET("/", Home(config.Application))
 	loadAuthEndpoints(router, authMiddleware)
-	loadAPIEndpoints(router, apiLoader, authMiddleware, config)
-	loadOAuthEndpoints(router, oauthLoader, authMiddleware)
+	loadAPIEndpoints(router, authMiddleware)
+	loadOAuthEndpoints(router, authMiddleware)
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", config.Port), router))
+	log.Fatal(endless.ListenAndServe(fmt.Sprintf(":%v", config.Port), router))
 }
