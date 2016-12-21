@@ -20,8 +20,8 @@ import (
 )
 
 // initializeDatabase initializes a DB connection
-func initializeDatabase(dsn string) *middleware.DatabaseAccessor {
-	accessor, err := middleware.InitDB(dsn)
+func initializeDatabase(config config.Database) *middleware.DatabaseAccessor {
+	accessor, err := middleware.InitDB(config.DSN)
 	if err != nil {
 		log.Fatalf("Couldn't connect to the mongodb database: %s", err.Error())
 	}
@@ -127,15 +127,17 @@ func main() {
 	// logging
 	log.InitLog(config)
 
-	router := router.NewHttpTreeMuxRouter()
-	accessor := initializeDatabase(config.DatabaseDSN)
-	router.Use(middleware.NewLogger(config.Debug).Handler, middleware.NewRecovery(RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
+	accessor := initializeDatabase(config.Database)
+	defer accessor.Close()
 
 	redisStorage := initializeRedis(config.StorageDSN)
 	defer redisStorage.Close()
 
 	statsdClient := initializeStatsd(config.Statsd)
 	defer statsdClient.Close()
+
+	router := router.NewHttpTreeMuxRouter()
+	router.Use(middleware.NewLogger(config.Debug).Handler, middleware.NewRecovery(RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
 
 	manager := &oauth.Manager{redisStorage}
 	transport := oauth.NewAwareTransport(http.DefaultTransport, manager)
