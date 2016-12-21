@@ -1,5 +1,5 @@
-hash: e5914b5c750204c311cc1970f9ff2746e89bc33cd175292c384896774146f49a
-updated: 2016-12-20T22:01:42.188492205+01:00
+hash: 899a37b6e1f12f5f99b2f45947f47eef8b37ce9f37627fffe573f4300a0e7449
+updated: 2016-12-21T12:52:58.92199423+01:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
@@ -7,8 +7,6 @@ imports:
   version: f93ff950803d2209f053f89fc13e1beea1804791
 - name: github.com/dgrijalva/jwt-go
   version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
-- name: github.com/dimfeld/httppath
-  version: c8e499c3ef3c3e272ed8bdcc1ccf39f73c88debc
 - name: github.com/dimfeld/httptreemux
   version: e26f30cd88e1dd9707cb61d74fa5ee6b444fdb85
 - name: github.com/etcinit/speedbump
