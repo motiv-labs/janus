@@ -10,6 +10,7 @@ import (
 	"github.com/hellofresh/janus/api"
 	"github.com/hellofresh/janus/config"
 	"github.com/hellofresh/janus/jwt"
+	"github.com/hellofresh/janus/loader"
 	"github.com/hellofresh/janus/log"
 	"github.com/hellofresh/janus/middleware"
 	"github.com/hellofresh/janus/oauth"
@@ -67,11 +68,11 @@ func initializeStatsd(config config.Statsd) *statsd.Client {
 }
 
 //loadAPIEndpoints register api endpoints
-func loadAPIEndpoints(router router.Router, authMiddleware *jwt.Middleware) {
+func loadAPIEndpoints(router router.Router, authMiddleware *jwt.Middleware, changeTracker *loader.Tracker) {
 	log.Debug("Loading API Endpoints")
 
 	// Apis endpoints
-	handler := api.API{}
+	handler := api.NewController(changeTracker)
 	group := router.Group("/apis")
 	group.Use(authMiddleware.Handler)
 	{
@@ -84,11 +85,11 @@ func loadAPIEndpoints(router router.Router, authMiddleware *jwt.Middleware) {
 }
 
 //loadOAuthEndpoints register api endpoints
-func loadOAuthEndpoints(router router.Router, authMiddleware *jwt.Middleware) {
+func loadOAuthEndpoints(router router.Router, authMiddleware *jwt.Middleware, changeTracker *loader.Tracker) {
 	log.Debug("Loading OAuth Endpoints")
 
 	// Oauth servers endpoints
-	oAuthHandler := oauth.API{}
+	oAuthHandler := oauth.NewController(changeTracker)
 	oauthGroup := router.Group("/oauth/servers")
 	oauthGroup.Use(authMiddleware.Handler)
 	{
@@ -143,11 +144,14 @@ func main() {
 	transport := oauth.NewAwareTransport(http.DefaultTransport, manager)
 	registerChan := proxy.NewRegisterChan(router, transport)
 
+	changeTracker := loader.NewTracker()
 	apiLoader := api.NewLoader(registerChan, redisStorage, accessor, manager, config.Debug)
 	apiLoader.Load()
+	apiLoader.ListenToChanges(changeTracker)
 
 	oauthLoader := oauth.NewLoader(registerChan, accessor, config.Debug)
 	oauthLoader.Load()
+	oauthLoader.ListenToChanges(changeTracker)
 
 	authConfig := jwt.NewConfig(config.Credentials)
 	authMiddleware := jwt.NewMiddleware(authConfig)
@@ -155,8 +159,8 @@ func main() {
 	// Home endpoint for the gateway
 	router.GET("/", Home(config.Application))
 	loadAuthEndpoints(router, authMiddleware)
-	loadAPIEndpoints(router, authMiddleware)
-	loadOAuthEndpoints(router, authMiddleware)
+	loadAPIEndpoints(router, authMiddleware, changeTracker)
+	loadOAuthEndpoints(router, authMiddleware, changeTracker)
 
 	log.Fatal(endless.ListenAndServe(fmt.Sprintf(":%v", config.Port), router))
 }
