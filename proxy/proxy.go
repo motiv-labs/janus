@@ -4,7 +4,19 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/hellofresh/janus/router"
 )
+
+// Route is the container for a proxy and it's handlers
+type Route struct {
+	proxy    Proxy
+	handlers []router.Constructor
+}
+
+// NewRoute creates an instance of Route
+func NewRoute(proxy Proxy, handlers ...router.Constructor) *Route {
+	return &Route{proxy, handlers}
+}
 
 // Proxy defines proxy rules for a route
 type Proxy struct {
@@ -19,7 +31,7 @@ type Proxy struct {
 	Methods                     []string `bson:"methods" json:"methods"`
 }
 
-//Validate validates proxy data
+// Validate validates proxy data
 func Validate(proxy Proxy) bool {
 	if proxy.ListenPath == "" {
 		log.Warning("Listen path is empty")
