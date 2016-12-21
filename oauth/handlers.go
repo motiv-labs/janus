@@ -11,9 +11,7 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-type API struct {
-	Loader *Loader
-}
+type API struct{}
 
 func (u *API) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -72,8 +70,6 @@ func (u *API) PutBy() http.HandlerFunc {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		u.Loader.Load()
-
 		response.JSON(w, http.StatusOK, oauth)
 	}
 }
@@ -93,7 +89,6 @@ func (u *API) Post() http.HandlerFunc {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		u.Loader.Load()
 		response.JSON(w, http.StatusCreated, oauth)
 	}
 }
@@ -108,7 +103,6 @@ func (u *API) DeleteBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		u.Loader.Load()
 		response.JSON(w, http.StatusNoContent, nil)
 	}
 }
