@@ -32,11 +32,15 @@ integrating an API gateway is a faster, more secure route that writing your own 
 
 This API Gateway offers powerful, yet lightweight features that allow fine gained control over your API ecosystem.
 
-* **RESTFul API** - Full programatic access to the internals makes it easy to manage your API users, keys and Api Configuration from within your systems
-* **Multiple access protocols** - Out of the box, we support JWT, OAtuh2, Basic Auth and Keyless access methods
+* **No dependency hell** - Single binary made with go
+* **REST API** - Full programatic access to the internals makes it easy to manage your API users, keys and Api Configuration from within your systems
 * **Rate Limiting** - Easily rate limit your API users, rate limiting is granular and can be applied on a per-key basis
+* **CORS Filter** - Enable cors for your API,or even for specific endpoints
 * **API Versioning** - API Versions can be easily set and deprecated at a specific time and date
-* **Analytics logging** - Record detailed usage data on who is using your API's (raw data only)
+* **Multiple auth protocols** - Out of the box, we support JWT, OAtuh2 and Basic Auth access methods
+* **Hot-reloading of configuration** - No need to restart the process
+* **Graceful shutdown** - Graceful shutdown of http connections
+* **Docker Image** - Small [official](https://quay.io/repository/hellofresh/janus) docker image included
 
 ## Installation
 
