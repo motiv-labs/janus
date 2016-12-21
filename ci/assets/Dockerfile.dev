@@ -1,5 +1,7 @@
-FROM golang
+FROM golang:1.7-alpine
 
+# Install make and curl
+RUN apk --update add make curl git
 RUN go get github.com/codegangsta/gin
 
 # Set apps home directory.
