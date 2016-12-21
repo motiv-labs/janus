@@ -13,6 +13,11 @@ var (
 	logger *logrus.Entry
 )
 
+func init() {
+	logger = logrus.StandardLogger().WithFields(logrus.Fields{})
+}
+
+// InitLog initializes the basic configuration for the log wrapper
 func InitLog(config *config.Specification) {
 	level, err := logrus.ParseLevel(strings.ToLower(config.LogLevel))
 	if err != nil {
@@ -23,7 +28,6 @@ func InitLog(config *config.Specification) {
 	logrus.SetFormatter(&logrus_logstash.LogstashFormatter{
 		Type: config.Application.Name,
 	})
-	logger = logrus.StandardLogger().WithFields(logrus.Fields{})
 }
 
 // Context sets the Context of the logger
