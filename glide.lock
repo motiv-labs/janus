@@ -1,5 +1,5 @@
-hash: 73f2248bec728e9838e3715880b051604c54b8c84bd7ccd2d84ea7115f584e14
-updated: 2016-12-19T16:46:19.29054833+01:00
+hash: 64bfcbc007dbce88bd407005ebbb97685a2f5b6fff945b720c4cd61ef1bf41ed
+updated: 2016-12-21T08:27:42.376461588+01:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
@@ -10,7 +10,7 @@ imports:
 - name: github.com/dimfeld/httppath
   version: c8e499c3ef3c3e272ed8bdcc1ccf39f73c88debc
 - name: github.com/dimfeld/httptreemux
-  version: 5cb0ec25af2dd6a7d3718b5aa05dc48e192473bc
+  version: e26f30cd88e1dd9707cb61d74fa5ee6b444fdb85
 - name: github.com/etcinit/speedbump
   version: 0dd4ce600c6cbf0f4d033846269f029dacf30cad
 - name: github.com/facebookgo/clock
