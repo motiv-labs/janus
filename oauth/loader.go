@@ -2,6 +2,7 @@ package oauth
 
 import (
 	"github.com/hellofresh/janus/cors"
+	"github.com/hellofresh/janus/loader"
 	"github.com/hellofresh/janus/log"
 	"github.com/hellofresh/janus/middleware"
 	"github.com/hellofresh/janus/proxy"
@@ -17,6 +18,22 @@ type Loader struct {
 // NewLoader creates a new instance of the api manager
 func NewLoader(registerChan *proxy.RegisterChan, accessor *middleware.DatabaseAccessor, debug bool) *Loader {
 	return &Loader{registerChan, accessor, debug}
+}
+
+// ListenToChanges listens to any changes that might require a reload of configurations
+func (m *Loader) ListenToChanges(tracker *loader.Tracker) {
+	go func() {
+		for {
+			select {
+			case <-tracker.StopChan():
+				log.Debug("Stopping listening to api changes....")
+				return
+			case <-tracker.Changed():
+				log.Debug("A changed was identified. Reloading api configurations....")
+				m.Load()
+			}
+		}
+	}()
 }
 
 // Load loads all api specs from a datasource
