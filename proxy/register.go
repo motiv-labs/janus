@@ -3,7 +3,6 @@ package proxy
 import (
 	"net/http"
 	"strings"
-	"sync"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/log"
@@ -44,7 +43,6 @@ func (rc *RegisterChan) listenForRouteChanges(register *Register) {
 
 		case route := <-rc.One:
 			register.Register(route)
-		default:
 		}
 	}
 }
@@ -52,7 +50,6 @@ func (rc *RegisterChan) listenForRouteChanges(register *Register) {
 // Register handles the register of proxies into the choosen router.
 // It also handles the conversion from a proxy to an http.HandlerFunc
 type Register struct {
-	lock      sync.Mutex
 	router    router.Router
 	transport http.RoundTripper
 	proxies   []Proxy
@@ -60,7 +57,7 @@ type Register struct {
 
 // NewRegister creates a new instance of Register
 func NewRegister(router router.Router, transport http.RoundTripper) *Register {
-	return &Register{lock: sync.Mutex{}, router: router, transport: transport}
+	return &Register{router: router, transport: transport}
 }
 
 // RegisterMany registers many proxies at once
@@ -72,9 +69,6 @@ func (p *Register) RegisterMany(routes []*Route) {
 
 // Register register a new proxy
 func (p *Register) Register(route *Route) {
-	p.lock.Lock()
-	defer p.lock.Unlock()
-
 	proxy := route.proxy
 
 	if false == p.Exists(proxy) {
