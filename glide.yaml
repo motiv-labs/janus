@@ -31,6 +31,7 @@ import:
   version: ^1.0.0
 - package: github.com/dimfeld/httppath
 - package: github.com/bshuster-repo/logrus-logstash-hook
+- package: github.com/fvbock/endless
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.2.0

@@ -1,20 +1,22 @@
-hash: 73f2248bec728e9838e3715880b051604c54b8c84bd7ccd2d84ea7115f584e14
-updated: 2016-12-19T16:46:19.29054833+01:00
+hash: e5914b5c750204c311cc1970f9ff2746e89bc33cd175292c384896774146f49a
+updated: 2016-12-20T22:01:42.188492205+01:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
 - name: github.com/bshuster-repo/logrus-logstash-hook
-  version: 544f72d23cd2536636193deff26b6190c47e10bb
+  version: f93ff950803d2209f053f89fc13e1beea1804791
 - name: github.com/dgrijalva/jwt-go
   version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
 - name: github.com/dimfeld/httppath
   version: c8e499c3ef3c3e272ed8bdcc1ccf39f73c88debc
 - name: github.com/dimfeld/httptreemux
-  version: 5cb0ec25af2dd6a7d3718b5aa05dc48e192473bc
+  version: e26f30cd88e1dd9707cb61d74fa5ee6b444fdb85
 - name: github.com/etcinit/speedbump
   version: 0dd4ce600c6cbf0f4d033846269f029dacf30cad
 - name: github.com/facebookgo/clock
   version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
+- name: github.com/fvbock/endless
+  version: 67d0a784ad8ab10a69d12107f6de220db0c18002
 - name: github.com/justinas/alice
   version: 052b8b6c18edb9db317af86806d8e00ebaa94160
 - name: github.com/kelseyhightower/envconfig
