@@ -41,7 +41,7 @@ func init() {
 	})
 }
 
-// initDatabase initializes a DB connection
+// initializes a DB connection
 func init() {
 	accessor, err = middleware.InitDB(globalConfig.Database.DSN)
 	if err != nil {
@@ -49,7 +49,7 @@ func init() {
 	}
 }
 
-// initRedis initializes a Redis connection
+// initializes a Redis connection
 func init() {
 	dsn := globalConfig.StorageDSN
 	log.Debugf("Trying to connect to redis instance: %s", dsn)
@@ -58,7 +58,7 @@ func init() {
 	})
 }
 
-// initStatsd initializes new StatsD client if it enabled
+// initializes new StatsD client if it enabled
 func init() {
 	var options []statsd.Option
 	statsdConfig := globalConfig.Statsd
