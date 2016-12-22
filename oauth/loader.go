@@ -1,9 +1,9 @@
 package oauth
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/cors"
 	"github.com/hellofresh/janus/loader"
-	"github.com/hellofresh/janus/log"
 	"github.com/hellofresh/janus/middleware"
 	"github.com/hellofresh/janus/proxy"
 )
