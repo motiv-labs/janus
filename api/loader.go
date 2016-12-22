@@ -36,7 +36,7 @@ func (m *Loader) ListenToChanges(tracker *loader.Tracker) {
 				log.Debug("Stopping listening to api changes....")
 				return
 			case <-tracker.Changed():
-				log.Debug("A changed was identified. Reloading api configurations....")
+				log.Debug("A change was identified. Reloading api configurations....")
 				m.Load()
 			}
 		}
