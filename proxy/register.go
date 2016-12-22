@@ -4,8 +4,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/Sirupsen/logrus"
-	"github.com/hellofresh/janus/log"
+	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/router"
 )
 
@@ -90,7 +89,7 @@ func (p *Register) doRegister(
 	methods []string,
 	handlers []router.Constructor,
 ) {
-	log.WithFields(logrus.Fields{
+	log.WithFields(log.Fields{
 		"listen_path": listenPath,
 	}).Debug("Registering a proxy")
 
