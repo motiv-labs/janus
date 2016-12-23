@@ -34,6 +34,7 @@ import:
   subpackages:
   - gracehttp
 - package: github.com/facebookgo/httpdown
+- package: github.com/facebookgo/clock
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.2.0
