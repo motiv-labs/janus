@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/fvbock/endless"
 	"github.com/hellofresh/janus/api"
 	"github.com/hellofresh/janus/jwt"
 	"github.com/hellofresh/janus/loader"
@@ -97,5 +96,5 @@ func main() {
 	loadAPIEndpoints(router, authMiddleware, changeTracker)
 	loadOAuthEndpoints(router, authMiddleware, changeTracker)
 
-	log.Fatal(endless.ListenAndServe(fmt.Sprintf(":%v", globalConfig.Port), router))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", globalConfig.Port), router))
 }

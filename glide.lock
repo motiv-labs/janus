@@ -1,5 +1,5 @@
-hash: 899a37b6e1f12f5f99b2f45947f47eef8b37ce9f37627fffe573f4300a0e7449
-updated: 2016-12-21T12:52:58.92199423+01:00
+hash: fa7378cf7c453f0a62af91a955537cd0d11aff2f90e69175997b783576ffcba1
+updated: 2016-12-23T15:17:27.332299554+01:00
 imports:
 - name: github.com/asaskevich/govalidator
   version: 7664702784775e51966f0885f5cd27435916517b
@@ -13,8 +13,6 @@ imports:
   version: 0dd4ce600c6cbf0f4d033846269f029dacf30cad
 - name: github.com/facebookgo/clock
   version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
-- name: github.com/fvbock/endless
-  version: 67d0a784ad8ab10a69d12107f6de220db0c18002
 - name: github.com/justinas/alice
   version: 052b8b6c18edb9db317af86806d8e00ebaa94160
 - name: github.com/kelseyhightower/envconfig
@@ -70,12 +68,11 @@ testImports:
   - reporters/stenographer
   - types
 - name: github.com/onsi/gomega
-  version: d59fa0ac68bb5dd932ee8d24eed631cdd519efc3
+  version: a78ae492d53aad5a7a232d0d0462c14c400e3ee7
   subpackages:
   - format
   - internal/assertion
   - internal/asyncassertion
-  - internal/oraclematcher
   - internal/testingtsupport
   - matchers
   - matchers/support/goraph/bipartitegraph
@@ -83,5 +80,3 @@ testImports:
   - matchers/support/goraph/node
   - matchers/support/goraph/util
   - types
-- name: gopkg.in/yaml.v2
-  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
