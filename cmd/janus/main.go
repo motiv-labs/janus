@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/fvbock/endless"
+	"github.com/facebookgo/grace/gracehttp"
 	"github.com/hellofresh/janus/api"
 	"github.com/hellofresh/janus/jwt"
 	"github.com/hellofresh/janus/loader"
@@ -97,5 +97,5 @@ func main() {
 	loadAPIEndpoints(router, authMiddleware, changeTracker)
 	loadOAuthEndpoints(router, authMiddleware, changeTracker)
 
-	log.Fatal(endless.ListenAndServe(fmt.Sprintf(":%v", globalConfig.Port), router))
+	log.Fatal(gracehttp.Serve(&http.Server{Addr: fmt.Sprintf(":%v", globalConfig.Port), Handler: router}))
 }

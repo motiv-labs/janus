@@ -30,7 +30,10 @@ import:
 - package: github.com/justinas/alice
   version: ^1.0.0
 - package: github.com/bshuster-repo/logrus-logstash-hook
-- package: github.com/fvbock/endless
+- package: github.com/facebookgo/grace
+  subpackages:
+  - gracehttp
+- package: github.com/facebookgo/httpdown
 testImport:
 - package: github.com/onsi/ginkgo
   version: ^1.2.0
