@@ -44,7 +44,7 @@ func (u *Controller) GetBy() http.HandlerFunc {
 
 		data, err := repo.FindByID(id)
 		if data.ID == "" {
-			panic(errors.New(http.StatusNotFound, "Application not found"))
+			panic(ErrAPIDefinitionNotFound)
 		}
 
 		if err != nil {
@@ -64,7 +64,7 @@ func (u *Controller) PutBy() http.HandlerFunc {
 		repo := u.getRepository(u.getDatabase(r))
 		definition, err := repo.FindByID(id)
 		if definition.ID == "" {
-			panic(errors.New(http.StatusNotFound, "Application not found"))
+			panic(ErrAPIDefinitionNotFound)
 		}
 
 		if err != nil {
@@ -126,7 +126,7 @@ func (u *Controller) getDatabase(r *http.Request) *mgo.Database {
 	db := r.Context().Value(middleware.ContextKeyDatabase)
 
 	if nil == db {
-		panic(errors.New(http.StatusInternalServerError, "DB context was not set for this request"))
+		panic(ErrDBContextNotSet)
 	}
 
 	return db.(*mgo.Database)

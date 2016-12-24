@@ -8,7 +8,6 @@ import (
 	"encoding/base64"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hellofresh/janus/errors"
 )
 
 // SecretMiddleware prevents requests to an API from exceeding a specified rate limit.
@@ -41,7 +40,7 @@ func (m *SecretMiddleware) Handler(handler http.Handler) http.Handler {
 
 		clientSecret, exists := m.oauth.Secrets[clientID]
 		if false == exists {
-			panic(errors.ErrClientIdNotFound)
+			panic(ErrClientIDNotFound)
 		}
 
 		m.ChangeRequest(r, clientID, clientSecret)

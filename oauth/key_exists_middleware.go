@@ -7,7 +7,6 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hellofresh/janus/errors"
 	"github.com/hellofresh/janus/request"
 	"github.com/hellofresh/janus/session"
 )
@@ -43,12 +42,12 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 		parts := strings.Split(authHeaderValue, " ")
 		if len(parts) < 2 {
 			logger.Info("Attempted access with malformed header, no auth header found.")
-			panic(errors.New(http.StatusBadRequest, "authorization field missing"))
+			panic(ErrAuthorizationFieldNotFound)
 		}
 
 		if strings.ToLower(parts[0]) != "bearer" {
 			logger.Info("Bearer token malformed")
-			panic(errors.New(http.StatusBadRequest, "bearer token malformed"))
+			panic(ErrBearerMalformed)
 		}
 
 		accessToken := parts[1]
@@ -61,8 +60,7 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 				"origin": r.RemoteAddr,
 				"key":    accessToken,
 			}).Info("Attempted access with non-existent key.")
-
-			panic(errors.New(http.StatusUnauthorized, "key not authorised"))
+			panic(ErrAccessTokenNotAuthorized)
 		}
 
 		ctx := context.WithValue(r.Context(), SessionData, thisSessionState)

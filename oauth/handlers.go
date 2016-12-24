@@ -43,7 +43,7 @@ func (u *Controller) GetBy() http.HandlerFunc {
 
 		data, err := repo.FindByID(id)
 		if data.ID == "" {
-			panic(errors.New(http.StatusNotFound, "OAuth server not found"))
+			panic(ErrOauthServerNotFound)
 		}
 
 		if err != nil {
@@ -62,7 +62,7 @@ func (u *Controller) PutBy() http.HandlerFunc {
 		repo := u.getRepository(u.getDatabase(r))
 		oauth, err := repo.FindByID(id)
 		if oauth.ID == "" {
-			panic(errors.New(http.StatusNotFound, "OAuth server not found"))
+			panic(ErrOauthServerNotFound)
 		}
 
 		if err != nil {
@@ -121,16 +121,15 @@ func (u *Controller) DeleteBy() http.HandlerFunc {
 
 func (u *Controller) getDatabase(r *http.Request) *mgo.Database {
 	db := r.Context().Value(middleware.ContextKeyDatabase)
-
 	if nil == db {
-		panic(errors.New(http.StatusInternalServerError, "DB context was not set for this request"))
+		panic(ErrDBContextNotSet)
 	}
 
 	return db.(*mgo.Database)
 }
 
 // GetRepository gets the repository for the handlers
-func (u *Controller) getRepository(db *mgo.Database) *MongoRepository {
+func (u *Controller) getRepository(db *mgo.Database) Repository {
 	repo, err := NewMongoRepository(db)
 	if err != nil {
 		panic(errors.New(http.StatusInternalServerError, err.Error()))
