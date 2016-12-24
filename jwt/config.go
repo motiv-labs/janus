@@ -3,6 +3,9 @@ package jwt
 import (
 	"time"
 
+	"github.com/hellofresh/janus/config"
+	"github.com/hellofresh/janus/response"
+
 	"net/http"
 )
 
@@ -45,4 +48,33 @@ type Config struct {
 	// This means that the maximum validity timespan for a token is MaxRefresh + Timeout.
 	// Optional, defaults to 0 meaning not refreshable.
 	MaxRefresh time.Duration
+}
+
+func NewConfig(cred config.Credentials) Config {
+	return Config{
+		SigningAlgorithm: "HS256",
+		Secret:           []byte(cred.Secret),
+		Timeout:          time.Hour,
+		MaxRefresh:       time.Hour * 24,
+		Authenticator: func(userID string, password string) (string, bool) {
+			if userID == cred.Username && password == cred.Password {
+				return userID, true
+			}
+
+			return userID, false
+		},
+		Authorizator: func(userID string, w http.ResponseWriter, r *http.Request) bool {
+			if userID == cred.Username {
+				return true
+			}
+
+			return false
+		},
+		Unauthorized: func(w http.ResponseWriter, r *http.Request, err error) {
+			response.JSON(w, http.StatusUnauthorized, response.H{
+				"message": err.Error(),
+			})
+		},
+		TokenLookup: "header:Authorization",
+	}
 }
