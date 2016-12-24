@@ -1,4 +1,4 @@
-package limitter
+package middleware
 
 import (
 	"net"
@@ -12,20 +12,20 @@ import (
 	"github.com/hellofresh/janus/errors"
 )
 
-// RateLimitMiddleware prevents requests to an API from exceeding a specified rate limit.
-type RateLimitMiddleware struct {
+// RateLimit prevents requests to an API from exceeding a specified rate limit.
+type RateLimit struct {
 	limiter *speedbump.RateLimiter
 	hasher  speedbump.RateHasher
 	limit   int64
 }
 
-// NewRateLimitMiddleware creates a new instance of RateLimitMiddleware
-func NewRateLimitMiddleware(limiter *speedbump.RateLimiter, hasher speedbump.RateHasher, limit int64) *RateLimitMiddleware {
-	return &RateLimitMiddleware{limiter, hasher, limit}
+// NewRateLimit creates a new instance of RateLimit
+func NewRateLimit(limiter *speedbump.RateLimiter, hasher speedbump.RateHasher, limit int64) *RateLimit {
+	return &RateLimit{limiter, hasher, limit}
 }
 
 // Handler is the middleware method.
-func (m *RateLimitMiddleware) Handler(handler http.Handler) http.Handler {
+func (m *RateLimit) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Debug("Rate Limit middleware started")
 

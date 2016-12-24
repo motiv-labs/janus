@@ -4,7 +4,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/etcinit/speedbump"
 	"github.com/hellofresh/janus/cors"
-	"github.com/hellofresh/janus/limitter"
 	"github.com/hellofresh/janus/loader"
 	"github.com/hellofresh/janus/middleware"
 	"github.com/hellofresh/janus/oauth"
@@ -75,7 +74,7 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 
 		var handlers []router.Constructor
 		if referenceSpec.RateLimit.Enabled {
-			handlers = append(handlers, limitter.NewRateLimitMiddleware(limiter, hasher, limit).Handler)
+			handlers = append(handlers, middleware.NewRateLimit(limiter, hasher, limit).Handler)
 		} else {
 			log.Debug("Rate limit is not enabled")
 		}
