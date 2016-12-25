@@ -2,28 +2,28 @@ package api
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/etcinit/speedbump"
 	"github.com/hellofresh/janus/cors"
 	"github.com/hellofresh/janus/loader"
 	"github.com/hellofresh/janus/middleware"
 	"github.com/hellofresh/janus/oauth"
 	"github.com/hellofresh/janus/proxy"
 	"github.com/hellofresh/janus/router"
-	"gopkg.in/redis.v3"
+	"github.com/hellofresh/janus/store"
+	"github.com/ulule/limiter"
 )
 
 // Loader is responsible for loading all apis form a datastore and configure them in a register
 type Loader struct {
 	registerChan *proxy.RegisterChan
-	redisClient  *redis.Client
+	store        store.Store
 	accessor     *middleware.DatabaseAccessor
 	manager      *oauth.Manager
 	debug        bool
 }
 
 // NewLoader creates a new instance of the api manager
-func NewLoader(registerChan *proxy.RegisterChan, redisClient *redis.Client, accessor *middleware.DatabaseAccessor, manager *oauth.Manager, debug bool) *Loader {
-	return &Loader{registerChan, redisClient, accessor, manager, debug}
+func NewLoader(registerChan *proxy.RegisterChan, store store.Store, accessor *middleware.DatabaseAccessor, manager *oauth.Manager, debug bool) *Loader {
+	return &Loader{registerChan, store, accessor, manager, debug}
 }
 
 // ListenToChanges listens to any changes that might require a reload of configurations
@@ -68,13 +68,19 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 	}
 
 	if skip {
-		hasher := speedbump.PerSecondHasher{}
-		limit := referenceSpec.RateLimit.Limit
-		limiter := speedbump.NewLimiter(m.redisClient, hasher, limit)
-
 		var handlers []router.Constructor
 		if referenceSpec.RateLimit.Enabled {
-			handlers = append(handlers, middleware.NewRateLimit(limiter, hasher, limit).Handler)
+			rate, err := limiter.NewRateFromFormatted(referenceSpec.RateLimit.Limit)
+			if err != nil {
+				panic(err)
+			}
+
+			limiterStore, err := m.store.ToLimiterStore(referenceSpec.Name)
+			if err != nil {
+				panic(err)
+			}
+
+			handlers = append(handlers, limiter.NewHTTPMiddleware(limiter.NewLimiter(limiterStore, rate)).Handler)
 		} else {
 			log.Debug("Rate limit is not enabled")
 		}
