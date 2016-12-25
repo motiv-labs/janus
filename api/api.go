@@ -40,6 +40,6 @@ func NewDefinition() *Definition {
 
 // RateLimitMeta holds configuration for a rate limit
 type RateLimitMeta struct {
-	Enabled bool  `bson:"enabled" json:"enabled"`
-	Limit   int64 `bson:"limit" json:"limit"`
+	Enabled bool   `bson:"enabled" json:"enabled"`
+	Limit   string `bson:"limit" json:"limit"`
 }
