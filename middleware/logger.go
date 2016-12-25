@@ -8,7 +8,7 @@ import (
 )
 
 type Logger struct {
-	Debug bool
+	debug bool
 }
 
 func NewLogger(debug bool) *Logger {
@@ -33,7 +33,7 @@ func (m *Logger) Handler(handler http.Handler) http.Handler {
 			"user-agent": r.UserAgent(),
 		}
 
-		if m.Debug {
+		if m.debug {
 			log.WithFields(fields).Info("completed handling request")
 		} else {
 			log.Info("completed handling request")
