@@ -15,7 +15,7 @@ import (
 // TestContextKey tests Rate methods.
 func TestBindSimpleJson(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/", nil)
-	req.Body = ioutil.NopCloser(bytes.NewBuffer([]byte("{\"name\": \"Test Recipe\", \"tags\": \"[\"test\"]\"}")))
+	req.Body = ioutil.NopCloser(bytes.NewBuffer([]byte("{\"name\": \"Test Recipe\", \"tags\": [\"test\"]}")))
 
 	recipe := mock.Recipe{}
 	err := request.BindJSON(req, &recipe)
