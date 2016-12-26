@@ -12,7 +12,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-// TestContextKey tests Rate methods.
 func TestBindSimpleJson(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/", nil)
 	req.Body = ioutil.NopCloser(bytes.NewBuffer([]byte("{\"name\": \"Test Recipe\", \"tags\": [\"test\"]}")))
@@ -22,4 +21,5 @@ func TestBindSimpleJson(t *testing.T) {
 
 	assert.Nil(t, err)
 	assert.Equal(t, "Test Recipe", recipe.Name)
+	assert.Equal(t, []mock.Tag{"test"}, recipe.Tags)
 }
