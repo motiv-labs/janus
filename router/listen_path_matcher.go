@@ -2,8 +2,8 @@ package router
 
 import "regexp"
 
-var (
-	matchRule = `(\/\*(.+)?)`
+const (
+	matchRule string = `(\/\*(.+)?)`
 )
 
 type ListenPathMatcher struct {
