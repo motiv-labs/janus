@@ -60,7 +60,7 @@ func init() {
 	}
 
 	dsn := globalConfig.StorageDSN
-	log.Debugf("Trying to connect to redis poll: %s", dsn)
+	log.Debugf("Trying to connect to redis pool: %s", dsn)
 	storage, err = store.NewRedisStore(pool)
 	if err != nil {
 		log.Fatalf("Couldn't connect to the redis pool: %s", err.Error())
