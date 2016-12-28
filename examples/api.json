@@ -19,7 +19,7 @@
     },
     "rate_limit": {
         "enabled": true,
-        "limit": 10
+        "limit": "10-S"
     },
     "use_basic_auth": false,
     "use_oauth2": false,

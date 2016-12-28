@@ -76,7 +76,12 @@ func (m *KeyExistsMiddleware) CheckSessionAndIdentityForValidKey(key string) (se
 
 	// Checks if the key is present on the cache and if it didn't expire yet
 	log.Debug("Querying keystore")
-	if !m.manager.KeyExists(key) {
+	exists, err := m.manager.KeyExists(key)
+	if nil != err {
+		panic(err)
+	}
+
+	if !exists {
 		log.Debug("Key not found in keystore")
 		return thisSession, false
 	}

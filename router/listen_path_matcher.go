@@ -2,12 +2,16 @@ package router
 
 import "regexp"
 
+const (
+	matchRule string = `(\/\*(.+)?)`
+)
+
 type ListenPathMatcher struct {
 	reg *regexp.Regexp
 }
 
 func NewListenPathMatcher() *ListenPathMatcher {
-	return &ListenPathMatcher{regexp.MustCompile(`(\/\*(.+)?)`)}
+	return &ListenPathMatcher{regexp.MustCompile(matchRule)}
 }
 
 func (l *ListenPathMatcher) Match(listenPath string) bool {

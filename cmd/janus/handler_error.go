@@ -10,9 +10,8 @@ import (
 
 // RecoveryHandler handler for the apis
 func RecoveryHandler(w http.ResponseWriter, r *http.Request, err interface{}) {
-	switch err.(type) {
+	switch internalErr := err.(type) {
 	case *errors.Error:
-		internalErr := err.(*errors.Error)
 		log.Error(internalErr.Error())
 		response.JSON(w, internalErr.Code, internalErr.Error())
 	default:

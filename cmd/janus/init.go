@@ -2,21 +2,22 @@ package main
 
 import (
 	"strings"
-
-	statsd "gopkg.in/alexcesaro/statsd.v2"
-	redis "gopkg.in/redis.v3"
+	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/bshuster-repo/logrus-logstash-hook"
+	"github.com/garyburd/redigo/redis"
 	"github.com/hellofresh/janus/config"
 	"github.com/hellofresh/janus/middleware"
+	"github.com/hellofresh/janus/store"
+	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
 var (
 	err          error
 	globalConfig *config.Specification
 	accessor     *middleware.DatabaseAccessor
-	redisStorage *redis.Client
+	storage      store.Store
 	statsdClient *statsd.Client
 )
 
@@ -49,13 +50,21 @@ func init() {
 	}
 }
 
-// initializes a Redis connection
+// initializes a storage
 func init() {
+	// Create a Redis pool.
+	pool := &redis.Pool{
+		MaxIdle:     3,
+		IdleTimeout: 240 * time.Second,
+		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", globalConfig.StorageDSN) },
+	}
+
 	dsn := globalConfig.StorageDSN
-	log.Debugf("Trying to connect to redis instance: %s", dsn)
-	redisStorage = redis.NewClient(&redis.Options{
-		Addr: dsn,
-	})
+	log.Debugf("Trying to connect to redis pool: %s", dsn)
+	storage, err = store.NewRedisStore(pool)
+	if err != nil {
+		log.Fatalf("Couldn't connect to the redis pool: %s", err.Error())
+	}
 }
 
 // initializes new StatsD client if it enabled

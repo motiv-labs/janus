@@ -6,18 +6,18 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/session"
-	"gopkg.in/redis.v3"
+	"github.com/hellofresh/janus/store"
 )
 
 // Manager is responsible for managing the access tokens
 type Manager struct {
-	Storage *redis.Client
+	Storage store.Store
 }
 
 // KeyExists checks if the given access token exits in the storage
-func (o *Manager) KeyExists(accessToken string) bool {
+func (o *Manager) KeyExists(accessToken string) (bool, error) {
 	log.Debugf("Searching for key %s", accessToken)
-	return o.Storage.Exists(accessToken).Val()
+	return o.Storage.Exists(accessToken)
 }
 
 // Set a new access token and its session to the storage
@@ -34,7 +34,11 @@ func (o *Manager) Set(accessToken string, session session.SessionState, resetTTL
 // IsKeyAuthorised checks if the access token is valid
 func (o *Manager) IsKeyAuthorised(accessToken string) (session.SessionState, bool) {
 	var newSession session.SessionState
-	jsonKeyVal := o.Storage.Get(accessToken).Val()
+	jsonKeyVal, err := o.Storage.Get(accessToken)
+	if nil != err {
+		log.Errorf("Couldn't get the access token from storage: %s", accessToken)
+		return newSession, false
+	}
 
 	if marshalErr := json.Unmarshal([]byte(jsonKeyVal), &newSession); marshalErr != nil {
 		log.Errorf("Couldn't unmarshal session object: %s", marshalErr.Error())

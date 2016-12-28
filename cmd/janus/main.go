@@ -63,7 +63,6 @@ func loadAuthEndpoints(router router.Router, authMiddleware *jwt.Middleware) {
 
 func main() {
 	defer accessor.Close()
-	defer redisStorage.Close()
 	defer statsdClient.Close()
 
 	http.DefaultTransport.(*http.Transport).MaxIdleConnsPerHost = globalConfig.MaxIdleConnsPerHost
@@ -74,12 +73,12 @@ func main() {
 	router := router.NewHttpTreeMuxRouter()
 	router.Use(middleware.NewLogger(globalConfig.Debug).Handler, middleware.NewRecovery(RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
 
-	manager := &oauth.Manager{redisStorage}
+	manager := &oauth.Manager{Storage: storage}
 	transport := oauth.NewAwareTransport(http.DefaultTransport, manager)
 	registerChan := proxy.NewRegisterChan(router, transport)
 
 	changeTracker := loader.NewTracker()
-	apiLoader := api.NewLoader(registerChan, redisStorage, accessor, manager, globalConfig.Debug)
+	apiLoader := api.NewLoader(registerChan, storage, accessor, manager, globalConfig.Debug)
 	apiLoader.Load()
 	apiLoader.ListenToChanges(changeTracker)
 

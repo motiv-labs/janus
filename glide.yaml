@@ -8,15 +8,11 @@ import:
   version: ^0.10.0
 - package: github.com/asaskevich/govalidator
   version: ^4.0.0
-- package: github.com/etcinit/speedbump
-  version: ^0.2.0
 - package: github.com/kelseyhightower/envconfig
   version: ^1.1.0
 - package: gopkg.in/mgo.v2
   subpackages:
   - bson
-- package: gopkg.in/redis.v3
-  version: ^3.6.4
 - package: gopkg.in/alexcesaro/statsd.v2
   version: ~2.0.0
 - package: github.com/dimfeld/httptreemux
@@ -30,6 +26,19 @@ import:
 - package: github.com/justinas/alice
   version: ^1.0.0
 - package: github.com/bshuster-repo/logrus-logstash-hook
+- package: github.com/ulule/limiter
+- package: github.com/ant0ine/go-json-rest
+  version: ^3.3.2
+  subpackages:
+  - rest
+- package: github.com/patrickmn/go-cache
+  version: ^2.0.0
+- package: github.com/garyburd/redigo
+  version: ^1.0.0
+  subpackages:
+  - redis
 testImport:
-- package: github.com/onsi/ginkgo
-  version: ^1.2.0
+- package: github.com/stretchr/testify
+  version: ^1.1.4
+  subpackages:
+  - assert
