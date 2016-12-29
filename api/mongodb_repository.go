@@ -55,6 +55,14 @@ func (r *MongoAPISpecRepository) FindByID(id string) (*Definition, error) {
 	return result, err
 }
 
+// FindByListenPath searches an existing Proxy definition by its listen_path
+func (r *MongoAPISpecRepository) FindByListenPath(path string) (*Definition, error) {
+	var result *Definition
+	err := r.coll.Find(bson.M{"proxy.listen_path": path}).One(&result)
+
+	return result, err
+}
+
 // Add adds a country to the repository
 func (r *MongoAPISpecRepository) Add(definition *Definition) error {
 	var id bson.ObjectId
