@@ -85,7 +85,7 @@ func (u *Controller) PutBy() http.HandlerFunc {
 	}
 }
 
-// POST /apps
+// Post corresponds to POST /apis to create a new Proxy definition
 func (u *Controller) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		repo := u.getRepository(u.getDatabase(r))
@@ -96,8 +96,17 @@ func (u *Controller) Post() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
+		def, err := repo.FindByListenPath(definition.Proxy.ListenPath)
+		if nil != err && err != mgo.ErrNotFound {
+			panic(errors.New(http.StatusBadRequest, err.Error()))
+		}
+
+		if def != nil {
+			panic(errors.ErrProxyExists)
+		}
 		err = repo.Add(definition)
 		if nil != err {
+
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
