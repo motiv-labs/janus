@@ -51,7 +51,7 @@ type HttpTreeMuxRouter struct {
 
 func NewHttpTreeMuxRouter() *HttpTreeMuxRouter {
 	router := httptreemux.New()
-
+	router.SafeAddRoutesWhileRunning = true
 	return &HttpTreeMuxRouter{
 		mux:         router,
 		innerRouter: router.UsingContext(),

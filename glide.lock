@@ -1,5 +1,5 @@
-hash: c389e6325cc81944df1949d70d869eebc8c80b137409aee11d98071344848238
-updated: 2016-12-26T20:53:04.261324081+01:00
+hash: 3f646106b9cd38b0c02894fe1240ac5d1b16613599b609efff316e4b14104d9c
+updated: 2017-01-02T10:02:13.622743215+01:00
 imports:
 - name: github.com/ant0ine/go-json-rest
   version: ce4b71cdf7ba29ef443d704bd923f5bbf281ee30
@@ -13,7 +13,7 @@ imports:
 - name: github.com/dgrijalva/jwt-go
   version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
 - name: github.com/dimfeld/httptreemux
-  version: e26f30cd88e1dd9707cb61d74fa5ee6b444fdb85
+  version: a12c89c2c0f23f880dfd74af4832a23bae6e837a
 - name: github.com/garyburd/redigo
   version: 8873b2f1995f59d4bcdd2b0dc9858e2cb9bf0c13
   subpackages:
@@ -52,11 +52,11 @@ imports:
   - internal/scram
 testImports:
 - name: github.com/davecgh/go-spew
-  version: 5215b55f46b2b919f50a1df0eaa5886afe4e3b3d
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:
   - spew
 - name: github.com/pmezard/go-difflib
-  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
   - difflib
 - name: github.com/stretchr/testify

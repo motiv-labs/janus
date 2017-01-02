@@ -16,7 +16,7 @@ import:
 - package: gopkg.in/alexcesaro/statsd.v2
   version: ~2.0.0
 - package: github.com/dimfeld/httptreemux
-  version: ^3.6.0
+  version: ^3.7.0
 - package: github.com/rs/cors
   version: ^1.0.0
 - package: github.com/rs/xhandler
