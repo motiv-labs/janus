@@ -17,11 +17,9 @@ WORKDIR $APP_DIR
 
 # Build the go binary
 RUN make
-RUN cp out/linux_amd64/janus ${GOPATH}/bin
 
 # Clean apk cache
 RUN rm -rf /var/cache/apk/*
 
 EXPOSE 8080
 CMD janus
-

@@ -3,15 +3,20 @@ OK_COLOR=\033[32;01m
 ERROR_COLOR=\033[31;01m
 WARN_COLOR=\033[33;01m
 
-REPO=github.com/hellofresh/janus
-GO_LINKER_FLAGS=-ldflags="-s -w"
-GO_PROJECT_FILES=`go list -f '{{.Dir}}' ./... | grep -v /vendor/ | sed -n '1!p'`
-GO_PROJECT_PACKAGES=`go list ./... | grep -v /vendor/`
+# The binary to build (just the basename).
+BIN := hellowork-api
 
-# This how we want to name the binary output
-DIR_OUT=$(CURDIR)/out
-PROJECT_SRC=$(REPO)/cmd/janus
-BINARY=janus
+# This repo's root import path (under GOPATH).
+PKG := github.com/hellofresh/janus
+
+# Which architecture to build - see $(ALL_ARCH) for options.
+ARCH ?= amd64
+
+###
+### These variables should not need tweaking.
+###
+
+SRC_DIRS := cmd pkg # directories which hold app source (not vendored)
 
 .PHONY: all clean deps build
 
@@ -22,29 +27,13 @@ deps:
 	@curl https://glide.sh/get | sh
 	@glide install
 
-# Builds the project
-build: build-ensure-dir build-linux build-osx
-
-build-ensure-dir:
-	@mkdir -p ${DIR_OUT}
-
-build-linux:
-	@echo "$(OK_COLOR)==> Building Linux amd64"
-	@env GOOS=linux GOARCH=amd64 go build -o ${DIR_OUT}/linux_amd64/${BINARY} ${GO_LINKER_FLAGS} ${PROJECT_SRC}
-
-build-osx:
-	@echo "$(OK_COLOR)==> Building OSX amd64"
-	@env GOOS=darwin GOARCH=amd64 go build -o ${DIR_OUT}/darwin_amd64/${BINARY} ${GO_LINKER_FLAGS} ${PROJECT_SRC}
-
-# Installs our project: copies binaries
-install:
-	@echo "$(OK_COLOR)==> Installing project$(NO_COLOR)"
-	go install -v
+build:
+	@echo "$(OK_COLOR)==> Building... $(NO_COLOR)"
+	@/bin/sh -c "ARCH=$(ARCH) ./build/build.sh"
 
 test:
-	go test ${GO_PROJECT_PACKAGES} -v
-	
-# Cleans our project: deletes binaries
+	@/bin/sh -c "./build/test.sh $(SRC_DIRS)"
+
 clean:
 	@echo "$(OK_COLOR)==> Cleaning project$(NO_COLOR)"
-	if [ -d ${DIR_OUT} ] ; then rm -rf ${DIR_OUT}/* ; fi
+	@go clean

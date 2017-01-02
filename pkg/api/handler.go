@@ -104,6 +104,7 @@ func (u *Controller) Post() http.HandlerFunc {
 		if def != nil {
 			panic(errors.ErrProxyExists)
 		}
+
 		err = repo.Add(definition)
 		if nil != err {
 
