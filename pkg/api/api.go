@@ -10,7 +10,7 @@ import (
 
 // Spec Holds an api definition and basic options
 type Spec struct {
-	Definition
+	*Definition
 }
 
 // Definition Represents an API that you want to proxy
@@ -23,7 +23,7 @@ type Definition struct {
 	Active        bool          `bson:"active" json:"active"`
 	UseBasicAuth  bool          `bson:"use_basic_auth" json:"use_basic_auth"`
 	Domain        string        `bson:"domain" json:"domain"`
-	Proxy         proxy.Proxy   `bson:"proxy" json:"proxy" valid:"required"`
+	Proxy         *proxy.Proxy   `bson:"proxy" json:"proxy" valid:"required"`
 	AllowedIPs    []string      `mapstructure:"allowed_ips" bson:"allowed_ips" json:"allowed_ips"`
 	UseOauth2     bool          `bson:"use_oauth2" json:"use_oauth2"`
 	OAuthServerID bson.ObjectId `bson:"oauth_server_id" json:"oauth_server_id"`
