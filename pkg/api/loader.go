@@ -3,7 +3,6 @@ package api
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/cors"
-	"github.com/hellofresh/janus/pkg/loader"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -14,32 +13,16 @@ import (
 
 // Loader is responsible for loading all apis form a datastore and configure them in a register
 type Loader struct {
-	registerChan *proxy.RegisterChan
-	store        store.Store
-	accessor     *middleware.DatabaseAccessor
-	manager      *oauth.Manager
-	debug        bool
+	register proxy.Register
+	store    store.Store
+	accessor *middleware.DatabaseAccessor
+	manager  *oauth.Manager
+	debug    bool
 }
 
 // NewLoader creates a new instance of the api manager
-func NewLoader(registerChan *proxy.RegisterChan, store store.Store, accessor *middleware.DatabaseAccessor, manager *oauth.Manager, debug bool) *Loader {
-	return &Loader{registerChan, store, accessor, manager, debug}
-}
-
-// ListenToChanges listens to any changes that might require a reload of configurations
-func (m *Loader) ListenToChanges(tracker *loader.Tracker) {
-	go func() {
-		for {
-			select {
-			case <-tracker.StopChan():
-				log.Debug("Stopping listening to api changes....")
-				return
-			case <-tracker.Changed():
-				log.Debug("A change was identified. Reloading api configurations....")
-				m.Load()
-			}
-		}
-	}()
+func NewLoader(register proxy.Register, store store.Store, accessor *middleware.DatabaseAccessor, manager *oauth.Manager, debug bool) *Loader {
+	return &Loader{register, store, accessor, manager, debug}
 }
 
 // Load loads all api specs from a datasource
@@ -97,8 +80,8 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 			log.Debug("OAuth2 is not enabled")
 		}
 
-		m.registerChan.One <- proxy.NewRoute(referenceSpec.Proxy, handlers...)
-		log.Debug("Proxy registered")
+		m.register.Add(proxy.NewRoute(referenceSpec.Proxy, handlers...))
+		log.Debug("API registered")
 	} else {
 		log.Error("Listen path is empty, skipping...")
 	}
@@ -117,12 +100,12 @@ func (m *Loader) getAPISpecs() []*Spec {
 		log.Panic(err)
 	}
 
-	var APISpecs = []*Spec{}
+	var specs []*Spec
 	for _, definition := range definitions {
-		newAppSpec := Spec{}
-		newAppSpec.Definition = definition
-		APISpecs = append(APISpecs, &newAppSpec)
+		spec := new(Spec)
+		spec.Definition = definition
+		specs = append(specs, spec)
 	}
 
-	return APISpecs
+	return specs
 }

@@ -3,37 +3,20 @@ package oauth
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/cors"
-	"github.com/hellofresh/janus/pkg/loader"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/proxy"
 )
 
 // Loader handles the loading of the api specs
 type Loader struct {
-	registerChan *proxy.RegisterChan
-	accessor     *middleware.DatabaseAccessor
-	debug        bool
+	register proxy.Register
+	accessor *middleware.DatabaseAccessor
+	debug    bool
 }
 
 // NewLoader creates a new instance of the api manager
-func NewLoader(registerChan *proxy.RegisterChan, accessor *middleware.DatabaseAccessor, debug bool) *Loader {
-	return &Loader{registerChan, accessor, debug}
-}
-
-// ListenToChanges listens to any changes that might require a reload of configurations
-func (m *Loader) ListenToChanges(tracker *loader.Tracker) {
-	go func() {
-		for {
-			select {
-			case <-tracker.StopChan():
-				log.Debug("Stopping listening to api changes....")
-				return
-			case <-tracker.Changed():
-				log.Debug("A change was identified. Reloading api configurations....")
-				m.Load()
-			}
-		}
-	}()
+func NewLoader(register proxy.Register, accessor *middleware.DatabaseAccessor, debug bool) *Loader {
+	return &Loader{register, accessor, debug}
 }
 
 // Load loads all api specs from a datasource
@@ -47,7 +30,7 @@ func (m *Loader) RegisterOAuthServers(oauthServers []*OAuth) {
 	log.Debug("Loading OAuth servers configurations")
 
 	for _, oauthServer := range oauthServers {
-		m.registerChan.Many <- m.RegisterOAuthServer(oauthServer)
+		m.register.AddMany(m.RegisterOAuthServer(oauthServer))
 	}
 
 	log.Debug("Done loading OAuth servers configurations")
