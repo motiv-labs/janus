@@ -12,8 +12,8 @@ import (
 
 // APISpecRepository defines the behaviour of a country repository
 type APISpecRepository interface {
-	FindAll() ([]Definition, error)
-	FindByID(id string) (Definition, error)
+	FindAll() ([]*Definition, error)
+	FindByID(id string) (*Definition, error)
 	Add(app *Definition) error
 	Remove(id string) error
 }
@@ -31,12 +31,12 @@ func NewMongoAppRepository(db *mgo.Database) (*MongoAPISpecRepository, error) {
 }
 
 // FindAll fetches all the countries available
-func (r *MongoAPISpecRepository) FindAll() ([]Definition, error) {
-	result := []Definition{}
+func (r *MongoAPISpecRepository) FindAll() ([]*Definition, error) {
+	result := []*Definition{}
 
 	err := r.coll.Find(nil).All(&result)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	return result, nil
@@ -47,7 +47,7 @@ func (r *MongoAPISpecRepository) FindByID(id string) (*Definition, error) {
 	var result *Definition
 
 	if false == bson.IsObjectIdHex(id) {
-		return result, errors.ErrInvalidID
+		return nil, errors.ErrInvalidID
 	}
 
 	err := r.coll.FindId(bson.ObjectIdHex(id)).One(&result)
