@@ -8,7 +8,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/jwt"
-	"github.com/hellofresh/janus/pkg/loader"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -16,11 +15,11 @@ import (
 )
 
 //loadAPIEndpoints register api endpoints
-func loadAPIEndpoints(router router.Router, authMiddleware *jwt.Middleware, changeTracker *loader.Tracker) {
+func loadAPIEndpoints(router router.Router, authMiddleware *jwt.Middleware, loader *api.Loader) {
 	log.Debug("Loading API Endpoints")
 
 	// Apis endpoints
-	handler := api.NewController(changeTracker)
+	handler := api.NewController(loader)
 	group := router.Group("/apis")
 	group.Use(authMiddleware.Handler)
 	{
@@ -33,11 +32,11 @@ func loadAPIEndpoints(router router.Router, authMiddleware *jwt.Middleware, chan
 }
 
 //loadOAuthEndpoints register api endpoints
-func loadOAuthEndpoints(router router.Router, authMiddleware *jwt.Middleware, changeTracker *loader.Tracker) {
+func loadOAuthEndpoints(router router.Router, authMiddleware *jwt.Middleware, loader *oauth.Loader) {
 	log.Debug("Loading OAuth Endpoints")
 
 	// Oauth servers endpoints
-	oAuthHandler := oauth.NewController(changeTracker)
+	oAuthHandler := oauth.NewController(loader)
 	oauthGroup := router.Group("/oauth/servers")
 	oauthGroup.Use(authMiddleware.Handler)
 	{
@@ -70,30 +69,28 @@ func main() {
 		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	}
 
-	router := router.NewHttpTreeMuxRouter()
-	router.Use(middleware.NewLogger(globalConfig.Debug).Handler, middleware.NewRecovery(RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
+	r := router.NewHttpTreeMuxRouter()
+	r.Use(middleware.NewLogger(globalConfig.Debug).Handler, middleware.NewRecovery(RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
 
 	manager := &oauth.Manager{Storage: storage}
 	transport := oauth.NewAwareTransport(http.DefaultTransport, manager)
-	registerChan := proxy.NewRegisterChan(router, transport)
+	//registerChan := proxy.NewRegisterChan(r, transport)
+	register := proxy.NewInMemoryRegister(r, transport)
 
-	changeTracker := loader.NewTracker()
-	apiLoader := api.NewLoader(registerChan, storage, accessor, manager, globalConfig.Debug)
+	apiLoader := api.NewLoader(register, storage, accessor, manager, globalConfig.Debug)
 	apiLoader.Load()
-	apiLoader.ListenToChanges(changeTracker)
 
-	oauthLoader := oauth.NewLoader(registerChan, accessor, globalConfig.Debug)
+	oauthLoader := oauth.NewLoader(register, accessor, globalConfig.Debug)
 	oauthLoader.Load()
-	oauthLoader.ListenToChanges(changeTracker)
 
 	authConfig := jwt.NewConfig(globalConfig.Credentials)
 	authMiddleware := jwt.NewMiddleware(authConfig)
 
 	// Home endpoint for the gateway
-	router.GET("/", Home(globalConfig.Application))
-	loadAuthEndpoints(router, authMiddleware)
-	loadAPIEndpoints(router, authMiddleware, changeTracker)
-	loadOAuthEndpoints(router, authMiddleware, changeTracker)
+	r.GET("/", Home(globalConfig.Application))
+	loadAuthEndpoints(r, authMiddleware)
+	loadAPIEndpoints(r, authMiddleware, apiLoader)
+	loadOAuthEndpoints(r, authMiddleware, oauthLoader)
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", globalConfig.Port), router))
+	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", globalConfig.Port), r))
 }
