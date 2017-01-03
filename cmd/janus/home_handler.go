@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hellofresh/janus/config"
-	"github.com/hellofresh/janus/response"
+	"github.com/hellofresh/janus/pkg/config"
+	"github.com/hellofresh/janus/pkg/response"
 )
 
 func Home(app config.Application) http.HandlerFunc {

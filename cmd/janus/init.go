@@ -7,9 +7,9 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/bshuster-repo/logrus-logstash-hook"
 	"github.com/garyburd/redigo/redis"
-	"github.com/hellofresh/janus/config"
-	"github.com/hellofresh/janus/middleware"
-	"github.com/hellofresh/janus/store"
+	"github.com/hellofresh/janus/pkg/config"
+	"github.com/hellofresh/janus/pkg/middleware"
+	"github.com/hellofresh/janus/pkg/store"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 

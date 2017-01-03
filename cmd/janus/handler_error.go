@@ -4,8 +4,8 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hellofresh/janus/errors"
-	"github.com/hellofresh/janus/response"
+	"github.com/hellofresh/janus/pkg/errors"
+	"github.com/hellofresh/janus/pkg/response"
 )
 
 // RecoveryHandler handler for the apis

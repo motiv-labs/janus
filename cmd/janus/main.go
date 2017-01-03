@@ -6,13 +6,13 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hellofresh/janus/api"
-	"github.com/hellofresh/janus/jwt"
-	"github.com/hellofresh/janus/loader"
-	"github.com/hellofresh/janus/middleware"
-	"github.com/hellofresh/janus/oauth"
-	"github.com/hellofresh/janus/proxy"
-	"github.com/hellofresh/janus/router"
+	"github.com/hellofresh/janus/pkg/api"
+	"github.com/hellofresh/janus/pkg/jwt"
+	"github.com/hellofresh/janus/pkg/loader"
+	"github.com/hellofresh/janus/pkg/middleware"
+	"github.com/hellofresh/janus/pkg/oauth"
+	"github.com/hellofresh/janus/pkg/proxy"
+	"github.com/hellofresh/janus/pkg/router"
 )
 
 //loadAPIEndpoints register api endpoints

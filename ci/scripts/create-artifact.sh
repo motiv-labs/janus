@@ -17,11 +17,10 @@ cd ${PROJECT_SRC}
 # Build the go application
 make
 # Goes to the generated go binaries
-cd out/
+cd $GOPATH/bin
 
 echo "Creating tar.gz"
-tar -C darwin_amd64 -czf darwin_amd64.tar.gz ${BINARY}
-tar -C linux_amd64 -czf linux_amd64.tar.gz ${BINARY}
+tar -czf linux_amd64.tar.gz ${BINARY}
 
 # Copies the tar to the artifact folder so its available to the next step of the pipeline
 echo "Copying *.tar.gz ${CWD}/artifacts"
