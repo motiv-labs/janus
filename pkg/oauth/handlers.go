@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/errors"
-	"github.com/hellofresh/janus/pkg/loader"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/request"
 	"github.com/hellofresh/janus/pkg/response"
@@ -14,12 +13,12 @@ import (
 
 // Controller is the api rest controller
 type Controller struct {
-	changeTracker *loader.Tracker
+	loader *Loader
 }
 
 // NewController creates a new instance of Controller
-func NewController(changeTracker *loader.Tracker) *Controller {
-	return &Controller{changeTracker}
+func NewController(loader *Loader) *Controller {
+	return &Controller{loader}
 }
 
 func (u *Controller) Get() http.HandlerFunc {
@@ -79,8 +78,8 @@ func (u *Controller) PutBy() http.HandlerFunc {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		u.changeTracker.Change()
-		response.JSON(w, http.StatusOK, oauth)
+		u.loader.Load()
+		response.JSON(w, http.StatusOK, nil)
 	}
 }
 
@@ -99,8 +98,8 @@ func (u *Controller) Post() http.HandlerFunc {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		u.changeTracker.Change()
-		response.JSON(w, http.StatusCreated, oauth)
+		u.loader.Load()
+		response.JSON(w, http.StatusCreated, nil)
 	}
 }
 
@@ -114,7 +113,7 @@ func (u *Controller) DeleteBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		u.changeTracker.Change()
+		u.loader.Load()
 		response.JSON(w, http.StatusNoContent, nil)
 	}
 }
