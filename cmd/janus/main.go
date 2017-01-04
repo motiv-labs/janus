@@ -88,6 +88,8 @@ func main() {
 
 	// Home endpoint for the gateway
 	r.GET("/", Home(globalConfig.Application))
+	r.GET("/status", Heartbeat())
+
 	loadAuthEndpoints(r, authMiddleware)
 	loadAPIEndpoints(r, authMiddleware, apiLoader)
 	loadOAuthEndpoints(r, authMiddleware, oauthLoader)
