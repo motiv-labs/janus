@@ -12,86 +12,97 @@ const (
 	methodAll = "ALL"
 )
 
-// RegisterChan holds two channels. Many is a channel of many routes
-// this is more for a bulk operation, when you create many routes at once
-// use this channel.
-// One is for a single route, if you create one route and want to register it
-// use this channel
-type RegisterChan struct {
-	Many chan []*Route
-	One  chan *Route
-}
-
-// NewRegisterChan creates a new instance of RegisterChan
-func NewRegisterChan(router router.Router, transport http.RoundTripper) *RegisterChan {
-	register := NewRegister(router, transport)
-
-	registerChan := &RegisterChan{}
-	registerChan.Many = make(chan []*Route)
-	registerChan.One = make(chan *Route)
-
-	go registerChan.listenForRouteChanges(register)
-	return registerChan
-}
-
-func (rc *RegisterChan) listenForRouteChanges(register *Register) {
-	for {
-		select {
-		case routes := <-rc.Many:
-			register.RegisterMany(routes)
-
-		case route := <-rc.One:
-			register.Register(route)
-		}
-	}
+type Register interface {
+	Exists(route *Route) bool
+	Get(listenPath string) *Route
+	Remove(listenPath string) error
+	AddMany(routes []*Route) error
+	Add(route *Route) error
 }
 
 // Register handles the register of proxies into the choosen router.
 // It also handles the conversion from a proxy to an http.HandlerFunc
-type Register struct {
+type InMemoryRegister struct {
 	router    router.Router
 	transport http.RoundTripper
-	proxies   []Proxy
+	proxies   map[string]*Route
 }
 
-// NewRegister creates a new instance of Register
-func NewRegister(router router.Router, transport http.RoundTripper) *Register {
-	return &Register{router: router, transport: transport}
+// NewInMemoryRegister creates a new instance of Register
+func NewInMemoryRegister(router router.Router, transport http.RoundTripper) *InMemoryRegister {
+	return &InMemoryRegister{router: router, transport: transport, proxies: make(map[string]*Route)}
 }
 
-// RegisterMany registers many proxies at once
-func (p *Register) RegisterMany(routes []*Route) {
-	for _, route := range routes {
-		p.Register(route)
+// Exists checks if a proxy is already registered in the manager
+func (p *InMemoryRegister) Exists(route *Route) bool {
+	_, exists := p.proxies[route.proxy.ListenPath]
+	return exists
+}
+
+func (p *InMemoryRegister) Get(listenPath string) *Route {
+	return p.proxies[listenPath]
+}
+
+func (p *InMemoryRegister) Remove(listenPath string) error {
+	delete(p.proxies, listenPath)
+	return nil
+}
+
+// AddMany registers many proxies at once
+func (p *InMemoryRegister) AddMany(routes []*Route) error {
+	for _, r := range routes {
+		err := p.Add(r)
+		if nil != err {
+			return err
+		}
 	}
+
+	return nil
 }
 
 // Register register a new proxy
-func (p *Register) Register(route *Route) {
-	proxy := route.proxy
+func (p *InMemoryRegister) Add(route *Route) error {
+	if p.Exists(route) {
+		return p.replace(route)
+	} else {
+		return p.add(route)
+	}
+}
 
-	if false == p.Exists(proxy) {
-		handler := p.ToHandler(proxy)
+func (p *InMemoryRegister) add(route *Route) error {
+	if false == p.Exists(route) {
+		proxy := route.proxy
+
+		handler := p.toHandler(proxy)
 		matcher := router.NewListenPathMatcher()
 		if matcher.Match(proxy.ListenPath) {
 			p.doRegister(matcher.Extract(proxy.ListenPath), handler, proxy.Methods, route.handlers)
 		}
 
 		p.doRegister(proxy.ListenPath, handler, proxy.Methods, route.handlers)
-		p.proxies = append(p.proxies, proxy)
+		p.proxies[proxy.ListenPath] = route
 	}
 
+	return nil
 }
 
-func (p *Register) doRegister(
-	listenPath string,
-	handler http.HandlerFunc,
-	methods []string,
-	handlers []router.Constructor,
-) {
+func (p *InMemoryRegister) replace(r *Route) error {
+	log.WithFields(log.Fields{
+		"listen_path": r.proxy.ListenPath,
+		"target_url":  r.proxy.TargetURL,
+	}).Debug("Replacing a route")
+
+	currentRoute := p.Get(r.proxy.ListenPath)
+	*currentRoute.proxy = *r.proxy
+	currentRoute.handlers = r.handlers
+
+	return nil
+}
+
+func (p *InMemoryRegister) doRegister(listenPath string, handler http.HandlerFunc, methods []string, handlers []router.Constructor) {
 	log.WithFields(log.Fields{
 		"listen_path": listenPath,
-	}).Debug("Registering a proxy")
+	}).Debug("Registering a route")
 
 	for _, method := range methods {
 		if strings.ToUpper(method) == methodAll {
@@ -102,19 +113,8 @@ func (p *Register) doRegister(
 	}
 }
 
-// Exists checks if a proxy is already registered in the manager
-func (p *Register) Exists(proxy Proxy) bool {
-	for _, route := range p.proxies {
-		if route.ListenPath == proxy.ListenPath {
-			return true
-		}
-	}
-
-	return false
-}
-
 // ToHandler turns a proxy configuration into a handler
-func (p *Register) ToHandler(proxy Proxy) http.HandlerFunc {
+func (p *InMemoryRegister) toHandler(proxy *Proxy) http.HandlerFunc {
 	return func(rw http.ResponseWriter, r *http.Request) {
 		reverseProxy := NewSingleHostReverseProxy(proxy, p.transport)
 		reverseProxy.ServeHTTP(rw, r)

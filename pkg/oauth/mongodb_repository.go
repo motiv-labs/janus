@@ -34,7 +34,7 @@ func (r *MongoRepository) FindAll() ([]*OAuth, error) {
 
 	err := r.coll.Find(nil).All(&result)
 	if err != nil {
-		return result, err
+		return nil, err
 	}
 
 	return result, nil
@@ -45,7 +45,7 @@ func (r *MongoRepository) FindByID(id string) (*OAuth, error) {
 	var result *OAuth
 
 	if false == bson.IsObjectIdHex(id) {
-		return result, errors.ErrInvalidID
+		return nil, errors.ErrInvalidID
 	}
 
 	err := r.coll.FindId(bson.ObjectIdHex(id)).One(&result)

@@ -7,13 +7,7 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hellofresh/janus/pkg/request"
 	"github.com/hellofresh/janus/pkg/router"
-)
-
-var (
-	// ContextKeyBody defines the db context key
-	ContextKeyBody = request.ContextKey("body")
 )
 
 // NewSingleHostReverseProxy returns a new ReverseProxy that routes
@@ -23,7 +17,7 @@ var (
 // NewSingleHostReverseProxy does not rewrite the Host header.
 // To rewrite Host headers, use ReverseProxy directly with a custom
 // Director policy.
-func NewSingleHostReverseProxy(proxy Proxy, transport http.RoundTripper) *httputil.ReverseProxy {
+func NewSingleHostReverseProxy(proxy *Proxy, transport http.RoundTripper) *httputil.ReverseProxy {
 	target, _ := url.Parse(proxy.TargetURL)
 	targetQuery := target.RawQuery
 

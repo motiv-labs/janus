@@ -9,12 +9,12 @@ import (
 
 // Route is the container for a proxy and it's handlers
 type Route struct {
-	proxy    Proxy
+	proxy    *Proxy
 	handlers []router.Constructor
 }
 
 // NewRoute creates an instance of Route
-func NewRoute(proxy Proxy, handlers ...router.Constructor) *Route {
+func NewRoute(proxy *Proxy, handlers ...router.Constructor) *Route {
 	return &Route{proxy, handlers}
 }
 
@@ -32,7 +32,7 @@ type Proxy struct {
 }
 
 // Validate validates proxy data
-func Validate(proxy Proxy) bool {
+func Validate(proxy *Proxy) bool {
 	if proxy.ListenPath == "" {
 		log.Warning("Listen path is empty")
 		return false
