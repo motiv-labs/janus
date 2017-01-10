@@ -17,16 +17,16 @@ type Specification struct {
 	StorageDSN          string `envconfig:"REDIS_DSN"`
 
 	// Path of certificate when using TLS
-	CertPathTLS string        `envconfig:"CERT_PATH"`
+	CertPathTLS string `envconfig:"CERT_PATH"`
 	// Path of key when using TLS
-	KeyPathTLS string         `envconfig:"KEY_PATH"`
+	KeyPathTLS string `envconfig:"KEY_PATH"`
 
 	// Flush interval for upgraded Proxy connections
-	BackendFlushInterval time.Duration
+	BackendFlushInterval time.Duration `envconfig:"BACKEND_FLUSH_INTERVAL" default:"20ms"`
 
 	// Defines the time period of how often the idle connections maintained
 	// by the proxy are closed.
-	CloseIdleConnsPeriod time.Duration
+	CloseIdleConnsPeriod time.Duration `envconfig:"CLOSE_IDLE_CONNS_PERIOD"`
 
 	Database    Database
 	Statsd      Statsd
