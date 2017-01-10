@@ -1,7 +1,6 @@
 package main
 
 import (
-	"crypto/tls"
 	"fmt"
 	"net/http"
 
@@ -64,18 +63,24 @@ func main() {
 	defer accessor.Close()
 	defer statsdClient.Close()
 
-	http.DefaultTransport.(*http.Transport).MaxIdleConnsPerHost = globalConfig.MaxIdleConnsPerHost
-	if globalConfig.InsecureSkipVerify {
-		http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
-	}
-
+	// create router
 	r := router.NewHttpTreeMuxRouter()
 	r.Use(middleware.NewLogger(globalConfig.Debug).Handler, middleware.NewRecovery(RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
 
+	// create the proxy
 	manager := &oauth.Manager{Storage: storage}
-	transport := oauth.NewAwareTransport(http.DefaultTransport, manager)
-	//registerChan := proxy.NewRegisterChan(r, transport)
-	register := proxy.NewInMemoryRegister(r, transport)
+	transport := oauth.NewAwareTransport(manager)
+	p := proxy.WithParams(proxy.Params{
+		Transport:              transport,
+		FlushInterval:          globalConfig.BackendFlushInterval,
+		IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
+		CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
+		InsecureSkipVerify:     globalConfig.InsecureSkipVerify,
+	})
+	defer p.Close()
+
+	// create proxy register
+	register := proxy.NewInMemoryRegister(r, p)
 
 	apiLoader := api.NewLoader(register, storage, accessor, manager, globalConfig.Debug)
 	apiLoader.Load()
@@ -83,10 +88,11 @@ func main() {
 	oauthLoader := oauth.NewLoader(register, accessor, globalConfig.Debug)
 	oauthLoader.Load()
 
+	// create authentication for Janus
 	authConfig := jwt.NewConfig(globalConfig.Credentials)
 	authMiddleware := jwt.NewMiddleware(authConfig)
 
-	// Home endpoint for the gateway
+	// create endpoints
 	r.GET("/", Home(globalConfig.Application))
 	r.GET("/status", Heartbeat())
 
@@ -94,5 +100,16 @@ func main() {
 	loadAPIEndpoints(r, authMiddleware, apiLoader)
 	loadOAuthEndpoints(r, authMiddleware, oauthLoader)
 
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%v", globalConfig.Port), r))
+	log.Fatal(listenAndServe(r))
+}
+
+func listenAndServe(handler http.Handler) error {
+	address := fmt.Sprintf(":%v", globalConfig.Port)
+	log.Infof("Listening on %v", address)
+	if globalConfig.IsHTTPS() {
+		return http.ListenAndServeTLS(address, globalConfig.CertPathTLS, globalConfig.KeyPathTLS, handler)
+	}
+
+	log.Infof("certPathTLS or keyPathTLS not found, defaulting to HTTP")
+	return http.ListenAndServe(address, handler)
 }
