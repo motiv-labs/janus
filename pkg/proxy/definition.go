@@ -9,17 +9,17 @@ import (
 
 // Route is the container for a proxy and it's handlers
 type Route struct {
-	proxy    *Proxy
+	proxy    *Definition
 	handlers []router.Constructor
 }
 
 // NewRoute creates an instance of Route
-func NewRoute(proxy *Proxy, handlers ...router.Constructor) *Route {
+func NewRoute(proxy *Definition, handlers ...router.Constructor) *Route {
 	return &Route{proxy, handlers}
 }
 
-// Proxy defines proxy rules for a route
-type Proxy struct {
+// Definition defines proxy rules for a route
+type Definition struct {
 	PreserveHostHeader          bool     `bson:"preserve_host_header" json:"preserve_host_header"`
 	ListenPath                  string   `bson:"listen_path" json:"listen_path" valid:"required"`
 	TargetURL                   string   `bson:"target_url" json:"target_url" valid:"url,required"`
@@ -32,7 +32,7 @@ type Proxy struct {
 }
 
 // Validate validates proxy data
-func Validate(proxy *Proxy) bool {
+func Validate(proxy *Definition) bool {
 	if proxy.ListenPath == "" {
 		log.Warning("Listen path is empty")
 		return false

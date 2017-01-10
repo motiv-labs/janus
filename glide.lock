@@ -1,5 +1,5 @@
-hash: 3f646106b9cd38b0c02894fe1240ac5d1b16613599b609efff316e4b14104d9c
-updated: 2017-01-02T10:02:13.622743215+01:00
+hash: 16b6eac52c56571eb6a8757083835c652fcdd2a9d20e5bc601c68465892bebc5
+updated: 2017-01-09T15:51:12.34797085+01:00
 imports:
 - name: github.com/ant0ine/go-json-rest
   version: ce4b71cdf7ba29ef443d704bd923f5bbf281ee30
@@ -7,7 +7,7 @@ imports:
   - rest
   - rest/trie
 - name: github.com/asaskevich/govalidator
-  version: 7664702784775e51966f0885f5cd27435916517b
+  version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
 - name: github.com/bshuster-repo/logrus-logstash-hook
   version: f93ff950803d2209f053f89fc13e1beea1804791
 - name: github.com/dgrijalva/jwt-go
@@ -34,13 +34,24 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: f315505cf3349909cdf013ea56690da34e96a451
+  version: 67957fd0b1868d2b9f4fd2b3a3474c83bc3d49c3
   subpackages:
   - context
+  - http2
+  - http2/hpack
+  - idna
+  - lex/httplex
 - name: golang.org/x/sys
   version: a408501be4d17ee978c04a618e7a1b22af058c0e
   subpackages:
   - unix
+- name: golang.org/x/text
+  version: 44f4f658a783b0cee41fe0a23b8fc91d9c120558
+  subpackages:
+  - secure/bidirule
+  - transform
+  - unicode/bidi
+  - unicode/norm
 - name: gopkg.in/alexcesaro/statsd.v2
   version: 7fea3f0d2fab1ad973e641e51dba45443a311a90
 - name: gopkg.in/mgo.v2

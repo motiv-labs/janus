@@ -31,13 +31,13 @@ type OAuth struct {
 
 // Endpoints defines the oauth endpoints that wil be proxied
 type Endpoints struct {
-	Authorize *proxy.Proxy `bson:"authorize" json:"authorize"`
-	Token     *proxy.Proxy `bson:"token" json:"token"`
-	Info      *proxy.Proxy `bson:"info" json:"info"`
+	Authorize *proxy.Definition `bson:"authorize" json:"authorize"`
+	Token     *proxy.Definition `bson:"token" json:"token"`
+	Info      *proxy.Definition `bson:"info" json:"info"`
 }
 
 // ClientEndpoints defines the oauth client endpoints that wil be proxied
 type ClientEndpoints struct {
-	Create *proxy.Proxy `bson:"create" json:"create"`
-	Remove *proxy.Proxy `bson:"remove" json:"remove"`
+	Create *proxy.Definition `bson:"create" json:"create"`
+	Remove *proxy.Definition `bson:"remove" json:"remove"`
 }

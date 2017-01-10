@@ -3,6 +3,7 @@ package oauth
 import (
 	"bytes"
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"net/http"
 
@@ -11,16 +12,24 @@ import (
 )
 
 // AwareTransport is a RoundTripper that is aware of the access tokens that come back from the
-// authentication server. After retriving the token, we delagete the storage of it for the
+// authentication server. After retrieving the token, we delagete the storage of it for the
 // oauth manager
 type AwareTransport struct {
-	http.RoundTripper
 	manager *Manager
 }
 
-// NewAwareTransport creates a new instace of AwareTransport
-func NewAwareTransport(roundTripper http.RoundTripper, manager *Manager) *AwareTransport {
-	return &AwareTransport{roundTripper, manager}
+// NewAwareTransport creates a new instance of AwareTransport
+func NewAwareTransport(manager *Manager) *AwareTransport {
+	return &AwareTransport{manager}
+}
+
+func (at *AwareTransport) GetRoundTripper(roundTripper http.RoundTripper) http.RoundTripper {
+	return &RoundTripper{roundTripper, at.manager}
+}
+
+type RoundTripper struct {
+	RoundTripper http.RoundTripper
+	manager      *Manager
 }
 
 // RoundTrip executes a single HTTP transaction, returning
@@ -44,9 +53,19 @@ func NewAwareTransport(roundTripper http.RoundTripper, manager *Manager) *AwareT
 // must arrange to wait for the Close call before doing so.
 //
 // The Request's URL and Header fields must be initialized.
-func (t *AwareTransport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err error) {
 	resp, err = t.RoundTripper.RoundTrip(req)
+	if resp.Body != nil {
+		defer func(body io.Closer) {
+			err := body.Close()
+			if err != nil {
+				log.Error(err)
+			}
+		}(resp.Body)
+	}
+
 	if nil != err {
+		log.Error("Reponse from the server was an error", err)
 		return resp, err
 	}
 
@@ -55,8 +74,6 @@ func (t *AwareTransport) RoundTrip(req *http.Request) (resp *http.Response, err 
 
 		//This is useful for the middlewares
 		var bodyBytes []byte
-
-		defer resp.Body.Close()
 		bodyBytes, _ = ioutil.ReadAll(resp.Body)
 
 		if marshalErr := json.Unmarshal(bodyBytes, &newSession); marshalErr == nil {

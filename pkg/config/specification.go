@@ -1,6 +1,10 @@
 package config
 
-import "github.com/kelseyhightower/envconfig"
+import (
+	"time"
+
+	"github.com/kelseyhightower/envconfig"
+)
 
 // Specification for basic configurations
 type Specification struct {
@@ -11,10 +15,27 @@ type Specification struct {
 	MaxIdleConnsPerHost int    `envconfig:"MAX_IDLE_CONNS_PER_HOST"`
 	InsecureSkipVerify  bool   `envconfig:"INSECURE_SKIP_VERIFY"`
 	StorageDSN          string `envconfig:"REDIS_DSN"`
-	Database            Database
-	Statsd              Statsd
-	Credentials         Credentials
-	Application         Application
+
+	// Path of certificate when using TLS
+	CertPathTLS string `envconfig:"CERT_PATH"`
+	// Path of key when using TLS
+	KeyPathTLS string `envconfig:"KEY_PATH"`
+
+	// Flush interval for upgraded Proxy connections
+	BackendFlushInterval time.Duration `envconfig:"BACKEND_FLUSH_INTERVAL" default:"20ms"`
+
+	// Defines the time period of how often the idle connections maintained
+	// by the proxy are closed.
+	CloseIdleConnsPeriod time.Duration `envconfig:"CLOSE_IDLE_CONNS_PERIOD"`
+
+	Database    Database
+	Statsd      Statsd
+	Credentials Credentials
+	Application Application
+}
+
+func (s *Specification) IsHTTPS() bool {
+	return s.CertPathTLS != "" && s.KeyPathTLS != ""
 }
 
 // Database holds the configuration for a database
