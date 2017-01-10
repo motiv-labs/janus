@@ -23,14 +23,14 @@ type Register interface {
 // Register handles the register of proxies into the choosen router.
 // It also handles the conversion from a proxy to an http.HandlerFunc
 type InMemoryRegister struct {
-	router    router.Router
-	transport http.RoundTripper
-	proxies   map[string]*Route
+	router  router.Router
+	proxy   *Proxy
+	proxies map[string]*Route
 }
 
 // NewInMemoryRegister creates a new instance of Register
-func NewInMemoryRegister(router router.Router, transport http.RoundTripper) *InMemoryRegister {
-	return &InMemoryRegister{router: router, transport: transport, proxies: make(map[string]*Route)}
+func NewInMemoryRegister(router router.Router, proxy *Proxy) *InMemoryRegister {
+	return &InMemoryRegister{router: router, proxy: proxy, proxies: make(map[string]*Route)}
 }
 
 // Exists checks if a proxy is already registered in the manager
@@ -60,27 +60,27 @@ func (p *InMemoryRegister) AddMany(routes []*Route) error {
 	return nil
 }
 
-// Register register a new proxy
+// Add register a new route
 func (p *InMemoryRegister) Add(route *Route) error {
 	if p.Exists(route) {
 		return p.replace(route)
-	} else {
-		return p.add(route)
 	}
+
+	return p.add(route)
 }
 
 func (p *InMemoryRegister) add(route *Route) error {
 	if false == p.Exists(route) {
-		proxy := route.proxy
+		definition := route.proxy
 
-		handler := p.toHandler(proxy)
+		handler := p.proxy.Reverse(definition).ServeHTTP
 		matcher := router.NewListenPathMatcher()
-		if matcher.Match(proxy.ListenPath) {
-			p.doRegister(matcher.Extract(proxy.ListenPath), handler, proxy.Methods, route.handlers)
+		if matcher.Match(definition.ListenPath) {
+			p.doRegister(matcher.Extract(definition.ListenPath), handler, definition.Methods, route.handlers)
 		}
 
-		p.doRegister(proxy.ListenPath, handler, proxy.Methods, route.handlers)
-		p.proxies[proxy.ListenPath] = route
+		p.doRegister(definition.ListenPath, handler, definition.Methods, route.handlers)
+		p.proxies[definition.ListenPath] = route
 	}
 
 	return nil
@@ -110,13 +110,5 @@ func (p *InMemoryRegister) doRegister(listenPath string, handler http.HandlerFun
 		} else {
 			p.router.Handle(strings.ToUpper(method), listenPath, handler, handlers...)
 		}
-	}
-}
-
-// ToHandler turns a proxy configuration into a handler
-func (p *InMemoryRegister) toHandler(proxy *Proxy) http.HandlerFunc {
-	return func(rw http.ResponseWriter, r *http.Request) {
-		reverseProxy := NewSingleHostReverseProxy(proxy, p.transport)
-		reverseProxy.ServeHTTP(rw, r)
 	}
 }
