@@ -20,7 +20,7 @@ type Register interface {
 	Add(route *Route) error
 }
 
-// Register handles the register of proxies into the choosen router.
+// InMemoryRegister handles the register of proxies into the chosen router.
 // It also handles the conversion from a proxy to an http.HandlerFunc
 type InMemoryRegister struct {
 	router  router.Router
@@ -39,6 +39,7 @@ func (p *InMemoryRegister) Exists(route *Route) bool {
 	return exists
 }
 
+// Get
 func (p *InMemoryRegister) Get(listenPath string) *Route {
 	return p.proxies[listenPath]
 }
