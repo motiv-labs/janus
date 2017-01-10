@@ -129,7 +129,7 @@ func (p *Proxy) Reverse(proxyDefinition *Definition) *httputil.ReverseProxy {
 			log.Debugf("Stripping listen path: %s", listenPath)
 			path = strings.Replace(path, listenPath, "", 1)
 			if !strings.HasSuffix(target.Path, "/") && strings.HasSuffix(path, "/") {
-				path = path[:len(path) - 1]
+				path = path[:len(path)-1]
 			}
 		}
 
