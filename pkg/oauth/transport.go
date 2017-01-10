@@ -55,17 +55,8 @@ type RoundTripper struct {
 // The Request's URL and Header fields must be initialized.
 func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err error) {
 	resp, err = t.RoundTripper.RoundTrip(req)
-	if resp.Body != nil {
-		defer func(body io.Closer) {
-			err := body.Close()
-			if err != nil {
-				log.Error(err)
-			}
-		}(resp.Body)
-	}
-
 	if nil != err {
-		log.Error("Reponse from the server was an error", err)
+		log.Error("Response from the server was an error", err)
 		return resp, err
 	}
 
@@ -74,6 +65,13 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err er
 
 		//This is useful for the middlewares
 		var bodyBytes []byte
+
+		defer func(body io.Closer) {
+			err := body.Close()
+			if err != nil {
+				log.Error(err)
+			}
+		}(resp.Body)
 		bodyBytes, _ = ioutil.ReadAll(resp.Body)
 
 		if marshalErr := json.Unmarshal(bodyBytes, &newSession); marshalErr == nil {
