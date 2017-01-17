@@ -20,7 +20,7 @@ services:
     #         ADMIN_PASSWORD: 'admin'
     #         GRACE_TIMEOUT: '10'
     #         MAX_IDLE_CONNS_PER_HOST: '200'
-    #         INSECURE_SKIP_VERIFY: false
+    #         INSECURE_SKIP_VERIFY: 'false'
 
     mongodb:
         image: mongo
