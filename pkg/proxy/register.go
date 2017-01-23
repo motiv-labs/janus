@@ -6,51 +6,51 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/router"
+	"github.com/hellofresh/janus/pkg/store"
+	"encoding/json"
 )
 
 const (
 	methodAll = "ALL"
 )
 
-type Register interface {
-	Exists(route *Route) bool
-	Get(listenPath string) *Route
-	Remove(listenPath string) error
-	AddMany(routes []*Route) error
-	Add(route *Route) error
-}
-
-// InMemoryRegister handles the register of proxies into the chosen router.
+// Register handles the register of proxies into the chosen router.
 // It also handles the conversion from a proxy to an http.HandlerFunc
-type InMemoryRegister struct {
-	router  router.Router
-	proxy   *Proxy
-	proxies map[string]*Route
+type Register struct {
+	router router.Router
+	proxy  *Proxy
+	store  store.Store
 }
 
-// NewInMemoryRegister creates a new instance of Register
-func NewInMemoryRegister(router router.Router, proxy *Proxy) *InMemoryRegister {
-	return &InMemoryRegister{router: router, proxy: proxy, proxies: make(map[string]*Route)}
+// NewRegister creates a new instance of Register
+func NewRegister(router router.Router, proxy *Proxy, store store.Store) *Register {
+	return &Register{router: router, proxy: proxy, store: store}
 }
 
 // Exists checks if a proxy is already registered in the manager
-func (p *InMemoryRegister) Exists(route *Route) bool {
-	_, exists := p.proxies[route.proxy.ListenPath]
+func (p *Register) Exists(route *Route) bool {
+	exists, _ := p.store.Exists(route.proxy.ListenPath)
 	return exists
 }
 
 // Get
-func (p *InMemoryRegister) Get(listenPath string) *Route {
-	return p.proxies[listenPath]
-}
+func (p *Register) Get(listenPath string) *Route {
+	var route Route
+	rawRoute, err := p.store.Get(listenPath)
+	if nil != err {
+		log.Warn(err.Error())
+	}
 
-func (p *InMemoryRegister) Remove(listenPath string) error {
-	delete(p.proxies, listenPath)
-	return nil
+	json.Unmarshal([]byte(rawRoute), &route)
+	if nil != err {
+		log.Warn(err.Error())
+	}
+
+	return &route
 }
 
 // AddMany registers many proxies at once
-func (p *InMemoryRegister) AddMany(routes []*Route) error {
+func (p *Register) AddMany(routes []*Route) error {
 	for _, r := range routes {
 		err := p.Add(r)
 		if nil != err {
@@ -62,7 +62,7 @@ func (p *InMemoryRegister) AddMany(routes []*Route) error {
 }
 
 // Add register a new route
-func (p *InMemoryRegister) Add(route *Route) error {
+func (p *Register) Add(route *Route) error {
 	if p.Exists(route) {
 		return p.replace(route)
 	}
@@ -70,24 +70,28 @@ func (p *InMemoryRegister) Add(route *Route) error {
 	return p.add(route)
 }
 
-func (p *InMemoryRegister) add(route *Route) error {
-	if false == p.Exists(route) {
-		definition := route.proxy
+func (p *Register) add(route *Route) error {
+	definition := route.proxy
 
-		handler := p.proxy.Reverse(definition).ServeHTTP
-		matcher := router.NewListenPathMatcher()
-		if matcher.Match(definition.ListenPath) {
-			p.doRegister(matcher.Extract(definition.ListenPath), handler, definition.Methods, route.handlers)
-		}
-
-		p.doRegister(definition.ListenPath, handler, definition.Methods, route.handlers)
-		p.proxies[definition.ListenPath] = route
+	handler := p.proxy.Reverse(definition).ServeHTTP
+	matcher := router.NewListenPathMatcher()
+	if matcher.Match(definition.ListenPath) {
+		p.doRegister(matcher.Extract(definition.ListenPath), handler, definition.Methods, route.handlers)
 	}
+
+	p.doRegister(definition.ListenPath, handler, definition.Methods, route.handlers)
+	jsonRoute, err := json.Marshal(route)
+
+	if err != nil {
+		return err
+	}
+
+	p.store.Set(definition.ListenPath, string(jsonRoute), 0)
 
 	return nil
 }
 
-func (p *InMemoryRegister) replace(r *Route) error {
+func (p *Register) replace(r *Route) error {
 	log.WithFields(log.Fields{
 		"listen_path": r.proxy.ListenPath,
 		"target_url":  r.proxy.TargetURL,
@@ -100,7 +104,7 @@ func (p *InMemoryRegister) replace(r *Route) error {
 	return nil
 }
 
-func (p *InMemoryRegister) doRegister(listenPath string, handler http.HandlerFunc, methods []string, handlers []router.Constructor) {
+func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, methods []string, handlers []router.Constructor) {
 	log.WithFields(log.Fields{
 		"listen_path": listenPath,
 	}).Debug("Registering a route")
