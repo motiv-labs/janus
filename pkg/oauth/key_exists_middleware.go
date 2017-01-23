@@ -8,6 +8,7 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/request"
 	"github.com/hellofresh/janus/pkg/session"
+	"gopkg.in/mgo.v2/bson"
 )
 
 // Enums for keys to be stored in a session context - this is how gorilla expects
@@ -20,11 +21,13 @@ var (
 // KeyExistsMiddleware checks the integrity of the provided OAuth headers
 type KeyExistsMiddleware struct {
 	manager *Manager
+	// TODO pass api.Spec pointer here, currently impossible as circullar referens occurs
+	oAuthServerID bson.ObjectId
 }
 
 // NewKeyExistsMiddleware creates a new instance of KeyExistsMiddleware
-func NewKeyExistsMiddleware(manager *Manager) *KeyExistsMiddleware {
-	return &KeyExistsMiddleware{manager}
+func NewKeyExistsMiddleware(manager *Manager, oAuthServerID bson.ObjectId) *KeyExistsMiddleware {
+	return &KeyExistsMiddleware{manager, oAuthServerID}
 }
 
 // Handler is the middleware method.
@@ -52,7 +55,6 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 		accessToken := parts[1]
 		thisSessionState, keyExists := m.CheckSessionAndIdentityForValidKey(accessToken)
 
-		//TODO find a way to check this thisSessionState.OAuthServerID != m.Spec.OAuthServerID
 		if !keyExists {
 			log.WithFields(log.Fields{
 				"path":   r.RequestURI,
@@ -60,6 +62,17 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 				"key":    accessToken,
 			}).Info("Attempted access with non-existent key.")
 			panic(ErrAccessTokenNotAuthorized)
+		}
+
+		if m.oAuthServerID != thisSessionState.OAuthServerID {
+			log.WithFields(log.Fields{
+				"path":   r.RequestURI,
+				"origin": r.RemoteAddr,
+				"key":    accessToken,
+				"sessionOAuthServerID": thisSessionState.OAuthServerID,
+				"authOAuthServerID":    m.oAuthServerID,
+			}).Info("Attempted access with the key issued by other OAuth provider.")
+			panic(ErrAccessTokenOfOtherOrigin)
 		}
 
 		ctx := context.WithValue(r.Context(), SessionData, thisSessionState)

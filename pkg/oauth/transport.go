@@ -6,6 +6,7 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/session"
@@ -15,21 +16,23 @@ import (
 // authentication server. After retrieving the token, we delagete the storage of it for the
 // oauth manager
 type AwareTransport struct {
-	manager *Manager
+	manager          *Manager
+	oAuthServersRepo *MongoRepository
 }
 
 // NewAwareTransport creates a new instance of AwareTransport
-func NewAwareTransport(manager *Manager) *AwareTransport {
-	return &AwareTransport{manager}
+func NewAwareTransport(manager *Manager, oAuthServersRepo *MongoRepository) *AwareTransport {
+	return &AwareTransport{manager, oAuthServersRepo}
 }
 
 func (at *AwareTransport) GetRoundTripper(roundTripper http.RoundTripper) http.RoundTripper {
-	return &RoundTripper{roundTripper, at.manager}
+	return &RoundTripper{roundTripper, at.manager, at.oAuthServersRepo}
 }
 
 type RoundTripper struct {
-	RoundTripper http.RoundTripper
-	manager      *Manager
+	RoundTripper     http.RoundTripper
+	manager          *Manager
+	oAuthServersRepo *MongoRepository
 }
 
 // RoundTrip executes a single HTTP transaction, returning
@@ -75,8 +78,17 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err er
 		bodyBytes, _ = ioutil.ReadAll(resp.Body)
 
 		if marshalErr := json.Unmarshal(bodyBytes, &newSession); marshalErr == nil {
-			log.Debug("Setting body in the oauth storage")
-			t.manager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
+			tokenURL := url.URL{Scheme: req.URL.Scheme, Host: req.URL.Host, Path: req.URL.Path}
+			log.WithField("token_url", tokenURL.String()).Debug("Looking for OAuth provider who issued the token")
+			oAuthServer, err := t.oAuthServersRepo.FindByTokenURL(tokenURL)
+			if err != nil {
+				log.Error("Failed to find OAuth server by token URL", err)
+			} else {
+				newSession.OAuthServerID = oAuthServer.ID
+
+				log.Debug("Setting body in the oauth storage")
+				t.manager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
+			}
 		}
 
 		// Restore the io.ReadCloser to its original state

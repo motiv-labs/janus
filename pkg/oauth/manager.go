@@ -25,7 +25,7 @@ func (o *Manager) Set(accessToken string, session session.SessionState, resetTTL
 	value, _ := json.Marshal(session)
 	expireDuration := time.Duration(resetTTLTo) * time.Second
 
-	log.Debugf("Storing key %s for %d seconds", accessToken, expireDuration)
+	log.Debugf("Storing key %s for %d seconds", accessToken, resetTTLTo)
 	go o.Storage.Set(accessToken, string(value), expireDuration)
 
 	return nil

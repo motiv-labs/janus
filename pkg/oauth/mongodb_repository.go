@@ -1,6 +1,7 @@
 package oauth
 
 import (
+	"net/url"
 	"time"
 
 	log "github.com/Sirupsen/logrus"
@@ -100,4 +101,13 @@ func (r *MongoRepository) Remove(id string) error {
 
 	log.Debugf("Resource %s removed", id)
 	return nil
+}
+
+// FindByTokenURL returns OAuth server records with corresponding token url
+func (r *MongoRepository) FindByTokenURL(url url.URL) (*OAuth, error) {
+	var result *OAuth
+
+	err := r.coll.Find(bson.M{"oauth_endpoints.token.target_url": url.String()}).One(&result)
+
+	return result, err
 }
