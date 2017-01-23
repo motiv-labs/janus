@@ -4,10 +4,10 @@ import (
 	"net/http"
 	"strings"
 
+	"encoding/json"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/store"
-	"encoding/json"
 )
 
 const (
