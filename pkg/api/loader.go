@@ -58,7 +58,7 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 				panic(err)
 			}
 
-			limiterStore, err := m.store.ToLimiterStore(referenceSpec.Name)
+			limiterStore, err := m.store.ToLimiterStore(referenceSpec.Slug)
 			if err != nil {
 				panic(err)
 			}
@@ -75,7 +75,7 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 		}
 
 		if referenceSpec.UseOauth2 {
-			handlers = append(handlers, oauth.NewKeyExistsMiddleware(m.manager).Handler)
+			handlers = append(handlers, oauth.NewKeyExistsMiddleware(m.manager, referenceSpec.OAuthServerID).Handler)
 		} else {
 			log.Debug("OAuth2 is not enabled")
 		}

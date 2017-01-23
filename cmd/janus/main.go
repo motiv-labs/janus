@@ -68,8 +68,12 @@ func main() {
 	r.Use(middleware.NewLogger(globalConfig.Debug).Handler, middleware.NewRecovery(RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
 
 	// create the proxy
+	oAuthServersRepo, err := oauth.NewMongoRepository(accessor.Session.DB(""))
+	if err != nil {
+		log.Panic(err)
+	}
 	manager := &oauth.Manager{Storage: storage}
-	transport := oauth.NewAwareTransport(manager)
+	transport := oauth.NewAwareTransport(manager, oAuthServersRepo)
 	p := proxy.WithParams(proxy.Params{
 		Transport:              transport,
 		FlushInterval:          globalConfig.BackendFlushInterval,
