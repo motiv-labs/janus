@@ -80,8 +80,7 @@ func main() {
 	defer p.Close()
 
 	// create proxy register
-	register := proxy.NewInMemoryRegister(r, p)
-
+	register := proxy.NewRegister(r, p, storage)
 	apiLoader := api.NewLoader(register, storage, accessor, manager, globalConfig.Debug)
 	apiLoader.Load()
 
