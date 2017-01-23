@@ -13,7 +13,7 @@ import (
 
 // Loader is responsible for loading all apis form a datastore and configure them in a register
 type Loader struct {
-	register proxy.Register
+	register *proxy.Register
 	store    store.Store
 	accessor *middleware.DatabaseAccessor
 	manager  *oauth.Manager
@@ -21,7 +21,7 @@ type Loader struct {
 }
 
 // NewLoader creates a new instance of the api manager
-func NewLoader(register proxy.Register, store store.Store, accessor *middleware.DatabaseAccessor, manager *oauth.Manager, debug bool) *Loader {
+func NewLoader(register *proxy.Register, store store.Store, accessor *middleware.DatabaseAccessor, manager *oauth.Manager, debug bool) *Loader {
 	return &Loader{register, store, accessor, manager, debug}
 }
 
