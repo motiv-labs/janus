@@ -58,7 +58,7 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 				panic(err)
 			}
 
-			limiterStore, err := m.store.ToLimiterStore(referenceSpec.Name)
+			limiterStore, err := m.store.ToLimiterStore(referenceSpec.Slug)
 			if err != nil {
 				panic(err)
 			}
