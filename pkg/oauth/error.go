@@ -16,6 +16,9 @@ var (
 	// ErrAccessTokenNotAuthorized is used when the access token is not found on the storage
 	ErrAccessTokenNotAuthorized = errors.New(http.StatusUnauthorized, "access token not authorized")
 
+	// ErrAccessTokenOfOtherOrigin is used when the access token is of other origin
+	ErrAccessTokenOfOtherOrigin = errors.New(http.StatusUnauthorized, "access token of other origin")
+
 	// ErrOauthServerNotFound is used when the oauth server was not found in the datastore
 	ErrOauthServerNotFound = errors.New(http.StatusNotFound, "oauth server not found")
 
