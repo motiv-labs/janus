@@ -104,7 +104,6 @@ func (u *Controller) Post() http.HandlerFunc {
 
 		err = repo.Add(definition)
 		if nil != err {
-
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 

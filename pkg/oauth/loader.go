@@ -9,13 +9,13 @@ import (
 
 // Loader handles the loading of the api specs
 type Loader struct {
-	register proxy.Register
+	register *proxy.Register
 	accessor *middleware.DatabaseAccessor
 	debug    bool
 }
 
 // NewLoader creates a new instance of the api manager
-func NewLoader(register proxy.Register, accessor *middleware.DatabaseAccessor, debug bool) *Loader {
+func NewLoader(register *proxy.Register, accessor *middleware.DatabaseAccessor, debug bool) *Loader {
 	return &Loader{register, accessor, debug}
 }
 
