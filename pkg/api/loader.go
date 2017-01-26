@@ -58,12 +58,13 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 				panic(err)
 			}
 
-			limiterStore, err := m.store.ToLimiterStore(referenceSpec.Slug)
+			limiterStore, err := m.store.ToLimiterStore(referenceSpec.ID.String())
 			if err != nil {
 				panic(err)
 			}
 
 			handlers = append(handlers, limiter.NewHTTPMiddleware(limiter.NewLimiter(limiterStore, rate)).Handler)
+			handlers = append(handlers, middleware.NewRateLimitLogger().Handler)
 		} else {
 			log.Debug("Rate limit is not enabled")
 		}
