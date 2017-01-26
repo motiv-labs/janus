@@ -38,7 +38,8 @@ func init() {
 
 	log.SetLevel(level)
 	log.SetFormatter(&logrus_logstash.LogstashFormatter{
-		Type: globalConfig.Application.Name,
+		Type:            globalConfig.Application.Name,
+		TimestampFormat: time.RFC3339Nano,
 	})
 }
 
