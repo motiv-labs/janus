@@ -69,9 +69,11 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err er
 		log.Error("Response from the server was an error", err)
 		return resp, err
 	}
-	t.statsClient.TrackRoundTrip(timing, req, true)
 
-	if resp.StatusCode < 300 && resp.Body != nil {
+	statusCodeSuccess := resp.StatusCode < 300
+	t.statsClient.TrackRoundTrip(timing, req, statusCodeSuccess)
+
+	if statusCodeSuccess && resp.Body != nil {
 		var newSession session.SessionState
 
 		//This is useful for the middlewares
