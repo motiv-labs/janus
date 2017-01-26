@@ -44,5 +44,19 @@ func (sc *StatsClient) getStatsdMetricName(req *http.Request) string {
 		"_",
 		-1,
 	)
-	return fmt.Sprintf("%s.%s", strings.ToLower(req.Method), path)
+
+	var pathFragments []string
+	if path == "/" {
+		pathFragments = []string{"/"}
+	} else {
+		// we need only two first fragments of path (first one always empty, as path always starts with slash)
+		pathFragments = strings.Split(path, "/")
+		fragmentsCount := 3
+		if len(pathFragments) < fragmentsCount {
+			fragmentsCount = len(pathFragments)
+		}
+		pathFragments = pathFragments[:fragmentsCount]
+		pathFragments[0] = "/"
+	}
+	return fmt.Sprintf("%s.%s", strings.ToLower(req.Method), strings.Join(pathFragments, "."))
 }
