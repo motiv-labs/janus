@@ -11,6 +11,7 @@ import (
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
+	"github.com/hellofresh/janus/pkg/stats"
 )
 
 //loadAPIEndpoints register api endpoints
@@ -63,9 +64,16 @@ func main() {
 	defer accessor.Close()
 	defer statsdClient.Close()
 
+	statsClient := stats.NewStatsClient(statsdClient)
+
 	// create router
 	r := router.NewHttpTreeMuxRouter()
-	r.Use(middleware.NewLogger(globalConfig.Debug).Handler, middleware.NewRecovery(RecoveryHandler).Handler, middleware.NewMongoDB(accessor).Handler)
+	r.Use(middleware.NewLogger(
+		globalConfig.Debug).Handler,
+		middleware.NewRecovery(RecoveryHandler).Handler,
+		middleware.NewStats(statsClient).Handler,
+		middleware.NewMongoDB(accessor).Handler,
+	)
 
 	// create the proxy
 	oAuthServersRepo, err := oauth.NewMongoRepository(accessor.Session.DB(""))
@@ -73,7 +81,7 @@ func main() {
 		log.Panic(err)
 	}
 	manager := &oauth.Manager{Storage: storage}
-	transport := oauth.NewAwareTransport(manager, oAuthServersRepo)
+	transport := oauth.NewAwareTransport(manager, oAuthServersRepo, statsClient)
 	p := proxy.WithParams(proxy.Params{
 		Transport:              transport,
 		FlushInterval:          globalConfig.BackendFlushInterval,
