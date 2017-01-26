@@ -10,6 +10,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/session"
+	"github.com/hellofresh/janus/pkg/stats"
 )
 
 // AwareTransport is a RoundTripper that is aware of the access tokens that come back from the
@@ -18,21 +19,24 @@ import (
 type AwareTransport struct {
 	manager          *Manager
 	oAuthServersRepo *MongoRepository
+	statsClient      *stats.StatsClient
 }
 
 // NewAwareTransport creates a new instance of AwareTransport
-func NewAwareTransport(manager *Manager, oAuthServersRepo *MongoRepository) *AwareTransport {
-	return &AwareTransport{manager, oAuthServersRepo}
+func NewAwareTransport(manager *Manager, oAuthServersRepo *MongoRepository, statsClient *stats.StatsClient) *AwareTransport {
+	return &AwareTransport{manager, oAuthServersRepo, statsClient}
 }
 
+// GetRoundTripper returns initialized RoundTripper insnace
 func (at *AwareTransport) GetRoundTripper(roundTripper http.RoundTripper) http.RoundTripper {
-	return &RoundTripper{roundTripper, at.manager, at.oAuthServersRepo}
+	return &RoundTripper{roundTripper, at.manager, at.oAuthServersRepo, at.statsClient}
 }
 
 type RoundTripper struct {
 	RoundTripper     http.RoundTripper
 	manager          *Manager
 	oAuthServersRepo *MongoRepository
+	statsClient      *stats.StatsClient
 }
 
 // RoundTrip executes a single HTTP transaction, returning
@@ -57,11 +61,15 @@ type RoundTripper struct {
 //
 // The Request's URL and Header fields must be initialized.
 func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err error) {
+	timing := t.statsClient.StatsDClient.NewTiming()
 	resp, err = t.RoundTripper.RoundTrip(req)
+
 	if nil != err {
+		t.statsClient.TrackRoundTrip(timing, req, false)
 		log.Error("Response from the server was an error", err)
 		return resp, err
 	}
+	t.statsClient.TrackRoundTrip(timing, req, true)
 
 	if resp.StatusCode < 300 && resp.Body != nil {
 		var newSession session.SessionState
