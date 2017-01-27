@@ -12,13 +12,11 @@ import (
 )
 
 // Controller is the api rest controller
-type Controller struct {
-	loader *Loader
-}
+type Controller struct{}
 
 // NewController creates a new instance of Controller
-func NewController(loader *Loader) *Controller {
-	return &Controller{loader}
+func NewController() *Controller {
+	return &Controller{}
 }
 
 func (u *Controller) Get() http.HandlerFunc {
@@ -78,7 +76,6 @@ func (u *Controller) PutBy() http.HandlerFunc {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		u.loader.Load()
 		response.JSON(w, http.StatusOK, nil)
 	}
 }
@@ -98,7 +95,6 @@ func (u *Controller) Post() http.HandlerFunc {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		u.loader.Load()
 		response.JSON(w, http.StatusCreated, nil)
 	}
 }
@@ -113,7 +109,6 @@ func (u *Controller) DeleteBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		u.loader.Load()
 		response.JSON(w, http.StatusNoContent, nil)
 	}
 }
