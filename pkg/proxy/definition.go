@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"encoding/json"
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
@@ -13,9 +14,27 @@ type Route struct {
 	handlers []router.Constructor
 }
 
+type routeJSONProxy struct {
+	Proxy *Definition `json:"proxy"`
+}
+
 // NewRoute creates an instance of Route
 func NewRoute(proxy *Definition, handlers ...router.Constructor) *Route {
 	return &Route{proxy, handlers}
+}
+
+// JSONMarshal encodes route struct to JSON
+func (r *Route) JSONMarshal() ([]byte, error) {
+	return json.Marshal(routeJSONProxy{r.proxy})
+}
+
+// JSONUnmarshalRoute decodes route struct from JSON
+func JSONUnmarshalRoute(rawRoute []byte) (*Route, error) {
+	var proxyRoute routeJSONProxy
+	if err := json.Unmarshal(rawRoute, &proxyRoute); err != nil {
+		return nil, err
+	}
+	return NewRoute(proxyRoute.Proxy), nil
 }
 
 // Definition defines proxy rules for a route

@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"strings"
 
-	"encoding/json"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/store"
@@ -33,20 +32,19 @@ func (p *Register) Exists(route *Route) bool {
 	return exists
 }
 
-// Get
+// Get return route information from store
 func (p *Register) Get(listenPath string) *Route {
-	var route Route
 	rawRoute, err := p.store.Get(listenPath)
 	if nil != err {
 		log.Warn(err.Error())
 	}
 
-	json.Unmarshal([]byte(rawRoute), &route)
+	route, err := JSONUnmarshalRoute([]byte(rawRoute))
 	if nil != err {
 		log.Warn(err.Error())
 	}
 
-	return &route
+	return route
 }
 
 // AddMany registers many proxies at once
@@ -80,13 +78,15 @@ func (p *Register) add(route *Route) error {
 	}
 
 	p.doRegister(definition.ListenPath, handler, definition.Methods, route.handlers)
-	jsonRoute, err := json.Marshal(route)
+	jsonRoute, err := route.JSONMarshal()
 
 	if err != nil {
 		return err
 	}
 
-	p.store.Set(definition.ListenPath, string(jsonRoute), 0)
+	if err := p.store.Set(definition.ListenPath, string(jsonRoute), 0); err != nil {
+		log.WithError(err).Error("Failed to add route information to store")
+	}
 
 	return nil
 }

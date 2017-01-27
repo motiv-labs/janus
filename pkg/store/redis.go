@@ -80,7 +80,12 @@ func (s *RedisStore) Set(key string, value string, expire time.Duration) error {
 	conn := s.Pool.Get()
 	defer conn.Close()
 
-	_, err := conn.Do("SETEX", key, expire.Seconds(), value)
+	var err error
+	if int(expire.Seconds()) == 0 {
+		_, err = conn.Do("SET", key, value)
+	} else {
+		_, err = conn.Do("SETEX", key, expire.Seconds(), value)
+	}
 	if err != nil {
 		return err
 	}
