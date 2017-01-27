@@ -15,11 +15,11 @@ import (
 )
 
 //loadAPIEndpoints register api endpoints
-func loadAPIEndpoints(router router.Router, authMiddleware *jwt.Middleware, loader *api.Loader) {
+func loadAPIEndpoints(router router.Router, authMiddleware *jwt.Middleware) {
 	log.Debug("Loading API Endpoints")
 
 	// Apis endpoints
-	handler := api.NewController(loader)
+	handler := api.NewController()
 	group := router.Group("/apis")
 	group.Use(authMiddleware.Handler)
 	{
@@ -32,11 +32,11 @@ func loadAPIEndpoints(router router.Router, authMiddleware *jwt.Middleware, load
 }
 
 //loadOAuthEndpoints register api endpoints
-func loadOAuthEndpoints(router router.Router, authMiddleware *jwt.Middleware, loader *oauth.Loader) {
+func loadOAuthEndpoints(router router.Router, authMiddleware *jwt.Middleware) {
 	log.Debug("Loading OAuth Endpoints")
 
 	// Oauth servers endpoints
-	oAuthHandler := oauth.NewController(loader)
+	oAuthHandler := oauth.NewController()
 	oauthGroup := router.Group("/oauth/servers")
 	oauthGroup.Use(authMiddleware.Handler)
 	{
@@ -92,7 +92,7 @@ func main() {
 	defer p.Close()
 
 	// create proxy register
-	register := proxy.NewRegister(r, p, storage)
+	register := proxy.NewRegister(r, p)
 	apiLoader := api.NewLoader(register, storage, accessor, manager, globalConfig.Debug)
 	apiLoader.Load()
 
@@ -108,8 +108,8 @@ func main() {
 	r.GET("/status", Heartbeat())
 
 	loadAuthEndpoints(r, authMiddleware)
-	loadAPIEndpoints(r, authMiddleware, apiLoader)
-	loadOAuthEndpoints(r, authMiddleware, oauthLoader)
+	loadAPIEndpoints(r, authMiddleware)
+	loadOAuthEndpoints(r, authMiddleware)
 
 	log.Fatal(listenAndServe(r))
 }
