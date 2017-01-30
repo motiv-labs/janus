@@ -3,6 +3,7 @@ package stats
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 
 	statsd "gopkg.in/alexcesaro/statsd.v2"
@@ -19,7 +20,7 @@ func NewStatsClient(statsdClient *statsd.Client) *StatsClient {
 
 // TrackRequest tracks stats for generic request
 func (sc *StatsClient) TrackRequest(timing statsd.Timing, req *http.Request) {
-	bucket := "request." + sc.getStatsdMetricName(req)
+	bucket := "request." + sc.getStatsdMetricName(req.Method, req.URL)
 
 	timing.Send(bucket)
 	sc.StatsDClient.Increment(bucket)
@@ -28,35 +29,37 @@ func (sc *StatsClient) TrackRequest(timing statsd.Timing, req *http.Request) {
 // TrackRoundTrip tracks stats for round trip request
 func (sc *StatsClient) TrackRoundTrip(timing statsd.Timing, req *http.Request, success bool) {
 	prefix := fmt.Sprintf("round-%s.", map[bool]string{true: "ok", false: "fail"}[success])
-	bucket := prefix + sc.getStatsdMetricName(req)
+	bucket := prefix + sc.getStatsdMetricName(req.Method, req.URL)
 
 	timing.Send(bucket)
 	sc.StatsDClient.Increment(bucket)
 }
 
 // Returns metric name for StatsD in "<request method>.<request path>" format
-func (sc *StatsClient) getStatsdMetricName(req *http.Request) string {
+func (sc *StatsClient) getStatsdMetricName(method string, url *url.URL) string {
 	path := strings.Replace(
 		// Double underscores
-		strings.Replace(req.URL.Path, "_", "__", -1),
+		strings.Replace(url.Path, "_", "__", -1),
 		// and replace dots with single underscore
 		".",
 		"_",
 		-1,
 	)
 
-	var pathFragments []string
-	if path == "/" {
-		pathFragments = []string{"/"}
-	} else {
-		// we need only two first fragments of path (first one always empty, as path always starts with slash)
-		pathFragments = strings.Split(path, "/")
-		fragmentsCount := 3
-		if len(pathFragments) < fragmentsCount {
-			fragmentsCount = len(pathFragments)
+	metricFragments := []string{"-", "-"}
+	if path != "/" {
+		fragmentsFilled := 0
+		for _, fragment := range strings.Split(path, "/") {
+			if fragment == "" {
+				continue
+			}
+
+			metricFragments[fragmentsFilled] = fragment
+			fragmentsFilled++
+			if fragmentsFilled >= len(metricFragments) {
+				break
+			}
 		}
-		pathFragments = pathFragments[:fragmentsCount]
-		pathFragments[0] = "/"
 	}
-	return fmt.Sprintf("%s.%s", strings.ToLower(req.Method), strings.Join(pathFragments, "."))
+	return fmt.Sprintf("%s.%s", strings.ToLower(method), strings.Join(metricFragments, "."))
 }
