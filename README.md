@@ -59,7 +59,7 @@ docker-compose up -d
 Now you should be able to get a response from the gateway, try the following command:
 
 ```sh
-curl http://localhost:8080/
+http http://localhost:8080/
 ```
 
 ### Manual
@@ -94,7 +94,7 @@ After you have *janus* up and running we need to setup our first proxy. Everythi
 we do it through a REST API, since all endpoints are protected we need to login first.
 
 ```sh
-http -v --json POST localhost:3000/login username=admin password=admin
+http -v --json POST localhost:8080/login username=admin password=admin
 ```
 
 The username and password are defined in a enviroment variable called `ADMIN_USERNAME` and `ADMIN_PASSWORD`, it defaults to *admin*/*admin*.
@@ -112,7 +112,7 @@ The main feature of the API Gateway is to proxy the requests to a different serv
 Now that you are authenticate you can send a request to `/apis` to create a proxy.
 
 ```
-http -v --json POST localhost:3000/apis "Authorization:Bearer yourToken" "Content-Type: application/json" < examples/api.json
+http -v POST localhost:8080/apis "Authorization:Bearer yourToken" "Content-Type: application/json" < examples/api.json
 ```
 
 <p align="center">
@@ -125,7 +125,7 @@ This will create a proxy to `https://jsonplaceholder.typicode.com/posts` when yo
 Now just make a request to `GET /posts`
 
 ```
-http -v --json GET http://localhost:3000/posts/1
+http -v --json GET http://localhost:8080/posts/1
 ```
 <p align="center">
   <a href="http://g.recordit.co/vufeMjwEfg.gif">
