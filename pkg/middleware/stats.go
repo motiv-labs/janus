@@ -18,7 +18,7 @@ func NewStats(statsClient *stats.StatsClient) *Stats {
 
 func (m *Stats) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Debug("Starting Stats middleware")
+		log.WithField("path", r.URL.Path).Debug("Starting Stats middleware")
 
 		timing := m.statsClient.StatsDClient.NewTiming()
 
@@ -29,6 +29,7 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 
 		handler.ServeHTTP(w, r)
 
+		log.WithFields(log.Fields{"original_path": originalURL.Path, "request_url": r.URL.Path}).Debug("Track request stats")
 		m.statsClient.TrackRequest(timing, originalRequest)
 	})
 }
