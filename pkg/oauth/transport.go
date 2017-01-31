@@ -70,10 +70,10 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err er
 		return resp, err
 	}
 
-	statusCodeSuccess := resp.StatusCode < 300
+	statusCodeSuccess := resp.StatusCode < http.StatusInternalServerError
 	t.statsClient.TrackRoundTrip(timing, req, statusCodeSuccess)
 
-	if statusCodeSuccess && resp.Body != nil {
+	if resp.StatusCode < http.StatusMultipleChoices && resp.Body != nil {
 		var newSession session.SessionState
 
 		//This is useful for the middlewares
