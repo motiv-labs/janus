@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"net/url"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/stats"
@@ -21,8 +22,13 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 
 		timing := m.statsClient.StatsDClient.NewTiming()
 
+		// reverse proxy replaces original request with target request, so keep required fields of the original one
+		originalURL := &url.URL{}
+		*originalURL = *r.URL
+		originalRequest := &http.Request{Method: r.Method, URL: originalURL}
+
 		handler.ServeHTTP(w, r)
 
-		m.statsClient.TrackRequest(timing, r)
+		m.statsClient.TrackRequest(timing, originalRequest)
 	})
 }
