@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/NYTimes/gziphandler"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/jwt"
@@ -21,7 +22,7 @@ func loadAPIEndpoints(router router.Router, authMiddleware *jwt.Middleware) {
 	// Apis endpoints
 	handler := api.NewController()
 	group := router.Group("/apis")
-	group.Use(authMiddleware.Handler)
+	group.Use(authMiddleware.Handler, gziphandler.GzipHandler)
 	{
 		group.GET("", handler.Get())
 		group.POST("", handler.Post())
@@ -38,7 +39,7 @@ func loadOAuthEndpoints(router router.Router, authMiddleware *jwt.Middleware) {
 	// Oauth servers endpoints
 	oAuthHandler := oauth.NewController()
 	oauthGroup := router.Group("/oauth/servers")
-	oauthGroup.Use(authMiddleware.Handler)
+	oauthGroup.Use(authMiddleware.Handler, gziphandler.GzipHandler)
 	{
 		oauthGroup.GET("", oAuthHandler.Get())
 		oauthGroup.POST("", oAuthHandler.Post())
@@ -68,8 +69,8 @@ func main() {
 
 	// create router
 	r := router.NewHttpTreeMuxRouter()
-	r.Use(middleware.NewLogger(
-		globalConfig.Debug).Handler,
+	r.Use(
+		middleware.NewLogger(globalConfig.Debug).Handler,
 		middleware.NewRecovery(RecoveryHandler).Handler,
 		middleware.NewStats(statsClient).Handler,
 		middleware.NewMongoDB(accessor).Handler,
