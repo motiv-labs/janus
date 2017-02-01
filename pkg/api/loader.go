@@ -1,6 +1,7 @@
 package api
 
 import (
+	"github.com/NYTimes/gziphandler"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/cors"
 	"github.com/hellofresh/janus/pkg/middleware"
@@ -79,6 +80,12 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 			handlers = append(handlers, oauth.NewKeyExistsMiddleware(m.manager, referenceSpec.OAuthServerID).Handler)
 		} else {
 			log.Debug("OAuth2 is not enabled")
+		}
+
+		if referenceSpec.UseCompression {
+			handlers = append(handlers, gziphandler.GzipHandler)
+		} else {
+			log.Debug("Compression is not enabled")
 		}
 
 		m.register.Add(proxy.NewRoute(referenceSpec.Proxy, handlers...))
