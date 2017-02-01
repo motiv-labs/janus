@@ -1,5 +1,5 @@
-hash: 16b6eac52c56571eb6a8757083835c652fcdd2a9d20e5bc601c68465892bebc5
-updated: 2017-01-09T15:51:12.34797085+01:00
+hash: dc78b56933a6c3f5ca7a452d68a643664f7bf2f290c9f41be54902730ecd2ec7
+updated: 2017-02-01T22:22:32.384224423+01:00
 imports:
 - name: github.com/ant0ine/go-json-rest
   version: ce4b71cdf7ba29ef443d704bd923f5bbf281ee30
@@ -22,7 +22,9 @@ imports:
 - name: github.com/justinas/alice
   version: 052b8b6c18edb9db317af86806d8e00ebaa94160
 - name: github.com/kelseyhightower/envconfig
-  version: 9aca109c9aec4633fced9717c4a09ecab3d33111
+  version: f611eb38b3875cc3bd991ca91c51d06446afa14c
+- name: github.com/NYTimes/gziphandler
+  version: 6710af535839f57c687b62c4c23d649f9545d885
 - name: github.com/patrickmn/go-cache
   version: 1881a9bccb818787f68c52bfba648c6cf34c34fa
 - name: github.com/rs/cors
@@ -34,24 +36,14 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: 67957fd0b1868d2b9f4fd2b3a3474c83bc3d49c3
+  version: f315505cf3349909cdf013ea56690da34e96a451
   subpackages:
   - context
   - http2
-  - http2/hpack
-  - idna
-  - lex/httplex
 - name: golang.org/x/sys
   version: a408501be4d17ee978c04a618e7a1b22af058c0e
   subpackages:
   - unix
-- name: golang.org/x/text
-  version: 44f4f658a783b0cee41fe0a23b8fc91d9c120558
-  subpackages:
-  - secure/bidirule
-  - transform
-  - unicode/bidi
-  - unicode/norm
 - name: gopkg.in/alexcesaro/statsd.v2
   version: 7fea3f0d2fab1ad973e641e51dba45443a311a90
 - name: gopkg.in/mgo.v2
@@ -63,7 +55,7 @@ imports:
   - internal/scram
 testImports:
 - name: github.com/davecgh/go-spew
-  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  version: 2df174808ee097f90d259e432cc04442cf60be21
   subpackages:
   - spew
 - name: github.com/pmezard/go-difflib
