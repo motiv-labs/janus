@@ -13,6 +13,11 @@ type StatsClient struct {
 	StatsDClient *statsd.Client
 }
 
+const (
+	bucketTotalRequests = "total.requests"
+	bucketTotalRound    = "total.round"
+)
+
 // NewStatsClient returns initialised stats client instance
 func NewStatsClient(statsdClient *statsd.Client) *StatsClient {
 	return &StatsClient{statsdClient}
@@ -24,15 +29,19 @@ func (sc *StatsClient) TrackRequest(timing statsd.Timing, req *http.Request) {
 
 	timing.Send(bucket)
 	sc.StatsDClient.Increment(bucket)
+	sc.StatsDClient.Increment(bucketTotalRequests)
 }
 
 // TrackRoundTrip tracks stats for round trip request
 func (sc *StatsClient) TrackRoundTrip(timing statsd.Timing, req *http.Request, success bool) {
-	prefix := fmt.Sprintf("round-%s.", map[bool]string{true: "ok", false: "fail"}[success])
+	okSuffix := map[bool]string{true: "ok", false: "fail"}[success]
+	prefix := fmt.Sprintf("round-%s.", okSuffix)
 	bucket := prefix + sc.getStatsdMetricName(req.Method, req.URL)
 
 	timing.Send(bucket)
 	sc.StatsDClient.Increment(bucket)
+	sc.StatsDClient.Increment(bucketTotalRound)
+	sc.StatsDClient.Increment(fmt.Sprintf("%s-%s", bucketTotalRound, okSuffix))
 }
 
 // Returns metric name for StatsD in "<request method>.<request path>" format
