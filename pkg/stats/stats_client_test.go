@@ -8,8 +8,6 @@ import (
 )
 
 func TestStatsMetricName(t *testing.T) {
-	client := &StatsClient{nil}
-
 	dataProvider := []struct {
 		Method string
 		Path   string
@@ -26,6 +24,6 @@ func TestStatsMetricName(t *testing.T) {
 	}
 
 	for _, data := range dataProvider {
-		assert.Equal(t, data.Metric, client.getStatsdMetricName(data.Method, &url.URL{Path: data.Path}))
+		assert.Equal(t, data.Metric, getMetricName(data.Method, &url.URL{Path: data.Path}))
 	}
 }
