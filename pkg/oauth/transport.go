@@ -61,17 +61,18 @@ type RoundTripper struct {
 //
 // The Request's URL and Header fields must be initialized.
 func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	timing := t.statsClient.StatsDClient.NewTiming()
+	timing := t.statsClient.BuildTimeTracker()
+	timing.Start()
 	resp, err = t.RoundTripper.RoundTrip(req)
 
 	if nil != err {
-		t.statsClient.TrackRoundTrip(timing, req, false)
+		t.statsClient.TrackRoundTrip(req, timing, false)
 		log.Error("Response from the server was an error", err)
 		return resp, err
 	}
 
 	statusCodeSuccess := resp.StatusCode < http.StatusInternalServerError
-	t.statsClient.TrackRoundTrip(timing, req, statusCodeSuccess)
+	t.statsClient.TrackRoundTrip(req, timing, statusCodeSuccess)
 
 	if resp.StatusCode < http.StatusMultipleChoices && resp.Body != nil {
 		var newSession session.SessionState
