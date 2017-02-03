@@ -70,9 +70,9 @@ func main() {
 	// create router
 	r := router.NewHttpTreeMuxRouter()
 	r.Use(
+		middleware.NewStats(statsClient).Handler,
 		middleware.NewLogger(globalConfig.Debug).Handler,
 		middleware.NewRecovery(RecoveryHandler).Handler,
-		middleware.NewStats(statsClient).Handler,
 		middleware.NewMongoDB(accessor).Handler,
 	)
 
