@@ -87,10 +87,13 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err er
 			}
 		}(resp.Body)
 		bodyBytes, _ = ioutil.ReadAll(resp.Body)
+
+		marshalErr := json.Unmarshal(bodyBytes, &newSession)
+
 		// Restore the io.ReadCloser to its original state
 		resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
 
-		if marshalErr := json.Unmarshal(bodyBytes, &newSession); marshalErr != nil {
+		if marshalErr != nil {
 			return resp, marshalErr
 		}
 
