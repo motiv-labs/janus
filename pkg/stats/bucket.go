@@ -4,13 +4,45 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strconv"
 	"strings"
 )
 
 const (
-	TotalRequestBucket   = "total.requests"
-	TotalRoundTripBucket = "total.round"
+	totalRequestBucket   = "total.requests"
+	totalRoundTripBucket = "total.round"
+	pathIDPlaceholder    = "-id-"
 )
+
+func testAlwaysTrue(string) bool {
+	return true
+}
+
+func testIsNumeric(s string) bool {
+	_, err := strconv.Atoi(s)
+	return err == nil
+}
+
+// key - path first level
+// value - function to test if the second level is ID
+var hasIDAtSecondLevel = map[string]func(string) bool{
+	"users":             testAlwaysTrue,
+	"allergens":         testAlwaysTrue,
+	"cuisines":          testAlwaysTrue,
+	"favorites":         testAlwaysTrue,
+	"ingredients":       testAlwaysTrue,
+	"menus":             testAlwaysTrue,
+	"ratings":           testAlwaysTrue,
+	"recipes":           testAlwaysTrue,
+	"addresses":         testAlwaysTrue,
+	"boxes":             testAlwaysTrue,
+	"coupons":           testAlwaysTrue,
+	"customers":         testAlwaysTrue,
+	"delivery__options": testAlwaysTrue,
+	"product__families": testAlwaysTrue,
+	"products":          testAlwaysTrue,
+	"subscriptions":     testIsNumeric,
+}
 
 type Bucket interface {
 	Name() string
@@ -21,7 +53,7 @@ func RequestsWithSuffixBucket(r *http.Request, success bool) string {
 }
 
 func TotalRequestsWithSuffixBucket(success bool) string {
-	return fmt.Sprintf("%s-%s", TotalRequestBucket, getRequestStatus(success))
+	return fmt.Sprintf("%s-%s", totalRequestBucket, getRequestStatus(success))
 }
 
 func RequestBucket(r *http.Request) string {
@@ -33,7 +65,7 @@ func RoundTripBucket(r *http.Request, success bool) string {
 }
 
 func RoundTripSuffixBucket(success bool) string {
-	return fmt.Sprintf("%s-%s", TotalRoundTripBucket, getRequestStatus(success))
+	return fmt.Sprintf("%s-%s", totalRoundTripBucket, getRequestStatus(success))
 }
 
 func getRequestStatus(success bool) string {
@@ -66,5 +98,12 @@ func getMetricName(method string, url *url.URL) string {
 			}
 		}
 	}
+
+	if testFunction, ok := hasIDAtSecondLevel[metricFragments[0]]; ok {
+		if testFunction(metricFragments[1]) {
+			metricFragments[1] = pathIDPlaceholder
+		}
+	}
+
 	return fmt.Sprintf("%s.%s", strings.ToLower(method), strings.Join(metricFragments, "."))
 }
