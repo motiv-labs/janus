@@ -22,6 +22,7 @@ func TestStatsMetricName(t *testing.T) {
 		{"DELETE", "/api/recipes.foo-bar/123", "delete.api.recipes_foo-bar"},
 		{"DELETE", "/api/recipes.foo_bar/123", "delete.api.recipes_foo__bar"},
 		// paths withs IDs at the path second level
+		{"GET", "/user/qwerty", "get.user." + pathIDPlaceholder},
 		{"GET", "/users/qwerty", "get.users." + pathIDPlaceholder},
 		{"GET", "/allergens/foobarbaz", "get.allergens." + pathIDPlaceholder},
 		{"GET", "/cuisines/foobarbaz", "get.cuisines." + pathIDPlaceholder},
