@@ -24,7 +24,7 @@ func (f *StatsClient) TrackRequest(r *http.Request, tt *TimeTracker, success boo
 
 	tt.Finish(b)
 	i.Increment(b)
-	i.Increment(TotalRequestBucket)
+	i.Increment(totalRequestBucket)
 
 	i.Increment(TotalRequestsWithSuffixBucket(success))
 	i.Increment(RequestsWithSuffixBucket(r, success))
@@ -36,6 +36,6 @@ func (f *StatsClient) TrackRoundTrip(r *http.Request, tt *TimeTracker, success b
 
 	tt.Finish(b)
 	i.Increment(b)
-	i.Increment(TotalRoundTripBucket)
+	i.Increment(totalRoundTripBucket)
 	i.Increment(RoundTripSuffixBucket(success))
 }
