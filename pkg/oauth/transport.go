@@ -95,7 +95,7 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err er
 		}
 
 		if newSession.AccessToken == "" {
-			return resp, err
+			return resp, nil
 		}
 
 		tokenURL := url.URL{Scheme: req.URL.Scheme, Host: req.URL.Host, Path: req.URL.Path}
