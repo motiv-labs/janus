@@ -87,23 +87,28 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err er
 			}
 		}(resp.Body)
 		bodyBytes, _ = ioutil.ReadAll(resp.Body)
-
-		if marshalErr := json.Unmarshal(bodyBytes, &newSession); marshalErr == nil {
-			tokenURL := url.URL{Scheme: req.URL.Scheme, Host: req.URL.Host, Path: req.URL.Path}
-			log.WithField("token_url", tokenURL.String()).Debug("Looking for OAuth provider who issued the token")
-			oAuthServer, err := t.oAuthServersRepo.FindByTokenURL(tokenURL)
-			if err != nil {
-				log.Error("Failed to find OAuth server by token URL", err)
-			} else {
-				newSession.OAuthServerID = oAuthServer.ID
-
-				log.Debug("Setting body in the oauth storage")
-				t.manager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
-			}
-		}
-
 		// Restore the io.ReadCloser to its original state
 		resp.Body = ioutil.NopCloser(bytes.NewBuffer(bodyBytes))
+
+		if marshalErr := json.Unmarshal(bodyBytes, &newSession); marshalErr != nil {
+			return resp, marshalErr
+		}
+
+		if newSession.AccessToken == "" {
+			return resp, nil
+		}
+
+		tokenURL := url.URL{Scheme: req.URL.Scheme, Host: req.URL.Host, Path: req.URL.Path}
+		log.WithField("token_url", tokenURL.String()).Debug("Looking for OAuth provider who issued the token")
+		oAuthServer, err := t.oAuthServersRepo.FindByTokenURL(tokenURL)
+		if err != nil {
+			log.Error("Failed to find OAuth server by token URL: ", err)
+		} else {
+			newSession.OAuthServerID = oAuthServer.ID
+
+			log.Debug("Setting body in the oauth storage")
+			t.manager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
+		}
 	}
 
 	return resp, err
