@@ -42,6 +42,7 @@ var hasIDAtSecondLevel = map[string]func(string) bool{
 	"delivery__options": testAlwaysTrue,
 	"product__families": testAlwaysTrue,
 	"products":          testAlwaysTrue,
+	"recipients":        testAlwaysTrue,
 	"subscriptions":     testIsNumeric,
 }
 

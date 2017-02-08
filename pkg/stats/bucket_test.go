@@ -38,6 +38,7 @@ func TestStatsMetricName(t *testing.T) {
 		{"GET", "/delivery_options/foobarbaz", "get.delivery__options." + pathIDPlaceholder},
 		{"GET", "/product_families/foobarbaz", "get.product__families." + pathIDPlaceholder},
 		{"GET", "/products/foobarbaz", "get.products." + pathIDPlaceholder},
+		{"GET", "/recipients/foobarbaz", "get.recipients." + pathIDPlaceholder},
 		// path may have either numeric ID or non-numeric trackable path
 		{"GET", "/subscriptions/12345", "get.subscriptions." + pathIDPlaceholder},
 		{"GET", "/subscriptions/search", "get.subscriptions.search"},
