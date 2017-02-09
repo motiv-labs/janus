@@ -42,16 +42,14 @@ func (m *Loader) RegisterApis(apiSpecs []*Spec) {
 }
 
 func (m *Loader) RegisterApi(referenceSpec *Spec) {
-	var skip bool
-
 	//Validates the proxy
-	skip = proxy.Validate(referenceSpec.Proxy)
+	active := proxy.Validate(referenceSpec.Proxy)
 	if false == referenceSpec.Active {
-		log.Debug("API is not active, skiping...")
-		skip = false
+		log.WithField("listen_path", referenceSpec.Proxy.ListenPath).Debug("API is not active, skiping...")
+		active = false
 	}
 
-	if skip {
+	if active {
 		var handlers []router.Constructor
 		if referenceSpec.RateLimit.Enabled {
 			rate, err := limiter.NewRateFromFormatted(referenceSpec.RateLimit.Limit)
@@ -89,9 +87,9 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 		}
 
 		m.register.Add(proxy.NewRoute(referenceSpec.Proxy, handlers...))
-		log.Debug("API registered")
+		log.WithField("listen_path", referenceSpec.Proxy.ListenPath).Debug("API registered")
 	} else {
-		log.Error("Listen path is empty, skipping...")
+		log.WithField("listen_path", referenceSpec.Proxy.ListenPath).Error("Listen path is invalid or not active, skipping...")
 	}
 }
 
