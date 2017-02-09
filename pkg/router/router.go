@@ -51,7 +51,13 @@ type HttpTreeMuxRouter struct {
 
 func NewHttpTreeMuxRouter() *HttpTreeMuxRouter {
 	router := httptreemux.New()
+
 	router.SafeAddRoutesWhileRunning = true
+	// tree mux router uses Redirect301 behavior by default for paths that differs with slash at the end
+	// from registered, that causes problems with some services, e.g. api-v2 OPTIONS /menus/ gives 301 and we
+	// want by-pass it as is
+	router.RedirectBehavior = httptreemux.UseHandler
+
 	return &HttpTreeMuxRouter{
 		mux:         router,
 		innerRouter: router.UsingContext(),
