@@ -2,7 +2,6 @@ package oauth
 
 import (
 	"encoding/json"
-	"time"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/session"
@@ -23,10 +22,10 @@ func (o *Manager) KeyExists(accessToken string) (bool, error) {
 // Set a new access token and its session to the storage
 func (o *Manager) Set(accessToken string, session session.SessionState, resetTTLTo int64) error {
 	value, _ := json.Marshal(session)
-	expireDuration := time.Duration(resetTTLTo) * time.Second
+	// expireDuration := time.Duration(resetTTLTo) * time.Second
 
 	log.Debugf("Storing key %s for %d seconds", accessToken, resetTTLTo)
-	go o.Storage.Set(accessToken, string(value), expireDuration)
+	go o.Storage.Set(accessToken, string(value), resetTTLTo)
 
 	return nil
 }
