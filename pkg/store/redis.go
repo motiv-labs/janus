@@ -1,8 +1,6 @@
 package store
 
 import (
-	"time"
-
 	"github.com/garyburd/redigo/redis"
 	"github.com/ulule/limiter"
 )
@@ -76,15 +74,15 @@ func (s *RedisStore) Get(key string) (string, error) {
 	return redis.String(conn.Do("GET", key))
 }
 
-func (s *RedisStore) Set(key string, value string, expire time.Duration) error {
+func (s *RedisStore) Set(key string, value string, expire int64) error {
 	conn := s.Pool.Get()
 	defer conn.Close()
 
 	var err error
-	if int(expire.Seconds()) == 0 {
+	if expire == 0 {
 		_, err = conn.Do("SET", key, value)
 	} else {
-		_, err = conn.Do("SETEX", key, expire.Seconds(), value)
+		_, err = conn.Do("SETEX", key, expire, value)
 	}
 	if err != nil {
 		return err
