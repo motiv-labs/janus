@@ -26,24 +26,25 @@ func testIsNumeric(s string) bool {
 // key - path first level
 // value - function to test if the second level is ID
 var hasIDAtSecondLevel = map[string]func(string) bool{
-	"user":              testAlwaysTrue,
-	"users":             testAlwaysTrue,
-	"allergens":         testAlwaysTrue,
-	"cuisines":          testAlwaysTrue,
-	"favorites":         testAlwaysTrue,
-	"ingredients":       testAlwaysTrue,
-	"menus":             testAlwaysTrue,
-	"ratings":           testAlwaysTrue,
-	"recipes":           testAlwaysTrue,
 	"addresses":         testAlwaysTrue,
+	"allergens":         testAlwaysTrue,
 	"boxes":             testAlwaysTrue,
 	"coupons":           testAlwaysTrue,
+	"cuisines":          testAlwaysTrue,
 	"customers":         testAlwaysTrue,
 	"delivery__options": testAlwaysTrue,
+	"favorites":         testAlwaysTrue,
+	"freebies":          testIsNumeric,
+	"ingredients":       testAlwaysTrue,
+	"menus":             testAlwaysTrue,
 	"product__families": testAlwaysTrue,
 	"products":          testAlwaysTrue,
+	"ratings":           testAlwaysTrue,
+	"recipes":           testAlwaysTrue,
 	"recipients":        testAlwaysTrue,
 	"subscriptions":     testIsNumeric,
+	"user":              testAlwaysTrue,
+	"users":             testAlwaysTrue,
 }
 
 type Bucket interface {

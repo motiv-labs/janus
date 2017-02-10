@@ -42,6 +42,8 @@ func TestStatsMetricName(t *testing.T) {
 		// path may have either numeric ID or non-numeric trackable path
 		{"GET", "/subscriptions/12345", "get.subscriptions." + pathIDPlaceholder},
 		{"GET", "/subscriptions/search", "get.subscriptions.search"},
+		{"GET", "/freebies/12345", "get.freebies." + pathIDPlaceholder},
+		{"GET", "/freebies/search", "get.freebies.search"},
 	}
 
 	for _, data := range dataProvider {
