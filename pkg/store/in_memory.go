@@ -2,7 +2,6 @@ package store
 
 import (
 	"sync"
-	"time"
 
 	"github.com/ulule/limiter"
 )
@@ -39,7 +38,7 @@ func (s *InMemoryStore) Get(key string) (string, error) {
 	return s.get(key)
 }
 
-func (s *InMemoryStore) Set(key string, value string, expire time.Duration) error {
+func (s *InMemoryStore) Set(key string, value string, expire int64) error {
 	s.Lock()
 	defer s.Unlock()
 
@@ -59,7 +58,7 @@ func (s *InMemoryStore) get(key string) (string, error) {
 	return s.data[key], nil
 }
 
-func (s *InMemoryStore) set(key string, value string, expire time.Duration) error {
+func (s *InMemoryStore) set(key string, value string, expire int64) error {
 	s.data[key] = value
 	return nil
 }
