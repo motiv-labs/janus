@@ -1,23 +1,17 @@
 package stats
 
 import (
-	log "github.com/Sirupsen/logrus"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
-type Incrementer struct {
-	c     *statsd.Client
-	muted bool
+type Incrementer interface {
+	Increment(bucket string)
 }
 
-func NewIncrementer(c *statsd.Client, muted bool) *Incrementer {
-	return &Incrementer{c, muted}
-}
-
-func (t *Incrementer) Increment(bucket string) {
-	if t.muted {
-		log.WithField("bucket", bucket).Debug("Muted stats counter increment")
+func NewIncrementer(c *statsd.Client, muted bool) Incrementer {
+	if muted {
+		return &MutedIncrementer{}
 	} else {
-		t.c.Increment(bucket)
+		return &LiveIncrementer{c}
 	}
 }

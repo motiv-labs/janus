@@ -27,7 +27,7 @@ func NewAwareTransport(manager *Manager, oAuthServersRepo *MongoRepository, stat
 	return &AwareTransport{manager, oAuthServersRepo, statsClient}
 }
 
-// GetRoundTripper returns initialized RoundTripper insnace
+// GetRoundTripper returns initialized RoundTripper instance
 func (at *AwareTransport) GetRoundTripper(roundTripper http.RoundTripper) http.RoundTripper {
 	return &RoundTripper{roundTripper, at.manager, at.oAuthServersRepo, at.statsClient}
 }
