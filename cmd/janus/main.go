@@ -65,7 +65,7 @@ func main() {
 	defer accessor.Close()
 	defer statsdClient.Close()
 
-	statsClient := stats.NewStatsClient(statsdClient)
+	statsClient := stats.NewStatsClient(statsdClient, globalConfig.Statsd.DSN == "")
 
 	// create router
 	r := router.NewHttpTreeMuxRouter()
