@@ -26,7 +26,7 @@ var (
 func init() {
 	globalConfig, err = config.LoadEnv()
 	if nil != err {
-		log.Panic(err.Error())
+		log.WithError(err).Panic("Failed to load config from environment")
 	}
 }
 
@@ -34,7 +34,7 @@ func init() {
 func init() {
 	level, err := log.ParseLevel(strings.ToLower(globalConfig.LogLevel))
 	if err != nil {
-		log.Error("Error getting level", err)
+		log.WithError(err).Error("Error getting level")
 	}
 
 	log.SetLevel(level)
@@ -48,7 +48,7 @@ func init() {
 func init() {
 	accessor, err = middleware.InitDB(globalConfig.Database.DSN)
 	if err != nil {
-		log.Fatalf("Couldn't connect to the mongodb database: %s", err.Error())
+		log.WithError(err).Fatal("Couldn't connect to the mongodb database")
 	}
 }
 
@@ -65,7 +65,7 @@ func init() {
 	log.Debugf("Trying to connect to redis pool: %s", dsn)
 	storage, err = store.NewRedisStore(pool)
 	if err != nil {
-		log.Fatalf("Couldn't connect to the redis pool: %s", err.Error())
+		log.WithError(err).Fatal("Couldn't connect to the redis pool")
 	}
 }
 
@@ -92,9 +92,9 @@ func init() {
 	if err != nil {
 		log.WithError(err).
 			WithFields(log.Fields{
-			"dsn":    statsdConfig.DSN,
-			"prefix": statsdConfig.Prefix,
-		}).Warning("An error occurred while connecting to StatsD. Client will be muted.")
+				"dsn":    statsdConfig.DSN,
+				"prefix": statsdConfig.Prefix,
+			}).Warning("An error occurred while connecting to StatsD. Client will be muted.")
 		muted = true
 	}
 
