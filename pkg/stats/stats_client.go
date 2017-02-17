@@ -40,3 +40,7 @@ func (f *StatsClient) TrackRoundTrip(r *http.Request, tt TimeTracker, success bo
 	i.Increment(totalRoundTripBucket)
 	i.Increment(RoundTripSuffixBucket(success))
 }
+
+func (f *StatsClient) Close() {
+	f.client.Close()
+}

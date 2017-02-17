@@ -9,6 +9,7 @@ import (
 	"github.com/garyburd/redigo/redis"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/middleware"
+	"github.com/hellofresh/janus/pkg/stats"
 	"github.com/hellofresh/janus/pkg/store"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
@@ -18,7 +19,7 @@ var (
 	globalConfig *config.Specification
 	accessor     *middleware.DatabaseAccessor
 	storage      store.Store
-	statsdClient *statsd.Client
+	statsClient  *stats.StatsClient
 )
 
 // initializes the global configuration
@@ -72,11 +73,13 @@ func init() {
 func init() {
 	var options []statsd.Option
 	statsdConfig := globalConfig.Statsd
+	muted := false
 
 	log.Debugf("Trying to connect to statsd instance: %s", statsdConfig.DSN)
 	if len(statsdConfig.DSN) == 0 {
 		log.Debug("Statsd DSN not provided, client will be muted")
 		options = append(options, statsd.Mute(true))
+		muted = true
 	} else {
 		options = append(options, statsd.Address(statsdConfig.DSN))
 	}
@@ -85,12 +88,15 @@ func init() {
 		options = append(options, statsd.Prefix(statsdConfig.Prefix))
 	}
 
-	statsdClient, err = statsd.New(options...)
+	statsdClient, err := statsd.New(options...)
 	if err != nil {
 		log.WithError(err).
 			WithFields(log.Fields{
-				"dsn":    statsdConfig.DSN,
-				"prefix": statsdConfig.Prefix,
-			}).Warning("An error occurred while connecting to StatsD. Client will be muted.")
+			"dsn":    statsdConfig.DSN,
+			"prefix": statsdConfig.Prefix,
+		}).Warning("An error occurred while connecting to StatsD. Client will be muted.")
+		muted = true
 	}
+
+	statsClient = stats.NewStatsClient(statsdClient, muted)
 }
