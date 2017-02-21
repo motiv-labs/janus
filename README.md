@@ -40,7 +40,7 @@ This API Gateway offers powerful, yet lightweight features that allow fine gaine
 * **Rate Limiting** - Easily rate limit your API users, rate limiting is granular and can be applied on a per-key basis
 * **CORS Filter** - Enable cors for your API,or even for specific endpoints
 * **API Versioning** - API Versions can be easily set and deprecated at a specific time and date
-* **Multiple auth protocols** - Out of the box, we support JWT, OAtuh2 and Basic Auth access methods
+* **Multiple auth protocols** - Out of the box, we support JWT, OAuth 2.0 and Basic Auth access methods
 * **Hot-reloading of configuration** - No need to restart the process
 * **Graceful shutdown** - Graceful shutdown of http connections
 * **Docker Image** - Small [official](https://quay.io/repository/hellofresh/janus) docker image included
