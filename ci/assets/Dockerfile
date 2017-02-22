@@ -18,7 +18,9 @@ RUN set -ex \
     && make \
     # Clean up
     && apk del .build-deps \
-    && rm -rf /var/cache/apk/*
+    && rm -rf /var/cache/apk/* \
+    && rm -rf /go/src/* \
+    && rm -rf /go/pkg/*
 
 EXPOSE 8080
 CMD janus
