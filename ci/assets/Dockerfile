@@ -1,4 +1,4 @@
-FROM golang:1.7-alpine
+FROM golang:1.8-alpine
 
 # Set apps home directory.
 ENV APP_DIR /go/src/github.com/hellofresh/janus
