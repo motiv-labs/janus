@@ -97,7 +97,7 @@ func main() {
 	apiLoader := api.NewLoader(register, storage, accessor, manager, globalConfig.Debug)
 	apiLoader.Load()
 
-	oauthLoader := oauth.NewLoader(register, accessor, globalConfig.Debug)
+	oauthLoader := oauth.NewLoader(register, storage, accessor, globalConfig.Debug)
 	oauthLoader.Load()
 
 	// create authentication for Janus
