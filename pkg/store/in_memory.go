@@ -38,6 +38,13 @@ func (s *InMemoryStore) Get(key string) (string, error) {
 	return s.get(key)
 }
 
+func (s *InMemoryStore) Remove(key string) error {
+	s.Lock()
+	defer s.Unlock()
+
+	return s.remove(key)
+}
+
 func (s *InMemoryStore) Set(key string, value string, expire int64) error {
 	s.Lock()
 	defer s.Unlock()
@@ -52,6 +59,11 @@ func (s *InMemoryStore) ToLimiterStore(prefix string) (limiter.Store, error) {
 func (s *InMemoryStore) exists(key string) (bool, error) {
 	_, exists := s.data[key]
 	return exists, nil
+}
+
+func (s *InMemoryStore) remove(key string) error {
+	delete(s.data, key)
+	return nil
 }
 
 func (s *InMemoryStore) get(key string) (string, error) {
