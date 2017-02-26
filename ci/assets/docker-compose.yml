@@ -1,16 +1,20 @@
 version: '2'
 services:
 
-    # janus:
-    #     image: quay.io/hellofresh/janus
-    #     ports:
-    #         - "8080:8080"
-    #     environment:
-    #         # required
-    #         DATABASE_DSN: 'mongodb://mongodb:27017/janus'
-    #         REDIS_DSN: 'redis:6379'
-    #         SECRET: 'secret key'
-    #         # not required
+    janus:
+      depends_on:
+        - mongodb
+        - redis
+        - statsd
+      image: quay.io/hellofresh/janus
+      ports:
+        - "8080:8080"
+      environment:
+      # required
+        DATABASE_DSN: 'mongodb://mongodb:27017/janus'
+        REDIS_DSN: 'redis:6379'
+        SECRET: 'secret key'
+      # not required
     #         PORT: '8080'
     #         DEBUG: 'false'
     #         LOG_LEVEL: 'debug'
