@@ -75,7 +75,7 @@ And then just define where your dependencies are located
 
 ```sh
 export DATABASE_DSN="mongodb://localhost:27017/janus"
-export REDIS_DSN="redis://localhost:6379"
+export REDIS_DSN="localhost:6379"
 export SECRET="yourSecret"
 export ADMIN_USERNAME="admin"
 export ADMIN_PASSWORD="admin"
