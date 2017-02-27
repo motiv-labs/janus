@@ -57,7 +57,7 @@ func init() {
 	pool := &redis.Pool{
 		MaxIdle:     3,
 		IdleTimeout: 240 * time.Second,
-		Dial:        func() (redis.Conn, error) { return redis.Dial("tcp", globalConfig.StorageDSN) },
+		Dial:        func() (redis.Conn, error) { return redis.DialURL(globalConfig.StorageDSN) },
 	}
 
 	dsn := globalConfig.StorageDSN
