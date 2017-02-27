@@ -10,6 +10,7 @@ import (
 type Store interface {
 	Exists(key string) (bool, error)
 	Get(key string) (string, error)
+	Remove(key string) error
 	Set(key string, value string, expire int64) error
 	ToLimiterStore(prefix string) (limiter.Store, error)
 }

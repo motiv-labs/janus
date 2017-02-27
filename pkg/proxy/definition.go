@@ -52,6 +52,10 @@ type Definition struct {
 
 // Validate validates proxy data
 func Validate(proxy *Definition) bool {
+	if nil == proxy {
+		return false
+	}
+
 	if proxy.ListenPath == "" {
 		log.Warning("Listen path is empty")
 		return false

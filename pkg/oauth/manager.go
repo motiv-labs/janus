@@ -37,12 +37,12 @@ func (o *Manager) IsKeyAuthorised(accessToken string) (session.SessionState, boo
 	var newSession session.SessionState
 	jsonKeyVal, err := o.Storage.Get(accessToken)
 	if nil != err {
-		log.Errorf("Couldn't get the access token from storage: %s", accessToken)
+		log.WithError(err).Error("Couldn't get the access token from storage")
 		return newSession, false
 	}
 
 	if marshalErr := json.Unmarshal([]byte(jsonKeyVal), &newSession); marshalErr != nil {
-		log.Errorf("Couldn't unmarshal session object: %s", marshalErr.Error())
+		log.WithError(marshalErr).Error("Couldn't unmarshal session object")
 		return newSession, false
 	}
 

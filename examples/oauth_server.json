@@ -37,6 +37,18 @@
             "methods" : [ 
                 "GET"
             ]
+        },
+        "revoke" : {
+            "preserve_host_header" : false,
+            "listen_path" : "/auth/revoke",
+            "target_url" : "https://example.auth0.com/revoke",
+            "strip_listen_path" : true,
+            "enable_load_balancing" : false,
+            "target_list" : [],
+            "check_host_against_uptime_tests" : false,
+            "methods" : [ 
+                "POST"
+            ]
         }
     },
     "oauth_client_endpoints" : {

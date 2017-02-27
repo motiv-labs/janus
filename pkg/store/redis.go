@@ -74,6 +74,13 @@ func (s *RedisStore) Get(key string) (string, error) {
 	return redis.String(conn.Do("GET", key))
 }
 
+func (s *RedisStore) Remove(key string) error {
+	conn := s.Pool.Get()
+	defer conn.Close()
+	_, err := conn.Do("DEL", key)
+	return err
+}
+
 func (s *RedisStore) Set(key string, value string, expire int64) error {
 	conn := s.Pool.Get()
 	defer conn.Close()

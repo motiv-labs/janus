@@ -43,12 +43,12 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 		authHeaderValue := r.Header.Get("Authorization")
 		parts := strings.Split(authHeaderValue, " ")
 		if len(parts) < 2 {
-			logger.Info("Attempted access with malformed header, no auth header found.")
+			logger.Warn("Attempted access with malformed header, no auth header found.")
 			panic(ErrAuthorizationFieldNotFound)
 		}
 
 		if strings.ToLower(parts[0]) != "bearer" {
-			logger.Info("Bearer token malformed")
+			logger.Warn("Bearer token malformed")
 			panic(ErrBearerMalformed)
 		}
 
@@ -60,7 +60,7 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 				"path":   r.RequestURI,
 				"origin": r.RemoteAddr,
 				"key":    accessToken,
-			}).Info("Attempted access with non-existent key.")
+			}).Warn("Attempted access with non-existent key.")
 			panic(ErrAccessTokenNotAuthorized)
 		}
 
@@ -71,7 +71,7 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 				"key":    accessToken,
 				"sessionOAuthServerID": thisSessionState.OAuthServerID,
 				"authOAuthServerID":    m.oAuthServerID,
-			}).Info("Attempted access with the key issued by other OAuth provider.")
+			}).Warn("Attempted access with the key issued by other OAuth provider.")
 			panic(ErrAccessTokenOfOtherOrigin)
 		}
 
@@ -94,7 +94,7 @@ func (m *KeyExistsMiddleware) CheckSessionAndIdentityForValidKey(key string) (se
 	}
 
 	if !exists {
-		log.Debug("Key not found in keystore")
+		log.Warn("Key not found in keystore")
 		return thisSession, false
 	}
 
