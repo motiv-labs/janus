@@ -6,7 +6,6 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
-	"net/url"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/session"
@@ -17,13 +16,13 @@ import (
 // authentication server. After retrieving the token, we delagete the storage of it for the
 // oauth manager
 type AwareTransport struct {
-	manager          *Manager
+	manager          Manager
 	oAuthServersRepo *MongoRepository
 	statsClient      *stats.StatsClient
 }
 
 // NewAwareTransport creates a new instance of AwareTransport
-func NewAwareTransport(manager *Manager, oAuthServersRepo *MongoRepository, statsClient *stats.StatsClient) *AwareTransport {
+func NewAwareTransport(manager Manager, oAuthServersRepo *MongoRepository, statsClient *stats.StatsClient) *AwareTransport {
 	return &AwareTransport{manager, oAuthServersRepo, statsClient}
 }
 
@@ -34,7 +33,7 @@ func (at *AwareTransport) GetRoundTripper(roundTripper http.RoundTripper) http.R
 
 type RoundTripper struct {
 	RoundTripper     http.RoundTripper
-	manager          *Manager
+	manager          Manager
 	oAuthServersRepo *MongoRepository
 	statsClient      *stats.StatsClient
 }
@@ -90,17 +89,8 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err er
 
 		if marshalErr := json.Unmarshal(bodyBytes, &newSession); marshalErr == nil {
 			if newSession.AccessToken != "" {
-				tokenURL := url.URL{Scheme: req.URL.Scheme, Host: req.URL.Host, Path: req.URL.Path}
-				log.WithField("token_url", tokenURL.String()).Debug("Looking for OAuth provider who issued the token")
-				oAuthServer, err := t.oAuthServersRepo.FindByTokenURL(tokenURL)
-				if err != nil {
-					log.Error("Failed to find OAuth server by token URL", err)
-				} else {
-					newSession.OAuthServerID = oAuthServer.ID
-
-					log.Debug("Setting body in the oauth storage")
-					t.manager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
-				}
+				log.Debug("Setting body in the oauth storage")
+				t.manager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
 			}
 		}
 

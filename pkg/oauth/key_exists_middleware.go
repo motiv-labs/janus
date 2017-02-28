@@ -7,7 +7,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/request"
-	"github.com/hellofresh/janus/pkg/session"
 	"gopkg.in/mgo.v2/bson"
 )
 
@@ -20,13 +19,13 @@ var (
 
 // KeyExistsMiddleware checks the integrity of the provided OAuth headers
 type KeyExistsMiddleware struct {
-	manager *Manager
+	manager Manager
 	// TODO pass api.Spec pointer here, currently impossible as circullar referens occurs
 	oAuthServerID bson.ObjectId
 }
 
 // NewKeyExistsMiddleware creates a new instance of KeyExistsMiddleware
-func NewKeyExistsMiddleware(manager *Manager, oAuthServerID bson.ObjectId) *KeyExistsMiddleware {
+func NewKeyExistsMiddleware(manager Manager, oAuthServerID bson.ObjectId) *KeyExistsMiddleware {
 	return &KeyExistsMiddleware{manager, oAuthServerID}
 }
 
@@ -53,7 +52,7 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 		}
 
 		accessToken := parts[1]
-		thisSessionState, keyExists := m.CheckSessionAndIdentityForValidKey(accessToken)
+		thisSessionState, keyExists := m.manager.IsKeyAuthorised(accessToken)
 
 		if !keyExists {
 			log.WithFields(log.Fields{
@@ -64,40 +63,9 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 			panic(ErrAccessTokenNotAuthorized)
 		}
 
-		if m.oAuthServerID != thisSessionState.OAuthServerID {
-			log.WithFields(log.Fields{
-				"path":   r.RequestURI,
-				"origin": r.RemoteAddr,
-				"key":    accessToken,
-				"sessionOAuthServerID": thisSessionState.OAuthServerID,
-				"authOAuthServerID":    m.oAuthServerID,
-			}).Warn("Attempted access with the key issued by other OAuth provider.")
-			panic(ErrAccessTokenOfOtherOrigin)
-		}
-
 		ctx := context.WithValue(r.Context(), SessionData, thisSessionState)
 		ctx = context.WithValue(ctx, AuthHeaderValue, accessToken)
 
 		handler.ServeHTTP(w, r.WithContext(ctx))
 	})
-}
-
-// CheckSessionAndIdentityForValidKey ensures we have the valid key in the session store
-func (m *KeyExistsMiddleware) CheckSessionAndIdentityForValidKey(key string) (session.SessionState, bool) {
-	var thisSession session.SessionState
-
-	// Checks if the key is present on the cache and if it didn't expire yet
-	log.Debug("Querying keystore")
-	exists, err := m.manager.KeyExists(key)
-	if nil != err {
-		panic(err)
-	}
-
-	if !exists {
-		log.Warn("Key not found in keystore")
-		return thisSession, false
-	}
-
-	// 2. If not there, get it from the AuthorizationHandler
-	return m.manager.IsKeyAuthorised(key)
 }

@@ -4,17 +4,16 @@ import (
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hellofresh/janus/pkg/store"
 )
 
 // RevokeMiddleware prevents requests to an API from exceeding a specified rate limit.
 type RevokeMiddleware struct {
-	store store.Store
+	manager Manager
 }
 
 // NewRevokeMiddleware creates an instance of RevokeMiddleware
-func NewRevokeMiddleware(store store.Store) *RevokeMiddleware {
-	return &RevokeMiddleware{store}
+func NewRevokeMiddleware(manager Manager) *RevokeMiddleware {
+	return &RevokeMiddleware{manager}
 }
 
 // Handler is the middleware method.
@@ -35,7 +34,7 @@ func (m *RevokeMiddleware) Handler(handler http.Handler) http.Handler {
 		}
 
 		log.Debug("Trying to remove the token")
-		err := m.store.Remove(accessToken)
+		err := m.manager.Remove(accessToken)
 		if nil != err {
 			log.WithError(err).Error("Not able to remove the token")
 		}

@@ -17,12 +17,12 @@ type Loader struct {
 	register *proxy.Register
 	store    store.Store
 	accessor *middleware.DatabaseAccessor
-	manager  *oauth.Manager
+	manager  oauth.Manager
 	debug    bool
 }
 
 // NewLoader creates a new instance of the api manager
-func NewLoader(register *proxy.Register, store store.Store, accessor *middleware.DatabaseAccessor, manager *oauth.Manager, debug bool) *Loader {
+func NewLoader(register *proxy.Register, store store.Store, accessor *middleware.DatabaseAccessor, manager oauth.Manager, debug bool) *Loader {
 	return &Loader{register, store, accessor, manager, debug}
 }
 
