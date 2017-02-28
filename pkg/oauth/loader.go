@@ -5,20 +5,19 @@ import (
 	"github.com/hellofresh/janus/pkg/cors"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/proxy"
-	"github.com/hellofresh/janus/pkg/store"
 )
 
 // Loader handles the loading of the api specs
 type Loader struct {
 	register *proxy.Register
-	store    store.Store
+	manager  Manager
 	accessor *middleware.DatabaseAccessor
 	debug    bool
 }
 
 // NewLoader creates a new instance of the api manager
-func NewLoader(register *proxy.Register, store store.Store, accessor *middleware.DatabaseAccessor, debug bool) *Loader {
-	return &Loader{register, store, accessor, debug}
+func NewLoader(register *proxy.Register, manager Manager, accessor *middleware.DatabaseAccessor, debug bool) *Loader {
+	return &Loader{register, manager, accessor, debug}
 }
 
 // Load loads all api specs from a datasource
@@ -62,7 +61,7 @@ func (m *Loader) RegisterOAuthServers(oauthServers []*OAuth) {
 		log.Debug("Registering revoke endpoint")
 		revokeProxy := oauthServer.Endpoints.Revoke
 		if proxy.Validate(revokeProxy) {
-			m.register.Add(proxy.NewRoute(revokeProxy, corsHandler, NewRevokeMiddleware(m.store).Handler))
+			m.register.Add(proxy.NewRoute(revokeProxy, corsHandler, NewRevokeMiddleware(m.manager).Handler))
 		} else {
 			log.Debug("No revoke endpoint")
 		}

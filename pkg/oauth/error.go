@@ -24,4 +24,10 @@ var (
 
 	// ErrDBContextNotSet is used when the database request context is not set
 	ErrDBContextNotSet = errors.New(http.StatusInternalServerError, "DB context was not set for this request")
+
+	// ErrJWTSecretMissing is used when the database request context is not set
+	ErrJWTSecretMissing = errors.New(http.StatusBadRequest, "You need to set a JWT secret")
+
+	// ErrUnknownManager is used when the database request context is not set
+	ErrUnknownManager = errors.New(http.StatusBadRequest, "Unknown manager type provided")
 )
