@@ -6,9 +6,9 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/bshuster-repo/logrus-logstash-hook"
-	"github.com/garyburd/redigo/redis"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/middleware"
+	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/store"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
@@ -19,6 +19,7 @@ var (
 	accessor     *middleware.DatabaseAccessor
 	storage      store.Store
 	statsdClient *statsd.Client
+	manager      oauth.Manager
 )
 
 // initializes the global configuration
@@ -51,20 +52,22 @@ func init() {
 	}
 }
 
-// initializes a storage
+// initializes the storage and managers
 func init() {
-	// Create a Redis pool.
-	pool := &redis.Pool{
-		MaxIdle:     3,
-		IdleTimeout: 240 * time.Second,
-		Dial:        func() (redis.Conn, error) { return redis.DialURL(globalConfig.StorageDSN) },
+	var err error
+	storage, err = store.Build(globalConfig.StorageDSN)
+	if nil != err {
+		log.Panic(err)
 	}
 
-	dsn := globalConfig.StorageDSN
-	log.Debugf("Trying to connect to redis pool: %s", dsn)
-	storage, err = store.NewRedisStore(pool)
-	if err != nil {
-		log.Fatalf("Couldn't connect to the redis pool: %s", err.Error())
+	managerType, err := oauth.ParseType(globalConfig.TokenStrategy)
+	if nil != err {
+		log.Panic(err)
+	}
+
+	manager, err = oauth.NewManagerFactory(storage, globalConfig.JWTSecret).Build(managerType)
+	if nil != err {
+		log.Panic(err)
 	}
 }
 
