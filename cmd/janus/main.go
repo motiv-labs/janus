@@ -81,7 +81,7 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	manager := &oauth.Manager{Storage: storage}
+
 	transport := oauth.NewAwareTransport(manager, oAuthServersRepo, statsClient)
 	p := proxy.WithParams(proxy.Params{
 		Transport:              transport,
@@ -97,7 +97,7 @@ func main() {
 	apiLoader := api.NewLoader(register, storage, accessor, manager, globalConfig.Debug)
 	apiLoader.Load()
 
-	oauthLoader := oauth.NewLoader(register, storage, accessor, globalConfig.Debug)
+	oauthLoader := oauth.NewLoader(register, manager, accessor, globalConfig.Debug)
 	oauthLoader.Load()
 
 	// create authentication for Janus
