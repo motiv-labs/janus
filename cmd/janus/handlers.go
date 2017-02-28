@@ -12,7 +12,7 @@ import (
 
 func Home(app config.Application) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		response.JSON(w, http.StatusOK, fmt.Sprintf("Welcome to %s, this is version %s", app.Name, app.Version))
+		response.JSON(w, http.StatusOK, fmt.Sprintf("Welcome to %s", app.Name))
 	}
 }
 
@@ -21,9 +21,10 @@ func RecoveryHandler(w http.ResponseWriter, r *http.Request, err interface{}) {
 	switch internalErr := err.(type) {
 	case *errors.Error:
 		log.Error(internalErr.Error())
-		response.JSON(w, internalErr.Code, internalErr.Error())
-	default:
-		response.JSON(w, http.StatusInternalServerError, err)
+		response.JSON(w, internalErr.Code, internalErr)
+	case error:
+		jsonErr := errors.New(http.StatusInternalServerError, internalErr.Error())
+		response.JSON(w, jsonErr.Code, jsonErr)
 	}
 }
 
