@@ -1,8 +1,11 @@
-sudo: required
-
 language: go
 
-before_script:
+go:
+  - 1.x
+  - 1.6
+  - 1.7
+
+install:
   - make deps
 
 script:
