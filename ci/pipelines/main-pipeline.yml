@@ -79,12 +79,12 @@ groups:
   - run-unit-tests
   - create-release-candidate
   - staging-deployment
+  - docker-deployment
 
 - name: live
   jobs:
   - create-release
   - live-deployment
-  - docker-deployment
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Jobs
@@ -166,7 +166,7 @@ jobs:
   plan:
 
   # Trigger after a release candidate has been created
-  - get: release
+  - get: release-candidate
     trigger: true
     passed: [create-release-candidate]
 
