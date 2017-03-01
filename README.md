@@ -6,6 +6,7 @@
 
 # Janus
 
+[![Build Status](https://travis-ci.org/hellofresh/janus.svg?branch=master)](https://travis-ci.org/hellofresh/janus)
 [![GoDoc](https://godoc.org/github.com/hellofresh/janus?status.svg)](https://godoc.org/github.com/hellofresh/janus)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hellofresh/janus)](https://goreportcard.com/report/github.com/hellofresh/janus)
 
