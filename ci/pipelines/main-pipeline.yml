@@ -79,7 +79,6 @@ groups:
   - run-unit-tests
   - create-release-candidate
   - staging-deployment
-  - docker-dev-deployment
 
 - name: live
   jobs:
@@ -161,13 +160,13 @@ jobs:
 
 # Docker Deployments
 #-----------------------------------------------------------------------------------------------------------------------
-- name: docker-dev-deployment
+- name: docker-deployment
   public: false
   serial: true
   plan:
 
   # Trigger after a release candidate has been created
-  - get: release-candidate
+  - get: release
     trigger: true
     passed: [create-release-candidate]
 
@@ -181,42 +180,12 @@ jobs:
   # Get the application version to use it in docker
   - get: version
   
-  - aggregate:
-
-    # Upload the dev image to quay.io
-    - put: docker-image
-      params:
-        build: docker-images/dev
-        tag: docker-images/dev/version
-
-- name: docker-deployment
-  public: false
-  serial: true
-  plan:
-
-  # Trigger after a release candidate has been created
-  - get: release
-    trigger: true
-    passed: [create-release]
-
-  # Get the application source for the scripts
-  - get: source-code
-
-  # Prepare the dir structure for building the docker images
-  - task: prepare-docker-images
-    file: source-code/ci/tasks/docker-deployment.yml
-
-  # Get the application version to use it in docker
-  - get: version
-  
-  - aggregate:
-
-    # Upload the image to quay.io
-    - put: docker-image
-      params:
-        build: docker-images/latest
-        tag_as_latest: true
-        tag: version/version
+  # Upload the image to quay.io
+  - put: docker-image
+    params:
+      build: docker-images/latest
+      tag_as_latest: true
+      tag: version/version
 
 # Staging Deployments
 #-----------------------------------------------------------------------------------------------------------------------
