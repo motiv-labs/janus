@@ -1,0 +1,9 @@
+sudo: required
+
+language: go
+
+before_script:
+  - make deps
+
+script:
+- make test
