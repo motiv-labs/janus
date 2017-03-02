@@ -8,7 +8,7 @@ import (
 
 // Specification for basic configurations
 type Specification struct {
-	Port                int    `envconfig:"PORT"`
+	Port                int    `envconfig:"PORT" default:"8080"`
 	Debug               bool   `envconfig:"DEBUG"`
 	LogLevel            string `envconfig:"LOG_LEVEL" default:"info"`
 	GraceTimeOut        int64  `envconfig:"GRACE_TIMEOUT"`
