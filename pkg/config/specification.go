@@ -42,13 +42,14 @@ type Specification struct {
 	Application Application
 }
 
+// IsHTTPS checks if you have https enabled
 func (s *Specification) IsHTTPS() bool {
 	return s.CertPathTLS != "" && s.KeyPathTLS != ""
 }
 
 // Database holds the configuration for a database
 type Database struct {
-	DSN string `envconfig:"DATABASE_DSN"`
+	DSN string `envconfig:"DATABASE_DSN" required:"true"`
 }
 
 // Statsd holds the configuration for statsd
@@ -57,10 +58,19 @@ type Statsd struct {
 	Prefix string `envconfig:"STATSD_PREFIX"`
 }
 
+// IsEnabled checks if you have metrics enabled
+func (s Statsd) IsEnabled() bool {
+	return len(s.DSN) == 0
+}
+
+// HasPrefix checks if you have any prefix configured
+func (s Statsd) HasPrefix() bool {
+	return len(s.Prefix) > 0
+}
+
 // Application represents a simple application definition
 type Application struct {
-	Name    string `envconfig:"APP_NAME" default:"Janus"`
-	Version string `envconfig:"APP_VERSION" default:"1.0"`
+	Name string `envconfig:"APP_NAME" default:"Janus"`
 }
 
 // Credentials represents the credentials that are going to be
