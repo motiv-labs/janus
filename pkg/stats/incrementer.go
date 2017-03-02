@@ -4,14 +4,14 @@ import (
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
-type Incrementer struct {
-	c *statsd.Client
+type Incrementer interface {
+	Increment(bucket string)
 }
 
-func NewIncrementer(c *statsd.Client) *Incrementer {
-	return &Incrementer{c}
-}
-
-func (t *Incrementer) Increment(bucket string) {
-	t.c.Increment(bucket)
+func NewIncrementer(c *statsd.Client, muted bool) Incrementer {
+	if muted {
+		return &MutedIncrementer{}
+	} else {
+		return &LiveIncrementer{c}
+	}
 }

@@ -12,7 +12,6 @@ import (
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
-	"github.com/hellofresh/janus/pkg/stats"
 )
 
 //loadAPIEndpoints register api endpoints
@@ -63,9 +62,7 @@ func loadAuthEndpoints(router router.Router, authMiddleware *jwt.Middleware) {
 
 func main() {
 	defer accessor.Close()
-	defer statsdClient.Close()
-
-	statsClient := stats.NewStatsClient(statsdClient)
+	defer statsClient.Close()
 
 	// create router
 	r := router.NewHttpTreeMuxRouter()

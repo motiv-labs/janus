@@ -8,19 +8,20 @@ import (
 
 type StatsClient struct {
 	client *statsd.Client
+	muted  bool
 }
 
-func NewStatsClient(client *statsd.Client) *StatsClient {
-	return &StatsClient{client}
+func NewStatsClient(client *statsd.Client, muted bool) *StatsClient {
+	return &StatsClient{client, muted}
 }
 
-func (f *StatsClient) BuildTimeTracker() *TimeTracker {
-	return NewTimeTracker(f.client)
+func (f *StatsClient) BuildTimeTracker() TimeTracker {
+	return NewTimeTracker(f.client, f.muted)
 }
 
-func (f *StatsClient) TrackRequest(r *http.Request, tt *TimeTracker, success bool) {
+func (f *StatsClient) TrackRequest(r *http.Request, tt TimeTracker, success bool) {
 	b := RequestBucket(r)
-	i := NewIncrementer(f.client)
+	i := NewIncrementer(f.client, f.muted)
 
 	tt.Finish(b)
 	i.Increment(b)
@@ -30,12 +31,16 @@ func (f *StatsClient) TrackRequest(r *http.Request, tt *TimeTracker, success boo
 	i.Increment(RequestsWithSuffixBucket(r, success))
 }
 
-func (f *StatsClient) TrackRoundTrip(r *http.Request, tt *TimeTracker, success bool) {
+func (f *StatsClient) TrackRoundTrip(r *http.Request, tt TimeTracker, success bool) {
 	b := RoundTripBucket(r, success)
-	i := NewIncrementer(f.client)
+	i := NewIncrementer(f.client, f.muted)
 
 	tt.Finish(b)
 	i.Increment(b)
 	i.Increment(totalRoundTripBucket)
 	i.Increment(RoundTripSuffixBucket(success))
+}
+
+func (f *StatsClient) Close() {
+	f.client.Close()
 }
