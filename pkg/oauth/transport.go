@@ -6,36 +6,38 @@ import (
 	"io"
 	"io/ioutil"
 	"net/http"
+	"net/url"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/session"
 	"github.com/hellofresh/janus/pkg/stats"
+	"github.com/hellofresh/janus/pkg/store"
 )
 
 // AwareTransport is a RoundTripper that is aware of the access tokens that come back from the
 // authentication server. After retrieving the token, we delagete the storage of it for the
 // oauth manager
 type AwareTransport struct {
-	manager          Manager
-	oAuthServersRepo *MongoRepository
-	statsClient      *stats.StatsClient
+	statsClient *stats.StatsClient
+	storage     store.Store
+	repo        Repository
 }
 
 // NewAwareTransport creates a new instance of AwareTransport
-func NewAwareTransport(manager Manager, oAuthServersRepo *MongoRepository, statsClient *stats.StatsClient) *AwareTransport {
-	return &AwareTransport{manager, oAuthServersRepo, statsClient}
+func NewAwareTransport(statsClient *stats.StatsClient, storage store.Store, repo Repository) *AwareTransport {
+	return &AwareTransport{statsClient, storage, repo}
 }
 
 // GetRoundTripper returns initialized RoundTripper insnace
 func (at *AwareTransport) GetRoundTripper(roundTripper http.RoundTripper) http.RoundTripper {
-	return &RoundTripper{roundTripper, at.manager, at.oAuthServersRepo, at.statsClient}
+	return &RoundTripper{roundTripper, at.statsClient, at.storage, at.repo}
 }
 
 type RoundTripper struct {
-	RoundTripper     http.RoundTripper
-	manager          Manager
-	oAuthServersRepo *MongoRepository
-	statsClient      *stats.StatsClient
+	RoundTripper http.RoundTripper
+	statsClient  *stats.StatsClient
+	storage      store.Store
+	repo         Repository
 }
 
 // RoundTrip executes a single HTTP transaction, returning
@@ -89,8 +91,16 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err er
 
 		if marshalErr := json.Unmarshal(bodyBytes, &newSession); marshalErr == nil {
 			if newSession.AccessToken != "" {
-				log.Debug("Setting body in the oauth storage")
-				t.manager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
+				tokenURL := url.URL{Scheme: req.URL.Scheme, Host: req.URL.Host, Path: req.URL.Path}
+				log.WithField("token_url", tokenURL.String()).Debug("Looking for OAuth provider who issued the token")
+				manager, oAuthServer, err := t.getManager(tokenURL)
+				if err != nil {
+					log.WithError(err).Error("Failed to find OAuth server by token URL", err)
+				} else {
+					newSession.OAuthServerID = oAuthServer.ID
+					log.Debug("Setting body in the oauth storage")
+					manager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
+				}
 			}
 		}
 
@@ -99,4 +109,20 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err er
 	}
 
 	return resp, err
+}
+
+func (t *RoundTripper) getManager(url url.URL) (Manager, *OAuth, error) {
+	oauthServer, err := t.repo.FindByTokenURL(url)
+	if nil != err {
+		return nil, nil, err
+	}
+
+	managerType, err := ParseType(oauthServer.TokenStrategy)
+	if nil != err {
+		return nil, nil, err
+	}
+
+	manager, err := NewManagerFactory(t.storage, oauthServer.JWTMeta.Secret).Build(managerType)
+
+	return manager, oauthServer, err
 }
