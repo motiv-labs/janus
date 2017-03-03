@@ -31,7 +31,7 @@ func ParseType(lvl string) (ManagerType, error) {
 	}
 
 	var m ManagerType
-	return m, ErrUnknownManager
+	return m, ErrUnknownStrategy
 }
 
 // ManagerType type
