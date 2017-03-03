@@ -20,19 +20,20 @@ const (
 	Auth
 )
 
+var typesMap = map[string]ManagerType{
+	"storage": Storage,
+	"jwt":     JWT,
+	"auth":    Auth,
+}
+
 // ParseType takes a string type and returns the Manager type constant.
 func ParseType(lvl string) (ManagerType, error) {
-	switch strings.ToLower(lvl) {
-	case "storage":
-		return Storage, nil
-	case "jwt":
-		return JWT, nil
-	case "auth":
-		return Auth, nil
+	m, ok := typesMap[strings.ToLower(lvl)]
+	if !ok {
+		var m ManagerType
+		return m, ErrUnknownStrategy
 	}
-
-	var m ManagerType
-	return m, ErrUnknownStrategy
+	return m, nil
 }
 
 // ManagerType type
@@ -55,12 +56,21 @@ func NewManagerFactory(storage store.Store, settings TokenStrategySettings) *Man
 }
 
 func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
-	log.WithField("strategy_name", t).Debug("Building token strategy type")
+	// TODO: make it nicer with BiMap - GetByType, GetByName
+	typesMapReversed := make(map[ManagerType]string, len(typesMap))
+	for k, v := range typesMap {
+		typesMapReversed[v] = k
+	}
+
+	log.WithField("name", typesMapReversed[t]).
+		WithField("settings", f.settings).
+		Debug("Building token strategy")
+
 	switch t {
 	case Storage:
 		return &StorageTokenManager{Storage: f.Storage}, nil
 	case JWT:
-		value, ok := f.settings["jwt"]
+		value, ok := f.settings["secret"]
 		if !ok || value == "" {
 			return nil, ErrJWTSecretMissing
 		}

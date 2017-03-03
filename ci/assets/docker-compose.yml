@@ -1,31 +1,31 @@
 version: '2'
 services:
 
-    janus:
-      depends_on:
-        - mongodb
-        - redis
-        - statsd
-      image: quay.io/hellofresh/janus
-      ports:
-        - "8080:8080"
-      environment:
-        PORT: '8080'
-        DEBUG: 'false'
-        LOG_LEVEL: 'info'
-        STATSD_DSN: 'statsd:8125'
-        STATSD_PREFIX: 'janus-docker.'
-        DATABASE_DSN: 'mongodb://mongodb:27017/janus'
-        # Storage
-        STORAGE_DNS: 'memory://localhost'
-        # STORAGE_DNS: 'redis://redis:6379'
-        SECRET: 'secret key'
-        ADMIN_USERNAME: 'admin'
-        ADMIN_PASSWORD: 'admin'
-        GRACE_TIMEOUT: '10'
-        MAX_IDLE_CONNS_PER_HOST: '200'
-        INSECURE_SKIP_VERIFY: 'false'
-        
+#    janus:
+#      depends_on:
+#        - mongodb
+#        - redis
+#        - statsd
+#      image: quay.io/hellofresh/janus
+#      ports:
+#        - "8080:8080"
+#      environment:
+#        PORT: '8080'
+#        DEBUG: 'false'
+#        LOG_LEVEL: 'info'
+#        STATSD_DSN: 'statsd:8125'
+#        STATSD_PREFIX: 'janus-docker.'
+#        DATABASE_DSN: 'mongodb://mongodb:27017/janus'
+#        # Storage
+#        STORAGE_DNS: 'memory://localhost'
+#        # STORAGE_DNS: 'redis://redis:6379'
+#        SECRET: 'secret key'
+#        ADMIN_USERNAME: 'admin'
+#        ADMIN_PASSWORD: 'admin'
+#        GRACE_TIMEOUT: '10'
+#        MAX_IDLE_CONNS_PER_HOST: '200'
+#        INSECURE_SKIP_VERIFY: 'false'
+
     mongodb:
         image: mongo
         ports:
