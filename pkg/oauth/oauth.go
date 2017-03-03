@@ -33,8 +33,7 @@ type OAuth struct {
 	AuthorizeLoginRedirect string                 `bson:"auth_login_redirect" json:"auth_login_redirect"`
 	Secrets                map[string]string      `bson:"secrets" json:"secrets"`
 	CorsMeta               cors.Meta              `bson:"cors_meta" json:"cors_meta" valid:"cors_meta"`
-	TokenStrategy          string                 `bson:"token_strategy" json:"token_strategy"`
-	JWTMeta                JWTMeta                `bson:"jwt_meta" json:"jwt_meta"`
+	TokenStrategy          TokenStrategy          `bson:"token_strategy" json:"token_strategy"`
 }
 
 // Endpoints defines the oauth endpoints that wil be proxied
@@ -51,7 +50,11 @@ type ClientEndpoints struct {
 	Remove *proxy.Definition `bson:"remove" json:"remove"`
 }
 
-// JWTMeta defines the jwt metadata (only if you choose the JWT Token strategy)
-type JWTMeta struct {
-	Secret string `bson:"secret" json:"secret"`
+// TokenStrategy defines the token strategy fields
+type TokenStrategy struct {
+	Name     string                `bson:"name" json:"name"`
+	Settings TokenStrategySettings `bson:"settings" json:"settings"`
 }
+
+// TokenStrategySettings
+type TokenStrategySettings map[string]string

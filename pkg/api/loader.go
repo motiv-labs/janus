@@ -130,10 +130,10 @@ func (m *Loader) getManager(oAuthServerID string) (oauth.Manager, error) {
 		return nil, err
 	}
 
-	managerType, err := oauth.ParseType(oauthServer.TokenStrategy)
+	managerType, err := oauth.ParseType(oauthServer.TokenStrategy.Name)
 	if nil != err {
 		return nil, err
 	}
 
-	return oauth.NewManagerFactory(m.storage, oauthServer.JWTMeta.Secret).Build(managerType)
+	return oauth.NewManagerFactory(m.storage, oauthServer.TokenStrategy.Settings).Build(managerType)
 }

@@ -117,12 +117,12 @@ func (t *RoundTripper) getManager(url url.URL) (Manager, *OAuth, error) {
 		return nil, nil, err
 	}
 
-	managerType, err := ParseType(oauthServer.TokenStrategy)
+	managerType, err := ParseType(oauthServer.TokenStrategy.Name)
 	if nil != err {
 		return nil, nil, err
 	}
 
-	manager, err := NewManagerFactory(t.storage, oauthServer.JWTMeta.Secret).Build(managerType)
+	manager, err := NewManagerFactory(t.storage, oauthServer.TokenStrategy.Settings).Build(managerType)
 
 	return manager, oauthServer, err
 }

@@ -117,10 +117,10 @@ func (m *Loader) getOAuthServers() []*Spec {
 }
 
 func (m *Loader) getManager(oauthServer *OAuth) (Manager, error) {
-	managerType, err := ParseType(oauthServer.TokenStrategy)
+	managerType, err := ParseType(oauthServer.TokenStrategy.Name)
 	if nil != err {
 		return nil, err
 	}
 
-	return NewManagerFactory(m.storage, oauthServer.JWTMeta.Secret).Build(managerType)
+	return NewManagerFactory(m.storage, oauthServer.TokenStrategy.Settings).Build(managerType)
 }

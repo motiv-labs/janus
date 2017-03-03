@@ -3,6 +3,7 @@ package oauth
 import (
 	"strings"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/session"
 	"github.com/hellofresh/janus/pkg/store"
 )
@@ -45,23 +46,26 @@ type Manager interface {
 }
 
 type ManagerFactory struct {
-	Storage store.Store
-	Secret  string
+	Storage  store.Store
+	settings TokenStrategySettings
 }
 
-func NewManagerFactory(storage store.Store, secret string) *ManagerFactory {
-	return &ManagerFactory{storage, secret}
+func NewManagerFactory(storage store.Store, settings TokenStrategySettings) *ManagerFactory {
+	return &ManagerFactory{storage, settings}
 }
 
 func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
+	log.WithField("strategy_name", t).Debug("Building token strategy type")
 	switch t {
 	case Storage:
 		return &StorageTokenManager{Storage: f.Storage}, nil
 	case JWT:
-		if f.Secret == "" {
+		value, ok := f.settings["jwt"]
+		if !ok || value == "" {
 			return nil, ErrJWTSecretMissing
 		}
-		return &JWTManager{Secret: f.Secret}, nil
+
+		return &JWTManager{Secret: value}, nil
 	case Auth:
 		// TODO: Create an Auth Manager that always validated tokens against an auth provider
 	}
