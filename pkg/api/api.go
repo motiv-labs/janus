@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/hellofresh/janus/pkg/cors"
+	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"gopkg.in/mgo.v2/bson"
 )
@@ -11,6 +12,7 @@ import (
 // Spec Holds an api definition and basic options
 type Spec struct {
 	*Definition
+	Manager oauth.Manager
 }
 
 // Definition Represents an API that you want to proxy
