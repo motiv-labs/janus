@@ -7,15 +7,6 @@ var (
 	// ErrClientIDNotFound is raised when a client_id was not found
 	ErrClientIDNotFound = errors.New(http.StatusBadRequest, "Invalid client ID provided")
 
-	// ErrAuthorizationFieldNotFound is used when the http Authorization header is missing from the request
-	ErrAuthorizationFieldNotFound = errors.New(http.StatusBadRequest, "authorization field missing")
-
-	// ErrBearerMalformed is used when the Bearer string in the Authorization header is not found or is malformed
-	ErrBearerMalformed = errors.New(http.StatusBadRequest, "bearer token malformed")
-
-	// ErrAccessTokenNotAuthorized is used when the access token is not found on the storage
-	ErrAccessTokenNotAuthorized = errors.New(http.StatusUnauthorized, "access token not authorized")
-
 	// ErrAccessTokenOfOtherOrigin is used when the access token is of other origin
 	ErrAccessTokenOfOtherOrigin = errors.New(http.StatusUnauthorized, "access token of other origin")
 
@@ -28,6 +19,9 @@ var (
 	// ErrJWTSecretMissing is used when the database request context is not set
 	ErrJWTSecretMissing = errors.New(http.StatusBadRequest, "You need to set a JWT secret")
 
-	// ErrUnknownManager is used when the database request context is not set
+	// ErrUnknownManager is used when a manager type is not known
 	ErrUnknownManager = errors.New(http.StatusBadRequest, "Unknown manager type provided")
+
+	// ErrUnknownStrategy is used when a token strategy is not known
+	ErrUnknownStrategy = errors.New(http.StatusBadRequest, "Unknown token strategy type provided")
 )
