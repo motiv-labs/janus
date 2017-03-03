@@ -8,7 +8,6 @@ import (
 	"github.com/bshuster-repo/logrus-logstash-hook"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/middleware"
-	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/store"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
@@ -19,7 +18,6 @@ var (
 	accessor     *middleware.DatabaseAccessor
 	storage      store.Store
 	statsdClient *statsd.Client
-	manager      oauth.Manager
 )
 
 // initializes the global configuration
@@ -58,16 +56,6 @@ func init() {
 func init() {
 	var err error
 	storage, err = store.Build(globalConfig.StorageDSN)
-	if nil != err {
-		log.Panic(err)
-	}
-
-	managerType, err := oauth.ParseType(globalConfig.TokenStrategy)
-	if nil != err {
-		log.Panic(err)
-	}
-
-	manager, err = oauth.NewManagerFactory(storage, globalConfig.JWTSecret).Build(managerType)
 	if nil != err {
 		log.Panic(err)
 	}
