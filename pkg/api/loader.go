@@ -15,15 +15,15 @@ import (
 // Loader is responsible for loading all apis form a datastore and configure them in a register
 type Loader struct {
 	register *proxy.Register
-	store    store.Store
+	storage  store.Store
+	authRepo oauth.Repository
 	accessor *middleware.DatabaseAccessor
-	manager  *oauth.Manager
 	debug    bool
 }
 
 // NewLoader creates a new instance of the api manager
-func NewLoader(register *proxy.Register, store store.Store, accessor *middleware.DatabaseAccessor, manager *oauth.Manager, debug bool) *Loader {
-	return &Loader{register, store, accessor, manager, debug}
+func NewLoader(register *proxy.Register, storage store.Store, authRepo oauth.Repository, accessor *middleware.DatabaseAccessor, debug bool) *Loader {
+	return &Loader{register, storage, authRepo, accessor, debug}
 }
 
 // Load loads all api specs from a datasource
@@ -57,7 +57,7 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 				panic(err)
 			}
 
-			limiterStore, err := m.store.ToLimiterStore(referenceSpec.ID.String())
+			limiterStore, err := m.storage.ToLimiterStore(referenceSpec.ID.String())
 			if err != nil {
 				panic(err)
 			}
@@ -75,7 +75,7 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 		}
 
 		if referenceSpec.UseOauth2 {
-			handlers = append(handlers, oauth.NewKeyExistsMiddleware(m.manager, referenceSpec.OAuthServerID).Handler)
+			handlers = append(handlers, NewKeyExistsMiddleware(referenceSpec).Handler)
 		} else {
 			log.Debug("OAuth2 is not enabled")
 		}
@@ -110,8 +110,30 @@ func (m *Loader) getAPISpecs() []*Spec {
 	for _, definition := range definitions {
 		spec := new(Spec)
 		spec.Definition = definition
+		if definition.UseOauth2 {
+			manager, err := m.getManager(definition.OAuthServerID.Hex())
+			if nil != err {
+				log.WithError(err).Error("OAuth Configuration for this API is incorrect, skipping...")
+				continue
+			}
+			spec.Manager = manager
+		}
 		specs = append(specs, spec)
 	}
 
 	return specs
+}
+
+func (m *Loader) getManager(oAuthServerID string) (oauth.Manager, error) {
+	oauthServer, err := m.authRepo.FindByID(oAuthServerID)
+	if nil != err {
+		return nil, err
+	}
+
+	managerType, err := oauth.ParseType(oauthServer.TokenStrategy.Name)
+	if nil != err {
+		return nil, err
+	}
+
+	return oauth.NewManagerFactory(m.storage, oauthServer.TokenStrategy.Settings).Build(managerType)
 }

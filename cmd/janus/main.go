@@ -81,8 +81,8 @@ func main() {
 	if err != nil {
 		log.Panic(err)
 	}
-	manager := &oauth.Manager{Storage: storage}
-	transport := oauth.NewAwareTransport(manager, oAuthServersRepo, statsClient)
+
+	transport := oauth.NewAwareTransport(statsClient, storage, oAuthServersRepo)
 	p := proxy.WithParams(proxy.Params{
 		Transport:              transport,
 		FlushInterval:          globalConfig.BackendFlushInterval,
@@ -94,7 +94,7 @@ func main() {
 
 	// create proxy register
 	register := proxy.NewRegister(r, p)
-	apiLoader := api.NewLoader(register, storage, accessor, manager, globalConfig.Debug)
+	apiLoader := api.NewLoader(register, storage, oAuthServersRepo, accessor, globalConfig.Debug)
 	apiLoader.Load()
 
 	oauthLoader := oauth.NewLoader(register, storage, accessor, globalConfig.Debug)

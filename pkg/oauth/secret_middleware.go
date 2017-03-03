@@ -10,11 +10,11 @@ import (
 
 // SecretMiddleware prevents requests to an API from exceeding a specified rate limit.
 type SecretMiddleware struct {
-	oauth *OAuth
+	oauth *Spec
 }
 
 // NewSecretMiddleware creates an instance of SecretMiddleware
-func NewSecretMiddleware(oauth *OAuth) *SecretMiddleware {
+func NewSecretMiddleware(oauth *Spec) *SecretMiddleware {
 	return &SecretMiddleware{oauth}
 }
 

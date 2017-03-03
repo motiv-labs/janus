@@ -15,6 +15,7 @@ import (
 type Repository interface {
 	FindAll() ([]*OAuth, error)
 	FindByID(id string) (*OAuth, error)
+	FindByTokenURL(url url.URL) (*OAuth, error)
 	Add(oauth *OAuth) error
 	Remove(id string) error
 }

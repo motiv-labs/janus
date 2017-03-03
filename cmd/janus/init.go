@@ -6,7 +6,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/bshuster-repo/logrus-logstash-hook"
-	"github.com/garyburd/redigo/redis"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/store"
@@ -25,7 +24,7 @@ var (
 func init() {
 	globalConfig, err = config.LoadEnv()
 	if nil != err {
-		log.Panic(err.Error())
+		log.WithError(err).Panic("Could not parse the environment configurations")
 	}
 }
 
@@ -33,7 +32,7 @@ func init() {
 func init() {
 	level, err := log.ParseLevel(strings.ToLower(globalConfig.LogLevel))
 	if err != nil {
-		log.Error("Error getting level", err)
+		log.WithError(err).Error("Error getting log level")
 	}
 
 	log.SetLevel(level)
@@ -47,24 +46,18 @@ func init() {
 func init() {
 	accessor, err = middleware.InitDB(globalConfig.Database.DSN)
 	if err != nil {
-		log.Fatalf("Couldn't connect to the mongodb database: %s", err.Error())
+		log.WithError(err).
+			WithField("dsn", globalConfig.Database.DSN).
+			Fatalf("Couldn't connect to the mongodb database")
 	}
 }
 
-// initializes a storage
+// initializes the storage and managers
 func init() {
-	// Create a Redis pool.
-	pool := &redis.Pool{
-		MaxIdle:     3,
-		IdleTimeout: 240 * time.Second,
-		Dial:        func() (redis.Conn, error) { return redis.DialURL(globalConfig.StorageDSN) },
-	}
-
-	dsn := globalConfig.StorageDSN
-	log.Debugf("Trying to connect to redis pool: %s", dsn)
-	storage, err = store.NewRedisStore(pool)
-	if err != nil {
-		log.Fatalf("Couldn't connect to the redis pool: %s", err.Error())
+	var err error
+	storage, err = store.Build(globalConfig.StorageDSN)
+	if nil != err {
+		log.Panic(err)
 	}
 }
 
@@ -74,14 +67,14 @@ func init() {
 	statsdConfig := globalConfig.Statsd
 
 	log.Debugf("Trying to connect to statsd instance: %s", statsdConfig.DSN)
-	if len(statsdConfig.DSN) == 0 {
+	if statsdConfig.IsEnabled() {
 		log.Debug("Statsd DSN not provided, client will be muted")
 		options = append(options, statsd.Mute(true))
 	} else {
 		options = append(options, statsd.Address(statsdConfig.DSN))
 	}
 
-	if len(statsdConfig.Prefix) > 0 {
+	if statsdConfig.HasPrefix() {
 		options = append(options, statsd.Prefix(statsdConfig.Prefix))
 	}
 

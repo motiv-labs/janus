@@ -8,19 +8,13 @@ import (
 	"github.com/hellofresh/janus/pkg/store"
 )
 
-// Manager is responsible for managing the access tokens
-type Manager struct {
+// StorageTokenManager is responsible for managing the access tokens
+type StorageTokenManager struct {
 	Storage store.Store
 }
 
-// KeyExists checks if the given access token exits in the storage
-func (o *Manager) KeyExists(accessToken string) (bool, error) {
-	log.Debugf("Searching for key %s", accessToken)
-	return o.Storage.Exists(accessToken)
-}
-
 // Set a new access token and its session to the storage
-func (o *Manager) Set(accessToken string, session session.SessionState, resetTTLTo int64) error {
+func (o *StorageTokenManager) Set(accessToken string, session session.SessionState, resetTTLTo int64) error {
 	value, err := json.Marshal(session)
 	if err != nil {
 		return err
@@ -32,9 +26,24 @@ func (o *Manager) Set(accessToken string, session session.SessionState, resetTTL
 	return nil
 }
 
+// Remove an access token from the storage
+func (o *StorageTokenManager) Remove(accessToken string) error {
+	log.WithField("token", accessToken).Debug("removing token from the storage")
+	go o.Storage.Remove(accessToken)
+
+	return nil
+}
+
 // IsKeyAuthorised checks if the access token is valid
-func (o *Manager) IsKeyAuthorised(accessToken string) (session.SessionState, bool) {
+func (o *StorageTokenManager) IsKeyAuthorised(accessToken string) (session.SessionState, bool) {
 	var newSession session.SessionState
+
+	exists, err := o.Storage.Exists(accessToken)
+	if !exists || err != nil {
+		log.WithError(err).Warn("Key not found in keystore")
+		return newSession, false
+	}
+
 	jsonKeyVal, err := o.Storage.Get(accessToken)
 	if nil != err {
 		log.WithError(err).Error("Couldn't get the access token from storage")

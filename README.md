@@ -73,13 +73,11 @@ Just go to the [releases](https://github.com/hellofresh/janus/releases) page and
 Make sure you have the following dependencies installed in your environment:
 
  - Mongodb - For storing the proxies configurations
- - Redis - For caching and storing of expiration oauth tokens
 
 And then just define where your dependencies are located
 
 ```sh
 export DATABASE_DSN="mongodb://localhost:27017/janus"
-export REDIS_DSN="redis://localhost:6379"
 export SECRET="yourSecret"
 export ADMIN_USERNAME="admin"
 export ADMIN_PASSWORD="admin"

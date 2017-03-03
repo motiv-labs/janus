@@ -45,7 +45,7 @@ type Params struct {
 	FlushInterval time.Duration
 }
 
-// Proxy instances implement Skipper proxying functionality. For
+// Proxy instances implement Janus proxying functionality. For
 // initializing, see the WithParams the constructor and Params.
 type Proxy struct {
 	roundTripper  http.RoundTripper

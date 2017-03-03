@@ -95,7 +95,7 @@ func (j *Handler) Refresh() http.HandlerFunc {
 		expire := time.Now().Add(j.Config.Timeout)
 		newClaims["id"] = claims["id"]
 		newClaims["exp"] = expire.Unix()
-		newClaims["orig_iat"] = origIat
+		newClaims["iat"] = origIat
 
 		tokenString, err := newToken.SignedString(j.Config.Secret)
 

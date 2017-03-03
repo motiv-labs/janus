@@ -1,4 +1,4 @@
-package oauth
+package api
 
 import (
 	"context"
@@ -6,9 +6,8 @@ import (
 	"strings"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/request"
-	"github.com/hellofresh/janus/pkg/session"
-	"gopkg.in/mgo.v2/bson"
 )
 
 // Enums for keys to be stored in a session context - this is how gorilla expects
@@ -20,14 +19,12 @@ var (
 
 // KeyExistsMiddleware checks the integrity of the provided OAuth headers
 type KeyExistsMiddleware struct {
-	manager *Manager
-	// TODO pass api.Spec pointer here, currently impossible as circullar referens occurs
-	oAuthServerID bson.ObjectId
+	spec *Spec
 }
 
 // NewKeyExistsMiddleware creates a new instance of KeyExistsMiddleware
-func NewKeyExistsMiddleware(manager *Manager, oAuthServerID bson.ObjectId) *KeyExistsMiddleware {
-	return &KeyExistsMiddleware{manager, oAuthServerID}
+func NewKeyExistsMiddleware(spec *Spec) *KeyExistsMiddleware {
+	return &KeyExistsMiddleware{spec}
 }
 
 // Handler is the middleware method.
@@ -44,16 +41,16 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 		parts := strings.Split(authHeaderValue, " ")
 		if len(parts) < 2 {
 			logger.Warn("Attempted access with malformed header, no auth header found.")
-			panic(ErrAuthorizationFieldNotFound)
+			panic(errors.ErrAuthorizationFieldNotFound)
 		}
 
 		if strings.ToLower(parts[0]) != "bearer" {
 			logger.Warn("Bearer token malformed")
-			panic(ErrBearerMalformed)
+			panic(errors.ErrBearerMalformed)
 		}
 
 		accessToken := parts[1]
-		thisSessionState, keyExists := m.CheckSessionAndIdentityForValidKey(accessToken)
+		thisSessionState, keyExists := m.spec.Manager.IsKeyAuthorised(accessToken)
 
 		if !keyExists {
 			log.WithFields(log.Fields{
@@ -61,18 +58,7 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 				"origin": r.RemoteAddr,
 				"key":    accessToken,
 			}).Warn("Attempted access with non-existent key.")
-			panic(ErrAccessTokenNotAuthorized)
-		}
-
-		if m.oAuthServerID != thisSessionState.OAuthServerID {
-			log.WithFields(log.Fields{
-				"path":   r.RequestURI,
-				"origin": r.RemoteAddr,
-				"key":    accessToken,
-				"sessionOAuthServerID": thisSessionState.OAuthServerID,
-				"authOAuthServerID":    m.oAuthServerID,
-			}).Warn("Attempted access with the key issued by other OAuth provider.")
-			panic(ErrAccessTokenOfOtherOrigin)
+			panic(errors.ErrAccessTokenNotAuthorized)
 		}
 
 		ctx := context.WithValue(r.Context(), SessionData, thisSessionState)
@@ -80,24 +66,4 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 
 		handler.ServeHTTP(w, r.WithContext(ctx))
 	})
-}
-
-// CheckSessionAndIdentityForValidKey ensures we have the valid key in the session store
-func (m *KeyExistsMiddleware) CheckSessionAndIdentityForValidKey(key string) (session.SessionState, bool) {
-	var thisSession session.SessionState
-
-	// Checks if the key is present on the cache and if it didn't expire yet
-	log.Debug("Querying keystore")
-	exists, err := m.manager.KeyExists(key)
-	if nil != err {
-		panic(err)
-	}
-
-	if !exists {
-		log.Warn("Key not found in keystore")
-		return thisSession, false
-	}
-
-	// 2. If not there, get it from the AuthorizationHandler
-	return m.manager.IsKeyAuthorised(key)
 }
