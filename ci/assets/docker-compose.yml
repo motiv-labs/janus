@@ -16,12 +16,9 @@ services:
         STATSD_DSN: 'statsd:8125'
         STATSD_PREFIX: 'janus-docker.'
         DATABASE_DSN: 'mongodb://mongodb:27017/janus'
-        # Token Strategy
-        TOKEN_STRATEGY: "storage"
         # Storage
         STORAGE_DNS: 'memory://localhost'
         # STORAGE_DNS: 'redis://redis:6379'
-        # JWT_SECRET: "test"
         SECRET: 'secret key'
         ADMIN_USERNAME: 'admin'
         ADMIN_PASSWORD: 'admin'
