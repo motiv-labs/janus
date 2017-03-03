@@ -17,12 +17,6 @@ type Specification struct {
 	// The Storage DSN, this could be `memory` or `redis`
 	StorageDSN string `envconfig:"STORAGE_DSN" default:"memory://localhost"`
 
-	// Defines how do you want to handle the tokens after they are fetched from the auth provider
-	TokenStrategy string `envconfig:"TOKEN_STRATEGY" default:"storage"`
-
-	// If you choose to use teh JWT Strategy then this should be set
-	JWTSecret string `envconfig:"JWT_SECRET"`
-
 	// Path of certificate when using TLS
 	CertPathTLS string `envconfig:"CERT_PATH"`
 
