@@ -4,26 +4,24 @@ import (
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/errors"
-	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/request"
 	"github.com/hellofresh/janus/pkg/response"
 	"github.com/hellofresh/janus/pkg/router"
-	"gopkg.in/mgo.v2"
 )
 
 // Controller is the api rest controller
-type Controller struct{}
-
-// NewController creates a new instance of Controller
-func NewController() *Controller {
-	return &Controller{}
+type Controller struct {
+	repo Repository
 }
 
-func (u *Controller) Get() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		repo := u.getRepository(u.getDatabase(r))
+// NewController creates a new instance of Controller
+func NewController(repo Repository) *Controller {
+	return &Controller{repo}
+}
 
-		data, err := repo.FindAll()
+func (c *Controller) Get() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data, err := c.repo.FindAll()
 		if err != nil {
 			panic(err.Error())
 		}
@@ -33,13 +31,11 @@ func (u *Controller) Get() http.HandlerFunc {
 }
 
 // GetBy gets an oauth server by its id
-func (u *Controller) GetBy() http.HandlerFunc {
+func (c *Controller) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id := router.FromContext(r.Context()).ByName("id")
-		repo := u.getRepository(u.getDatabase(r))
-
-		data, err := repo.FindByID(id)
-		if data.ID == "" {
+		slug := router.FromContext(r.Context()).ByName("slug")
+		data, err := c.repo.FindBySlug(slug)
+		if data.Name == "" {
 			panic(ErrOauthServerNotFound)
 		}
 
@@ -51,14 +47,13 @@ func (u *Controller) GetBy() http.HandlerFunc {
 	}
 }
 
-func (u *Controller) PutBy() http.HandlerFunc {
+func (c *Controller) PutBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
-		id := router.FromContext(r.Context()).ByName("id")
-		repo := u.getRepository(u.getDatabase(r))
-		oauth, err := repo.FindByID(id)
-		if oauth.ID == "" {
+		slug := router.FromContext(r.Context()).ByName("slug")
+		oauth, err := c.repo.FindBySlug(slug)
+		if oauth.Name == "" {
 			panic(ErrOauthServerNotFound)
 		}
 
@@ -71,7 +66,7 @@ func (u *Controller) PutBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		err = repo.Add(oauth)
+		err = c.repo.Add(oauth)
 		if nil != err {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
@@ -80,9 +75,8 @@ func (u *Controller) PutBy() http.HandlerFunc {
 	}
 }
 
-func (u *Controller) Post() http.HandlerFunc {
+func (c *Controller) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		repo := u.getRepository(u.getDatabase(r))
 		var oauth OAuth
 
 		err := request.BindJSON(r, &oauth)
@@ -90,7 +84,7 @@ func (u *Controller) Post() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		err = repo.Add(&oauth)
+		err = c.repo.Add(&oauth)
 		if nil != err {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
@@ -99,35 +93,15 @@ func (u *Controller) Post() http.HandlerFunc {
 	}
 }
 
-func (u *Controller) DeleteBy() http.HandlerFunc {
+func (c *Controller) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		id := router.FromContext(r.Context()).ByName("id")
-		repo := u.getRepository(u.getDatabase(r))
 
-		err := repo.Remove(id)
+		err := c.repo.Remove(id)
 		if err != nil {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
 		response.JSON(w, http.StatusNoContent, nil)
 	}
-}
-
-func (u *Controller) getDatabase(r *http.Request) *mgo.Database {
-	db := r.Context().Value(middleware.ContextKeyDatabase)
-	if nil == db {
-		panic(ErrDBContextNotSet)
-	}
-
-	return db.(*mgo.Database)
-}
-
-// GetRepository gets the repository for the handlers
-func (u *Controller) getRepository(db *mgo.Database) Repository {
-	repo, err := NewMongoRepository(db)
-	if err != nil {
-		panic(errors.New(http.StatusInternalServerError, err.Error()))
-	}
-
-	return repo
 }
