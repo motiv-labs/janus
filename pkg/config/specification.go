@@ -10,11 +10,11 @@ import (
 type Specification struct {
 	Port                int    `envconfig:"PORT" default:"8080"`
 	APIPort             int    `envconfig:"API_PORT" default:"8081"`
-	Debug               bool   `envconfig:"DEBUG"`
-	LogLevel            string `envconfig:"LOG_LEVEL" default:"info"`
-	GraceTimeOut        int64  `envconfig:"GRACE_TIMEOUT"`
-	MaxIdleConnsPerHost int    `envconfig:"MAX_IDLE_CONNS_PER_HOST"`
-	InsecureSkipVerify  bool   `envconfig:"INSECURE_SKIP_VERIFY"`
+	Debug               bool   `envconfig:"DEBUG" description:"Enable debug mode"`
+	LogLevel            string `envconfig:"LOG_LEVEL" default:"info" description:"Log level"`
+	GraceTimeOut        int64  `envconfig:"GRACE_TIMEOUT" description:"Duration to give active requests a chance to finish during hot-reload"`
+	MaxIdleConnsPerHost int    `envconfig:"MAX_IDLE_CONNS_PER_HOST" description:"If non-zero, controls the maximum idle (keep-alive) to keep per-host."`
+	InsecureSkipVerify  bool   `envconfig:"INSECURE_SKIP_VERIFY" description:"Disable SSL certificate verification"`
 	// The Storage DSN, this could be `memory` or `redis`
 	StorageDSN string `envconfig:"STORAGE_DSN" default:"memory://localhost"`
 

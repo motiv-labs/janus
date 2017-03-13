@@ -22,6 +22,7 @@ import (
 func main() {
 	var repo api.APISpecRepository
 	var oAuthServersRepo oauth.Repository
+	var readOnlyAPI bool
 	var err error
 
 	defer statsdClient.Close()
@@ -65,6 +66,8 @@ func main() {
 		if err != nil {
 			log.Panic(err)
 		}
+
+		readOnlyAPI = true
 	default:
 		log.WithError(errors.ErrInvalidScheme).Error("No Database selected")
 	}
@@ -97,10 +100,11 @@ func main() {
 	oauthLoader.LoadDefinitions(oAuthServersRepo)
 
 	wp := web.Provider{
-		Port:     "3001",
+		Port:     globalConfig.APIPort,
 		Cred:     globalConfig.Credentials,
 		APIRepo:  repo,
 		AuthRepo: oAuthServersRepo,
+		ReadOnly: readOnlyAPI,
 	}
 	wp.Provide()
 

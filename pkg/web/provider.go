@@ -16,12 +16,13 @@ import (
 
 // Provider is a provider.Provider implementation that provides the REST API.
 type Provider struct {
+	Port     int    `description:"Web administration port"`
+	CertFile string `description:"SSL certificate"`
+	KeyFile  string `description:"SSL certificate"`
+	ReadOnly bool   `description:"Enable read only API"`
 	Cred     config.Credentials
 	APIRepo  api.APISpecRepository
 	AuthRepo oauth.Repository
-	Port     string
-	CertFile string
-	KeyFile  string
 }
 
 func (p *Provider) Provide() error {
@@ -76,10 +77,13 @@ func (p *Provider) loadAPIEndpoints(router router.Router) {
 	group := router.Group("/apis")
 	{
 		group.GET("", handler.Get())
-		group.POST("", handler.Post())
 		group.GET("/:slug", handler.GetBy())
-		group.PUT("/:slug", handler.PutBy())
-		group.DELETE("/:slug", handler.DeleteBy())
+
+		if false == p.ReadOnly {
+			group.POST("", handler.Post())
+			group.PUT("/:slug", handler.PutBy())
+			group.DELETE("/:slug", handler.DeleteBy())
+		}
 	}
 }
 
@@ -92,9 +96,12 @@ func (p *Provider) loadOAuthEndpoints(router router.Router) {
 	oauthGroup := router.Group("/oauth/servers")
 	{
 		oauthGroup.GET("", oAuthHandler.Get())
-		oauthGroup.POST("", oAuthHandler.Post())
 		oauthGroup.GET("/:slug", oAuthHandler.GetBy())
-		oauthGroup.PUT("/:slug", oAuthHandler.PutBy())
-		oauthGroup.DELETE("/:slug", oAuthHandler.DeleteBy())
+
+		if false == p.ReadOnly {
+			oauthGroup.POST("", oAuthHandler.Post())
+			oauthGroup.PUT("/:slug", oAuthHandler.PutBy())
+			oauthGroup.DELETE("/:slug", oAuthHandler.DeleteBy())
+		}
 	}
 }
