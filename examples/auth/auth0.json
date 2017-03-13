@@ -1,5 +1,6 @@
 {
-    "name" : "Example OAuth Server",
+    "name" : "Auth0",
+    "slug": "auth0",
     "oauth_endpoints" : {
         "authorize" : {
             "preserve_host_header" : false,

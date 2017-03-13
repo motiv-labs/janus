@@ -1,0 +1,93 @@
+{
+    "name" : "Local OAuth Server",
+    "slug" : "local",
+    "oauth_endpoints" : {
+        "authorize" : {
+            "preserve_host_header" : false,
+            "listen_path" : "/auth/authorize",
+            "target_url" : "http://localhost:8000/authorize",
+            "strip_listen_path" : true,
+            "append_listen_path" : false,
+            "enable_load_balancing" : false,
+            "target_list" : [],
+            "check_host_against_uptime_tests" : false,
+            "methods" : [ 
+                "ALL"
+            ]
+        },
+        "token" : {
+            "preserve_host_header" : false,
+            "listen_path" : "/auth/token",
+            "target_url" : "http://localhost:8000/token",
+            "strip_listen_path" : true,
+            "append_listen_path" : false,
+            "enable_load_balancing" : false,
+            "target_list" : [],
+            "check_host_against_uptime_tests" : false,
+            "methods" : [ 
+                "GET", 
+                "POST"
+            ]
+        },
+        "info" : {
+            "preserve_host_header" : false,
+            "listen_path" : "/auth/info",
+            "target_url" : "http://localhost:8000/info",
+            "strip_listen_path" : true,
+            "append_listen_path" : false,
+            "enable_load_balancing" : false,
+            "target_list" : [],
+            "check_host_against_uptime_tests" : false,
+            "methods" : [ 
+                "GET"
+            ]
+        }
+    },
+    "oauth_client_endpoints" : {
+        "create" : {
+            "preserve_host_header" : false,
+            "listen_path" : "/auth/clients/create",
+            "target_url" : "http://localhost:8000/clients/create",
+            "strip_listen_path" : true,
+            "append_listen_path" : false,
+            "enable_load_balancing" : false,
+            "target_list" : [],
+            "check_host_against_uptime_tests" : false,
+            "methods" : [ 
+                "POST"
+            ]
+        },
+        "remove" : {
+            "preserve_host_header" : false,
+            "listen_path" : "/auth/clients/remove",
+            "target_url" : "http://localhost:8000/clients/remove",
+            "strip_listen_path" : true,
+            "append_listen_path" : false,
+            "enable_load_balancing" : false,
+            "target_list" : [],
+            "check_host_against_uptime_tests" : false,
+            "methods" : [ 
+                "DELETE"
+            ]
+        }
+    },
+    "allowed_access_types" : [],
+    "allowed_authorize_types" : [],
+    "auth_login_redirect" : "",
+    "secrets" : {
+        "1234" : "aabbccdd"
+    },
+    "cors_meta" : {
+        "domains" : [],
+        "methods" : [],
+        "request_headers" : [],
+        "exposed_headers" : [],
+        "enabled" : false
+    },
+    "token_strategy" : {
+        "name" : "jwt",
+        "settings" : {
+            "secret" : "asdasdasdsd"
+        }
+    }
+}

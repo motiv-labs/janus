@@ -1,0 +1,50 @@
+{
+    "name" : "Example",
+    "slug" : "example",
+    "active" : true,
+    "use_basic_auth" : false,
+    "domain" : "",
+    "proxy" : {
+        "preserve_host_header" : false,
+        "listen_path" : "/example/*",
+        "target_url" : "http://www.mocky.io/v2/58c6c60710000040151b7cad",
+        "strip_listen_path" : false,
+        "append_listen_path" : false,
+        "enable_load_balancing" : false,
+        "target_list" : [],
+        "check_host_against_uptime_tests" : false,
+        "methods" : [ 
+            "ALL"
+        ]
+    },
+    "allowed_ips" : [],
+    "use_oauth2" : false,
+    "oauth_server_slug" : "local",
+    "rate_limit" : {
+        "enabled" : true,
+        "limit" : "10-S"
+    },
+    "cors_meta" : {
+        "domains" : [ 
+            "*"
+        ],
+        "methods" : [ 
+            "GET", 
+            "POST", 
+            "PUT", 
+            "PATCH", 
+            "DELETE"
+        ],
+        "request_headers" : [ 
+            "Origin", 
+            "Authorization", 
+            "Content-Type"
+        ],
+        "exposed_headers" : [ 
+            "X-Debug-Token", 
+            "X-Debug-Token-Link"
+        ],
+        "enabled" : true
+    },
+    "use_compression" : false
+}
