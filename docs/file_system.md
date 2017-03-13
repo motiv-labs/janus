@@ -35,4 +35,13 @@ http -v --json GET http://localhost:8080/posts/1
 
 Done! You just made your first request through the gateway.
 
+### Checking available proxies
+
+You can use the REST API to query (Read Only) all available APIs and Auth Providers. Simply make a request 
+to `/apis`.
+
+```
+http -v GET localhost:8081/apis "Authorization:Bearer yourToken" "Content-Type: application/json"
+```
+
 Do you want to protect your API? Check it out [here](docs/proxy_auth_methods.md) how to do it.
