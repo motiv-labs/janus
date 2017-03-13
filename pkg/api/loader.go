@@ -17,18 +17,16 @@ type Loader struct {
 	register *proxy.Register
 	storage  store.Store
 	authRepo oauth.Repository
-	accessor *middleware.DatabaseAccessor
-	debug    bool
 }
 
 // NewLoader creates a new instance of the api manager
-func NewLoader(register *proxy.Register, storage store.Store, authRepo oauth.Repository, accessor *middleware.DatabaseAccessor, debug bool) *Loader {
-	return &Loader{register, storage, authRepo, accessor, debug}
+func NewLoader(register *proxy.Register, storage store.Store, authRepo oauth.Repository) *Loader {
+	return &Loader{register, storage, authRepo}
 }
 
-// Load loads all api specs from a datasource
-func (m *Loader) Load() {
-	specs := m.getAPISpecs()
+// LoadDefinitions will connect and download ApiDefintions from a Mongo DB instance.
+func (m *Loader) LoadDefinitions(repo APISpecRepository) {
+	specs := m.getAPISpecs(repo)
 	m.RegisterApis(specs)
 }
 
@@ -57,7 +55,7 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 				panic(err)
 			}
 
-			limiterStore, err := m.storage.ToLimiterStore(referenceSpec.ID.String())
+			limiterStore, err := m.storage.ToLimiterStore(referenceSpec.Slug)
 			if err != nil {
 				panic(err)
 			}
@@ -69,7 +67,7 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 		}
 
 		if referenceSpec.CorsMeta.Enabled {
-			handlers = append(handlers, cors.NewMiddleware(referenceSpec.CorsMeta, m.debug).Handler)
+			handlers = append(handlers, cors.NewMiddleware(referenceSpec.CorsMeta, false).Handler)
 		} else {
 			log.Debug("CORS is not enabled")
 		}
@@ -94,13 +92,7 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 }
 
 //getAPISpecs Load application specs from datasource
-func (m *Loader) getAPISpecs() []*Spec {
-	log.Debug("Using App Configuration from Mongo DB")
-	repo, err := NewMongoAppRepository(m.accessor.Session.DB(""))
-	if err != nil {
-		log.Panic(err)
-	}
-
+func (m *Loader) getAPISpecs(repo APISpecRepository) []*Spec {
 	definitions, err := repo.FindAll()
 	if err != nil {
 		log.Panic(err)
@@ -108,24 +100,34 @@ func (m *Loader) getAPISpecs() []*Spec {
 
 	var specs []*Spec
 	for _, definition := range definitions {
-		spec := new(Spec)
-		spec.Definition = definition
-		if definition.UseOauth2 {
-			manager, err := m.getManager(definition.OAuthServerID.Hex())
-			if nil != err {
-				log.WithError(err).Error("OAuth Configuration for this API is incorrect, skipping...")
-				continue
-			}
-			spec.Manager = manager
+		spec, err := m.makeSpec(definition)
+		if nil != err {
+			continue
 		}
+
 		specs = append(specs, spec)
 	}
 
 	return specs
 }
 
-func (m *Loader) getManager(oAuthServerID string) (oauth.Manager, error) {
-	oauthServer, err := m.authRepo.FindByID(oAuthServerID)
+func (m *Loader) makeSpec(definition *Definition) (*Spec, error) {
+	spec := new(Spec)
+	spec.Definition = definition
+	if definition.UseOauth2 {
+		manager, err := m.getManager(definition.OAuthServerSlug)
+		if nil != err {
+			log.WithError(err).Error("OAuth Configuration for this API is incorrect, skipping...")
+			return nil, err
+		}
+		spec.Manager = manager
+	}
+
+	return spec, nil
+}
+
+func (m *Loader) getManager(oAuthServerSlug string) (oauth.Manager, error) {
+	oauthServer, err := m.authRepo.FindBySlug(oAuthServerSlug)
 	if nil != err {
 		return nil, err
 	}
