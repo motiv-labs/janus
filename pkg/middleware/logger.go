@@ -10,12 +10,10 @@ import (
 	"github.com/hellofresh/janus/pkg/response"
 )
 
-type Logger struct {
-	debug bool
-}
+type Logger struct{}
 
-func NewLogger(debug bool) *Logger {
-	return &Logger{debug}
+func NewLogger() *Logger {
+	return &Logger{}
 }
 
 func (m *Logger) Handler(handler http.Handler) http.Handler {
