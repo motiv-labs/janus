@@ -13,4 +13,6 @@ var (
 	ErrBearerMalformed = New(http.StatusBadRequest, "bearer token malformed")
 	// ErrAccessTokenNotAuthorized is used when the access token is not found on the storage
 	ErrAccessTokenNotAuthorized = New(http.StatusUnauthorized, "access token not authorized")
+	// ErrInvalidScheme is used when the access token is not found on the storage
+	ErrInvalidScheme = New(http.StatusBadRequest, "the scheme is not supported")
 )
