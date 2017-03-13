@@ -1,4 +1,4 @@
-package api
+package oauth
 
 import (
 	"encoding/json"
@@ -6,17 +6,19 @@ import (
 	"path/filepath"
 	"strings"
 
+	"net/url"
+
 	log "github.com/Sirupsen/logrus"
 )
 
 // FileSystemRepository represents a mongodb repository
 type FileSystemRepository struct {
-	definitions map[string]*Definition
+	servers map[string]*OAuth
 }
 
 // NewFileSystemRepository creates a mongo country repo
 func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
-	repo := &FileSystemRepository{make(map[string]*Definition)}
+	repo := &FileSystemRepository{make(map[string]*OAuth)}
 	// Grab json files from directory
 	files, err := ioutil.ReadDir(dir)
 	if nil != err {
@@ -46,51 +48,51 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 }
 
 // FindAll fetches all the countries available
-func (r *FileSystemRepository) FindAll() ([]*Definition, error) {
-	var definitions []*Definition
-	for _, definition := range r.definitions {
-		definitions = append(definitions, definition)
+func (r *FileSystemRepository) FindAll() ([]*OAuth, error) {
+	var servers []*OAuth
+	for _, server := range r.servers {
+		servers = append(servers, server)
 	}
 
-	return definitions, nil
+	return servers, nil
 }
 
 // FindBySlug find a country by the iso2code provided
-func (r *FileSystemRepository) FindBySlug(slug string) (*Definition, error) {
-	definition, ok := r.definitions[slug]
+func (r *FileSystemRepository) FindBySlug(slug string) (*OAuth, error) {
+	server, ok := r.servers[slug]
 	if false == ok {
-		return nil, ErrAPIDefinitionNotFound
+		return nil, ErrOauthServerNotFound
 	}
 
-	return definition, nil
-}
-
-// FindByListenPath searches an existing Proxy definition by its listen_path
-func (r *FileSystemRepository) FindByListenPath(path string) (*Definition, error) {
-	for _, definition := range r.definitions {
-		if definition.Proxy.ListenPath == path {
-			return definition, nil
-		}
-	}
-
-	return nil, ErrAPIDefinitionNotFound
+	return server, nil
 }
 
 // Add adds a country to the repository
-func (r *FileSystemRepository) Add(definition *Definition) error {
-	r.definitions[definition.Slug] = definition
+func (r *FileSystemRepository) Add(server *OAuth) error {
+	r.servers[server.Slug] = server
 
 	return nil
 }
 
 // Remove removes a country from the repository
 func (r *FileSystemRepository) Remove(slug string) error {
-	delete(r.definitions, slug)
+	delete(r.servers, slug)
 	return nil
 }
 
-func (r *FileSystemRepository) parseDefinition(apiDef []byte) *Definition {
-	appConfig := &Definition{}
+// FindByTokenURL returns OAuth server records with corresponding token url
+func (r *FileSystemRepository) FindByTokenURL(url url.URL) (*OAuth, error) {
+	for _, server := range r.servers {
+		if server.Endpoints.Token.TargetURL == url.String() {
+			return server, nil
+		}
+	}
+
+	return nil, ErrOauthServerNotFound
+}
+
+func (r *FileSystemRepository) parseDefinition(apiDef []byte) *OAuth {
+	appConfig := &OAuth{}
 	if err := json.Unmarshal(apiDef, appConfig); err != nil {
 		log.Error("[RPC] --> Couldn't unmarshal api configuration: ", err)
 	}
