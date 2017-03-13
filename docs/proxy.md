@@ -11,7 +11,7 @@ Janus listens for traffic on four ports, which by default are:
 
 - [Terminology][proxy-terminology]
 - [Overview][proxy-overview]
-- [Reminder: How to add an API to Kong][proxy-reminder]
+- [Reminder: How to add an API to Janus][proxy-reminder]
 - [Routing capabilities][proxy-routing-capabilities]
     - [Request Host header][proxy-request-host-header]
         - [Using wildcard hostnames][proxy-using-wildcard-hostnames]
@@ -34,7 +34,7 @@ Janus listens for traffic on four ports, which by default are:
 
 [proxy-terminology]: #terminology
 [proxy-overview]: #overview
-[proxy-reminder]: #reminder-how-to-add-an-api-to-kong
+[proxy-reminder]: #reminder-how-to-add-an-api-to-Janus
 [proxy-routing-capabilities]: #routing-capabilities
 [proxy-request-host-header]: #request-host-header
 [proxy-using-wildcard-hostnames]: #using-wildcard-hostnames
@@ -174,7 +174,7 @@ Host: service.com
 
 #### Using wildcard hostnames
 
-To provide flexibility, Kong allows you to specify hostnames with wildcards in the hosts field. Wildcard hostnames allow any matching Host header to satisfy the condition, and thus match a given API.
+To provide flexibility, Janus allows you to specify hostnames with wildcards in the hosts field. Wildcard hostnames allow any matching Host header to satisfy the condition, and thus match a given API.
 
 Wildcard hostnames must contain only one asterisk at the leftmost or rightmost label of the domain. Examples:
 
@@ -204,7 +204,7 @@ Host: service.com
 
 #### The `preserve_host_header` property
 
-When proxying, Janus's default behavior is to set the upstream request's Host header to the hostname of the API's `target_url` property. The `preserve_host_header` field accepts a boolean flag instructing Kong not to do so.
+When proxying, Janus's default behavior is to set the upstream request's Host header to the hostname of the API's `target_url` property. The `preserve_host_header` field accepts a boolean flag instructing Janus not to do so.
 
 For example, when the `preserve_host_header` property is not changed and an API is configured like this:
 
