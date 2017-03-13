@@ -5,7 +5,6 @@ import (
 
 	"github.com/hellofresh/janus/pkg/cors"
 	"github.com/hellofresh/janus/pkg/proxy"
-	"gopkg.in/mgo.v2/bson"
 )
 
 // AccessRequestType is the type for OAuth param `grant_type`
@@ -22,8 +21,8 @@ type Spec struct {
 
 // OAuth holds the configuration for oauth proxies
 type OAuth struct {
-	ID                     bson.ObjectId          `bson:"_id,omitempty" json:"id,omitempty" valid:"required"`
 	Name                   string                 `bson:"name" json:"name" valid:"required"`
+	Slug                   string                 `bson:"slug" json:"slug" valid:"required"`
 	CreatedAt              time.Time              `bson:"created_at" json:"created_at" valid:"-"`
 	UpdatedAt              time.Time              `bson:"updated_at" json:"updated_at" valid:"-"`
 	Endpoints              Endpoints              `bson:"oauth_endpoints" json:"oauth_endpoints"`
