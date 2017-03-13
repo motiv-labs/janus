@@ -7,7 +7,6 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/bshuster-repo/logrus-logstash-hook"
 	"github.com/hellofresh/janus/pkg/config"
-	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/store"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
@@ -15,7 +14,6 @@ import (
 var (
 	err          error
 	globalConfig *config.Specification
-	accessor     *middleware.DatabaseAccessor
 	storage      store.Store
 	statsdClient *statsd.Client
 )
@@ -40,16 +38,6 @@ func init() {
 		Type:            globalConfig.Application.Name,
 		TimestampFormat: time.RFC3339Nano,
 	})
-}
-
-// initializes a DB connection
-func init() {
-	accessor, err = middleware.InitDB(globalConfig.Database.DSN)
-	if err != nil {
-		log.WithError(err).
-			WithField("dsn", globalConfig.Database.DSN).
-			Fatalf("Couldn't connect to the mongodb database")
-	}
 }
 
 // initializes the storage and managers
