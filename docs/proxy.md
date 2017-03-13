@@ -15,9 +15,9 @@ Janus listens for traffic on four ports, which by default are:
 - [Routing capabilities][proxy-routing-capabilities]
     - [Request Host header][proxy-request-host-header]
         - [Using wildcard hostnames][proxy-using-wildcard-hostnames]
-        - [The `preserve_host` property][proxy-preserve-host-property]
+        - [The `preserve_host_header` property][proxy-preserve-host-property]
     - [Request URI][proxy-request-uri]
-        - [The `strip_uri` property][proxy-strip-uri-property]
+        - [The `strip_listen_path` property][proxy-strip-uri-property]
     - [Request HTTP method][proxy-request-http-method]
 - [Routing priorities][proxy-routing-priorities]
 - [Proxying behavior][proxy-proxying-behavior]
@@ -38,9 +38,9 @@ Janus listens for traffic on four ports, which by default are:
 [proxy-routing-capabilities]: #routing-capabilities
 [proxy-request-host-header]: #request-host-header
 [proxy-using-wildcard-hostnames]: #using-wildcard-hostnames
-[proxy-preserve-host-property]: #the-preserve_host-property
+[proxy-preserve-host-property]: #the-preserve_host_header-property
 [proxy-request-uri]: #request-uri
-[proxy-strip-uri-property]: #the-strip_uri-property
+[proxy-strip-uri-property]: #the-strip_listen_path-property
 [proxy-request-http-method]: #request-http-method
 [proxy-routing-priorities]: #routing-priorities
 [proxy-proxying-behavior]: #proxying-behavior
