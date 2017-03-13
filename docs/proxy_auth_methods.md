@@ -2,28 +2,38 @@
 
 When configuring your API you can choose between different authentication methods, these are:
 
-* OAuth 2.0
 * Basic Authentication
+* OAuth 2.0
+* JWT
 
-Let's see how to configure 
-We've tried to desing the API in a way that authentication provider are simple to setup 
+We've tried to desing Janus in a way that authentication provider are simple to setup 
 and completely decoupled from the gateway. You can protect you API endpoints by simply 
 following a few steps:
 
-1. Configure a new authnetication provider
+1. Configure a new authentication provider
 
-You can add a new authentication provider by sending a post request to `/oauth/servers`
-
-```
-http -v POST localhost:8080/oauth/servers "Authorization:Bearer yourToken" "Content-Type: application/json" < examples/oauth_server.json
-
-HTTP/1.1 201 Created
-Location: /oauth/servers/6fe999d3-63d5-4fd4-ba46-d9cd843e9133
-```
+First we need to create an authentication provider. Use your choosen [configuration method](docs/config.md)
+to configure your auth provider.
 
 2. Attaching the oauth server to an API
 
-To attach this auth provider to one of our configured routes. You can do that by setting the
-`oauth_server_id` propertry to use the returned ID of the authentication provider.
+To use the auth configuration we need attach it to one of our configured APIs.
+You can do that by setting the `oauth_server_slug` propertry to use the configured
+`slug` of the authentication provider.
 
-3. Restart the gateway to apply the configurations and done.
+3. Enable the protection on your API
+
+After attaching it to the API now you need to make sure that you enable it. To do this
+you just need to set the property `use_oauth` to `true`.
+
+You can choose between `use_oauth`, `use_basic` or `use_jwt`.
+
+4. Restart the gateway to apply the configurations and done.
+
+5. Query your Auth Servers
+
+If you want to see the available auth providers that you've configured just do:
+
+```
+http -v GET localhost:8081/oauth/servers "Authorization:Bearer yourToken" "Content-Type: application/json"
+```
