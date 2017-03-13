@@ -14,7 +14,7 @@ type StorageTokenManager struct {
 }
 
 // Set a new access token and its session to the storage
-func (o *StorageTokenManager) Set(accessToken string, session session.SessionState, resetTTLTo int64) error {
+func (o *StorageTokenManager) Set(accessToken string, session session.State, resetTTLTo int64) error {
 	value, err := json.Marshal(session)
 	if err != nil {
 		return err
@@ -35,8 +35,8 @@ func (o *StorageTokenManager) Remove(accessToken string) error {
 }
 
 // IsKeyAuthorised checks if the access token is valid
-func (o *StorageTokenManager) IsKeyAuthorised(accessToken string) (session.SessionState, bool) {
-	var newSession session.SessionState
+func (o *StorageTokenManager) IsKeyAuthorised(accessToken string) (session.State, bool) {
+	var newSession session.State
 
 	exists, err := o.Storage.Exists(accessToken)
 	if !exists || err != nil {

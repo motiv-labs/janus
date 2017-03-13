@@ -76,7 +76,7 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err er
 	t.statsClient.TrackRoundTrip(req, timing, statusCodeSuccess)
 
 	if resp.StatusCode < http.StatusMultipleChoices && resp.Body != nil {
-		var newSession session.SessionState
+		var newSession session.State
 
 		//This is useful for the middlewares
 		var bodyBytes []byte
@@ -97,7 +97,7 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err er
 				if err != nil {
 					log.WithError(err).Error("Failed to find OAuth server by token URL", err)
 				} else {
-					newSession.OAuthServerID = oAuthServer.ID
+					newSession.OAuthServerSlug = oAuthServer.Slug
 					log.Debug("Setting body in the oauth storage")
 					manager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
 				}

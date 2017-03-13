@@ -41,9 +41,9 @@ type ManagerType uint8
 
 // Manager holds the methods to handle tokens
 type Manager interface {
-	Set(accessToken string, session session.SessionState, resetTTLTo int64) error
+	Set(accessToken string, session session.State, resetTTLTo int64) error
 	Remove(accessToken string) error
-	IsKeyAuthorised(accessToken string) (session.SessionState, bool)
+	IsKeyAuthorised(accessToken string) (session.State, bool)
 }
 
 type ManagerFactory struct {
