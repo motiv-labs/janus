@@ -1,18 +1,17 @@
-package main
+package web
 
 import (
 	"fmt"
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/response"
 )
 
-func Home(app config.Application) http.HandlerFunc {
+func Home() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		response.JSON(w, http.StatusOK, fmt.Sprintf("Welcome to %s", app.Name))
+		response.JSON(w, http.StatusOK, fmt.Sprintf("Welcome to Janus"))
 	}
 }
 
