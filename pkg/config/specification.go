@@ -34,7 +34,6 @@ type Specification struct {
 	Database    Database
 	Statsd      Statsd
 	Credentials Credentials
-	Application Application
 }
 
 // IsHTTPS checks if you have https enabled
@@ -61,11 +60,6 @@ func (s Statsd) IsEnabled() bool {
 // HasPrefix checks if you have any prefix configured
 func (s Statsd) HasPrefix() bool {
 	return len(s.Prefix) > 0
-}
-
-// Application represents a simple application definition
-type Application struct {
-	Name string `envconfig:"APP_NAME" default:"Janus"`
 }
 
 // Credentials represents the credentials that are going to be
