@@ -14,6 +14,8 @@ type Specification struct {
 	GraceTimeOut        int64  `envconfig:"GRACE_TIMEOUT"`
 	MaxIdleConnsPerHost int    `envconfig:"MAX_IDLE_CONNS_PER_HOST"`
 	InsecureSkipVerify  bool   `envconfig:"INSECURE_SKIP_VERIFY"`
+	UseDBAppConfigs     bool   `envconfig:"USE_DB_APP_CONFIG"`
+
 	// The Storage DSN, this could be `memory` or `redis`
 	StorageDSN string `envconfig:"STORAGE_DSN" default:"memory://localhost"`
 
