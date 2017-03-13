@@ -73,7 +73,7 @@ Just go to the [releases](https://github.com/hellofresh/janus/releases) page and
 
 After you have *janus* up and running we need to setup our first proxy. You can choose between:
 
-* [File System](docs/filesystem.md)
+* [File System](docs/file_system.md)
 * [MongoDB](docs/mongodb.md)
 
 ## Contributing

@@ -44,4 +44,4 @@ to `/apis`.
 http -v GET localhost:8081/apis "Authorization:Bearer yourToken" "Content-Type: application/json"
 ```
 
-Do you want to protect your API? Check it out [here](docs/proxy_auth_methods.md) how to do it.
+Do you want to protect your API? Check it out [here](proxy_auth_methods.md) how to do it.

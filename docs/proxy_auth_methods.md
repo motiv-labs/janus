@@ -12,7 +12,7 @@ following a few steps:
 
 1. Configure a new authentication provider
 
-First we need to create an authentication provider. Use your choosen [configuration method](docs/config.md)
+First we need to create an authentication provider. Use your choosen [configuration method](config.md)
 to configure your auth provider.
 
 2. Attaching the oauth server to an API

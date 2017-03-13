@@ -48,4 +48,4 @@ http -v --json GET http://localhost:8080/posts/1
 
 Done! You just made your first request through the gateway.
 
-Do you want to protect your API? Check it out [here](docs/proxy_auth_methods.md) how to do it.
+Do you want to protect your API? Check it out [here](proxy_auth_methods.md) how to do it.

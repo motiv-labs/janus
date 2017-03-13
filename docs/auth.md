@@ -18,4 +18,3 @@ The username and password are defined in an environmental variable called `ADMIN
 </p>
 
 With this token you can now request the administration endpoints of Janus
-
