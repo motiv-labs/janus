@@ -9,6 +9,7 @@ import (
 // Specification for basic configurations
 type Specification struct {
 	Port                int    `envconfig:"PORT" default:"8080"`
+	APIPort             int    `envconfig:"API_PORT" default:"8081"`
 	Debug               bool   `envconfig:"DEBUG"`
 	LogLevel            string `envconfig:"LOG_LEVEL" default:"info"`
 	GraceTimeOut        int64  `envconfig:"GRACE_TIMEOUT"`
@@ -43,7 +44,7 @@ func (s *Specification) IsHTTPS() bool {
 
 // Database holds the configuration for a database
 type Database struct {
-	DSN string `envconfig:"DATABASE_DSN" required:"true"`
+	DSN string `envconfig:"DATABASE_DSN" default:"file:///etc/janus"`
 }
 
 // Statsd holds the configuration for statsd
