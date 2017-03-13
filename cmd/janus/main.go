@@ -6,8 +6,11 @@ import (
 
 	mgo "gopkg.in/mgo.v2"
 
+	"net/url"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
+	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -24,8 +27,10 @@ func main() {
 	defer statsdClient.Close()
 
 	statsClient := stats.NewStatsClient(statsdClient)
+	dsnURL, err := url.Parse(globalConfig.Database.DSN)
 
-	if globalConfig.UseDBAppConfigs {
+	switch dsnURL.Scheme {
+	case "mongodb":
 		log.Debugf("Trying to connect to %s", globalConfig.Database.DSN)
 		session, err := mgo.Dial(globalConfig.Database.DSN)
 		defer session.Close()
@@ -48,12 +53,20 @@ func main() {
 		if err != nil {
 			log.Panic(err)
 		}
-	} else {
-		log.Debug("Using File base configuration")
-		repo, err = api.NewFileSystemRepository("")
+	case "file":
+		log.Debug("Loading API definitions from file system")
+		repo, err = api.NewFileSystemRepository(dsnURL.Path + "/apis")
 		if err != nil {
 			log.Panic(err)
 		}
+
+		log.Debug("Loading OAuth servers definitions from file system")
+		oAuthServersRepo, err = oauth.NewFileSystemRepository(dsnURL.Path + "/auth")
+		if err != nil {
+			log.Panic(err)
+		}
+	default:
+		log.WithError(errors.ErrInvalidScheme).Error("No Database selected")
 	}
 
 	transport := oauth.NewAwareTransport(statsClient, storage, oAuthServersRepo)
