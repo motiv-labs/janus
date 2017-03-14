@@ -76,7 +76,7 @@ Content-Type: application/json
 Server: Janus/<x.x.x>
 
 {
-    "error": "no API found with those values"
+    "message": "no API found with those values"
 }
 ```
 
