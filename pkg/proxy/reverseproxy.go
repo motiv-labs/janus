@@ -108,7 +108,7 @@ func WithParams(o Params) *Proxy {
 }
 
 func (p *Proxy) Reverse(proxyDefinition *Definition) *httputil.ReverseProxy {
-	target, _ := url.Parse(proxyDefinition.TargetURL)
+	target, _ := url.Parse(proxyDefinition.UpstreamURL)
 	targetQuery := target.RawQuery
 
 	director := func(req *http.Request) {
@@ -116,12 +116,12 @@ func (p *Proxy) Reverse(proxyDefinition *Definition) *httputil.ReverseProxy {
 		req.URL.Host = target.Host
 		path := target.Path
 
-		if proxyDefinition.AppendListenPath {
+		if proxyDefinition.AppendPath {
 			log.Debug("Appending listen path to the target url")
 			path = singleJoiningSlash(target.Path, req.URL.Path)
 		}
 
-		if proxyDefinition.StripListenPath {
+		if proxyDefinition.StripPath {
 			path = singleJoiningSlash(target.Path, req.URL.Path)
 			matcher := router.NewListenPathMatcher()
 			listenPath := matcher.Extract(proxyDefinition.ListenPath)
@@ -137,7 +137,7 @@ func (p *Proxy) Reverse(proxyDefinition *Definition) *httputil.ReverseProxy {
 		req.URL.Path = path
 
 		// This is very important to avoid problems with ssl verification for the HOST header
-		if !proxyDefinition.PreserveHostHeader {
+		if !proxyDefinition.PreserveHost {
 			log.Debug("Preserving the host header")
 			req.Host = target.Host
 		}

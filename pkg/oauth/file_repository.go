@@ -91,7 +91,7 @@ func (r *FileSystemRepository) Remove(name string) error {
 // FindByTokenURL returns OAuth Server records with corresponding token url
 func (r *FileSystemRepository) FindByTokenURL(url url.URL) (*OAuth, error) {
 	for _, server := range r.servers {
-		if server.Endpoints.Token.TargetURL == url.String() {
+		if server.Endpoints.Token.UpstreamURL == url.String() {
 			return server, nil
 		}
 	}
