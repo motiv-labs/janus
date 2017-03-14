@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"net/url"
 
@@ -13,12 +14,13 @@ import (
 
 // FileSystemRepository represents a mongodb repository
 type FileSystemRepository struct {
+	sync.Mutex
 	servers map[string]*OAuth
 }
 
-// NewFileSystemRepository creates a mongo country repo
+// NewFileSystemRepository creates a mongo OAuth Server repo
 func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
-	repo := &FileSystemRepository{make(map[string]*OAuth)}
+	repo := &FileSystemRepository{servers: make(map[string]*OAuth)}
 	// Grab json files from directory
 	files, err := ioutil.ReadDir(dir)
 	if nil != err {
@@ -31,14 +33,14 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 			log.Info("Loading API Specification from ", filePath)
 			appConfigBody, err := ioutil.ReadFile(filePath)
 			if err != nil {
-				log.WithError(err).Error("Couldn't load app configuration file")
+				log.WithError(err).WithField("path", filePath).Error("Couldn't load oauth server definition file")
 				return nil, err
 			}
 
 			definition := repo.parseDefinition(appConfigBody)
 			err = repo.Add(definition)
 			if err != nil {
-				log.WithError(err).Error("Can't add the definition to the repository")
+				log.WithError(err).Error("Can't add the oauth server to the repository")
 				return nil, err
 			}
 		}
@@ -47,7 +49,7 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 	return repo, nil
 }
 
-// FindAll fetches all the countries available
+// FindAll fetches all the OAuth Servers available
 func (r *FileSystemRepository) FindAll() ([]*OAuth, error) {
 	var servers []*OAuth
 	for _, server := range r.servers {
@@ -57,7 +59,7 @@ func (r *FileSystemRepository) FindAll() ([]*OAuth, error) {
 	return servers, nil
 }
 
-// FindBySlug find a country by the iso2code provided
+// FindBySlug find an OAuth Server by the iso2code provided
 func (r *FileSystemRepository) FindBySlug(slug string) (*OAuth, error) {
 	server, ok := r.servers[slug]
 	if false == ok {
@@ -67,20 +69,26 @@ func (r *FileSystemRepository) FindBySlug(slug string) (*OAuth, error) {
 	return server, nil
 }
 
-// Add adds a country to the repository
+// Add adds an OAuth Server to the repository
 func (r *FileSystemRepository) Add(server *OAuth) error {
+	r.Lock()
+	defer r.Unlock()
+
 	r.servers[server.Slug] = server
 
 	return nil
 }
 
-// Remove removes a country from the repository
+// Remove removes an OAuth Server from the repository
 func (r *FileSystemRepository) Remove(slug string) error {
+	r.Lock()
+	defer r.Unlock()
+
 	delete(r.servers, slug)
 	return nil
 }
 
-// FindByTokenURL returns OAuth server records with corresponding token url
+// FindByTokenURL returns OAuth Server records with corresponding token url
 func (r *FileSystemRepository) FindByTokenURL(url url.URL) (*OAuth, error) {
 	for _, server := range r.servers {
 		if server.Endpoints.Token.TargetURL == url.String() {

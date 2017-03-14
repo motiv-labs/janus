@@ -32,12 +32,13 @@ func main() {
 
 	switch dsnURL.Scheme {
 	case "mongodb":
-		log.Debugf("Trying to connect to %s", globalConfig.Database.DSN)
+		log.WithField("dsn", globalConfig.Database.DSN).Debug("Trying to connect to DB")
 		session, err := mgo.Dial(globalConfig.Database.DSN)
-		defer session.Close()
 		if err != nil {
 			log.Panic(err)
 		}
+
+		defer session.Close()
 
 		log.Debug("Connected to mongodb")
 		session.SetMode(mgo.Monotonic, true)
@@ -55,14 +56,17 @@ func main() {
 			log.Panic(err)
 		}
 	case "file":
-		log.Debug("Loading API definitions from file system")
-		repo, err = api.NewFileSystemRepository(dsnURL.Path + "/apis")
+		var apiPath = dsnURL.Path + "/apis"
+		var authPath = dsnURL.Path + "/auth"
+
+		log.WithField("path", apiPath).Debug("Loading API definitions from file system")
+		repo, err = api.NewFileSystemRepository(apiPath)
 		if err != nil {
 			log.Panic(err)
 		}
 
-		log.Debug("Loading OAuth servers definitions from file system")
-		oAuthServersRepo, err = oauth.NewFileSystemRepository(dsnURL.Path + "/auth")
+		log.WithField("path", authPath).Debug("Loading OAuth servers definitions from file system")
+		oAuthServersRepo, err = oauth.NewFileSystemRepository(authPath)
 		if err != nil {
 			log.Panic(err)
 		}

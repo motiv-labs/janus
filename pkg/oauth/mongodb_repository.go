@@ -13,7 +13,7 @@ const (
 	collectionName string = "oauth_servers"
 )
 
-// Repository defines the behaviour of a authentication repo
+// Repository defines the behaviour of a OAuth Server repo
 type Repository interface {
 	FindAll() ([]*OAuth, error)
 	FindBySlug(slug string) (*OAuth, error)
@@ -27,12 +27,12 @@ type MongoRepository struct {
 	session *mgo.Session
 }
 
-// NewMongoRepository creates a mongo country repo
+// NewMongoRepository creates a mongodb OAuth Server repo
 func NewMongoRepository(session *mgo.Session) (*MongoRepository, error) {
 	return &MongoRepository{session}, nil
 }
 
-// FindAll fetches all the countries available
+// FindAll fetches all the OAuth Servers available
 func (r *MongoRepository) FindAll() ([]*OAuth, error) {
 	var result []*OAuth
 	session, coll := r.getSession()
@@ -46,7 +46,7 @@ func (r *MongoRepository) FindAll() ([]*OAuth, error) {
 	return result, nil
 }
 
-// FindBySlug find an oauth server by slug
+// FindBySlug find an OAuth Server by slug
 func (r *MongoRepository) FindBySlug(slug string) (*OAuth, error) {
 	var result *OAuth
 	session, coll := r.getSession()
@@ -57,7 +57,7 @@ func (r *MongoRepository) FindBySlug(slug string) (*OAuth, error) {
 	return result, err
 }
 
-// Add adds a country to the repository
+// Add adds an OAuth Server to the repository
 func (r *MongoRepository) Add(oauth *OAuth) error {
 	session, coll := r.getSession()
 	defer session.Close()
@@ -77,11 +77,11 @@ func (r *MongoRepository) Add(oauth *OAuth) error {
 		return err
 	}
 
-	log.Debugf("Resource %s added", oauth.Name)
+	log.WithField("slug", oauth.Slug).Debug("Resource added")
 	return nil
 }
 
-// Remove removes a country from the repository
+// Remove removes an OAuth Server from the repository
 func (r *MongoRepository) Remove(slug string) error {
 	session, coll := r.getSession()
 	defer session.Close()
@@ -92,11 +92,11 @@ func (r *MongoRepository) Remove(slug string) error {
 		return err
 	}
 
-	log.Debugf("Resource %s removed", slug)
+	log.WithField("slug", slug).Debug("Resource removed")
 	return nil
 }
 
-// FindByTokenURL returns OAuth server records with corresponding token url
+// FindByTokenURL returns OAuth Server records with corresponding token url
 func (r *MongoRepository) FindByTokenURL(url url.URL) (*OAuth, error) {
 	var result *OAuth
 	session, coll := r.getSession()

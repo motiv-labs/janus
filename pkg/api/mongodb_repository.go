@@ -25,12 +25,12 @@ type MongoAPISpecRepository struct {
 	session *mgo.Session
 }
 
-// NewMongoAppRepository creates a mongo country repo
+// NewMongoAppRepository creates a mongo API definition repo
 func NewMongoAppRepository(session *mgo.Session) (*MongoAPISpecRepository, error) {
 	return &MongoAPISpecRepository{session}, nil
 }
 
-// FindAll fetches all the countries available
+// FindAll fetches all the API definitions available
 func (r *MongoAPISpecRepository) FindAll() ([]*Definition, error) {
 	result := []*Definition{}
 	session, coll := r.getSession()
@@ -44,7 +44,7 @@ func (r *MongoAPISpecRepository) FindAll() ([]*Definition, error) {
 	return result, nil
 }
 
-// FindBySlug find a definintion by its slug
+// FindBySlug find an API definition by its slug
 func (r *MongoAPISpecRepository) FindBySlug(slug string) (*Definition, error) {
 	var result *Definition
 	session, coll := r.getSession()
@@ -54,7 +54,7 @@ func (r *MongoAPISpecRepository) FindBySlug(slug string) (*Definition, error) {
 	return result, err
 }
 
-// FindByListenPath searches an existing Proxy definition by its listen_path
+// FindByListenPath searches an existing API definition by its listen_path
 func (r *MongoAPISpecRepository) FindByListenPath(path string) (*Definition, error) {
 	var result *Definition
 	session, coll := r.getSession()
@@ -65,7 +65,7 @@ func (r *MongoAPISpecRepository) FindByListenPath(path string) (*Definition, err
 	return result, err
 }
 
-// Add adds a country to the repository
+// Add adds an API definition to the repository
 func (r *MongoAPISpecRepository) Add(definition *Definition) error {
 	session, coll := r.getSession()
 	defer session.Close()
@@ -89,7 +89,7 @@ func (r *MongoAPISpecRepository) Add(definition *Definition) error {
 	return nil
 }
 
-// Remove removes a country from the repository
+// Remove removes an API definition from the repository
 func (r *MongoAPISpecRepository) Remove(slug string) error {
 	session, coll := r.getSession()
 	defer session.Close()

@@ -6,17 +6,20 @@ import (
 	"path/filepath"
 	"strings"
 
+	"sync"
+
 	log "github.com/Sirupsen/logrus"
 )
 
 // FileSystemRepository represents a mongodb repository
 type FileSystemRepository struct {
+	sync.Mutex
 	definitions map[string]*Definition
 }
 
 // NewFileSystemRepository creates a mongo country repo
 func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
-	repo := &FileSystemRepository{make(map[string]*Definition)}
+	repo := &FileSystemRepository{definitions: make(map[string]*Definition)}
 	// Grab json files from directory
 	files, err := ioutil.ReadDir(dir)
 	if nil != err {
@@ -26,10 +29,10 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 	for _, f := range files {
 		if strings.Contains(f.Name(), ".json") {
 			filePath := filepath.Join(dir, f.Name())
-			log.Info("Loading API Specification from ", filePath)
+			log.WithField("path", filePath).Info("Loading API Specification from file")
 			appConfigBody, err := ioutil.ReadFile(filePath)
 			if err != nil {
-				log.WithError(err).Error("Couldn't load app configuration file")
+				log.WithError(err).WithField("path", filePath).Error("Couldn't load the api definition file")
 				return nil, err
 			}
 
@@ -45,7 +48,7 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 	return repo, nil
 }
 
-// FindAll fetches all the countries available
+// FindAll fetches all the api definitions available
 func (r *FileSystemRepository) FindAll() ([]*Definition, error) {
 	var definitions []*Definition
 	for _, definition := range r.definitions {
@@ -55,7 +58,7 @@ func (r *FileSystemRepository) FindAll() ([]*Definition, error) {
 	return definitions, nil
 }
 
-// FindBySlug find a country by the iso2code provided
+// FindBySlug find an api definition by slug
 func (r *FileSystemRepository) FindBySlug(slug string) (*Definition, error) {
 	definition, ok := r.definitions[slug]
 	if false == ok {
@@ -76,23 +79,30 @@ func (r *FileSystemRepository) FindByListenPath(path string) (*Definition, error
 	return nil, ErrAPIDefinitionNotFound
 }
 
-// Add adds a country to the repository
+// Add adds an api definition to the repository
 func (r *FileSystemRepository) Add(definition *Definition) error {
+	r.Lock()
+	defer r.Unlock()
+
 	r.definitions[definition.Slug] = definition
 
 	return nil
 }
 
-// Remove removes a country from the repository
+// Remove removes an api definition from the repository
 func (r *FileSystemRepository) Remove(slug string) error {
+	r.Lock()
+	defer r.Unlock()
+
 	delete(r.definitions, slug)
+
 	return nil
 }
 
 func (r *FileSystemRepository) parseDefinition(apiDef []byte) *Definition {
 	appConfig := &Definition{}
 	if err := json.Unmarshal(apiDef, appConfig); err != nil {
-		log.Error("[RPC] --> Couldn't unmarshal api configuration: ", err)
+		log.WithError(err).Error("[RPC] --> Couldn't unmarshal api configuration")
 	}
 
 	return appConfig
