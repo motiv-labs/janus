@@ -49,6 +49,13 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 
 	if active {
 		var handlers []router.Constructor
+
+		if len(referenceSpec.Proxy.Hosts) > 0 {
+			handlers = append(handlers, middleware.NewHostMatcher(referenceSpec.Proxy.Hosts).Handler)
+		} else {
+			log.Debug("Host filtering is not enabled")
+		}
+
 		if referenceSpec.RateLimit.Enabled {
 			rate, err := limiter.NewRateFromFormatted(referenceSpec.RateLimit.Limit)
 			if err != nil {
@@ -85,9 +92,9 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 		}
 
 		m.register.Add(proxy.NewRoute(referenceSpec.Proxy, handlers...))
-		log.WithField("listen_path", referenceSpec.Proxy.ListenPath).Debug("API registered")
+		log.WithField("uri", referenceSpec.Proxy.ListenPath).Debug("API registered")
 	} else {
-		log.WithField("listen_path", referenceSpec.Proxy.ListenPath).Error("Listen path is invalid or not active, skipping...")
+		log.WithField("uri", referenceSpec.Proxy.ListenPath).Error("API URI is invalid or not active, skipping...")
 	}
 }
 
