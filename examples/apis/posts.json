@@ -3,12 +3,13 @@
     "active" : true,
     "use_basic_auth" : false,
     "proxy" : {
-        "preserve_host_header" : false,
+        "preserve_host" : false,
         "listen_path" : "/posts/*",
-        "target_url" : "https://jsonplaceholder.typicode.com/posts",
-        "strip_listen_path" : true,
-        "append_listen_path" : false,
+        "upstream_url" : "https://jsonplaceholder.typicode.com/posts",
+        "strip_path" : true,
+        "append_path" : false,
         "enable_load_balancing" : false,
+        "hosts": ["hellofresh.*"],
         "methods" : [ 
             "GET"
         ]

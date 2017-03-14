@@ -3,12 +3,13 @@
     "active" : true,
     "use_basic_auth" : false,
     "proxy" : {
-        "preserve_host_header" : false,
+        "preserve_host" : false,
         "listen_path" : "/example/*",
-        "target_url" : "http://www.mocky.io/v2/58c6c60710000040151b7cad",
-        "strip_listen_path" : false,
-        "append_listen_path" : false,
+        "upstream_url" : "http://www.mocky.io/v2/58c6c60710000040151b7cad",
+        "strip_path" : false,
+        "append_path" : false,
         "enable_load_balancing" : false,
+        "hosts" : [],
         "methods" : [ 
             "ALL"
         ]
