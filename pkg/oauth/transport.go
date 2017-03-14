@@ -97,7 +97,7 @@ func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err er
 				if err != nil {
 					log.WithError(err).Error("Failed to find OAuth server by token URL", err)
 				} else {
-					newSession.OAuthServerSlug = oAuthServer.Slug
+					newSession.OAuthServer = oAuthServer.Name
 					log.Debug("Setting body in the oauth storage")
 					manager.Set(newSession.AccessToken, newSession, newSession.ExpiresIn)
 				}

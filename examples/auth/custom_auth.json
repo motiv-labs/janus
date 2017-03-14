@@ -1,6 +1,5 @@
 {
-    "name" : "Local OAuth Server",
-    "slug" : "local",
+    "name" : "local",
     "oauth_endpoints" : {
         "authorize" : {
             "preserve_host_header" : false,
@@ -9,8 +8,6 @@
             "strip_listen_path" : true,
             "append_listen_path" : false,
             "enable_load_balancing" : false,
-            "target_list" : [],
-            "check_host_against_uptime_tests" : false,
             "methods" : [ 
                 "ALL"
             ]
@@ -22,8 +19,6 @@
             "strip_listen_path" : true,
             "append_listen_path" : false,
             "enable_load_balancing" : false,
-            "target_list" : [],
-            "check_host_against_uptime_tests" : false,
             "methods" : [ 
                 "GET", 
                 "POST"
@@ -36,8 +31,6 @@
             "strip_listen_path" : true,
             "append_listen_path" : false,
             "enable_load_balancing" : false,
-            "target_list" : [],
-            "check_host_against_uptime_tests" : false,
             "methods" : [ 
                 "GET"
             ]
@@ -51,8 +44,6 @@
             "strip_listen_path" : true,
             "append_listen_path" : false,
             "enable_load_balancing" : false,
-            "target_list" : [],
-            "check_host_against_uptime_tests" : false,
             "methods" : [ 
                 "POST"
             ]
@@ -64,8 +55,6 @@
             "strip_listen_path" : true,
             "append_listen_path" : false,
             "enable_load_balancing" : false,
-            "target_list" : [],
-            "check_host_against_uptime_tests" : false,
             "methods" : [ 
                 "DELETE"
             ]

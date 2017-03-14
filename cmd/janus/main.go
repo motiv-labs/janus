@@ -20,7 +20,7 @@ import (
 )
 
 func main() {
-	var repo api.APISpecRepository
+	var repo api.Repository
 	var oAuthServersRepo oauth.Repository
 	var readOnlyAPI bool
 	var err error

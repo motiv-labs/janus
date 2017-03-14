@@ -25,7 +25,7 @@ func NewLoader(register *proxy.Register, storage store.Store, authRepo oauth.Rep
 }
 
 // LoadDefinitions will connect and download ApiDefintions from a Mongo DB instance.
-func (m *Loader) LoadDefinitions(repo APISpecRepository) {
+func (m *Loader) LoadDefinitions(repo Repository) {
 	specs := m.getAPISpecs(repo)
 	m.RegisterApis(specs)
 }
@@ -55,7 +55,7 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 				panic(err)
 			}
 
-			limiterStore, err := m.storage.ToLimiterStore(referenceSpec.Slug)
+			limiterStore, err := m.storage.ToLimiterStore(referenceSpec.Name)
 			if err != nil {
 				panic(err)
 			}
@@ -92,7 +92,7 @@ func (m *Loader) RegisterApi(referenceSpec *Spec) {
 }
 
 //getAPISpecs Load application specs from datasource
-func (m *Loader) getAPISpecs(repo APISpecRepository) []*Spec {
+func (m *Loader) getAPISpecs(repo Repository) []*Spec {
 	definitions, err := repo.FindAll()
 	if err != nil {
 		log.Panic(err)
@@ -127,7 +127,7 @@ func (m *Loader) makeSpec(definition *Definition) (*Spec, error) {
 }
 
 func (m *Loader) getManager(oAuthServerSlug string) (oauth.Manager, error) {
-	oauthServer, err := m.authRepo.FindBySlug(oAuthServerSlug)
+	oauthServer, err := m.authRepo.FindByName(oAuthServerSlug)
 	if nil != err {
 		return nil, err
 	}

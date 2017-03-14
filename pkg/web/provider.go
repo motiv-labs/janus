@@ -21,7 +21,7 @@ type Provider struct {
 	KeyFile  string `description:"SSL certificate"`
 	ReadOnly bool   `description:"Enable read only API"`
 	Cred     config.Credentials
-	APIRepo  api.APISpecRepository
+	APIRepo  api.Repository
 	AuthRepo oauth.Repository
 }
 
@@ -77,12 +77,12 @@ func (p *Provider) loadAPIEndpoints(router router.Router) {
 	group := router.Group("/apis")
 	{
 		group.GET("", handler.Get())
-		group.GET("/:slug", handler.GetBy())
+		group.GET("/:name", handler.GetBy())
 
 		if false == p.ReadOnly {
 			group.POST("", handler.Post())
-			group.PUT("/:slug", handler.PutBy())
-			group.DELETE("/:slug", handler.DeleteBy())
+			group.PUT("/:name", handler.PutBy())
+			group.DELETE("/:name", handler.DeleteBy())
 		}
 	}
 }
@@ -96,12 +96,12 @@ func (p *Provider) loadOAuthEndpoints(router router.Router) {
 	oauthGroup := router.Group("/oauth/servers")
 	{
 		oauthGroup.GET("", oAuthHandler.Get())
-		oauthGroup.GET("/:slug", oAuthHandler.GetBy())
+		oauthGroup.GET("/:name", oAuthHandler.GetBy())
 
 		if false == p.ReadOnly {
 			oauthGroup.POST("", oAuthHandler.Post())
-			oauthGroup.PUT("/:slug", oAuthHandler.PutBy())
-			oauthGroup.DELETE("/:slug", oAuthHandler.DeleteBy())
+			oauthGroup.PUT("/:name", oAuthHandler.PutBy())
+			oauthGroup.DELETE("/:name", oAuthHandler.DeleteBy())
 		}
 	}
 }

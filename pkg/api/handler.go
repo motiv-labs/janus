@@ -12,11 +12,11 @@ import (
 
 // Controller is the api rest controller
 type Controller struct {
-	repo APISpecRepository
+	repo Repository
 }
 
 // NewController creates a new instance of Controller
-func NewController(repo APISpecRepository) *Controller {
+func NewController(repo Repository) *Controller {
 	return &Controller{repo}
 }
 
@@ -33,9 +33,9 @@ func (c *Controller) Get() http.HandlerFunc {
 
 func (c *Controller) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		slug := router.FromContext(r.Context()).ByName("slug")
+		name := router.FromContext(r.Context()).ByName("name")
 
-		data, err := c.repo.FindBySlug(slug)
+		data, err := c.repo.FindByName(name)
 		if data == nil {
 			panic(ErrAPIDefinitionNotFound)
 		}
@@ -52,8 +52,8 @@ func (c *Controller) PutBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
-		slug := router.FromContext(r.Context()).ByName("slug")
-		definition, err := c.repo.FindBySlug(slug)
+		name := router.FromContext(r.Context()).ByName("name")
+		definition, err := c.repo.FindByName(name)
 		if definition == nil {
 			panic(ErrAPIDefinitionNotFound)
 		}
@@ -106,9 +106,9 @@ func (c *Controller) Post() http.HandlerFunc {
 
 func (c *Controller) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		slug := router.FromContext(r.Context()).ByName("slug")
+		name := router.FromContext(r.Context()).ByName("name")
 
-		err := c.repo.Remove(slug)
+		err := c.repo.Remove(name)
 		if err != nil {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}

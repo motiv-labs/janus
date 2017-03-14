@@ -16,7 +16,7 @@ const (
 // Repository defines the behaviour of a OAuth Server repo
 type Repository interface {
 	FindAll() ([]*OAuth, error)
-	FindBySlug(slug string) (*OAuth, error)
+	FindByName(name string) (*OAuth, error)
 	FindByTokenURL(url url.URL) (*OAuth, error)
 	Add(oauth *OAuth) error
 	Remove(id string) error
@@ -46,13 +46,13 @@ func (r *MongoRepository) FindAll() ([]*OAuth, error) {
 	return result, nil
 }
 
-// FindBySlug find an OAuth Server by slug
-func (r *MongoRepository) FindBySlug(slug string) (*OAuth, error) {
+// FindByName find an OAuth Server by name
+func (r *MongoRepository) FindByName(name string) (*OAuth, error) {
 	var result *OAuth
 	session, coll := r.getSession()
 	defer session.Close()
 
-	err := coll.Find(bson.M{"slug": slug}).One(&result)
+	err := coll.Find(bson.M{"name": name}).One(&result)
 
 	return result, err
 }
@@ -71,28 +71,28 @@ func (r *MongoRepository) Add(oauth *OAuth) error {
 		return err
 	}
 
-	_, err = coll.Upsert(bson.M{"slug": oauth.Slug}, oauth)
+	_, err = coll.Upsert(bson.M{"name": oauth.Name}, oauth)
 	if err != nil {
 		log.Errorf("There was an error adding the resource %s", oauth.Name)
 		return err
 	}
 
-	log.WithField("slug", oauth.Slug).Debug("Resource added")
+	log.WithField("name", oauth.Name).Debug("Resource added")
 	return nil
 }
 
 // Remove removes an OAuth Server from the repository
-func (r *MongoRepository) Remove(slug string) error {
+func (r *MongoRepository) Remove(name string) error {
 	session, coll := r.getSession()
 	defer session.Close()
 
-	err := coll.Remove(bson.M{"slug": slug})
+	err := coll.Remove(bson.M{"name": name})
 	if err != nil {
-		log.Errorf("There was an error removing the resource %s", slug)
+		log.Errorf("There was an error removing the resource %s", name)
 		return err
 	}
 
-	log.WithField("slug", slug).Debug("Resource removed")
+	log.WithField("name", name).Debug("Resource removed")
 	return nil
 }
 

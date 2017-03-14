@@ -1,6 +1,5 @@
 {
-    "name" : "Auth0",
-    "slug": "auth0",
+    "name" : "auth0",
     "oauth_endpoints" : {
         "authorize" : {
             "preserve_host_header" : false,
@@ -8,8 +7,6 @@
             "target_url" : "https://example.auth0.com/authorize",
             "strip_listen_path" : true,
             "enable_load_balancing" : false,
-            "target_list" : [],
-            "check_host_against_uptime_tests" : false,
             "methods" : [ 
                 "ALL"
             ]
@@ -20,8 +17,6 @@
             "target_url" : "https://example.auth0.com/oauth/access_token",
             "strip_listen_path" : true,
             "enable_load_balancing" : false,
-            "target_list" : [],
-            "check_host_against_uptime_tests" : false,
             "methods" : [ 
                 "GET", 
                 "POST"
@@ -33,8 +28,6 @@
             "target_url" : "https://example.auth0.com/tokeninfo",
             "strip_listen_path" : true,
             "enable_load_balancing" : false,
-            "target_list" : [],
-            "check_host_against_uptime_tests" : false,
             "methods" : [ 
                 "GET"
             ]
@@ -45,8 +38,6 @@
             "target_url" : "https://example.auth0.com/revoke",
             "strip_listen_path" : true,
             "enable_load_balancing" : false,
-            "target_list" : [],
-            "check_host_against_uptime_tests" : false,
             "methods" : [ 
                 "POST"
             ]
@@ -59,8 +50,6 @@
             "target_url" : "https://example.auth0.com//api/v2/clients",
             "strip_listen_path" : true,
             "enable_load_balancing" : false,
-            "target_list" : [],
-            "check_host_against_uptime_tests" : false,
             "methods" : [ 
                 "POST"
             ]
@@ -71,8 +60,6 @@
             "target_url" : "https://example.auth0.com/api/v2/clients",
             "strip_listen_path" : true,
             "enable_load_balancing" : false,
-            "target_list" : [],
-            "check_host_against_uptime_tests" : false,
             "methods" : [ 
                 "DELETE"
             ]

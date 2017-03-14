@@ -11,27 +11,27 @@ const (
 	collectionName string = "api_specs"
 )
 
-// APISpecRepository defines the behaviour of a country repository
-type APISpecRepository interface {
+// Repository defines the behaviour of a country repository
+type Repository interface {
 	FindAll() ([]*Definition, error)
-	FindBySlug(slug string) (*Definition, error)
+	FindByName(name string) (*Definition, error)
 	FindByListenPath(path string) (*Definition, error)
 	Add(app *Definition) error
-	Remove(slug string) error
+	Remove(name string) error
 }
 
-// MongoAPISpecRepository represents a mongodb repository
-type MongoAPISpecRepository struct {
+// MongoRepository represents a mongodb repository
+type MongoRepository struct {
 	session *mgo.Session
 }
 
 // NewMongoAppRepository creates a mongo API definition repo
-func NewMongoAppRepository(session *mgo.Session) (*MongoAPISpecRepository, error) {
-	return &MongoAPISpecRepository{session}, nil
+func NewMongoAppRepository(session *mgo.Session) (*MongoRepository, error) {
+	return &MongoRepository{session}, nil
 }
 
 // FindAll fetches all the API definitions available
-func (r *MongoAPISpecRepository) FindAll() ([]*Definition, error) {
+func (r *MongoRepository) FindAll() ([]*Definition, error) {
 	result := []*Definition{}
 	session, coll := r.getSession()
 	defer session.Close()
@@ -44,18 +44,18 @@ func (r *MongoAPISpecRepository) FindAll() ([]*Definition, error) {
 	return result, nil
 }
 
-// FindBySlug find an API definition by its slug
-func (r *MongoAPISpecRepository) FindBySlug(slug string) (*Definition, error) {
+// FindByName find an API definition by name
+func (r *MongoRepository) FindByName(name string) (*Definition, error) {
 	var result *Definition
 	session, coll := r.getSession()
 	defer session.Close()
 
-	err := coll.Find(bson.M{"slug": slug}).One(&result)
+	err := coll.Find(bson.M{"name": name}).One(&result)
 	return result, err
 }
 
 // FindByListenPath searches an existing API definition by its listen_path
-func (r *MongoAPISpecRepository) FindByListenPath(path string) (*Definition, error) {
+func (r *MongoRepository) FindByListenPath(path string) (*Definition, error) {
 	var result *Definition
 	session, coll := r.getSession()
 	defer session.Close()
@@ -66,7 +66,7 @@ func (r *MongoAPISpecRepository) FindByListenPath(path string) (*Definition, err
 }
 
 // Add adds an API definition to the repository
-func (r *MongoAPISpecRepository) Add(definition *Definition) error {
+func (r *MongoRepository) Add(definition *Definition) error {
 	session, coll := r.getSession()
 	defer session.Close()
 
@@ -79,32 +79,32 @@ func (r *MongoAPISpecRepository) Add(definition *Definition) error {
 		return err
 	}
 
-	_, err = coll.Upsert(bson.M{"slug": definition.Slug}, definition)
+	_, err = coll.Upsert(bson.M{"name": definition.Name}, definition)
 	if err != nil {
-		log.Errorf("There was an error adding the resource %s", definition.Slug)
+		log.Errorf("There was an error adding the resource %s", definition.Name)
 		return err
 	}
 
-	log.Debugf("Resource %s added", definition.Slug)
+	log.Debugf("Resource %s added", definition.Name)
 	return nil
 }
 
 // Remove removes an API definition from the repository
-func (r *MongoAPISpecRepository) Remove(slug string) error {
+func (r *MongoRepository) Remove(name string) error {
 	session, coll := r.getSession()
 	defer session.Close()
 
-	err := coll.Remove(bson.M{"slug": slug})
+	err := coll.Remove(bson.M{"name": name})
 	if err != nil {
-		log.Errorf("There was an error removing the resource %s", slug)
+		log.Errorf("There was an error removing the resource %s", name)
 		return err
 	}
 
-	log.Debugf("Resource %s removed", slug)
+	log.Debugf("Resource %s removed", name)
 	return nil
 }
 
-func (r *MongoAPISpecRepository) getSession() (*mgo.Session, *mgo.Collection) {
+func (r *MongoRepository) getSession() (*mgo.Session, *mgo.Collection) {
 	session := r.session.Copy()
 	coll := session.DB("").C(collectionName)
 

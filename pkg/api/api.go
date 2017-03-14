@@ -1,8 +1,6 @@
 package api
 
 import (
-	"time"
-
 	"github.com/hellofresh/janus/pkg/cors"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -16,15 +14,11 @@ type Spec struct {
 
 // Definition Represents an API that you want to proxy
 type Definition struct {
-	CreatedAt       time.Time         `bson:"created_at" json:"created_at" valid:"-"`
-	UpdatedAt       time.Time         `bson:"updated_at" json:"updated_at" valid:"-"`
 	Name            string            `bson:"name" json:"name" valid:"required"`
-	Slug            string            `bson:"slug" json:"slug" valid:"required"`
 	Active          bool              `bson:"active" json:"active"`
-	UseBasicAuth    bool              `bson:"use_basic_auth" json:"use_basic_auth"`
-	Domain          string            `bson:"domain" json:"domain"`
 	Proxy           *proxy.Definition `bson:"proxy" json:"proxy" valid:"required"`
 	AllowedIPs      []string          `mapstructure:"allowed_ips" bson:"allowed_ips" json:"allowed_ips"`
+	UseBasicAuth    bool              `bson:"use_basic_auth" json:"use_basic_auth"`
 	UseOauth2       bool              `bson:"use_oauth2" json:"use_oauth2"`
 	OAuthServerSlug string            `bson:"oauth_server_slug" json:"oauth_server_slug"`
 	RateLimit       RateLimitMeta     `bson:"rate_limit" json:"rate_limit" valid:"required"`

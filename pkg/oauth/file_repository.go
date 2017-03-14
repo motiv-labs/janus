@@ -59,9 +59,9 @@ func (r *FileSystemRepository) FindAll() ([]*OAuth, error) {
 	return servers, nil
 }
 
-// FindBySlug find an OAuth Server by the iso2code provided
-func (r *FileSystemRepository) FindBySlug(slug string) (*OAuth, error) {
-	server, ok := r.servers[slug]
+// FindByName find an OAuth Server by name
+func (r *FileSystemRepository) FindByName(name string) (*OAuth, error) {
+	server, ok := r.servers[name]
 	if false == ok {
 		return nil, ErrOauthServerNotFound
 	}
@@ -74,17 +74,17 @@ func (r *FileSystemRepository) Add(server *OAuth) error {
 	r.Lock()
 	defer r.Unlock()
 
-	r.servers[server.Slug] = server
+	r.servers[server.Name] = server
 
 	return nil
 }
 
 // Remove removes an OAuth Server from the repository
-func (r *FileSystemRepository) Remove(slug string) error {
+func (r *FileSystemRepository) Remove(name string) error {
 	r.Lock()
 	defer r.Unlock()
 
-	delete(r.servers, slug)
+	delete(r.servers, name)
 	return nil
 }
 

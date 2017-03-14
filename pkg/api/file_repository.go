@@ -58,9 +58,9 @@ func (r *FileSystemRepository) FindAll() ([]*Definition, error) {
 	return definitions, nil
 }
 
-// FindBySlug find an api definition by slug
-func (r *FileSystemRepository) FindBySlug(slug string) (*Definition, error) {
-	definition, ok := r.definitions[slug]
+// FindByName find an api definition by name
+func (r *FileSystemRepository) FindByName(name string) (*Definition, error) {
+	definition, ok := r.definitions[name]
 	if false == ok {
 		return nil, ErrAPIDefinitionNotFound
 	}
@@ -84,7 +84,7 @@ func (r *FileSystemRepository) Add(definition *Definition) error {
 	r.Lock()
 	defer r.Unlock()
 
-	r.definitions[definition.Slug] = definition
+	r.definitions[definition.Name] = definition
 
 	return nil
 }

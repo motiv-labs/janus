@@ -33,8 +33,8 @@ func (c *Controller) Get() http.HandlerFunc {
 // GetBy gets an oauth server by its id
 func (c *Controller) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		slug := router.FromContext(r.Context()).ByName("slug")
-		data, err := c.repo.FindBySlug(slug)
+		name := router.FromContext(r.Context()).ByName("name")
+		data, err := c.repo.FindByName(name)
 		if data.Name == "" {
 			panic(ErrOauthServerNotFound)
 		}
@@ -51,8 +51,8 @@ func (c *Controller) PutBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
-		slug := router.FromContext(r.Context()).ByName("slug")
-		oauth, err := c.repo.FindBySlug(slug)
+		name := router.FromContext(r.Context()).ByName("name")
+		oauth, err := c.repo.FindByName(name)
 		if oauth.Name == "" {
 			panic(ErrOauthServerNotFound)
 		}

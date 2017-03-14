@@ -1,9 +1,7 @@
 {
-    "name" : "Example",
-    "slug" : "example",
+    "name" : "example",
     "active" : true,
     "use_basic_auth" : false,
-    "domain" : "",
     "proxy" : {
         "preserve_host_header" : false,
         "listen_path" : "/example/*",
@@ -11,8 +9,6 @@
         "strip_listen_path" : false,
         "append_listen_path" : false,
         "enable_load_balancing" : false,
-        "target_list" : [],
-        "check_host_against_uptime_tests" : false,
         "methods" : [ 
             "ALL"
         ]
