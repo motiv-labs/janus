@@ -86,8 +86,9 @@ func main() {
 	})
 	defer p.Close()
 
-	// create router
-	r := router.NewHttpTreeMuxRouter()
+	// create router with a custom not found handler
+	router.DefaultOptions.NotFoundHandler = web.NotFound
+	r := router.NewHttpTreeMuxWithOptions(router.DefaultOptions)
 	r.Use(
 		middleware.NewStats(statsClient).Handler,
 		middleware.NewLogger().Handler,
