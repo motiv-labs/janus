@@ -30,7 +30,7 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 	for _, f := range files {
 		if strings.Contains(f.Name(), ".json") {
 			filePath := filepath.Join(dir, f.Name())
-			log.Info("Loading API Specification from ", filePath)
+			log.WithField("path", filePath).Info("Loading OAuth Server definition from file")
 			appConfigBody, err := ioutil.ReadFile(filePath)
 			if err != nil {
 				log.WithError(err).WithField("path", filePath).Error("Couldn't load oauth server definition file")

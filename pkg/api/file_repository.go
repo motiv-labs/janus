@@ -29,7 +29,7 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 	for _, f := range files {
 		if strings.Contains(f.Name(), ".json") {
 			filePath := filepath.Join(dir, f.Name())
-			log.WithField("path", filePath).Info("Loading API Specification from file")
+			log.WithField("path", filePath).Info("Loading API definition from file")
 			appConfigBody, err := ioutil.ReadFile(filePath)
 			if err != nil {
 				log.WithError(err).WithField("path", filePath).Error("Couldn't load the api definition file")
