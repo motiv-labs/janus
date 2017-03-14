@@ -49,22 +49,38 @@ type HttpTreeMuxRouter struct {
 	chain       alice.Chain
 }
 
-func NewHttpTreeMuxRouter() *HttpTreeMuxRouter {
-	router := httptreemux.New()
+type Options struct {
+	NotFoundHandler           http.HandlerFunc
+	SafeAddRoutesWhileRunning bool
+	RedirectMethodBehavior    map[string]httptreemux.RedirectBehavior
+}
 
-	router.SafeAddRoutesWhileRunning = true
-	// tree mux router uses Redirect301 behavior by default for paths that differs with slash at the end
-	// from registered, that causes problems with some services, e.g. api-v2 OPTIONS /menus/ gives 301 and we
-	// want by-pass it as is, but only for OPTIONS method, that is processed by CORS
-	router.RedirectMethodBehavior = map[string]httptreemux.RedirectBehavior{
+var DefaultOptions = Options{
+	NotFoundHandler:           http.NotFound,
+	SafeAddRoutesWhileRunning: true,
+	RedirectMethodBehavior: map[string]httptreemux.RedirectBehavior{
+		// tree mux router uses Redirect301 behavior by default for paths that differs with slash at the end
+		// from registered, that causes problems with some services, e.g. api-v2 OPTIONS /menus/ gives 301 and we
+		// want by-pass it as is, but only for OPTIONS method, that is processed by CORS
 		http.MethodOptions: httptreemux.UseHandler,
-	}
+	},
+}
+
+func NewHttpTreeMuxWithOptions(options Options) *HttpTreeMuxRouter {
+	router := httptreemux.New()
+	router.NotFoundHandler = options.NotFoundHandler
+	router.SafeAddRoutesWhileRunning = options.SafeAddRoutesWhileRunning
+	router.RedirectMethodBehavior = options.RedirectMethodBehavior
 
 	return &HttpTreeMuxRouter{
 		mux:         router,
 		innerRouter: router.UsingContext(),
 		chain:       alice.New(),
 	}
+}
+
+func NewHttpTreeMuxRouter() *HttpTreeMuxRouter {
+	return NewHttpTreeMuxWithOptions(DefaultOptions)
 }
 
 func (r *HttpTreeMuxRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
