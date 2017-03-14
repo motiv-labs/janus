@@ -15,9 +15,9 @@ Janus listens for traffic on four ports, which by default are:
 - [Routing capabilities][proxy-routing-capabilities]
     - [Request Host header][proxy-request-host-header]
         - [Using wildcard hostnames][proxy-using-wildcard-hostnames]
-        - [The `preserve_host_header` property][proxy-preserve-host-property]
+        - [The `preserve_host` property][proxy-preserve-host-property]
     - [Request URI][proxy-request-uri]
-        - [The `strip_listen_path` property][proxy-strip-uri-property]
+        - [The `strip_path` property][proxy-strip-uri-property]
     - [Request HTTP method][proxy-request-http-method]
 - [Routing priorities][proxy-routing-priorities]
 - [Proxying behavior][proxy-proxying-behavior]
@@ -38,9 +38,9 @@ Janus listens for traffic on four ports, which by default are:
 [proxy-routing-capabilities]: #routing-capabilities
 [proxy-request-host-header]: #request-host-header
 [proxy-using-wildcard-hostnames]: #using-wildcard-hostnames
-[proxy-preserve-host-property]: #the-preserve_host_header-property
+[proxy-preserve-host-property]: #the-preserve_host-property
 [proxy-request-uri]: #request-uri
-[proxy-strip-uri-property]: #the-strip_listen_path-property
+[proxy-strip-uri-property]: #the-strip_path-property
 [proxy-request-http-method]: #request-http-method
 [proxy-routing-priorities]: #routing-priorities
 [proxy-proxying-behavior]: #proxying-behavior
@@ -95,7 +95,7 @@ Let's go through a few examples. Consider an API configured like this:
     "hosts": ["example.com", "service.com"],
     "proxy": {
         "listen_path": "/foo/*",
-        "target_url": "http://my-api.com",
+        "upstream_url": "http://my-api.com",
         "methods": ["GET"]
     }
 }
@@ -202,11 +202,11 @@ Host: service.com
 ```
 [Back to TOC](#table-of-contents)
 
-#### The `preserve_host_header` property
+#### The `preserve_host` property
 
-When proxying, Janus's default behavior is to set the upstream request's Host header to the hostname of the API's `target_url` property. The `preserve_host_header` field accepts a boolean flag instructing Janus not to do so.
+When proxying, Janus's default behavior is to set the upstream request's Host header to the hostname of the API's `upstream_url` property. The `preserve_host` field accepts a boolean flag instructing Janus not to do so.
 
-For example, when the `preserve_host_header` property is not changed and an API is configured like this:
+For example, when the `preserve_host` property is not changed and an API is configured like this:
 
 ```json
 {
@@ -215,7 +215,7 @@ For example, when the `preserve_host_header` property is not changed and an API 
     "hosts": ["service.com"],
     "proxy": {
         "listen_path": "/foo/*",
-        "target_url": "http://my-api.com",
+        "upstream_url": "http://my-api.com",
         "methods": ["GET"]
     }
 }
@@ -228,14 +228,14 @@ GET / HTTP/1.1
 Host: service.com
 ```
 
-Janus would extract the Host header value from the the hostname of the API's `target_url` field, and would send the following request to your upstream service:
+Janus would extract the Host header value from the the hostname of the API's `upstream_url` field, and would send the following request to your upstream service:
 
 ```http
 GET / HTTP/1.1
 Host: my-api.com
 ```
 
-However, by explicitly configuring your API with `preserve_host_header=true`:
+However, by explicitly configuring your API with `preserve_host=true`:
 
 ```json
 {
@@ -244,9 +244,9 @@ However, by explicitly configuring your API with `preserve_host_header=true`:
     "hosts": ["example.com", "service.com"],
     "proxy": {
         "listen_path": "/foo/*",
-        "target_url": "http://my-api.com",
+        "upstream_url": "http://my-api.com",
         "methods": ["GET"],
-        "preserve_host_header": true
+        "preserve_host": true
     }
 }
 ```
@@ -282,7 +282,7 @@ For example, in an API configured like this:
     "slug": "my-api",
     "proxy": {
         "listen_path": "/hello/*",
-        "target_url": "http://my-api.com",
+        "upstream_url": "http://my-api.com",
         "methods": ["GET"],
     }
 }
@@ -315,10 +315,10 @@ This allow you to define two APIs with two URIs: `/service` and
 
 [Back to TOC](#table-of-contents)
 
-##### The `strip_listen_path` property
+##### The `strip_path` property
 
 It may be desirable to specify a URI prefix to match an API, but not
-include it in the upstream request. To do so, use the `strip_listen_path` boolean
+include it in the upstream request. To do so, use the `strip_path` boolean
 property by configuring an API like this:
 
 ```json
@@ -326,9 +326,9 @@ property by configuring an API like this:
     "name": "My API",
     "slug": "my-api",
     "proxy": {
-        "strip_listen_path" : true,
+        "strip_path" : true,
         "listen_path": "/service/*",
-        "target_url": "http://my-api.com",
+        "upstream_url": "http://my-api.com",
         "methods": ["GET"]
     }
 }
@@ -352,19 +352,19 @@ Host: my-api.com
 
 [Back to TOC](#table-of-contents)
 
-##### The `append_listen_path` property
+##### The `append_path` property
 
-You might also want to always append the `listen_path` to the upstream `target_url`. 
-To do so, use the `append_listen_path` boolean property by configuring an API like this:
+You might also want to always append the `listen_path` to the upstream `upstream_url`. 
+To do so, use the `append_path` boolean property by configuring an API like this:
 
 ```json
 {
     "name": "My API",
     "slug": "my-api",
     "proxy": {
-        "append_listen_path" : true,
+        "append_path" : true,
         "listen_path": "/service/*",
-        "target_url": "http://my-api.com/example",
+        "upstream_url": "http://my-api.com/example",
     }
 }
 ```
@@ -402,9 +402,9 @@ routing via `GET` and `HEAD` HTTP methods:
     "name": "My API",
     "slug": "my-api",
     "proxy": {
-        "strip_listen_path" : true,
+        "strip_path" : true,
         "listen_path": "/hello/*",
-        "target_url": "http://my-api.com",
+        "upstream_url": "http://my-api.com",
         "methods": ["GET", "HEAD"]
     }
 }
@@ -450,7 +450,7 @@ For example, two APIs are configured like this:
     "slug": "api-1",
     "proxy": {
         "listen_path": "/",
-        "target_url": "http://my-api.com",
+        "upstream_url": "http://my-api.com",
         "hosts": ["example.com"]
     }
 },
@@ -459,7 +459,7 @@ For example, two APIs are configured like this:
     "slug": "api-2",
     "proxy": {
         "listen_path": "/",
-        "target_url": "http://my-api.com",
+        "upstream_url": "http://my-api.com",
         "hosts": ["example.com"],
         "methods": ["POST"]
     }
