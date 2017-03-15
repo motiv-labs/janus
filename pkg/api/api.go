@@ -20,7 +20,7 @@ type Definition struct {
 	AllowedIPs      []string          `mapstructure:"allowed_ips" bson:"allowed_ips" json:"allowed_ips"`
 	UseBasicAuth    bool              `bson:"use_basic_auth" json:"use_basic_auth"`
 	UseOauth2       bool              `bson:"use_oauth2" json:"use_oauth2"`
-	OAuthServerSlug string            `bson:"oauth_server_slug" json:"oauth_server_slug"`
+	OAuthServerName string            `bson:"oauth_server_name" json:"oauth_server_name"`
 	RateLimit       RateLimitMeta     `bson:"rate_limit" json:"rate_limit" valid:"required"`
 	CorsMeta        cors.Meta         `bson:"cors_meta" json:"cors_meta" valid:"cors_meta"`
 	UseCompression  bool              `bson:"use_compression" json:"use_compression"`

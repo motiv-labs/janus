@@ -122,7 +122,7 @@ func (m *Loader) makeSpec(definition *Definition) (*Spec, error) {
 	spec := new(Spec)
 	spec.Definition = definition
 	if definition.UseOauth2 {
-		manager, err := m.getManager(definition.OAuthServerSlug)
+		manager, err := m.getManager(definition.OAuthServerName)
 		if nil != err {
 			log.WithError(err).Error("OAuth Configuration for this API is incorrect, skipping...")
 			return nil, err
@@ -133,8 +133,8 @@ func (m *Loader) makeSpec(definition *Definition) (*Spec, error) {
 	return spec, nil
 }
 
-func (m *Loader) getManager(oAuthServerSlug string) (oauth.Manager, error) {
-	oauthServer, err := m.authRepo.FindByName(oAuthServerSlug)
+func (m *Loader) getManager(oAuthServerName string) (oauth.Manager, error) {
+	oauthServer, err := m.authRepo.FindByName(oAuthServerName)
 	if nil != err {
 		return nil, err
 	}
