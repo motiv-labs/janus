@@ -16,7 +16,7 @@ type JWTManager struct {
 }
 
 // Set returns nil since when we work with JWT we don't need to store them
-func (m *JWTManager) Set(accessToken string, session session.SessionState, resetTTLTo int64) error {
+func (m *JWTManager) Set(accessToken string, session session.State, resetTTLTo int64) error {
 	return nil
 }
 
@@ -26,8 +26,8 @@ func (m *JWTManager) Remove(accessToken string) error {
 }
 
 // IsKeyAuthorised checks if the access token is valid
-func (m *JWTManager) IsKeyAuthorised(accessToken string) (session.SessionState, bool) {
-	var session session.SessionState
+func (m *JWTManager) IsKeyAuthorised(accessToken string) (session.State, bool) {
+	var session session.State
 
 	// Parse takes the token string and a function for looking up the key. The latter is especially
 	// useful if you use multiple keys for your application.  The standard is to use 'kid' in the

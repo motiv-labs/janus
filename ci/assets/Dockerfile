@@ -4,7 +4,9 @@ FROM golang:1.8-alpine
 ENV APP_DIR /go/src/github.com/hellofresh/janus
 
 # Creates the application directory
-RUN mkdir -p $APP_DIR
+RUN mkdir -p $APP_DIR \
+    && mkdir -p /etc/janus/apis \
+    && mkdir -p /etc/janus/auth
 
 # Add sources.
 COPY . $APP_DIR
@@ -23,4 +25,6 @@ RUN set -ex \
     && rm -rf /go/pkg/*
 
 EXPOSE 8080
+EXPOSE 8081
+
 CMD janus

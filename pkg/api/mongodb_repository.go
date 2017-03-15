@@ -1,40 +1,42 @@
 package api
 
 import (
-	"time"
-
 	log "github.com/Sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
-	"github.com/hellofresh/janus/pkg/errors"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
-// APISpecRepository defines the behaviour of a country repository
-type APISpecRepository interface {
+const (
+	collectionName string = "api_specs"
+)
+
+// Repository defines the behaviour of a country repository
+type Repository interface {
 	FindAll() ([]*Definition, error)
-	FindByID(id string) (*Definition, error)
+	FindByName(name string) (*Definition, error)
+	FindByListenPath(path string) (*Definition, error)
 	Add(app *Definition) error
-	Remove(id string) error
+	Remove(name string) error
 }
 
-// MongoAPISpecRepository represents a mongodb repository
-type MongoAPISpecRepository struct {
-	coll *mgo.Collection
+// MongoRepository represents a mongodb repository
+type MongoRepository struct {
+	session *mgo.Session
 }
 
-// NewMongoAppRepository creates a mongo country repo
-func NewMongoAppRepository(db *mgo.Database) (*MongoAPISpecRepository, error) {
-	coll := db.C("api_specs")
-
-	return &MongoAPISpecRepository{coll}, nil
+// NewMongoAppRepository creates a mongo API definition repo
+func NewMongoAppRepository(session *mgo.Session) (*MongoRepository, error) {
+	return &MongoRepository{session}, nil
 }
 
-// FindAll fetches all the countries available
-func (r *MongoAPISpecRepository) FindAll() ([]*Definition, error) {
+// FindAll fetches all the API definitions available
+func (r *MongoRepository) FindAll() ([]*Definition, error) {
 	result := []*Definition{}
+	session, coll := r.getSession()
+	defer session.Close()
 
-	err := r.coll.Find(nil).All(&result)
+	err := coll.Find(nil).All(&result)
 	if err != nil {
 		return nil, err
 	}
@@ -42,40 +44,31 @@ func (r *MongoAPISpecRepository) FindAll() ([]*Definition, error) {
 	return result, nil
 }
 
-// FindByID find a country by the iso2code provided
-func (r *MongoAPISpecRepository) FindByID(id string) (*Definition, error) {
+// FindByName find an API definition by name
+func (r *MongoRepository) FindByName(name string) (*Definition, error) {
 	var result *Definition
+	session, coll := r.getSession()
+	defer session.Close()
 
-	if false == bson.IsObjectIdHex(id) {
-		return nil, errors.ErrInvalidID
-	}
+	err := coll.Find(bson.M{"name": name}).One(&result)
+	return result, err
+}
 
-	err := r.coll.FindId(bson.ObjectIdHex(id)).One(&result)
+// FindByListenPath searches an existing API definition by its listen_path
+func (r *MongoRepository) FindByListenPath(path string) (*Definition, error) {
+	var result *Definition
+	session, coll := r.getSession()
+	defer session.Close()
+
+	err := coll.Find(bson.M{"proxy.listen_path": path}).One(&result)
 
 	return result, err
 }
 
-// FindByListenPath searches an existing Proxy definition by its listen_path
-func (r *MongoAPISpecRepository) FindByListenPath(path string) (*Definition, error) {
-	var result *Definition
-	err := r.coll.Find(bson.M{"proxy.listen_path": path}).One(&result)
-
-	return result, err
-}
-
-// Add adds a country to the repository
-func (r *MongoAPISpecRepository) Add(definition *Definition) error {
-	var id bson.ObjectId
-
-	if len(definition.ID) == 0 {
-		id = bson.NewObjectId()
-		definition.CreatedAt = time.Now()
-	} else {
-		id = definition.ID
-		definition.UpdatedAt = time.Now()
-	}
-
-	definition.ID = id
+// Add adds an API definition to the repository
+func (r *MongoRepository) Add(definition *Definition) error {
+	session, coll := r.getSession()
+	defer session.Close()
 
 	isValid, err := govalidator.ValidateStruct(definition)
 	if false == isValid && err != nil {
@@ -86,28 +79,34 @@ func (r *MongoAPISpecRepository) Add(definition *Definition) error {
 		return err
 	}
 
-	_, err = r.coll.UpsertId(id, definition)
+	_, err = coll.Upsert(bson.M{"name": definition.Name}, definition)
 	if err != nil {
-		log.Errorf("There was an error adding the resource %s", id)
+		log.Errorf("There was an error adding the resource %s", definition.Name)
 		return err
 	}
 
-	log.Debugf("Resource %s added", id)
+	log.Debugf("Resource %s added", definition.Name)
 	return nil
 }
 
-// Remove removes a country from the repository
-func (r *MongoAPISpecRepository) Remove(id string) error {
-	if false == bson.IsObjectIdHex(id) {
-		return errors.ErrInvalidID
-	}
+// Remove removes an API definition from the repository
+func (r *MongoRepository) Remove(name string) error {
+	session, coll := r.getSession()
+	defer session.Close()
 
-	err := r.coll.RemoveId(bson.ObjectIdHex(id))
+	err := coll.Remove(bson.M{"name": name})
 	if err != nil {
-		log.Errorf("There was an error removing the resource %s", id)
+		log.Errorf("There was an error removing the resource %s", name)
 		return err
 	}
 
-	log.Debugf("Resource %s removed", id)
+	log.Debugf("Resource %s removed", name)
 	return nil
+}
+
+func (r *MongoRepository) getSession() (*mgo.Session, *mgo.Collection) {
+	session := r.session.Copy()
+	coll := session.DB("").C(collectionName)
+
+	return session, coll
 }

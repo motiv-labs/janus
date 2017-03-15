@@ -39,15 +39,14 @@ func JSONUnmarshalRoute(rawRoute []byte) (*Route, error) {
 
 // Definition defines proxy rules for a route
 type Definition struct {
-	PreserveHostHeader          bool     `bson:"preserve_host_header" json:"preserve_host_header"`
-	ListenPath                  string   `bson:"listen_path" json:"listen_path" valid:"required"`
-	TargetURL                   string   `bson:"target_url" json:"target_url" valid:"url,required"`
-	StripListenPath             bool     `bson:"strip_listen_path" json:"strip_listen_path"`
-	AppendListenPath            bool     `bson:"append_listen_path" json:"append_listen_path"`
-	EnableLoadBalancing         bool     `bson:"enable_load_balancing" json:"enable_load_balancing"`
-	TargetList                  []string `bson:"target_list" json:"target_list"`
-	CheckHostAgainstUptimeTests bool     `bson:"check_host_against_uptime_tests" json:"check_host_against_uptime_tests"`
-	Methods                     []string `bson:"methods" json:"methods"`
+	PreserveHost        bool     `bson:"preserve_host" json:"preserve_host"`
+	ListenPath          string   `bson:"listen_path" json:"listen_path" valid:"required"`
+	UpstreamURL         string   `bson:"upstream_url" json:"upstream_url" valid:"url,required"`
+	StripPath           bool     `bson:"strip_path" json:"strip_path"`
+	AppendPath          bool     `bson:"append_path" json:"append_path"`
+	EnableLoadBalancing bool     `bson:"enable_load_balancing" json:"enable_load_balancing"`
+	Methods             []string `bson:"methods" json:"methods"`
+	Hosts               []string `bson:"hosts" json:"hosts"`
 }
 
 // Validate validates proxy data

@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/errors"
-	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/request"
 	"github.com/hellofresh/janus/pkg/response"
 	"github.com/hellofresh/janus/pkg/router"
@@ -12,18 +11,18 @@ import (
 )
 
 // Controller is the api rest controller
-type Controller struct{}
-
-// NewController creates a new instance of Controller
-func NewController() *Controller {
-	return &Controller{}
+type Controller struct {
+	repo Repository
 }
 
-func (u *Controller) Get() http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		repo := u.getRepository(u.getDatabase(r))
+// NewController creates a new instance of Controller
+func NewController(repo Repository) *Controller {
+	return &Controller{repo}
+}
 
-		data, err := repo.FindAll()
+func (c *Controller) Get() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		data, err := c.repo.FindAll()
 		if err != nil {
 			panic(err.Error())
 		}
@@ -32,13 +31,12 @@ func (u *Controller) Get() http.HandlerFunc {
 	}
 }
 
-func (u *Controller) GetBy() http.HandlerFunc {
+func (c *Controller) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id := router.FromContext(r.Context()).ByName("id")
-		repo := u.getRepository(u.getDatabase(r))
+		name := router.FromContext(r.Context()).ByName("name")
 
-		data, err := repo.FindByID(id)
-		if data.ID == "" {
+		data, err := c.repo.FindByName(name)
+		if data == nil {
 			panic(ErrAPIDefinitionNotFound)
 		}
 
@@ -50,14 +48,13 @@ func (u *Controller) GetBy() http.HandlerFunc {
 	}
 }
 
-func (u *Controller) PutBy() http.HandlerFunc {
+func (c *Controller) PutBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
-		id := router.FromContext(r.Context()).ByName("id")
-		repo := u.getRepository(u.getDatabase(r))
-		definition, err := repo.FindByID(id)
-		if definition.ID == "" {
+		name := router.FromContext(r.Context()).ByName("name")
+		definition, err := c.repo.FindByName(name)
+		if definition == nil {
 			panic(ErrAPIDefinitionNotFound)
 		}
 
@@ -70,7 +67,7 @@ func (u *Controller) PutBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		err = repo.Add(definition)
+		err = c.repo.Add(definition)
 		if nil != err {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
@@ -79,9 +76,8 @@ func (u *Controller) PutBy() http.HandlerFunc {
 	}
 }
 
-func (u *Controller) Post() http.HandlerFunc {
+func (c *Controller) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		repo := u.getRepository(u.getDatabase(r))
 		definition := NewDefinition()
 
 		err := request.BindJSON(r, definition)
@@ -89,7 +85,7 @@ func (u *Controller) Post() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		def, err := repo.FindByListenPath(definition.Proxy.ListenPath)
+		def, err := c.repo.FindByListenPath(definition.Proxy.ListenPath)
 		if nil != err && err != mgo.ErrNotFound {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
@@ -98,45 +94,25 @@ func (u *Controller) Post() http.HandlerFunc {
 			panic(errors.ErrProxyExists)
 		}
 
-		err = repo.Add(definition)
+		err = c.repo.Add(definition)
 		if nil != err {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
+		w.Header().Add("Location", "")
 		response.JSON(w, http.StatusCreated, nil)
 	}
 }
 
-func (u *Controller) DeleteBy() http.HandlerFunc {
+func (c *Controller) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		id := router.FromContext(r.Context()).ByName("id")
-		repo := u.getRepository(u.getDatabase(r))
+		name := router.FromContext(r.Context()).ByName("name")
 
-		err := repo.Remove(id)
+		err := c.repo.Remove(name)
 		if err != nil {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
 		response.JSON(w, http.StatusNoContent, nil)
 	}
-}
-
-func (u *Controller) getDatabase(r *http.Request) *mgo.Database {
-	db := r.Context().Value(middleware.ContextKeyDatabase)
-
-	if nil == db {
-		panic(ErrDBContextNotSet)
-	}
-
-	return db.(*mgo.Database)
-}
-
-// GetRepository gets the repository for the handlers
-func (u *Controller) getRepository(db *mgo.Database) *MongoAPISpecRepository {
-	repo, err := NewMongoAppRepository(db)
-	if err != nil {
-		panic(errors.New(http.StatusInternalServerError, err.Error()))
-	}
-
-	return repo
 }

@@ -24,6 +24,7 @@ _testmain.go
 *.prof
 gin-bin
 
+_book
 /vendor
 
 # HF config files

@@ -9,11 +9,12 @@ import (
 // Specification for basic configurations
 type Specification struct {
 	Port                int    `envconfig:"PORT" default:"8080"`
-	Debug               bool   `envconfig:"DEBUG"`
-	LogLevel            string `envconfig:"LOG_LEVEL" default:"info"`
-	GraceTimeOut        int64  `envconfig:"GRACE_TIMEOUT"`
-	MaxIdleConnsPerHost int    `envconfig:"MAX_IDLE_CONNS_PER_HOST"`
-	InsecureSkipVerify  bool   `envconfig:"INSECURE_SKIP_VERIFY"`
+	APIPort             int    `envconfig:"API_PORT" default:"8081"`
+	Debug               bool   `envconfig:"DEBUG" description:"Enable debug mode"`
+	LogLevel            string `envconfig:"LOG_LEVEL" default:"info" description:"Log level"`
+	GraceTimeOut        int64  `envconfig:"GRACE_TIMEOUT" description:"Duration to give active requests a chance to finish during hot-reload"`
+	MaxIdleConnsPerHost int    `envconfig:"MAX_IDLE_CONNS_PER_HOST" description:"If non-zero, controls the maximum idle (keep-alive) to keep per-host."`
+	InsecureSkipVerify  bool   `envconfig:"INSECURE_SKIP_VERIFY" description:"Disable SSL certificate verification"`
 	// The Storage DSN, this could be `memory` or `redis`
 	StorageDSN string `envconfig:"STORAGE_DSN" default:"memory://localhost"`
 
@@ -33,7 +34,6 @@ type Specification struct {
 	Database    Database
 	Statsd      Statsd
 	Credentials Credentials
-	Application Application
 }
 
 // IsHTTPS checks if you have https enabled
@@ -43,7 +43,7 @@ func (s *Specification) IsHTTPS() bool {
 
 // Database holds the configuration for a database
 type Database struct {
-	DSN string `envconfig:"DATABASE_DSN" required:"true"`
+	DSN string `envconfig:"DATABASE_DSN" default:"file:///etc/janus"`
 }
 
 // Statsd holds the configuration for statsd
@@ -60,11 +60,6 @@ func (s Statsd) IsEnabled() bool {
 // HasPrefix checks if you have any prefix configured
 func (s Statsd) HasPrefix() bool {
 	return len(s.Prefix) > 0
-}
-
-// Application represents a simple application definition
-type Application struct {
-	Name string `envconfig:"APP_NAME" default:"Janus"`
 }
 
 // Credentials represents the credentials that are going to be

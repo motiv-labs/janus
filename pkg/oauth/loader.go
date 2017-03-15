@@ -3,7 +3,6 @@ package oauth
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/cors"
-	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/store"
 )
@@ -12,18 +11,16 @@ import (
 type Loader struct {
 	register *proxy.Register
 	storage  store.Store
-	accessor *middleware.DatabaseAccessor
-	debug    bool
 }
 
-// NewLoader creates a new instance of the api manager
-func NewLoader(register *proxy.Register, storage store.Store, accessor *middleware.DatabaseAccessor, debug bool) *Loader {
-	return &Loader{register, storage, accessor, debug}
+// NewLoader creates a new instance of the Loader
+func NewLoader(register *proxy.Register, storage store.Store) *Loader {
+	return &Loader{register, storage}
 }
 
-// Load loads all api specs from a datasource
-func (m *Loader) Load() {
-	oAuthServers := m.getOAuthServers()
+// LoadDefinitions loads all oauth servers from a datasource
+func (m *Loader) LoadDefinitions(repo Repository) {
+	oAuthServers := m.getOAuthServers(repo)
 	m.RegisterOAuthServers(oAuthServers)
 }
 
@@ -33,7 +30,7 @@ func (m *Loader) RegisterOAuthServers(oauthServers []*Spec) {
 
 	for _, oauthServer := range oauthServers {
 		log.Debug("Loading oauth configuration")
-		corsHandler := cors.NewMiddleware(oauthServer.CorsMeta, m.debug).Handler
+		corsHandler := cors.NewMiddleware(oauthServer.CorsMeta, false).Handler
 		//oauth proxy
 		log.Debug("Registering authorize endpoint")
 		authorizeProxy := oauthServer.Endpoints.Authorize
@@ -88,13 +85,7 @@ func (m *Loader) RegisterOAuthServers(oauthServers []*Spec) {
 }
 
 //getOAuthServers Load oauth servers from datasource
-func (m *Loader) getOAuthServers() []*Spec {
-	log.Debug("Using Oauth servers configuration from Mongo DB")
-	repo, err := NewMongoRepository(m.accessor.Session.DB(""))
-	if err != nil {
-		log.Panic(err)
-	}
-
+func (m *Loader) getOAuthServers(repo Repository) []*Spec {
 	oauthServers, err := repo.FindAll()
 	if err != nil {
 		log.Panic(err)
