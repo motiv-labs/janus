@@ -90,11 +90,11 @@ func (r *FileSystemRepository) Add(definition *Definition) error {
 }
 
 // Remove removes an api definition from the repository
-func (r *FileSystemRepository) Remove(slug string) error {
+func (r *FileSystemRepository) Remove(name string) error {
 	r.Lock()
 	defer r.Unlock()
 
-	delete(r.definitions, slug)
+	delete(r.definitions, name)
 
 	return nil
 }

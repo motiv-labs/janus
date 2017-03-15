@@ -18,8 +18,8 @@ to configure your auth provider.
 ## Attaching the oauth server to an API
 
 To use the auth configuration we need attach it to one of our configured APIs.
-You can do that by setting the `oauth_server_slug` propertry to use the configured
-`slug` of the authentication provider.
+You can do that by setting the `oauth_server_name` propertry to use the configured
+`name` of the authentication provider.
 
 ## Enable the protection on your API
 
