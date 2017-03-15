@@ -7,7 +7,6 @@ property by configuring an API like this:
 ```json
 {
     "name": "My API",
-    "slug": "my-api",
     "proxy": {
         "strip_path" : true,
         "listen_path": "/service/*",

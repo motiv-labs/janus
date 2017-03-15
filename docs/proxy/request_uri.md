@@ -10,7 +10,6 @@ For example, in an API configured like this:
 ```json
 {
     "name": "My API",
-    "slug": "my-api",
     "proxy": {
         "listen_path": "/hello/*",
         "upstream_url": "http://my-api.com",

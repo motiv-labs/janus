@@ -102,7 +102,7 @@ func (r *MongoRepository) FindByTokenURL(url url.URL) (*OAuth, error) {
 	session, coll := r.getSession()
 	defer session.Close()
 
-	err := coll.Find(bson.M{"oauth_endpoints.token.target_url": url.String()}).One(&result)
+	err := coll.Find(bson.M{"oauth_endpoints.token.upstream_url": url.String()}).One(&result)
 
 	return result, err
 }

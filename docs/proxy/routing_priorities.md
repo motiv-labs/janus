@@ -14,7 +14,6 @@ For example, two APIs are configured like this:
 ```json
 {
     "name": "API 1",
-    "slug": "api-1",
     "proxy": {
         "listen_path": "/",
         "upstream_url": "http://my-api.com",
@@ -23,7 +22,6 @@ For example, two APIs are configured like this:
 },
 {
     "name": "API 2",
-    "slug": "api-2",
     "proxy": {
         "listen_path": "/",
         "upstream_url": "http://my-api.com",

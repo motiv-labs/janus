@@ -10,7 +10,7 @@ A complete example would look like this:
 
 ```json
 {
-    "slug": "my-api",
+    "name": "My API",
     "hosts": ["*.example.com", "service.com"]
 }
 ```

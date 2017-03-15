@@ -6,7 +6,6 @@ To do so, use the `append_path` boolean property by configuring an API like this
 ```json
 {
     "name": "My API",
-    "slug": "my-api",
     "proxy": {
         "append_path" : true,
         "listen_path": "/service/*",

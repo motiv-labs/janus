@@ -10,7 +10,6 @@ Let's go through a few examples. Consider an API configured like this:
 ```json
 {
     "name": "My API",
-    "slug": "my-api",
     "hosts": ["example.com", "service.com"],
     "proxy": {
         "listen_path": "/foo/*",

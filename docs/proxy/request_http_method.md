@@ -11,7 +11,6 @@ routing via `GET` and `HEAD` HTTP methods:
 ```json
 {
     "name": "My API",
-    "slug": "my-api",
     "proxy": {
         "strip_path" : true,
         "listen_path": "/hello/*",

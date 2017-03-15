@@ -7,7 +7,6 @@ For example, when the `preserve_host` property is not changed and an API is conf
 ```json
 {
     "name": "My API",
-    "slug": "my-api",
     "hosts": ["service.com"],
     "proxy": {
         "listen_path": "/foo/*",
@@ -36,7 +35,6 @@ However, by explicitly configuring your API with `preserve_host=true`:
 ```json
 {
     "name": "My API",
-    "slug": "my-api",
     "hosts": ["example.com", "service.com"],
     "proxy": {
         "listen_path": "/foo/*",
