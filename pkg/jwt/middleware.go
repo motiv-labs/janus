@@ -8,10 +8,12 @@ import (
 	jwt "github.com/dgrijalva/jwt-go"
 )
 
+// Middleware struct contains data and logic required for middleware functionality
 type Middleware struct {
 	Config Config
 }
 
+// NewMiddleware builds and returns new JWT middleware instance
 func NewMiddleware(config Config) *Middleware {
 	return &Middleware{config}
 }

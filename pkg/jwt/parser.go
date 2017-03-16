@@ -13,6 +13,8 @@ type Parser struct {
 	Config Config
 }
 
+// Parse tries to extract and validate token from request.
+// See "Config.TokenLookup" for possible ways to pass token in request.
 func (jp *Parser) Parse(r *http.Request) (*jwt.Token, error) {
 	var token string
 	var err error
