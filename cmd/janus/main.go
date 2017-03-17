@@ -3,9 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-
-	mgo "gopkg.in/mgo.v2"
-
 	"net/url"
 
 	log "github.com/Sirupsen/logrus"
@@ -17,6 +14,7 @@ import (
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/stats"
 	"github.com/hellofresh/janus/pkg/web"
+	mgo "gopkg.in/mgo.v2"
 )
 
 func main() {

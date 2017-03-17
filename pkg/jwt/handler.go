@@ -22,8 +22,8 @@ type Login struct {
 }
 
 // Login can be used by clients to get a jwt token.
-// Payload needs to be json in the form of {"username": "USERNAME", "password": "PASSWORD"}.
-// Reply will be of the form {"token": "TOKEN"}.
+// Payload needs to be json in the form of {"username": "<USERNAME>", "password": "<PASSWORD>"}.
+// Reply will be of the form {"token": "<TOKEN>"}.
 func (j *Handler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var loginVals Login
@@ -71,6 +71,8 @@ func (j *Handler) Login() http.HandlerFunc {
 	}
 }
 
+// Refresh can be used to refresh existing and valid jwt token.
+// Reply will be of the form {"token": "<TOKEN>", "expire": "<DateTime in RFC-3339 format>"}.
 func (j *Handler) Refresh() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		parser := Parser{j.Config}

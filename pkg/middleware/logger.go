@@ -10,12 +10,15 @@ import (
 	"github.com/hellofresh/janus/pkg/response"
 )
 
+// Logger struct contains data and logic required for middleware functionality
 type Logger struct{}
 
+// NewLogger builds and returns new Logger middleware instance
 func NewLogger() *Logger {
 	return &Logger{}
 }
 
+// Handler implementation
 func (m *Logger) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()

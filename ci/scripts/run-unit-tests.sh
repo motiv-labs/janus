@@ -6,7 +6,7 @@ set -e
 # Creates the project source on the gopath
 mkdir -p ${PROJECT_SRC}
 
-# Copies the current srouce code from the app to the gopath
+# Copies the current source code from the app to the gopath
 cp -r . ${PROJECT_SRC}
 
 # Goes to the application on the gopath

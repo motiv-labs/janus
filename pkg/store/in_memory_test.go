@@ -1,59 +1,79 @@
-package store_test
+package store
 
 import (
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/store"
 	"github.com/stretchr/testify/assert"
 	"github.com/ulule/limiter"
 )
 
-var (
-	storage = store.NewInMemoryStore()
+const (
+	testKey   = "key"
+	testValue = "value"
 )
 
-func TestNewInMemoryStore(t *testing.T) {
-	assert.IsType(t, &store.InMemoryStore{}, storage)
-	assert.Implements(t, (*store.Store)(nil), storage)
+func TestInMemoryStore_NewInMemoryStore(t *testing.T) {
+	instance := NewInMemoryStore()
+
+	assert.IsType(t, &InMemoryStore{}, instance)
+	assert.Implements(t, (*Store)(nil), instance)
 }
 
-func TestSetValueToStore(t *testing.T) {
-	err := storage.Set("key", "test", 0)
+func TestInMemoryStore_Set(t *testing.T) {
+	instance := NewInMemoryStore()
+
+	err := instance.Set(testKey, testValue, 0)
 	assert.Nil(t, err)
 }
 
-func TestGetValueFromStore(t *testing.T) {
-	value, err := storage.Get("key")
-	assert.Nil(t, err)
+func TestInMemoryStore_Exists(t *testing.T) {
+	instance := NewInMemoryStore()
 
-	assert.Equal(t, "test", value)
+	instance.Set(testKey, testValue, 0)
+
+	val, err := instance.Exists("foo")
+	assert.Nil(t, err)
+	assert.False(t, val)
+
+	val, err = instance.Exists(testKey)
+	assert.Nil(t, err)
+	assert.True(t, val)
 }
 
-func TestKeyExistis(t *testing.T) {
-	exists, err := storage.Exists("key")
-	assert.Nil(t, err)
+func TestInMemoryStore_Get(t *testing.T) {
+	instance := NewInMemoryStore()
 
-	assert.True(t, exists)
+	instance.Set(testKey, testValue, 0)
+
+	val, err := instance.Get(testKey)
+	assert.Nil(t, err)
+	assert.Equal(t, testValue, val)
+
+	val, err = instance.Get("foo")
+	assert.Nil(t, err)
+	assert.Empty(t, val)
 }
 
-func TestRemove(t *testing.T) {
-	err := storage.Set("keyToRemove", "test", 0)
-	assert.Nil(t, err)
+func TestInMemoryStore_Remove(t *testing.T) {
+	instance := NewInMemoryStore()
 
-	exists, err := storage.Exists("keyToRemove")
-	assert.Nil(t, err)
-	assert.True(t, exists)
+	instance.Set(testKey, testValue, 0)
 
-	err = storage.Remove("keyToRemove")
+	val, err := instance.Get(testKey)
 	assert.Nil(t, err)
+	assert.Equal(t, testValue, val)
 
-	exists, err = storage.Exists("keyToRemove")
+	instance.Remove(testKey)
+
+	val, err = instance.Get(testKey)
 	assert.Nil(t, err)
-	assert.False(t, exists)
+	assert.Empty(t, val)
 }
 
-func TestConvertToLmiterStore(t *testing.T) {
-	limiterStore, err := storage.ToLimiterStore("prefix")
+func TestInMemoryStore_ToLimiterStore(t *testing.T) {
+	instance := NewInMemoryStore()
+
+	limiterStore, err := instance.ToLimiterStore("prefix")
 	assert.Nil(t, err)
 	assert.IsType(t, &limiter.MemoryStore{}, limiterStore)
 }

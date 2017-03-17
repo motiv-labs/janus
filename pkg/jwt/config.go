@@ -49,6 +49,7 @@ type Config struct {
 	MaxRefresh time.Duration
 }
 
+// NewConfig builds and returns new JWT config instance
 func NewConfig(cred config.Credentials) Config {
 	return Config{
 		SigningAlgorithm: "HS256",
