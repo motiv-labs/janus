@@ -40,16 +40,7 @@ type Database struct {
 type Statsd struct {
 	DSN    string `envconfig:"STATSD_DSN"`
 	Prefix string `envconfig:"STATSD_PREFIX"`
-}
-
-// IsEnabled checks if you have metrics enabled
-func (s Statsd) IsEnabled() bool {
-	return len(s.DSN) == 0
-}
-
-// HasPrefix checks if you have any prefix configured
-func (s Statsd) HasPrefix() bool {
-	return len(s.Prefix) > 0
+	IDs    string `envconfig:"STATSD_IDS"`
 }
 
 // Credentials represents the credentials that are going to be

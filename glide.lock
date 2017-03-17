@@ -1,8 +1,8 @@
-hash: dbbdc1cc6c7b6be2fb332b30d6904be2c07619ced24e2787a77ff73f69522473
-updated: 2017-03-19T22:07:29.006237414+01:00
+hash: 6aa09198e67e9c88bf8ac982c5aacafad120e9516df9d32df9a6f54caaec5ff2
+updated: 2017-03-20T16:37:15.601847924+01:00
 imports:
 - name: cloud.google.com/go
-  version: 49b49ef3c9d0c5fec4438c6dda687093f6c1f8d8
+  version: 8790afb57dfdb470da0b1f441c177e6e49ba66e7
   subpackages:
   - compute/metadata
   - internal
@@ -14,7 +14,7 @@ imports:
 - name: github.com/asaskevich/govalidator
   version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
 - name: github.com/bshuster-repo/logrus-logstash-hook
-  version: f93ff950803d2209f053f89fc13e1beea1804791
+  version: c5a17a5eb72da4c560f5e9bfb165180d9e681741
 - name: github.com/dgrijalva/jwt-go
   version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
 - name: github.com/dimfeld/httptreemux
@@ -30,23 +30,25 @@ imports:
   - io
   - proto
 - name: github.com/golang/protobuf
-  version: c9c7427a2a70d2eb3bafa0ab2dc163e45f143317
+  version: 2402d76f3d41f928c7902a765dfc872356dd3aad
   subpackages:
   - proto
 - name: github.com/googleapis/gax-go
   version: 8c5154c0fe5bf18cf649634d4c6df50897a32751
 - name: github.com/gorilla/context
-  version: 1ea25387ff6f684839d82767c1733ff4d4d15d0a
+  version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
   version: 392c28fe23e1c45ddba891b0320b3b5df220beea
 - name: github.com/hellofresh/gcloud-opentracing
   version: 8c9c9c8a60b3d4b71ad91d6aa60cd24399f355a7
+- name: github.com/hellofresh/stats-go
+  version: 47f7950a30e6f2c5f5769dd06856647d58ecf9f6
 - name: github.com/justinas/alice
   version: 052b8b6c18edb9db317af86806d8e00ebaa94160
 - name: github.com/kelseyhightower/envconfig
   version: f611eb38b3875cc3bd991ca91c51d06446afa14c
 - name: github.com/NYTimes/gziphandler
-  version: 3b0c4852c5b9710340f1ed7b1a529c46a3bc0fc1
+  version: 6710af535839f57c687b62c4c23d649f9545d885
 - name: github.com/opentracing/basictracer-go
   version: 1b32af207119a14b1b231d451df3ed04a72efebf
   subpackages:
@@ -67,7 +69,7 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: a6577fac2d73be281a500b310739095313165611
+  version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
   subpackages:
   - context
   - context/ctxhttp
@@ -85,11 +87,11 @@ imports:
   - jws
   - jwt
 - name: golang.org/x/sys
-  version: a408501be4d17ee978c04a618e7a1b22af058c0e
+  version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
   subpackages:
   - unix
 - name: google.golang.org/api
-  version: 650535c7d6201e8304c92f38c922a9a3a36c6877
+  version: 8d00a4951e067948e3677034e525b281e9b82158
   subpackages:
   - cloudtrace/v1
   - gensupport
@@ -109,12 +111,13 @@ imports:
   - internal/urlfetch
   - urlfetch
 - name: google.golang.org/grpc
-  version: 708a7f9f3283aa2d4f6132d287d78683babe55c8
+  version: cdee119ee21e61eef7093a41ba148fa83585e143
   subpackages:
   - codes
   - credentials
   - grpclog
   - internal
+  - keepalive
   - metadata
   - naming
   - peer
@@ -131,7 +134,7 @@ imports:
   - internal/sasl
   - internal/scram
 - name: sourcegraph.com/sourcegraph/appdash
-  version: 0192d7f0689d8577da4d76d3ed947485f51e32e1
+  version: 5b9b70908c0e32b53e17215ee6e9515b02ad08b2
   subpackages:
   - httptrace
   - internal/wire
@@ -143,7 +146,7 @@ imports:
   version: 73f23eafcf67cad684fba328dd545a116ac273ff
 testImports:
 - name: github.com/davecgh/go-spew
-  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
+  version: 2df174808ee097f90d259e432cc04442cf60be21
   subpackages:
   - spew
 - name: github.com/pmezard/go-difflib

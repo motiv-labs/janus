@@ -15,7 +15,7 @@ services:
         API_PORT: '8081'
         DEBUG: 'false'
         LOG_LEVEL: 'info'
-        STATSD_DSN: 'statsd:8125'
+        STATSD_DSN: ''
         STATSD_PREFIX: 'janus-docker.'
         DATABASE_DSN: 'file:///etc/janus'
         # DATABASE_DSN: 'mongodb://mongodb:27017/janus'
@@ -38,11 +38,3 @@ services:
         image: redis
         ports:
             - "6379:6379"
-
-    statsd:
-        image: hopsoft/graphite-statsd
-        ports:
-          - "8010:80"
-          - "2003:2003"
-          - "8125:8125/udp"
-          - "8126:8126"

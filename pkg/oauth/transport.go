@@ -10,32 +10,36 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/session"
-	"github.com/hellofresh/janus/pkg/stats"
 	"github.com/hellofresh/janus/pkg/store"
+	"github.com/hellofresh/stats-go"
+)
+
+const (
+	statsSectionRoundTrip = "round"
 )
 
 // AwareTransport is a RoundTripper that is aware of the access tokens that come back from the
-// authentication server. After retrieving the token, we delagete the storage of it for the
+// authentication server. After retrieving the token, we delegate the storage of it for the
 // oauth manager
 type AwareTransport struct {
-	statsClient *stats.StatsClient
+	statsClient stats.StatsClient
 	storage     store.Store
 	repo        Repository
 }
 
 // NewAwareTransport creates a new instance of AwareTransport
-func NewAwareTransport(statsClient *stats.StatsClient, storage store.Store, repo Repository) *AwareTransport {
+func NewAwareTransport(statsClient stats.StatsClient, storage store.Store, repo Repository) *AwareTransport {
 	return &AwareTransport{statsClient, storage, repo}
 }
 
-// GetRoundTripper returns initialized RoundTripper insnace
+// GetRoundTripper returns initialized RoundTripper instance
 func (at *AwareTransport) GetRoundTripper(roundTripper http.RoundTripper) http.RoundTripper {
 	return &RoundTripper{roundTripper, at.statsClient, at.storage, at.repo}
 }
 
 type RoundTripper struct {
 	RoundTripper http.RoundTripper
-	statsClient  *stats.StatsClient
+	statsClient  stats.StatsClient
 	storage      store.Store
 	repo         Repository
 }
@@ -56,24 +60,28 @@ type RoundTripper struct {
 //
 // RoundTrip must always close the body, including on errors,
 // but depending on the implementation may do so in a separate
-// goroutine even after RoundTrip returns. This means that
+// go-routine even after RoundTrip returns. This means that
 // callers wanting to reuse the body for subsequent requests
 // must arrange to wait for the Close call before doing so.
 //
 // The Request's URL and Header fields must be initialized.
 func (t *RoundTripper) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	timing := t.statsClient.BuildTimeTracker()
-	timing.Start()
+	timing := t.statsClient.BuildTimeTracker().Start()
 	resp, err = t.RoundTripper.RoundTrip(req)
 
 	if nil != err {
-		t.statsClient.TrackRoundTrip(req, timing, false)
-		log.Error("Response from the server was an error", err)
+		t.statsClient.SetHttpRequestSection(statsSectionRoundTrip).
+			TrackRequest(req, timing, false).
+			ResetHttpRequestSection()
+
+		log.WithError(err).Error("Response from the server was an error")
 		return resp, err
 	}
 
 	statusCodeSuccess := resp.StatusCode < http.StatusInternalServerError
-	t.statsClient.TrackRoundTrip(req, timing, statusCodeSuccess)
+	t.statsClient.SetHttpRequestSection(statsSectionRoundTrip).
+		TrackRequest(req, timing, statusCodeSuccess).
+		ResetHttpRequestSection()
 
 	if resp.StatusCode < http.StatusMultipleChoices && resp.Body != nil {
 		var newSession session.State
