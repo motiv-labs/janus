@@ -23,6 +23,7 @@ func main() {
 	var readOnlyAPI bool
 	var err error
 
+	log.Info("Janus starting...")
 	defer statsdClient.Close()
 
 	statsClient := stats.NewStatsClient(statsdClient)
@@ -91,6 +92,7 @@ func main() {
 		middleware.NewStats(statsClient).Handler,
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(web.RecoveryHandler).Handler,
+		middleware.NewOpenTracing().Handler,
 	)
 
 	// create proxy register
@@ -121,6 +123,7 @@ func listenAndServe(handler http.Handler) error {
 		return http.ListenAndServeTLS(address, globalConfig.CertPathTLS, globalConfig.KeyPathTLS, handler)
 	}
 
-	log.Infof("certPathTLS or keyPathTLS not found, defaulting to HTTP")
+	log.Info("Certificate and certificate key were not found, defaulting to HTTP")
+	log.Info("Janus started")
 	return http.ListenAndServe(address, handler)
 }
