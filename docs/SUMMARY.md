@@ -18,3 +18,5 @@
     * [Request HTTP method](proxy/request_http_method.md)
     * [Routing priorities](proxy/routing_priorities.md)
     * [Conclusion](proxy/conclusion.md)
+* Misc
+    * [Monitoring](misc/monitoring.md)

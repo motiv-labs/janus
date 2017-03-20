@@ -1,5 +1,5 @@
 hash: 6aa09198e67e9c88bf8ac982c5aacafad120e9516df9d32df9a6f54caaec5ff2
-updated: 2017-03-20T16:37:15.601847924+01:00
+updated: 2017-03-20T16:41:51.464150829+01:00
 imports:
 - name: cloud.google.com/go
   version: 8790afb57dfdb470da0b1f441c177e6e49ba66e7
@@ -48,7 +48,7 @@ imports:
 - name: github.com/kelseyhightower/envconfig
   version: f611eb38b3875cc3bd991ca91c51d06446afa14c
 - name: github.com/NYTimes/gziphandler
-  version: 6710af535839f57c687b62c4c23d649f9545d885
+  version: 3b0c4852c5b9710340f1ed7b1a529c46a3bc0fc1
 - name: github.com/opentracing/basictracer-go
   version: 1b32af207119a14b1b231d451df3ed04a72efebf
   subpackages:
@@ -69,7 +69,7 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: f2499483f923065a842d38eb4c7f1927e6fc6e6d
+  version: a6577fac2d73be281a500b310739095313165611
   subpackages:
   - context
   - context/ctxhttp
@@ -146,7 +146,7 @@ imports:
   version: 73f23eafcf67cad684fba328dd545a116ac273ff
 testImports:
 - name: github.com/davecgh/go-spew
-  version: 2df174808ee097f90d259e432cc04442cf60be21
+  version: 6d212800a42e8ab5c146b8ace3490ee17e5225f9
   subpackages:
   - spew
 - name: github.com/pmezard/go-difflib

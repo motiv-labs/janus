@@ -25,16 +25,16 @@ func main() {
 
 	log.Info("Janus starting...")
 
-	sectionsTestsMap, err := stats.ParseSectionsTestsMap(globalConfig.Statsd.IDs)
+	sectionsTestsMap, err := stats.ParseSectionsTestsMap(globalConfig.Stats.IDs)
 	if err != nil {
-		log.WithError(err).WithField("config", globalConfig.Statsd.IDs).
-			Warning("Failed to parse stats second level IDs from env")
+		log.WithError(err).WithField("config", globalConfig.Stats.IDs).
+			Error("Failed to parse stats second level IDs from env")
 		sectionsTestsMap = map[stats.PathSection]stats.SectionTestDefinition{}
 	}
-	log.WithField("config", globalConfig.Statsd.IDs).WithField("map", sectionsTestsMap.String()).
+	log.WithField("config", globalConfig.Stats.IDs).WithField("map", sectionsTestsMap.String()).
 		Debug("Setting stats second level IDs")
 
-	statsClient := stats.NewStatsdStatsClient(globalConfig.Statsd.DSN, globalConfig.Statsd.Prefix).
+	statsClient := stats.NewStatsdStatsClient(globalConfig.Stats.DSN, globalConfig.Stats.Prefix).
 		SetHttpMetricCallback(stats.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
 	defer statsClient.Close()
 

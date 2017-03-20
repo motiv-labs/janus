@@ -21,7 +21,7 @@ type Specification struct {
 	BackendFlushInterval time.Duration `envconfig:"BACKEND_FLUSH_INTERVAL" default:"20ms" description:"Flush interval for upgraded Proxy connections"`
 	CloseIdleConnsPeriod time.Duration `envconfig:"CLOSE_IDLE_CONNS_PERIOD" description:"Defines the time period of how often the idle connections maintained by the proxy are closed."`
 	Database             Database
-	Statsd               Statsd
+	Stats                Stats
 	Credentials          Credentials
 	Tracing              Tracing
 }
@@ -36,11 +36,11 @@ type Database struct {
 	DSN string `envconfig:"DATABASE_DSN" default:"file:///etc/janus"`
 }
 
-// Statsd holds the configuration for statsd
-type Statsd struct {
-	DSN    string `envconfig:"STATSD_DSN"`
-	Prefix string `envconfig:"STATSD_PREFIX"`
-	IDs    string `envconfig:"STATSD_IDS"`
+// Stats holds the configuration for stats
+type Stats struct {
+	DSN    string `envconfig:"STATS_DSN"`
+	Prefix string `envconfig:"STATS_PREFIX"`
+	IDs    string `envconfig:"STATS_IDS"`
 }
 
 // Credentials represents the credentials that are going to be

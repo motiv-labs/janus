@@ -49,7 +49,7 @@ This API Gateway offers powerful, yet lightweight features that allows fine gain
 
 ### Docker
 
-The simplest way of installing janus is to run the docker image for it. Just check the [docker-compose.yml](ci/assets/docker-compose.yml)
+The simplest way of installing janus is to run the docker image for it. Just check the [docker-compose.yml](../ci/assets/docker-compose.yml)
 example and then run it.
 
 ```sh
@@ -73,12 +73,12 @@ Just go to the [releases](https://github.com/hellofresh/janus/releases) page and
 
 After you have *janus* up and running we need to setup our first proxy. You can choose between:
 
-* [File System](docs/file_system.md)
-* [MongoDB](docs/mongodb.md)
+* [File System](docs/quick_start/file_system.md)
+* [MongoDB](docs/quick_start/mongodb.md)
 
 ## Contributing
 
-To start contributing, please check [CONTRIBUTING](CONTRIBUTING.md).
+To start contributing, please check [CONTRIBUTING](../CONTRIBUTING.md).
 
 ## Documentation
 
