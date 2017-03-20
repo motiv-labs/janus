@@ -85,6 +85,7 @@ groups:
   jobs:
   - create-release
   - live-deployment
+  - increment-patch-version
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Jobs
@@ -270,3 +271,18 @@ jobs:
       params:
         channel: {{slack_channel}}
         text: {{slack_live_success_text}}
+
+# Increament Patch Version
+#-----------------------------------------------------------------------------------------------------------------------
+- name: increment-patch-version
+  serial: true
+  plan:
+
+  # Trigger a deployment to staging after build
+  - get: release
+    passed: [live-deployment]
+
+  # Bump the version of the release
+  - put: version
+    params:
+      bump: patch
