@@ -35,6 +35,7 @@ func (p *Provider) Provide() error {
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(RecoveryHandler).Handler,
 		gziphandler.GzipHandler,
+		middleware.NewOpenTracing().Handler,
 	)
 
 	// create endpoints
@@ -59,12 +60,13 @@ func (p *Provider) Provide() error {
 
 func (p *Provider) listenAndServe(handler http.Handler) error {
 	address := fmt.Sprintf(":%v", p.Port)
-	log.Infof("Listening on %v", address)
+	log.WithField("address", address).Info("Listening on")
+	log.Info("Janus Admin API started")
 	if len(p.CertFile) > 0 && len(p.KeyFile) > 0 {
 		return http.ListenAndServeTLS(address, p.CertFile, p.KeyFile, handler)
 	}
 
-	log.Infof("certPathTLS or keyPathTLS not found, defaulting to HTTP")
+	log.Info("Certificate and certificate key were not found, defaulting to HTTP")
 	return http.ListenAndServe(address, handler)
 }
 

@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/errors"
+	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/request"
 	"github.com/hellofresh/janus/pkg/response"
 	"github.com/hellofresh/janus/pkg/router"
@@ -22,7 +23,10 @@ func NewController(repo Repository) *Controller {
 
 func (c *Controller) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		span := opentracing.FromContext(r.Context(), "datastore.FindAll")
 		data, err := c.repo.FindAll()
+		span.Finish()
+
 		if err != nil {
 			panic(err.Error())
 		}
@@ -34,8 +38,10 @@ func (c *Controller) Get() http.HandlerFunc {
 func (c *Controller) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.FromContext(r.Context()).ByName("name")
-
+		span := opentracing.FromContext(r.Context(), "datastore.FindByName")
 		data, err := c.repo.FindByName(name)
+		span.Finish()
+
 		if data == nil {
 			panic(ErrAPIDefinitionNotFound)
 		}
@@ -53,7 +59,10 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		var err error
 
 		name := router.FromContext(r.Context()).ByName("name")
+		span := opentracing.FromContext(r.Context(), "datastore.FindByName")
 		definition, err := c.repo.FindByName(name)
+		span.Finish()
+
 		if definition == nil {
 			panic(ErrAPIDefinitionNotFound)
 		}
@@ -67,7 +76,10 @@ func (c *Controller) PutBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
+		span = opentracing.FromContext(r.Context(), "datastore.Add")
 		err = c.repo.Add(definition)
+		span.Finish()
+
 		if nil != err {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
@@ -85,7 +97,10 @@ func (c *Controller) Post() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
+		span := opentracing.FromContext(r.Context(), "datastore.FindByListenPath")
 		def, err := c.repo.FindByListenPath(definition.Proxy.ListenPath)
+		span.Finish()
+
 		if nil != err && err != mgo.ErrNotFound {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
@@ -94,7 +109,10 @@ func (c *Controller) Post() http.HandlerFunc {
 			panic(errors.ErrProxyExists)
 		}
 
+		span = opentracing.FromContext(r.Context(), "datastore.Add")
 		err = c.repo.Add(definition)
+		span.Finish()
+
 		if nil != err {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
@@ -108,7 +126,10 @@ func (c *Controller) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.FromContext(r.Context()).ByName("name")
 
+		span := opentracing.FromContext(r.Context(), "datastore.Remove")
 		err := c.repo.Remove(name)
+		span.Finish()
+
 		if err != nil {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}

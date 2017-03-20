@@ -7,7 +7,9 @@ import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/bshuster-repo/logrus-logstash-hook"
 	"github.com/hellofresh/janus/pkg/config"
+	tracerfactory "github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/store"
+	opentracing "github.com/opentracing/opentracing-go"
 	statsd "gopkg.in/alexcesaro/statsd.v2"
 )
 
@@ -38,6 +40,17 @@ func init() {
 		Type:            "Janus",
 		TimestampFormat: time.RFC3339Nano,
 	})
+}
+
+// initializes the
+func init() {
+	log.Debug("initializing Open Tracing")
+	tracer, err := tracerfactory.Build(globalConfig.Tracing)
+	if err != nil {
+		log.WithError(err).Panic("Could not build a tracer for open tracing")
+	}
+
+	opentracing.InitGlobalTracer(tracer)
 }
 
 // initializes the storage and managers
