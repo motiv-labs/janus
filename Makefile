@@ -24,7 +24,7 @@ all: clean deps build
 
 deps:
 	@echo "$(OK_COLOR)==> Installing glide dependencies$(NO_COLOR)"
-	@curl https://glide.sh/get | sh
+	@go get -u github.com/Masterminds/glide
 	@glide install
 
 build:
