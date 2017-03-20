@@ -56,9 +56,10 @@ func Build(config config.Tracing) (opentracing.Tracer, error) {
 		}
 
 		return server.GetTracer(), nil
+	} else {
+		log.Debug("Not using a tracer as tracing system")
+		return &opentracing.NoopTracer{}, nil
 	}
-
-	return nil, nil
 }
 
 // FromContext creates a span from a context that contains a parent span
