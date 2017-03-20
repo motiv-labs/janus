@@ -24,9 +24,7 @@ func NewController(repo Repository) *Controller {
 func (c *Controller) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		span := opentracing.FromContext(r.Context(), "datastore.FindAll")
-
 		data, err := c.repo.FindAll()
-
 		span.Finish()
 
 		if err != nil {
