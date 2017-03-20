@@ -7,14 +7,14 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/response"
-	"github.com/hellofresh/janus/pkg/stats"
+	"github.com/hellofresh/stats-go"
 )
 
 type Stats struct {
-	statsClient *stats.StatsClient
+	statsClient stats.StatsClient
 }
 
-func NewStats(statsClient *stats.StatsClient) *Stats {
+func NewStats(statsClient stats.StatsClient) *Stats {
 	return &Stats{statsClient}
 }
 
@@ -40,8 +40,7 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 			},
 		}
 
-		timing := m.statsClient.BuildTimeTracker()
-		timing.Start()
+		timing := m.statsClient.BuildTimeTracker().Start()
 
 		// reverse proxy replaces original request with target request, so keep required fields of the original one
 		originalURL := &url.URL{}

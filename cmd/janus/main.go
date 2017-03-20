@@ -12,8 +12,8 @@ import (
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
-	"github.com/hellofresh/janus/pkg/stats"
 	"github.com/hellofresh/janus/pkg/web"
+	"github.com/hellofresh/stats-go"
 	mgo "gopkg.in/mgo.v2"
 )
 
@@ -24,11 +24,21 @@ func main() {
 	var err error
 
 	log.Info("Janus starting...")
-	defer statsdClient.Close()
 
-	statsClient := stats.NewStatsClient(statsdClient)
+	sectionsTestsMap, err := stats.ParseSectionsTestsMap(globalConfig.Stats.IDs)
+	if err != nil {
+		log.WithError(err).WithField("config", globalConfig.Stats.IDs).
+			Error("Failed to parse stats second level IDs from env")
+		sectionsTestsMap = map[stats.PathSection]stats.SectionTestDefinition{}
+	}
+	log.WithField("config", globalConfig.Stats.IDs).WithField("map", sectionsTestsMap.String()).
+		Debug("Setting stats second level IDs")
+
+	statsClient := stats.NewStatsdStatsClient(globalConfig.Stats.DSN, globalConfig.Stats.Prefix).
+		SetHttpMetricCallback(stats.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
+	defer statsClient.Close()
+
 	dsnURL, err := url.Parse(globalConfig.Database.DSN)
-
 	switch dsnURL.Scheme {
 	case "mongodb":
 		log.WithField("dsn", globalConfig.Database.DSN).Debug("Trying to connect to DB")
