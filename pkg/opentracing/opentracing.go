@@ -36,23 +36,24 @@ func Build(config config.Tracing) (opentracing.Tracer, error) {
 
 		return tracer, nil
 	} else if config.IsAppdashEnabled() {
-		server, err := appdash.NewServer(config.AppdashTracing.DSN, config.AppdashTracing.URL)
+		server := appdash.NewServer(config.AppdashTracing.DSN, config.AppdashTracing.URL)
+		err := server.Listen()
 		if err != nil {
 			return nil, err
 		}
-
-		server.Listen()
 		return server.GetTracer(), nil
 	}
 
 	return nil, nil
 }
 
+// FromContext creates a span from a context that contains a parent span
 func FromContext(ctx context.Context, name string) opentracing.Span {
 	parentSpan := ctx.Value(CtxSpanID).(opentracing.Span)
 	return opentracing.StartSpan(name, opentracing.ChildOf(parentSpan.Context()))
 }
 
+// ToContext sets a span to a context
 func ToContext(r *http.Request, span opentracing.Span) *http.Request {
 	return r.WithContext(context.WithValue(r.Context(), CtxSpanID, span))
 }
