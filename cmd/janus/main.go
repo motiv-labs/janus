@@ -118,12 +118,12 @@ func main() {
 
 func listenAndServe(handler http.Handler) error {
 	address := fmt.Sprintf(":%v", globalConfig.Port)
-	log.Infof("Listening on %v", address)
+	log.WithField("address", address).Info("Listening on")
+	log.Info("Janus started")
 	if globalConfig.IsHTTPS() {
 		return http.ListenAndServeTLS(address, globalConfig.CertPathTLS, globalConfig.KeyPathTLS, handler)
 	}
 
 	log.Info("Certificate and certificate key were not found, defaulting to HTTP")
-	log.Info("Janus started")
 	return http.ListenAndServe(address, handler)
 }
