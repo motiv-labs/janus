@@ -1,10 +1,10 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 
 	log "github.com/Sirupsen/logrus"
+	base "github.com/hellofresh/janus/pkg/opentracing"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 
@@ -40,9 +40,6 @@ func (h *OpenTracing) Handler(handler http.Handler) http.Handler {
 		span.SetTag("peer.address", r.RemoteAddr)
 		span.SetTag("span.kind", "server")
 
-		ctx := context.WithValue(r.Context(), "trace.span", span)
-		r = r.WithContext(ctx)
-
 		err = span.Tracer().Inject(
 			span.Context(),
 			opentracing.HTTPHeaders,
@@ -51,6 +48,6 @@ func (h *OpenTracing) Handler(handler http.Handler) http.Handler {
 			log.WithError(err).Error("Could not inject span context into header")
 		}
 
-		handler.ServeHTTP(w, r)
+		handler.ServeHTTP(w, base.ToContext(r, span))
 	})
 }
