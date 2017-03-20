@@ -82,7 +82,7 @@ type Tracing struct {
 
 // IsGoogleCloudEnabled checks if google cloud is enabled
 func (t Tracing) IsGoogleCloudEnabled() bool {
-	return len(t.GoogleCloudTracing.Email) > 0 && len(t.GoogleCloudTracing.PrivateKey) > 0 && len(t.GoogleCloudTracing.PrivateKeyID) > 0
+	return len(t.GoogleCloudTracing.Email) > 0 && len(t.GoogleCloudTracing.PrivateKey) > 0 && len(t.GoogleCloudTracing.PrivateKeyID) > 0 && len(t.GoogleCloudTracing.ProjectID) > 0
 }
 
 // IsAppdashEnabled checks if appdash is enabled
