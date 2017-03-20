@@ -71,7 +71,7 @@ type GoogleCloudTracing struct {
 // AppdashTracing holds the Appdash tracing configuration
 type AppdashTracing struct {
 	DSN string `envconfig:"TRACING_APPDASH_DSN"`
-	URL string `envconfig:"TRACING_APPDASH_URL" default:"http://localhost:8700"`
+	URL string `envconfig:"TRACING_APPDASH_URL"`
 }
 
 // Tracing represents the distributed tracing configuration
