@@ -37,6 +37,7 @@ integrating an API gateway is a faster, more secure route than writing your own 
 This API Gateway offers powerful, yet lightweight features that allows fine gained control over your API ecosystem.
 
 * No dependency hell, single binary made with go
+* [OpenTracing](http://opentracing.io/) support for Distributed tracing (Supports Google Cloud Platform, Zipkin and Appdash)
 * HTTP/2 support
 * REST API, full programatic access to the internals makes it easy to manage your API users, keys and API Configuration from within your systems
 * Rate Limiting, easily rate limit your API users, rate limiting is granular and can be applied on a per-key basis
@@ -73,8 +74,8 @@ Just go to the [releases](https://github.com/hellofresh/janus/releases) page and
 
 After you have *janus* up and running we need to setup our first proxy. You can choose between:
 
-* [File System](docs/file_system.md)
-* [MongoDB](docs/mongodb.md)
+* [File System](https://hellofresh.gitbooks.io/janus/quick_start/file_system.html)
+* [MongoDB](https://hellofresh.gitbooks.io/janus/quick_start/mongodb.html)
 
 ## Contributing
 
@@ -82,5 +83,6 @@ To start contributing, please check [CONTRIBUTING](CONTRIBUTING.md).
 
 ## Documentation
 
-* Janus Docs: https://godoc.org/github.com/hellofresh/janus
+* Janus Docs: https://hellofresh.gitbooks.io/janus
+* Janus Go Docs: https://godoc.org/github.com/hellofresh/janus
 * Go lang: https://golang.org/
