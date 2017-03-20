@@ -17,21 +17,16 @@ import (
 // Server represents a new appdash server (local or remote)
 type Server struct {
 	collectorDSN    string
-	AppdashHTTPAddr string
+	appdashHTTPAddr string
 }
 
 // NewServer creates a new instance of Server
 func NewServer(collectorDSN string, appdashHTTPAddr string) *Server {
-	return &Server{collectorDSN: collectorDSN, AppdashHTTPAddr: appdashHTTPAddr}
+	return &Server{collectorDSN: collectorDSN, appdashHTTPAddr: appdashHTTPAddr}
 }
 
 // Listen starts the appdash server collector and UI
 func (s *Server) Listen() error {
-	if s.AppdashHTTPAddr == "" {
-		log.Info("Appdash is on remote mode")
-		return nil
-	}
-
 	memStore := appdash.NewMemoryStore()
 	store := &appdash.RecentStore{
 		MinEvictAge: 20 * time.Second,
@@ -39,7 +34,7 @@ func (s *Server) Listen() error {
 	}
 
 	s.listenCollector(s.collectorDSN, store)
-	s.listenWebUI(s.collectorDSN, store, memStore)
+	s.listenWebUI(s.appdashHTTPAddr, store, memStore)
 
 	return nil
 }

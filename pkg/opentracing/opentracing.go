@@ -20,6 +20,8 @@ const (
 // Build a tracer based on the configuration provided
 func Build(config config.Tracing) (opentracing.Tracer, error) {
 	if config.IsGoogleCloudEnabled() {
+		log.Debug("Using google cloud platform (stackdriver trace) as tracing system")
+
 		tracer, err := gcloudtracer.NewTracer(
 			context.Background(),
 			gcloudtracer.WithLogger(log.StandardLogger()),
@@ -37,10 +39,22 @@ func Build(config config.Tracing) (opentracing.Tracer, error) {
 		return tracer, nil
 	} else if config.IsAppdashEnabled() {
 		server := appdash.NewServer(config.AppdashTracing.DSN, config.AppdashTracing.URL)
-		err := server.Listen()
-		if err != nil {
-			return nil, err
+
+		appdashFields := log.WithFields(log.Fields{
+			"appdash_dsn":    config.AppdashTracing.DSN,
+			"appdash_web_ui": config.AppdashTracing.URL,
+		})
+
+		if config.AppdashTracing.URL != "" {
+			appdashFields.Debug("Using local appdash server as tracing system")
+			err := server.Listen()
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			appdashFields.Debug("Using remote appdash server as tracing system")
 		}
+
 		return server.GetTracer(), nil
 	}
 
