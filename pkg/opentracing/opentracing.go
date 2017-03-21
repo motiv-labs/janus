@@ -64,11 +64,11 @@ func Build(config config.Tracing) (opentracing.Tracer, error) {
 
 // FromContext creates a span from a context that contains a parent span
 func FromContext(ctx context.Context, name string) opentracing.Span {
-	parentSpan := ctx.Value(CtxSpanID).(opentracing.Span)
-	return opentracing.StartSpan(name, opentracing.ChildOf(parentSpan.Context()))
+	span, _ := opentracing.StartSpanFromContext(ctx, name)
+	return span
 }
 
 // ToContext sets a span to a context
 func ToContext(r *http.Request, span opentracing.Span) *http.Request {
-	return r.WithContext(context.WithValue(r.Context(), CtxSpanID, span))
+	return r.WithContext(opentracing.ContextWithSpan(r.Context(), span))
 }
