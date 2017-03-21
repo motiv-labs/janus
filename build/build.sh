@@ -11,7 +11,7 @@ OS_ARCH_ARG=(386 amd64)
 for OS in ${OS_PLATFORM_ARG[@]}; do
   for ARCH in ${OS_ARCH_ARG[@]}; do
     echo "Building binary for $OS/$ARCH..."
-    GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w" -o "dist/janus_$OS-$ARCH" .
+    GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w" -o "dist/janus_$OS-$ARCH" $PKG_SRC
   done
 done
 
@@ -21,9 +21,9 @@ OS_ARCH_ARG=(arm arm64)
 for OS in ${OS_PLATFORM_ARG[@]}; do
   for ARCH in ${OS_ARCH_ARG[@]}; do
     echo "Building binary for $OS/$ARCH..."
-    GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w" -o "dist/janus_$OS-$ARCH" .
+    GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w" -o "dist/janus_$OS-$ARCH" $PKG_SRC
   done
 done
 
 echo "Building default binary"
-GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w" -o "dist/janus" .
+GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w" -o "dist/janus" $PKG_SRC
