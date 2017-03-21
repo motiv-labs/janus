@@ -2,7 +2,7 @@
 
 By choosing a File System based configuration we have a static way of configure the gateway (similar to nginx).
 
-1. ### Preparing the folder structure
+## 1. Preparing the folder structure
 
 By default all apis configurations are splited in separeted files (one for each API) and they live in
 `/etc/janus`. Of course you can configure that route by simply defining the `DATABASE_DSN`, for instance,
@@ -16,7 +16,7 @@ mkdir -p /etc/janus/apis
 mkdir -p /etc/janus/auth
 ```
 
-2. ### Add your API
+## 2. Add your API
 
 The main feature of the API Gateway is to proxy the requests to a different service, so let's do this.
 
@@ -36,7 +36,7 @@ http -v --json GET http://localhost:8080/posts/1
 
 Done! You just made your first request through the gateway.
 
-3. ### Verify that your API has been added
+## 3. Verify that your API has been added
 
 You can use the REST API to query (Read Only) all available APIs and Auth Providers. Simply make a request 
 to `/apis`.
@@ -45,7 +45,7 @@ to `/apis`.
 http -v GET localhost:8081/apis "Authorization:Bearer yourToken" "Content-Type: application/json"
 ```
 
-4. ### Forward your requests through Janus
+## 4. Forward your requests through Janus
 
 Issue the following cURL request to verify that Janus is properly forwarding
 requests to your API. Note that [by default][proxy-port] Janus handles proxy
