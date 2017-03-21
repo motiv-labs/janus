@@ -29,5 +29,5 @@ _book
 
 # HF config files
 ci/vars_enc.yml
-/out
+/dist
 debug
