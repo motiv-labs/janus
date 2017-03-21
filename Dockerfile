@@ -1,4 +1,4 @@
-FROM scratch
+FROM alpine
 ADD ci/assets/ca-certificates.crt /etc/ssl/certs/
 ADD dist/janus /
 RUN mkdir -p /etc/janus/apis && mkdir -p /etc/janus/auth
