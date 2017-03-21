@@ -9,7 +9,7 @@ mkdir -p docker-images/dist
 mkdir -p docker-images/ci/assets
 
 # unzip the binary
-tar -C docker-images/dist -zxf release-candidate/janus.tar.gz
+tar -C docker-images/dist -zxf release-candidate/janus_linux-amd64.tar.gz
 
 # Copies code to the image directories
 cp source-code/ci/assets/* docker-images/ci/assets
