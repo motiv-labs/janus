@@ -6,7 +6,7 @@ using the `Authorization` header.
 To get a token you must execute:
 
 ```sh
-http -v --json POST localhost:8080/login username=admin password=admin
+http -v --json POST localhost:8081/login username=admin password=admin
 ```
 
 The username and password are defined in an environmental variable called `ADMIN_USERNAME` and `ADMIN_PASSWORD`. It defaults to *admin*/*admin*.
