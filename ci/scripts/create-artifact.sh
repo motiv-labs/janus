@@ -16,11 +16,30 @@ cp -r . ${PROJECT_SRC}
 cd ${PROJECT_SRC}
 # Build the go application
 make
-# Goes to the generated go binaries
-cd $GOPATH/bin
 
-echo "Creating tar.gz"
-tar -czf linux_amd64.tar.gz ${BINARY}
+# Goes to the generated go binaries
+cd dist
+
+# Pack 386 amd64 binaries
+OS_PLATFORM_ARG=(linux darwin windows freebsd openbsd)
+OS_ARCH_ARG=(386 amd64)
+for OS in ${OS_PLATFORM_ARG[@]}; do
+  for ARCH in ${OS_ARCH_ARG[@]}; do
+    echo "Packing binary for $OS/$ARCH..."
+    tar -czf $OS_$ARCH.tar.gz $BINARY_$OS-$ARCH
+  done
+done
+
+
+# Pack arm binaries
+OS_PLATFORM_ARG=(linux)
+OS_ARCH_ARG=(arm arm64)
+for OS in ${OS_PLATFORM_ARG[@]}; do
+  for ARCH in ${OS_ARCH_ARG[@]}; do
+    echo "Packing binary for $OS/$ARCH..."
+    tar -czf $OS_$ARCH.tar.gz $BINARY_$OS-$ARCH
+  done
+done
 
 # Copies the tar to the artifact folder so its available to the next step of the pipeline
 echo "Copying *.tar.gz ${CWD}/artifacts"
