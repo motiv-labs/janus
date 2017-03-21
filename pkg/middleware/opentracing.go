@@ -26,15 +26,17 @@ func (h *OpenTracing) Handler(handler http.Handler) http.Handler {
 		var span opentracing.Span
 		var err error
 
+		spanName := fmt.Sprintf("%s://%s%s", r.URL.Scheme, r.URL.Host, r.URL.Path)
+
 		// Attempt to join a trace by getting trace context from the headers.
 		wireContext, err := opentracing.GlobalTracer().Extract(
 			opentracing.HTTPHeaders,
 			opentracing.HTTPHeadersCarrier(r.Header))
 		if err != nil {
 			// If for whatever reason we can't join, go ahead an start a new root span.
-			span = opentracing.StartSpan(r.RequestURI)
+			span = opentracing.StartSpan(spanName)
 		} else {
-			span = opentracing.StartSpan(r.RequestURI, opentracing.ChildOf(wireContext))
+			span = opentracing.StartSpan(spanName, opentracing.ChildOf(wireContext))
 		}
 		defer span.Finish()
 
@@ -45,7 +47,7 @@ func (h *OpenTracing) Handler(handler http.Handler) http.Handler {
 		ext.HTTPMethod.Set(span, r.Method)
 		ext.HTTPUrl.Set(
 			span,
-			fmt.Sprintf("%s://%s%s", r.URL.Scheme, r.URL.Host, r.URL.Path),
+			spanName,
 		)
 
 		// Add information on the peer service we're about to contact.
