@@ -170,9 +170,14 @@ jobs:
   - get: release-candidate
     trigger: true
     passed: [create-release-candidate]
+    globs:
+    - release-candidate/janus.tar.gz
 
   # Get the application source for the scripts
   - get: source-code
+
+  - task: prepare-docker-images
+    file: source-code/ci/tasks/docker-deployment.yml
 
   # Get the application version to use it in docker
   - get: version
@@ -180,7 +185,7 @@ jobs:
   # Upload the image to quay.io
   - put: docker-image
     params:
-      build: docker-images/latest
+      build: docker-images
       tag_as_latest: true
       tag: version/version
 
