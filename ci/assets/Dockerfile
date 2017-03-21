@@ -22,7 +22,8 @@ RUN set -ex \
     && apk del .build-deps \
     && rm -rf /var/cache/apk/* \
     && rm -rf /go/src/* \
-    && rm -rf /go/pkg/*
+    && rm -rf /go/pkg/* \
+    && rm -rf /root/.glide
 
 EXPOSE 8080
 EXPOSE 8081
