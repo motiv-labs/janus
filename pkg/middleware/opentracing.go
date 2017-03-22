@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 
 	log "github.com/Sirupsen/logrus"
@@ -13,11 +14,13 @@ import (
 )
 
 // OpenTracing is a middleware that traces the request latency
-type OpenTracing struct{}
+type OpenTracing struct {
+	https bool
+}
 
 // NewOpenTracing creates a new instance of OpenTracing
-func NewOpenTracing() *OpenTracing {
-	return &OpenTracing{}
+func NewOpenTracing(https bool) *OpenTracing {
+	return &OpenTracing{https}
 }
 
 // Handler is the middleware function for OpenTracing
@@ -26,29 +29,33 @@ func (h *OpenTracing) Handler(handler http.Handler) http.Handler {
 		var span opentracing.Span
 		var err error
 
-		spanName := fmt.Sprintf("%s://%s%s", r.URL.Scheme, r.URL.Host, r.URL.Path)
-
 		// Attempt to join a trace by getting trace context from the headers.
 		wireContext, err := opentracing.GlobalTracer().Extract(
 			opentracing.HTTPHeaders,
 			opentracing.HTTPHeadersCarrier(r.Header))
 		if err != nil {
 			// If for whatever reason we can't join, go ahead an start a new root span.
-			span = opentracing.StartSpan(spanName)
+			span = opentracing.StartSpan(r.URL.Path)
 		} else {
-			span = opentracing.StartSpan(spanName, opentracing.ChildOf(wireContext))
+			span = opentracing.StartSpan(r.URL.Path, opentracing.ChildOf(wireContext))
 		}
 		defer span.Finish()
 
-		span.SetTag("component", "janus")
-		span.SetTag("http.url", r.RequestURI)
-		span.SetTag("peer.address", r.RemoteAddr)
-		span.SetTag("span.kind", "server")
+		host, err := os.Hostname()
+		if err != nil {
+			log.WithError(err).Error("Failed to get host name")
+		}
+
 		ext.HTTPMethod.Set(span, r.Method)
 		ext.HTTPUrl.Set(
 			span,
-			spanName,
+			fmt.Sprintf("%s://%s%s", map[bool]string{true: "https", false: "http"}[h.https], r.Host, r.URL.Path),
 		)
+		ext.Component.Set(span, "janus")
+		ext.SpanKind.Set(span, "server")
+
+		span.SetTag("peer.address", r.RemoteAddr)
+		span.SetTag("host.name", host)
 
 		// Add information on the peer service we're about to contact.
 		if host, portString, err := net.SplitHostPort(r.URL.Host); err == nil {
