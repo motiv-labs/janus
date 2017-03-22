@@ -17,10 +17,7 @@ supports File System and MongoDB).
     ```bash
     $ sv start janus
     ```
-
-    **Note:** The CLI also accepts a configuration (`-c <path_to_config>`)
-    option allowing you to point to different configurations.
-
+    
 2. ### Verify that Janus has started successfully
 
     Once these have finished you should see a message (`Janus started`)
