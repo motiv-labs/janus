@@ -1,4 +1,4 @@
-# Adding your API - File System
+# Adding your API - MongoDB
 
 By choosing Mongo DB everything that we want configure on the gateway we can do it through a REST API, since all endpoints are protected, we need to login first.
 
