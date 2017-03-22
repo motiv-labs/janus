@@ -102,7 +102,7 @@ func main() {
 		middleware.NewStats(statsClient).Handler,
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(web.RecoveryHandler).Handler,
-		middleware.NewOpenTracing().Handler,
+		middleware.NewOpenTracing(globalConfig.IsHTTPS()).Handler,
 	)
 
 	// create proxy register

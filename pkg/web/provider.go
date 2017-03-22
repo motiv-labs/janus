@@ -35,7 +35,7 @@ func (p *Provider) Provide() error {
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(RecoveryHandler).Handler,
 		gziphandler.GzipHandler,
-		middleware.NewOpenTracing().Handler,
+		middleware.NewOpenTracing(p.IsHTTPS()).Handler,
 	)
 
 	// create endpoints
@@ -62,7 +62,7 @@ func (p *Provider) listenAndServe(handler http.Handler) error {
 	address := fmt.Sprintf(":%v", p.Port)
 	log.WithField("address", address).Info("Listening on")
 	log.Info("Janus Admin API started")
-	if len(p.CertFile) > 0 && len(p.KeyFile) > 0 {
+	if p.IsHTTPS() {
 		return http.ListenAndServeTLS(address, p.CertFile, p.KeyFile, handler)
 	}
 
@@ -106,4 +106,9 @@ func (p *Provider) loadOAuthEndpoints(router router.Router) {
 			oauthGroup.DELETE("/:name", oAuthHandler.DeleteBy())
 		}
 	}
+}
+
+// IsHTTPS checks if you have https enabled
+func (p *Provider) IsHTTPS() bool {
+	return len(p.CertFile) > 0 && len(p.KeyFile) > 0
 }
