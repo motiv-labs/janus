@@ -1,38 +1,32 @@
 version: '2'
 services:
 
-    janus:
-      image: quay.io/hellofresh/janus
+  # Janus
+  janus:
+    image: quay.io/hellofresh/janus
+    ports:
+      - 8080
+      - 8081
+    depends_on:
+      - janus-database
+      - janus-storage
+    environment:
+      LOG_LEVEL: 'debug'
+      STATS_PREFIX: 'janus-docker.'
+      DATABASE_DSN: 'file:///etc/janus'
+      # DATABASE_DSN: 'mongodb://mongodb:27017/janus'
+      STORAGE_DNS: 'memory://localhost'
+      # STORAGE_DNS: 'redis://redis:6379'
+      SECRET: 'secret key'
+
+   # Janus Database (if you choose a database as storage)
+  janus-database:
+      image: mongo
       ports:
-        - "8080:8080"
-        - "8081:8081"
-      depends_on:
-        - mongodb
-        - redis
-      environment:
-        PORT: '8080'
-        API_PORT: '8081'
-        DEBUG: 'false'
-        LOG_LEVEL: 'info'
-        STATS_PREFIX: 'janus-docker.'
-        DATABASE_DSN: 'file:///etc/janus'
-        # DATABASE_DSN: 'mongodb://mongodb:27017/janus'
-        # Storage
-        STORAGE_DNS: 'memory://localhost'
-        # STORAGE_DNS: 'redis://redis:6379'
-        SECRET: 'secret key'
-        ADMIN_USERNAME: 'admin'
-        ADMIN_PASSWORD: 'admin'
-        GRACE_TIMEOUT: '10'
-        MAX_IDLE_CONNS_PER_HOST: '200'
-        INSECURE_SKIP_VERIFY: 'false'
+          - 27017
 
-    mongodb:
-        image: mongo
-        ports:
-            - "27017:27017"
-
-    redis:
-        image: redis
-        ports:
-            - "6379:6379"
+  # Janus Key Value Store (if you want to use redis instead of an in memory store)
+  janus-storage:
+      image: redis
+      ports:
+          - 6379
