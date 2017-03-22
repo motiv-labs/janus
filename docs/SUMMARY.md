@@ -1,6 +1,8 @@
 # Summary
 
 * [Introduction](README.md)
+* [Installation](README.md)
+    * [Docker](install/docker.md)
 * [Quick Start](quick_start.md)
     * [Auth](quick_start/auth.md)
     * [File System](quick_start/file_system.md)
