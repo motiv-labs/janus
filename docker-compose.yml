@@ -7,6 +7,8 @@ services:
     ports:
       - 8080
       - 8081
+      - 8443
+      - 8444
     depends_on:
       - janus-database
       - janus-storage
@@ -14,9 +16,9 @@ services:
       LOG_LEVEL: 'debug'
       STATS_PREFIX: 'janus-docker.'
       DATABASE_DSN: 'file:///etc/janus'
-      # DATABASE_DSN: 'mongodb://mongodb:27017/janus'
+      # DATABASE_DSN: 'mongodb://janus-database:27017/janus'
       STORAGE_DNS: 'memory://localhost'
-      # STORAGE_DNS: 'redis://redis:6379'
+      # STORAGE_DNS: 'redis://janus-storage:6379'
       SECRET: 'secret key'
 
    # Janus Database (if you choose a database as storage)

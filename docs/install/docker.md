@@ -17,7 +17,7 @@ Here is a quick example showing how to link a Janus container to a Cassandra or 
 2. **Start your key value storage:**
 
     You can choose to use redis as your key value store instead of the in memory one. If you choose to do so you just start the container:
-You will also need to set the storage dsn using the `STORAGE_DNS` to something like `memory://localhost` or if you use redis `redis://redis:6379`
+You will also need to set the storage dsn using the `STORAGE_DNS` to something like `memory://localhost` or if you use redis `redis://janus-storage:6379`
 
     ```bash
     $ docker run -d --name janus-storage \
@@ -36,10 +36,11 @@ You will also need to set the storage dsn using the `STORAGE_DNS` to something l
                   --link janus-database:janus-database \
                   --link janus-storage:janus-storage \
                   -e "DATABASE_DSN=mongodb://janus-database:27017/janus" \
-                  -e "STORAGE_DNS=redis://redis:6379" \
+                  -e "STORAGE_DNS=redis://janus-storage:6379" \
                   -p 8080:8080 \
                   -p 8443:8443 \
                   -p 8081:8081 \
+                  -p 8444:8444 \
                   quay.io/hellofresh/janus
     ```
 
