@@ -60,6 +60,7 @@ func (s *RedisStore) ping() (bool, error) {
 	return data == "PONG", nil
 }
 
+// Exists checks if a key exists in the store
 func (s *RedisStore) Exists(key string) (bool, error) {
 	conn := s.getConnection()
 	defer conn.Close()
@@ -67,6 +68,7 @@ func (s *RedisStore) Exists(key string) (bool, error) {
 	return s.exists(conn, key)
 }
 
+// Get retreives a value from the store
 func (s *RedisStore) Get(key string) (string, error) {
 	conn := s.getConnection()
 	defer conn.Close()
@@ -74,6 +76,7 @@ func (s *RedisStore) Get(key string) (string, error) {
 	return s.get(conn, key)
 }
 
+// Remove a value from the store
 func (s *RedisStore) Remove(key string) error {
 	conn := s.getConnection()
 	defer conn.Close()
@@ -81,6 +84,7 @@ func (s *RedisStore) Remove(key string) error {
 	return s.remove(conn, key)
 }
 
+// Set a value in the store
 func (s *RedisStore) Set(key string, value string, expire int64) error {
 	conn := s.getConnection()
 	defer conn.Close()
@@ -88,6 +92,7 @@ func (s *RedisStore) Set(key string, value string, expire int64) error {
 	return s.set(conn, key, value, expire)
 }
 
+// ToLimiterStore converts a storage into a limmiter compliant storage
 func (s *RedisStore) ToLimiterStore(prefix string) (limiter.Store, error) {
 	// Alternatively, you can pass options to the store with the "WithOptions"
 	// function. For example, for Redis store:
@@ -130,10 +135,10 @@ func getSetCommandAndArgs(key string, value string, expire int64) (string, []int
 		args = append(args, key)
 		args = append(args, value)
 		return "SET", args
-	} else {
-		args = append(args, key)
-		args = append(args, expire)
-		args = append(args, value)
-		return "SETEX", args
 	}
+
+	args = append(args, key)
+	args = append(args, expire)
+	args = append(args, value)
+	return "SETEX", args
 }

@@ -24,6 +24,7 @@ func NewInMemoryStoreWithOptions() *InMemoryStore {
 	}
 }
 
+// Exists checks if a key exists in the store
 func (s *InMemoryStore) Exists(key string) (bool, error) {
 	s.Lock()
 	defer s.Unlock()
@@ -31,6 +32,7 @@ func (s *InMemoryStore) Exists(key string) (bool, error) {
 	return s.exists(key)
 }
 
+// Get retreives a value from the store
 func (s *InMemoryStore) Get(key string) (string, error) {
 	s.Lock()
 	defer s.Unlock()
@@ -38,6 +40,7 @@ func (s *InMemoryStore) Get(key string) (string, error) {
 	return s.get(key)
 }
 
+// Remove a value from the store
 func (s *InMemoryStore) Remove(key string) error {
 	s.Lock()
 	defer s.Unlock()
@@ -45,6 +48,7 @@ func (s *InMemoryStore) Remove(key string) error {
 	return s.remove(key)
 }
 
+// Set a value in the store
 func (s *InMemoryStore) Set(key string, value string, expire int64) error {
 	s.Lock()
 	defer s.Unlock()
@@ -52,6 +56,7 @@ func (s *InMemoryStore) Set(key string, value string, expire int64) error {
 	return s.set(key, value, expire)
 }
 
+// ToLimiterStore converts a storage into a limmiter compliant storage
 func (s *InMemoryStore) ToLimiterStore(prefix string) (limiter.Store, error) {
 	return limiter.NewMemoryStore(), nil
 }

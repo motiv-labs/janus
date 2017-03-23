@@ -10,9 +10,12 @@ import (
 )
 
 const (
+	// InMemory storage
 	InMemory = "memory"
-	Redis    = "redis"
-	None     = "none"
+	// Redis storage
+	Redis = "redis"
+	// None Nullable storage
+	None = "none"
 )
 
 // Store is the common interface for datastores.
@@ -36,6 +39,7 @@ type Options struct {
 	CleanUpInterval time.Duration
 }
 
+// Build creates a new storage based on the provided DSN
 func Build(dsn string) (Store, error) {
 	url, err := url.Parse(dsn)
 	if nil != err {

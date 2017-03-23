@@ -5,9 +5,10 @@ import (
 	"net/http"
 )
 
+// H is a helper for creating a JSON response
 type H map[string]interface{}
 
-// JSON writes a json response to ResponseWriter
+// JSON writes a JSON response to ResponseWriter
 func JSON(w http.ResponseWriter, code int, obj interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)

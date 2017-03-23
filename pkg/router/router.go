@@ -11,8 +11,12 @@ import (
 // ParamsContextKey is used to retrieve a path's params map from a request's context.
 const ParamsContextKey = "params.context.key"
 
+// Constructor for a piece of middleware.
+// Some middleware use this constructor out of the box,
+// so in most cases you can just pass somepackage.New
 type Constructor func(http.Handler) http.Handler
 
+// Params represents the router params
 type Params struct {
 	params map[string]string
 }
@@ -25,10 +29,12 @@ func FromContext(ctx context.Context) *Params {
 	return &Params{}
 }
 
+// ByName gets a parameter by name
 func (p *Params) ByName(name string) string {
 	return p.params[name]
 }
 
+// Router defines the basic methods for a router
 type Router interface {
 	Handle(method string, path string, handler http.HandlerFunc, handlers ...Constructor)
 	Any(path string, handler http.HandlerFunc, handlers ...Constructor)
@@ -43,18 +49,21 @@ type Router interface {
 	Use(handlers ...Constructor) Router
 }
 
-type HttpTreeMuxRouter struct {
+// HTTPTreeMuxRouter is an adapter for httptreemux that implements the Router interface
+type HTTPTreeMuxRouter struct {
 	mux         *httptreemux.TreeMux
 	innerRouter *httptreemux.ContextGroup
 	chain       alice.Chain
 }
 
+// Options are the HTTPTreeMuxRouter options
 type Options struct {
 	NotFoundHandler           http.HandlerFunc
 	SafeAddRoutesWhileRunning bool
 	RedirectMethodBehavior    map[string]httptreemux.RedirectBehavior
 }
 
+// DefaultOptions are the default router options
 var DefaultOptions = Options{
 	NotFoundHandler:           http.NotFound,
 	SafeAddRoutesWhileRunning: true,
@@ -66,28 +75,33 @@ var DefaultOptions = Options{
 	},
 }
 
-func NewHttpTreeMuxWithOptions(options Options) *HttpTreeMuxRouter {
+// NewHTTPTreeMuxWithOptions creates a new instance of HTTPTreeMuxRouter
+// with the provided options
+func NewHTTPTreeMuxWithOptions(options Options) *HTTPTreeMuxRouter {
 	router := httptreemux.New()
 	router.NotFoundHandler = options.NotFoundHandler
 	router.SafeAddRoutesWhileRunning = options.SafeAddRoutesWhileRunning
 	router.RedirectMethodBehavior = options.RedirectMethodBehavior
 
-	return &HttpTreeMuxRouter{
+	return &HTTPTreeMuxRouter{
 		mux:         router,
 		innerRouter: router.UsingContext(),
 		chain:       alice.New(),
 	}
 }
 
-func NewHttpTreeMuxRouter() *HttpTreeMuxRouter {
-	return NewHttpTreeMuxWithOptions(DefaultOptions)
+// NewHTTPTreeMuxRouter creates a new instance of HTTPTreeMuxRouter
+func NewHTTPTreeMuxRouter() *HTTPTreeMuxRouter {
+	return NewHTTPTreeMuxWithOptions(DefaultOptions)
 }
 
-func (r *HttpTreeMuxRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
+// ServeHTTP server the HTTP requests
+func (r *HTTPTreeMuxRouter) ServeHTTP(w http.ResponseWriter, req *http.Request) {
 	r.mux.ServeHTTP(w, req)
 }
 
-func (r *HttpTreeMuxRouter) Any(path string, handler http.HandlerFunc, handlers ...Constructor) {
+// Any register a path to all HTTP methods
+func (r *HTTPTreeMuxRouter) Any(path string, handler http.HandlerFunc, handlers ...Constructor) {
 	methods := []string{
 		http.MethodGet,
 		http.MethodPost,
@@ -105,7 +119,8 @@ func (r *HttpTreeMuxRouter) Any(path string, handler http.HandlerFunc, handlers 
 	}
 }
 
-func (r *HttpTreeMuxRouter) Handle(method string, path string, handler http.HandlerFunc, handlers ...Constructor) {
+// Handle registers a path, method and handlers to the router
+func (r *HTTPTreeMuxRouter) Handle(method string, path string, handler http.HandlerFunc, handlers ...Constructor) {
 	var chain alice.Chain
 	chain = r.chain
 
@@ -116,43 +131,52 @@ func (r *HttpTreeMuxRouter) Handle(method string, path string, handler http.Hand
 	r.innerRouter.Handle(method, path, chain.ThenFunc(handler).ServeHTTP)
 }
 
-func (r *HttpTreeMuxRouter) GET(path string, handler http.HandlerFunc, handlers ...Constructor) {
+// GET registers a HTTP GET path
+func (r *HTTPTreeMuxRouter) GET(path string, handler http.HandlerFunc, handlers ...Constructor) {
 	r.Handle(http.MethodGet, path, handler, handlers...)
 }
 
-func (r *HttpTreeMuxRouter) POST(path string, handler http.HandlerFunc, handlers ...Constructor) {
+// POST registers a HTTP POST path
+func (r *HTTPTreeMuxRouter) POST(path string, handler http.HandlerFunc, handlers ...Constructor) {
 	r.Handle(http.MethodPost, path, handler, handlers...)
 }
 
-func (r *HttpTreeMuxRouter) PUT(path string, handler http.HandlerFunc, handlers ...Constructor) {
+// PUT registers a HTTP PUT path
+func (r *HTTPTreeMuxRouter) PUT(path string, handler http.HandlerFunc, handlers ...Constructor) {
 	r.Handle(http.MethodPut, path, handler, handlers...)
 }
 
-func (r *HttpTreeMuxRouter) DELETE(path string, handler http.HandlerFunc, handlers ...Constructor) {
+// DELETE registers a HTTP DELETE path
+func (r *HTTPTreeMuxRouter) DELETE(path string, handler http.HandlerFunc, handlers ...Constructor) {
 	r.Handle(http.MethodDelete, path, handler, handlers...)
 }
 
-func (r *HttpTreeMuxRouter) PATCH(path string, handler http.HandlerFunc, handlers ...Constructor) {
+// PATCH registers a HTTP PATCH path
+func (r *HTTPTreeMuxRouter) PATCH(path string, handler http.HandlerFunc, handlers ...Constructor) {
 	r.Handle(http.MethodPatch, path, handler, handlers...)
 }
 
-func (r *HttpTreeMuxRouter) HEAD(path string, handler http.HandlerFunc, middleware ...Constructor) {
+// HEAD registers a HTTP HEAD path
+func (r *HTTPTreeMuxRouter) HEAD(path string, handler http.HandlerFunc, middleware ...Constructor) {
 	r.Handle(http.MethodHead, path, handler, middleware...)
 }
 
-func (r *HttpTreeMuxRouter) OPTIONS(path string, handler http.HandlerFunc, middleware ...Constructor) {
+// OPTIONS registers a HTTP OPTIONS path
+func (r *HTTPTreeMuxRouter) OPTIONS(path string, handler http.HandlerFunc, middleware ...Constructor) {
 	r.Handle(http.MethodOptions, path, handler, middleware...)
 }
 
-func (r *HttpTreeMuxRouter) Group(path string) Router {
-	return &HttpTreeMuxRouter{
+// Group creates a child router for a specific path
+func (r *HTTPTreeMuxRouter) Group(path string) Router {
+	return &HTTPTreeMuxRouter{
 		mux:         r.mux,
 		innerRouter: r.innerRouter.NewContextGroup(path),
 		chain:       r.chain,
 	}
 }
 
-func (r *HttpTreeMuxRouter) Use(handlers ...Constructor) Router {
+// Use attaches a middleware to the router
+func (r *HTTPTreeMuxRouter) Use(handlers ...Constructor) Router {
 	for _, h := range handlers {
 		r.chain = r.chain.Append(alice.Constructor(h))
 	}
@@ -160,7 +184,7 @@ func (r *HttpTreeMuxRouter) Use(handlers ...Constructor) Router {
 	return r
 }
 
-func (r *HttpTreeMuxRouter) wrapConstructor(handlers []Constructor) []alice.Constructor {
+func (r *HTTPTreeMuxRouter) wrapConstructor(handlers []Constructor) []alice.Constructor {
 	var cons = make([]alice.Constructor, len(handlers))
 	for _, m := range handlers {
 		cons = append(cons, alice.Constructor(m))
