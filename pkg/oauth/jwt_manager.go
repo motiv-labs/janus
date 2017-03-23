@@ -20,7 +20,7 @@ func (m *JWTManager) Set(accessToken string, session session.State, resetTTLTo i
 	return nil
 }
 
-// Remove returns nil becuase there is not storage to remove from
+// Remove returns nil because there is not storage to remove from
 func (m *JWTManager) Remove(accessToken string) error {
 	return nil
 }

@@ -35,11 +35,12 @@ func (m *Loader) RegisterApis(apiSpecs []*Spec) {
 	log.Debug("Loading API configurations")
 
 	for _, referenceSpec := range apiSpecs {
-		m.RegisterApi(referenceSpec)
+		m.RegisterAPI(referenceSpec)
 	}
 }
 
-func (m *Loader) RegisterApi(referenceSpec *Spec) {
+// RegisterAPI register an API Spec in the register
+func (m *Loader) RegisterAPI(referenceSpec *Spec) {
 	//Validates the proxy
 	active := proxy.Validate(referenceSpec.Proxy)
 	if false == referenceSpec.Active {

@@ -16,7 +16,7 @@ const (
 	// probably the most versatile way to check for tokens, since it doesn't require any storage or extra calls in
 	// each request.
 	JWT
-	// Auth strategy makes sure to validade the provided token on every request against the athentication provider.
+	// Auth strategy makes sure to validate the provided token on every request against the athentication provider.
 	Auth
 )
 
@@ -46,15 +46,18 @@ type Manager interface {
 	IsKeyAuthorised(accessToken string) (session.State, bool)
 }
 
+// ManagerFactory is used for creating a new manager
 type ManagerFactory struct {
 	Storage  store.Store
 	settings TokenStrategySettings
 }
 
+// NewManagerFactory creates a new instance of ManagerFactory
 func NewManagerFactory(storage store.Store, settings TokenStrategySettings) *ManagerFactory {
 	return &ManagerFactory{storage, settings}
 }
 
+// Build creates a manager based on the type
 func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 	// TODO: make it nicer with BiMap - GetByType, GetByName
 	typesMapReversed := make(map[ManagerType]string, len(typesMap))

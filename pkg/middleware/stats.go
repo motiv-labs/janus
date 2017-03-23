@@ -10,14 +10,17 @@ import (
 	"github.com/hellofresh/stats-go"
 )
 
+// Stats represents the stats middleware
 type Stats struct {
 	statsClient stats.StatsClient
 }
 
+// NewStats creates a new instance of Stats
 func NewStats(statsClient stats.StatsClient) *Stats {
 	return &Stats{statsClient}
 }
 
+// Handler is the middleware function
 func (m *Stats) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var (

@@ -107,6 +107,7 @@ func WithParams(o Params) *Proxy {
 	}
 }
 
+// Reverse creates a reverse proxy from a proxy definition
 func (p *Proxy) Reverse(proxyDefinition *Definition) *httputil.ReverseProxy {
 	target, _ := url.Parse(proxyDefinition.UpstreamURL)
 	targetQuery := target.RawQuery

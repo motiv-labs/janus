@@ -37,6 +37,8 @@ func (at *AwareTransport) GetRoundTripper(roundTripper http.RoundTripper) http.R
 	return &RoundTripper{roundTripper, at.statsClient, at.storage, at.repo}
 }
 
+// A RoundTripper must be safe for concurrent use by multiple
+// goroutines.
 type RoundTripper struct {
 	RoundTripper http.RoundTripper
 	statsClient  stats.StatsClient

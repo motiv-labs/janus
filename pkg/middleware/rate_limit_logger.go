@@ -9,6 +9,7 @@ import (
 	"github.com/hellofresh/janus/pkg/response"
 )
 
+// RateLimitLogger represents the middleware struct
 type RateLimitLogger struct{}
 
 // NewRateLimitLogger logs the IP of blocked users with rate limit
@@ -16,6 +17,7 @@ func NewRateLimitLogger() *RateLimitLogger {
 	return &RateLimitLogger{}
 }
 
+// Handler is the middleware function
 func (m *RateLimitLogger) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var (

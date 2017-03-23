@@ -21,6 +21,7 @@ func NewController(repo Repository) *Controller {
 	return &Controller{repo}
 }
 
+// Get is the find all handler
 func (c *Controller) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		span := opentracing.FromContext(r.Context(), "datastore.FindAll")
@@ -35,6 +36,7 @@ func (c *Controller) Get() http.HandlerFunc {
 	}
 }
 
+// GetBy is the find by handler
 func (c *Controller) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.FromContext(r.Context()).ByName("name")
@@ -54,6 +56,7 @@ func (c *Controller) GetBy() http.HandlerFunc {
 	}
 }
 
+// PutBy is the update handler
 func (c *Controller) PutBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
@@ -88,6 +91,7 @@ func (c *Controller) PutBy() http.HandlerFunc {
 	}
 }
 
+// Post is the create handler
 func (c *Controller) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		definition := NewDefinition()
@@ -122,6 +126,7 @@ func (c *Controller) Post() http.HandlerFunc {
 	}
 }
 
+// DeleteBy is the delete handler
 func (c *Controller) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.FromContext(r.Context()).ByName("name")

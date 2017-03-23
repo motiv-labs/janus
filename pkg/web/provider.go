@@ -25,8 +25,11 @@ type Provider struct {
 	AuthRepo oauth.Repository
 }
 
+// Provide executes the provider functionality
+// This is normally the entry point of the
+// provider.
 func (p *Provider) Provide() error {
-	r := router.NewHttpTreeMuxRouter()
+	r := router.NewHTTPTreeMuxRouter()
 
 	// create authentication for Janus
 	authConfig := jwt.NewConfig(p.Cred)

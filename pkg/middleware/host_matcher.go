@@ -17,12 +17,14 @@ type HostMatcher struct {
 	wildcardHosts []*regexp.Regexp
 }
 
+// NewHostMatcher creates a new instance of HostMatcher
 func NewHostMatcher(hosts []string) *HostMatcher {
 	matcher := &HostMatcher{plainHosts: make(map[string]bool)}
 	matcher.prepareIndexes(hosts)
 	return matcher
 }
 
+// Handler is the middleware function
 func (h *HostMatcher) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		host := r.Host

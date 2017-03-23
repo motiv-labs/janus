@@ -16,35 +16,44 @@
 
 set -e
 
-export CGO_ENABLED=0
+export CGO_ENABLED=1
+NO_COLOR='\033[0m'
+OK_COLOR='\033[32;01m'
+ERROR_COLOR='\033[31;01m'
+WARN_COLOR='\033[33;01m'
+PASS="${OK_COLOR}PASS ${NO_COLOR}"
+FAIL="${ERROR_COLOR}FAIL ${NO_COLOR}"
 
-TARGETS=$(for d in "$@"; do echo ./$d/...; done)
+TARGETS=$@
 
-echo "Running tests:"
-go test -i -installsuffix "static" ${TARGETS}
-go test -installsuffix "static" ${TARGETS}
-echo
+echo "${OK_COLOR}Running tests: ${NO_COLOR}"
+go test -v -race ${TARGETS}
 
-echo -n "Checking gofmt: "
-ERRS=$(find "$@" -type f -name \*.go | xargs gofmt -l 2>&1 || true)
+echo "${OK_COLOR}Formatting: ${NO_COLOR}"
+ERRS=$(find cmd pkg -type f -name \*.go | xargs gofmt -l 2>&1 || true)
 if [ -n "${ERRS}" ]; then
-    echo "FAIL - the following files need to be gofmt'ed:"
+    echo "${ERROR_COLOR}FAIL - the following files need to be gofmt'ed: ${NO_COLOR}"
     for e in ${ERRS}; do
         echo "    $e"
     done
-    echo
     exit 1
 fi
-echo "PASS"
-echo
+echo ${PASS}
 
-echo -n "Checking go vet: "
+echo "${OK_COLOR}Vetting: ${NO_COLOR}"
 ERRS=$(go vet ${TARGETS} 2>&1 || true)
 if [ -n "${ERRS}" ]; then
-    echo "FAIL"
+    echo ${FAIL}
     echo "${ERRS}"
-    echo
     exit 1
 fi
-echo "PASS"
-echo
+echo ${PASS}
+
+echo "${OK_COLOR}Lintting: ${NO_COLOR}"
+ERRS=$(golint ${TARGETS} 2>&1 || true)
+if [ -n "${ERRS}" ]; then
+    echo ${FAIL}
+    echo "${ERRS}"
+    exit 1
+fi
+echo ${PASS}
