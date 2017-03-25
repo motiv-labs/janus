@@ -38,9 +38,14 @@ func (p *Register) AddMany(routes []*Route) error {
 
 // Add register a new route
 func (p *Register) Add(route *Route) error {
+	return p.AddWithInOut(route, InChain{}, OutChain{})
+}
+
+// AddWithInOut register a new route with inbound/outbounds plugins
+func (p *Register) AddWithInOut(route *Route, inbound InChain, outbound OutChain) error {
 	definition := route.proxy
 
-	handler := p.proxy.Reverse(definition).ServeHTTP
+	handler := p.proxy.Reverse(definition, inbound, outbound).ServeHTTP
 	matcher := router.NewListenPathMatcher()
 	if matcher.Match(definition.ListenPath) {
 		p.doRegister(matcher.Extract(definition.ListenPath), handler, definition.Methods, route.handlers)
