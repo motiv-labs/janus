@@ -21,11 +21,11 @@ func NewLoader(register *proxy.Register, storage store.Store) *Loader {
 // LoadDefinitions loads all oauth servers from a datasource
 func (m *Loader) LoadDefinitions(repo Repository) {
 	oAuthServers := m.getOAuthServers(repo)
-	m.RegisterOAuthServers(oAuthServers)
+	m.RegisterOAuthServers(oAuthServers, repo)
 }
 
 // RegisterOAuthServers register many oauth servers
-func (m *Loader) RegisterOAuthServers(oauthServers []*Spec) {
+func (m *Loader) RegisterOAuthServers(oauthServers []*Spec, repo Repository) {
 	log.Debug("Loading OAuth servers configurations")
 
 	for _, oauthServer := range oauthServers {
@@ -43,7 +43,11 @@ func (m *Loader) RegisterOAuthServers(oauthServers []*Spec) {
 		log.Debug("Registering token endpoint")
 		tokenProxy := oauthServer.Endpoints.Token
 		if proxy.Validate(tokenProxy) {
-			m.register.Add(proxy.NewRoute(tokenProxy, NewSecretMiddleware(oauthServer).Handler, corsHandler))
+			m.register.AddWithInOut(
+				proxy.NewRoute(tokenProxy, NewSecretMiddleware(oauthServer).Handler, corsHandler),
+				nil,
+				proxy.NewOutChain(NewTokenPlugin(m.storage, repo).Out),
+			)
 		} else {
 			log.Debug("No token endpoint")
 		}
