@@ -58,9 +58,6 @@ func TestSuccessfulProxy(t *testing.T) {
 			defer res.Body.Close()
 		}
 
-		// b, err := ioutil.ReadAll(res.Body)
-		// assert.NoError(t, err)
-
 		assert.Equal(t, tc.expectedContentType, res.Header.Get("Content-Type"))
 		assert.Equal(t, tc.expectedCode, res.StatusCode, tc.description)
 	}
