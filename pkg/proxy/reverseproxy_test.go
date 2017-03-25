@@ -48,7 +48,7 @@ var tests = []struct {
 }
 
 func TestSuccessfulProxy(t *testing.T) {
-	ts := test.CreateServer(createRegisterAndRouter())
+	ts := test.NewServer(createRegisterAndRouter())
 	defer ts.Close()
 
 	for _, tc := range tests {
