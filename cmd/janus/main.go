@@ -85,9 +85,8 @@ func main() {
 		log.WithError(errors.ErrInvalidScheme).Error("No Database selected")
 	}
 
-	transport := oauth.NewAwareTransport(statsClient, storage, oAuthServersRepo)
 	p := proxy.WithParams(proxy.Params{
-		Transport:              transport,
+		StatsClient:            statsClient,
 		FlushInterval:          globalConfig.BackendFlushInterval,
 		IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
 		CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
