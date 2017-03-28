@@ -20,7 +20,9 @@ var (
 
 // initializes the global configuration
 func init() {
-	globalConfig, err = config.LoadEnv()
+	conf, err := config.Load()
+	globalConfig, err = config.Load()
+	log.Debug(conf)
 	if nil != err {
 		log.WithError(err).Panic("Could not parse the environment configurations")
 	}
@@ -54,7 +56,7 @@ func init() {
 // initializes the storage and managers
 func init() {
 	var err error
-	storage, err = store.Build(globalConfig.StorageDSN)
+	storage, err = store.Build(globalConfig.Storage.DSN)
 	if nil != err {
 		log.Panic(err)
 	}
