@@ -20,9 +20,7 @@ var (
 
 // initializes the global configuration
 func init() {
-	conf, err := config.Load()
 	globalConfig, err = config.Load()
-	log.Debug(conf)
 	if nil != err {
 		log.WithError(err).Panic("Could not parse the environment configurations")
 	}
