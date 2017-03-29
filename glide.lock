@@ -1,5 +1,5 @@
-hash: 351e1c7a26de3b12f9de6fd02021375b344141de303d6ff6f526612e24a89982
-updated: 2017-03-28T12:39:34.331539985+02:00
+hash: 1c351a52b899b273223d9567e41fb19794040a67d0038ce7b4bba89c061b8d39
+updated: 2017-03-29T18:06:00.042274581+02:00
 imports:
 - name: cloud.google.com/go
   version: 8790afb57dfdb470da0b1f441c177e6e49ba66e7
@@ -56,6 +56,8 @@ imports:
   version: 8c9c9c8a60b3d4b71ad91d6aa60cd24399f355a7
 - name: github.com/hellofresh/stats-go
   version: 47f7950a30e6f2c5f5769dd06856647d58ecf9f6
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/justinas/alice
   version: 052b8b6c18edb9db317af86806d8e00ebaa94160
 - name: github.com/kelseyhightower/envconfig
@@ -93,6 +95,8 @@ imports:
   - mem
 - name: github.com/spf13/cast
   version: ce135a4ebeee6cfe9a26c93ee0d37825f26113c7
+- name: github.com/spf13/cobra
+  version: 7be4beda01ec05d0b93d80b3facd2b6f44080d94
 - name: github.com/spf13/jwalterweatherman
   version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
@@ -102,7 +106,7 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: 6c23252515492caf9b228a9d5cabcdbde29f7f82
+  version: c4f37062e123971566edb19fb0554351464f8a98
   subpackages:
   - context
   - context/ctxhttp
