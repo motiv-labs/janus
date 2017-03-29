@@ -7,6 +7,10 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var (
+	configFile string
+)
+
 func main() {
 	var RootCmd = &cobra.Command{
 		Use:   "janus",
@@ -18,6 +22,7 @@ func main() {
                 Complete documentation is available at https://hellofresh.gitbooks.io/janus`,
 		Run: RunServer,
 	}
+	RootCmd.Flags().StringVarP(&configFile, "config", "c", "", "Source of a configuration file")
 
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
