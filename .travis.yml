@@ -17,4 +17,4 @@ install:
 script:
 - make test
 - $GOPATH/bin/overalls -project=github.com/hellofresh/janus -covermode=count
-- $(go env GOPATH | awk 'BEGIN{FS=":"} {print $1}')/bin/goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN
+- $GOPATH/bin/goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN
