@@ -11,6 +11,7 @@ before_install:
   
 install:
   - mkdir -p $GOPATH/bin
+  - go get github.com/mattn/goveralls
   - go get github.com/go-playground/overalls
   - make deps
 
