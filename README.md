@@ -7,7 +7,7 @@
 # Janus
 
 [![Build Status](https://travis-ci.org/hellofresh/janus.svg?branch=master)](https://travis-ci.org/hellofresh/janus)
-[![Coverage Status](https://coveralls.io/repos/github/hellofresh/janus/badge.svg?branch=feature%2Fopentracing)](https://coveralls.io/github/hellofresh/janus?branch=feature%2Fopentracing)
+[![Coverage Status](https://coveralls.io/repos/github/hellofresh/janus/badge.svg?branch=master)](https://coveralls.io/github/hellofresh/janus?branch=master)
 [![GoDoc](https://godoc.org/github.com/hellofresh/janus?status.svg)](https://godoc.org/github.com/hellofresh/janus)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hellofresh/janus)](https://goreportcard.com/report/github.com/hellofresh/janus)
 
