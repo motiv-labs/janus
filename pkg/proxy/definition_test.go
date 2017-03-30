@@ -21,6 +21,10 @@ func TestEmptyListenPathValidation(t *testing.T) {
 	assert.False(t, proxy.Validate(&definition))
 }
 
+func TestNilProxy(t *testing.T) {
+	assert.False(t, proxy.Validate(nil))
+}
+
 func TestSpaceInListenPathValidation(t *testing.T) {
 	definition := proxy.Definition{
 		ListenPath: " ",
@@ -49,4 +53,10 @@ func TestJSONToRoute(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.IsType(t, &proxy.Route{}, route)
+}
+
+func TestJSONToRouteError(t *testing.T) {
+	_, err := proxy.JSONUnmarshalRoute([]byte{})
+
+	assert.Error(t, err)
 }
