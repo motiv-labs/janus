@@ -47,6 +47,9 @@ func (s *Shackles) RoundTrip(req *http.Request) (resp *http.Response, err error)
 	// apply inbound request plugins (if any)
 	req, err = s.applyInboundLinks(req)
 	if err != nil {
+		s.statsClient.SetHttpRequestSection(statsSectionRoundTrip).
+			TrackRequest(req, timing, false).
+			ResetHttpRequestSection()
 		return nil, err
 	}
 
@@ -62,12 +65,18 @@ func (s *Shackles) RoundTrip(req *http.Request) (resp *http.Response, err error)
 	// block until the entire body has been read
 	_, err = httputil.DumpResponse(resp, true)
 	if err != nil {
+		s.statsClient.SetHttpRequestSection(statsSectionRoundTrip).
+			TrackRequest(req, timing, false).
+			ResetHttpRequestSection()
 		return nil, err
 	}
 
 	// apply outbound response plugins (if any)
 	resp, err = s.applyOutboundLinks(req, resp)
 	if err != nil {
+		s.statsClient.SetHttpRequestSection(statsSectionRoundTrip).
+			TrackRequest(req, timing, false).
+			ResetHttpRequestSection()
 		return nil, err
 	}
 
