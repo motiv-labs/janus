@@ -19,7 +19,7 @@ func NewServer(r router.Router) *Server {
 }
 
 // Do creates a HTTP request to be tested
-func (s *Server) Do(method string, url string) (*http.Response, error) {
+func (s *Server) Do(method string, url string, headers map[string]string) (*http.Response, error) {
 	var u bytes.Buffer
 	u.WriteString(string(s.URL))
 	u.WriteString(url)
@@ -27,6 +27,14 @@ func (s *Server) Do(method string, url string) (*http.Response, error) {
 	req, err := http.NewRequest(method, u.String(), nil)
 	if err != nil {
 		return nil, err
+	}
+
+	for headerName, headerValue := range headers {
+		if headerName == "Host" {
+			req.Host = headerValue
+		} else {
+			req.Header.Set(headerName, headerValue)
+		}
 	}
 
 	return http.DefaultClient.Do(req)

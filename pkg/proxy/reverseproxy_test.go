@@ -52,7 +52,7 @@ func TestSuccessfulProxy(t *testing.T) {
 	defer ts.Close()
 
 	for _, tc := range tests {
-		res, err := ts.Do(tc.method, tc.url)
+		res, err := ts.Do(tc.method, tc.url, make(map[string]string))
 		assert.NoError(t, err)
 		if res != nil {
 			defer res.Body.Close()
