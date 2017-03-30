@@ -11,7 +11,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestBindSimpleJson(t *testing.T) {
+func TestBindSimpleJSON(t *testing.T) {
 	req, _ := http.NewRequest("GET", "/", nil)
 	req.Body = ioutil.NopCloser(bytes.NewBuffer([]byte("{\"name\": \"Test Recipe\", \"tags\": [\"test\"]}")))
 
@@ -21,4 +21,14 @@ func TestBindSimpleJson(t *testing.T) {
 	assert.Nil(t, err)
 	assert.Equal(t, "Test Recipe", recipe.Name)
 	assert.Equal(t, []mock.Tag{"test"}, recipe.Tags)
+}
+
+func TestWrongBindJSON(t *testing.T) {
+	req, _ := http.NewRequest("GET", "/", nil)
+	req.Body = ioutil.NopCloser(bytes.NewBuffer([]byte{}))
+
+	recipe := mock.Recipe{}
+	err := request.BindJSON(req, &recipe)
+
+	assert.NotNil(t, err)
 }

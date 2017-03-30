@@ -41,13 +41,20 @@ func (s *Server) Do(method string, url string, headers map[string]string) (*http
 }
 
 // Record creates a ResponseRecorder for testing
-func Record(method string, url string, handleFunc http.Handler) (*httptest.ResponseRecorder, error) {
+func Record(method string, url string, headers map[string]string, handleFunc http.Handler) (*httptest.ResponseRecorder, error) {
 	req, err := http.NewRequest(method, url, nil)
 	if err != nil {
 		return nil, err
 	}
 
-	req.Header.Set("Content-Type", "application/json")
+	for headerName, headerValue := range headers {
+		if headerName == "Host" {
+			req.Host = headerValue
+		} else {
+			req.Header.Set(headerName, headerValue)
+		}
+	}
+
 	w := httptest.NewRecorder()
 	handleFunc.ServeHTTP(w, req)
 
