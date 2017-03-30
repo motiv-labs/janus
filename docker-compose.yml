@@ -12,14 +12,8 @@ services:
     depends_on:
       - janus-database
       - janus-storage
-    environment:
-      LOG_LEVEL: 'debug'
-      STATS_PREFIX: 'janus-docker.'
-      DATABASE_DSN: 'file:///etc/janus'
-      # DATABASE_DSN: 'mongodb://janus-database:27017/janus'
-      STORAGE_DNS: 'memory://localhost'
-      # STORAGE_DNS: 'redis://janus-storage:6379'
-      SECRET: 'secret key'
+    volumes:
+      - ./janus.toml:/etc/janus/janus.toml
 
    # Janus Database (if you choose a database as storage)
   janus-database:

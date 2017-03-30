@@ -43,7 +43,7 @@ type Options struct {
 func Build(dsn string) (Store, error) {
 	url, err := url.Parse(dsn)
 	if nil != err {
-		log.Panic(err)
+		return nil, err
 	}
 	log.WithField("type", url.Scheme).Debug("Initializing storage")
 

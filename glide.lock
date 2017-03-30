@@ -1,5 +1,5 @@
-hash: 6aa09198e67e9c88bf8ac982c5aacafad120e9516df9d32df9a6f54caaec5ff2
-updated: 2017-03-20T16:41:51.464150829+01:00
+hash: 1c351a52b899b273223d9567e41fb19794040a67d0038ce7b4bba89c061b8d39
+updated: 2017-03-29T18:06:00.042274581+02:00
 imports:
 - name: cloud.google.com/go
   version: 8790afb57dfdb470da0b1f441c177e6e49ba66e7
@@ -19,6 +19,8 @@ imports:
   version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
 - name: github.com/dimfeld/httptreemux
   version: 86f7c217d9043ebc6adfd8e2ed04a0bb1e1db651
+- name: github.com/fsnotify/fsnotify
+  version: ff7bc41d4007f67e5456703c34342df4e0113f64
 - name: github.com/garyburd/redigo
   version: 8873b2f1995f59d4bcdd2b0dc9858e2cb9bf0c13
   subpackages:
@@ -39,16 +41,33 @@ imports:
   version: 08b5f424b9271eedf6f9f0ce86cb9396ed337a42
 - name: github.com/gorilla/mux
   version: 392c28fe23e1c45ddba891b0320b3b5df220beea
+- name: github.com/hashicorp/hcl
+  version: 630949a3c5fa3c613328e1b8256052cbc2327c9b
+  subpackages:
+  - hcl/ast
+  - hcl/parser
+  - hcl/scanner
+  - hcl/strconv
+  - hcl/token
+  - json/parser
+  - json/scanner
+  - json/token
 - name: github.com/hellofresh/gcloud-opentracing
   version: 8c9c9c8a60b3d4b71ad91d6aa60cd24399f355a7
 - name: github.com/hellofresh/stats-go
   version: 47f7950a30e6f2c5f5769dd06856647d58ecf9f6
+- name: github.com/inconshreveable/mousetrap
+  version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/justinas/alice
   version: 052b8b6c18edb9db317af86806d8e00ebaa94160
 - name: github.com/kelseyhightower/envconfig
   version: f611eb38b3875cc3bd991ca91c51d06446afa14c
+- name: github.com/magiconair/properties
+  version: 51463bfca2576e06c62a8504b5c0f06d61312647
+- name: github.com/mitchellh/mapstructure
+  version: 53818660ed4955e899c0bcafa97299a388bd7c8e
 - name: github.com/NYTimes/gziphandler
-  version: 3b0c4852c5b9710340f1ed7b1a529c46a3bc0fc1
+  version: d8206bba2a6097c0d75f4ac204a4814e47125cdd
 - name: github.com/opentracing/basictracer-go
   version: 1b32af207119a14b1b231d451df3ed04a72efebf
   subpackages:
@@ -60,16 +79,34 @@ imports:
   - log
 - name: github.com/patrickmn/go-cache
   version: 1881a9bccb818787f68c52bfba648c6cf34c34fa
+- name: github.com/pelletier/go-buffruneio
+  version: c37440a7cf42ac63b919c752ca73a85067e05992
+- name: github.com/pelletier/go-toml
+  version: f6e7596e8daafd44dc9e5c208dc73035020c8481
 - name: github.com/rs/cors
   version: a62a804a8a009876ca59105f7899938a1349f4b3
 - name: github.com/rs/xhandler
   version: d9d9599b6aaf6a058cb7b1f48291ded2cbd13390
 - name: github.com/Sirupsen/logrus
   version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
+- name: github.com/spf13/afero
+  version: 9be650865eab0c12963d8753212f4f9c66cdcf12
+  subpackages:
+  - mem
+- name: github.com/spf13/cast
+  version: ce135a4ebeee6cfe9a26c93ee0d37825f26113c7
+- name: github.com/spf13/cobra
+  version: 7be4beda01ec05d0b93d80b3facd2b6f44080d94
+- name: github.com/spf13/jwalterweatherman
+  version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
+- name: github.com/spf13/pflag
+  version: d16db1e50e33dff1b6cdf37596cef36742128670
+- name: github.com/spf13/viper
+  version: 84f94806c67f59dd7ae87bc5351f7a9c94a4558d
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: a6577fac2d73be281a500b310739095313165611
+  version: c4f37062e123971566edb19fb0554351464f8a98
   subpackages:
   - context
   - context/ctxhttp
@@ -90,6 +127,13 @@ imports:
   version: 8f0908ab3b2457e2e15403d3697c9ef5cb4b57a9
   subpackages:
   - unix
+- name: golang.org/x/text
+  version: fc7fa097411d30e6708badff276c4c164425590c
+  subpackages:
+  - secure/bidirule
+  - transform
+  - unicode/bidi
+  - unicode/norm
 - name: google.golang.org/api
   version: 8d00a4951e067948e3677034e525b281e9b82158
   subpackages:
@@ -133,6 +177,8 @@ imports:
   - internal/json
   - internal/sasl
   - internal/scram
+- name: gopkg.in/yaml.v2
+  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
 - name: sourcegraph.com/sourcegraph/appdash
   version: 5b9b70908c0e32b53e17215ee6e9515b02ad08b2
   subpackages:

@@ -11,7 +11,11 @@ before_install:
   
 install:
   - mkdir -p $GOPATH/bin
+  - go get github.com/mattn/goveralls
+  - go get github.com/go-playground/overalls
   - make deps
 
 script:
 - make test
+- $GOPATH/bin/overalls -project=github.com/hellofresh/janus -covermode=count
+- $GOPATH/bin/goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN

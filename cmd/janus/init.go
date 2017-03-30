@@ -9,26 +9,13 @@ import (
 	"github.com/hellofresh/janus/pkg/config"
 	tracerfactory "github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/store"
+	stats "github.com/hellofresh/stats-go"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 
-var (
-	err          error
-	globalConfig *config.Specification
-	storage      store.Store
-)
-
-// initializes the global configuration
-func init() {
-	globalConfig, err = config.LoadEnv()
-	if nil != err {
-		log.WithError(err).Panic("Could not parse the environment configurations")
-	}
-}
-
 // initializes the basic configuration for the log wrapper
-func init() {
-	level, err := log.ParseLevel(strings.ToLower(globalConfig.LogLevel))
+func initLogger(levelStr string) {
+	level, err := log.ParseLevel(strings.ToLower(levelStr))
 	if err != nil {
 		log.WithError(err).Error("Error getting log level")
 	}
@@ -40,10 +27,10 @@ func init() {
 	})
 }
 
-// initializes the
-func init() {
+// initializes distributed tracing
+func initTracing(config config.Tracing) {
 	log.Debug("initializing Open Tracing")
-	tracer, err := tracerfactory.Build(globalConfig.Tracing)
+	tracer, err := tracerfactory.Build(config)
 	if err != nil {
 		log.WithError(err).Panic("Could not build a tracer for open tracing")
 	}
@@ -52,10 +39,28 @@ func init() {
 }
 
 // initializes the storage and managers
-func init() {
-	var err error
-	storage, err = store.Build(globalConfig.StorageDSN)
+func initStorage(config config.Storage) store.Store {
+	storage, err := store.Build(config.DSN)
 	if nil != err {
 		log.Panic(err)
 	}
+
+	return storage
+}
+
+func initStatsdClient(config config.Stats) *stats.StatsdStatsClient {
+	sectionsTestsMap, err := stats.ParseSectionsTestsMap(config.IDs)
+	if err != nil {
+		log.WithError(err).WithField("config", config.IDs).
+			Error("Failed to parse stats second level IDs from env")
+		sectionsTestsMap = map[stats.PathSection]stats.SectionTestDefinition{}
+	}
+	log.WithField("config", config.IDs).
+		WithField("map", sectionsTestsMap.String()).
+		Debug("Setting stats second level IDs")
+
+	client := stats.NewStatsdStatsClient(config.DSN, config.Prefix)
+	client.SetHttpMetricCallback(stats.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
+
+	return client
 }

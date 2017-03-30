@@ -18,9 +18,9 @@ all: clean deps build
 
 deps:
 	@echo "$(OK_COLOR)==> Installing glide dependencies$(NO_COLOR)"
-	go get -u github.com/Masterminds/glide
-	go get -u github.com/golang/lint/golint
-	glide install
+	@go get -u github.com/Masterminds/glide
+	@go get -u github.com/golang/lint/golint
+	@glide install
 
 build:
 	@echo "$(OK_COLOR)==> Building... $(NO_COLOR)"
@@ -31,12 +31,12 @@ test:
 
 lint:
 	@echo "$(OK_COLOR)==> Linting... $(NO_COLOR)"
-	golint $(allpackages)
+	@golint $(allpackages)
 
 clean:
 	@echo "$(OK_COLOR)==> Cleaning project$(NO_COLOR)"
-	go clean
-	rm -rf bin $GOPATH/bin
+	@go clean
+	@rm -rf bin $GOPATH/bin
 
 # cd into the GOPATH to workaround ./... not following symlinks
 _allpackages = $(shell ( go list ./... 2>&1 1>&3 | \

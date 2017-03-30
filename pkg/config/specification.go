@@ -3,37 +3,53 @@ package config
 import (
 	"time"
 
+	log "github.com/Sirupsen/logrus"
+	"github.com/fsnotify/fsnotify"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/spf13/viper"
 )
 
 // Specification for basic configurations
 type Specification struct {
-	Port                 int           `envconfig:"PORT" default:"8080" description:"Default application port"`
-	APIPort              int           `envconfig:"API_PORT" default:"8081" description:"Admin API port"`
-	Debug                bool          `envconfig:"DEBUG" description:"Enable debug mode"`
-	LogLevel             string        `envconfig:"LOG_LEVEL" default:"info" description:"Log level"`
-	GraceTimeOut         int64         `envconfig:"GRACE_TIMEOUT" description:"Duration to give active requests a chance to finish during hot-reload"`
-	MaxIdleConnsPerHost  int           `envconfig:"MAX_IDLE_CONNS_PER_HOST" description:"If non-zero, controls the maximum idle (keep-alive) to keep per-host."`
-	InsecureSkipVerify   bool          `envconfig:"INSECURE_SKIP_VERIFY" description:"Disable SSL certificate verification"`
-	StorageDSN           string        `envconfig:"STORAGE_DSN" default:"memory://localhost" description:"The Storage DSN, this could be 'memory' or 'redis'"`
-	CertPathTLS          string        `envconfig:"CERT_PATH" description:"Path of certificate when using TLS"`
-	KeyPathTLS           string        `envconfig:"KEY_PATH" description:"Path of key when using TLS"`
-	BackendFlushInterval time.Duration `envconfig:"BACKEND_FLUSH_INTERVAL" default:"20ms" description:"Flush interval for upgraded Proxy connections"`
-	CloseIdleConnsPeriod time.Duration `envconfig:"CLOSE_IDLE_CONNS_PERIOD" description:"Defines the time period of how often the idle connections maintained by the proxy are closed."`
+	Port                 int           `envconfig:"PORT"`
+	Debug                bool          `envconfig:"DEBUG"`
+	LogLevel             string        `envconfig:"LOG_LEVEL"`
+	GraceTimeOut         int64         `envconfig:"GRACE_TIMEOUT"`
+	MaxIdleConnsPerHost  int           `envconfig:"MAX_IDLE_CONNS_PER_HOST"`
+	InsecureSkipVerify   bool          `envconfig:"INSECURE_SKIP_VERIFY"`
+	BackendFlushInterval time.Duration `envconfig:"BACKEND_FLUSH_INTERVAL"`
+	CloseIdleConnsPeriod time.Duration `envconfig:"CLOSE_IDLE_CONNS_PERIOD"`
+	CertFile             string        `envconfig:"CERT_PATH"`
+	KeyFile              string        `envconfig:"KEY_PATH"`
+	Web                  Web
 	Database             Database
+	Storage              Storage
 	Stats                Stats
-	Credentials          Credentials
 	Tracing              Tracing
 }
 
+// Web represents the API configurations
+type Web struct {
+	Port        int    `envconfig:"API_PORT"`
+	CertFile    string `envconfig:"API_CERT_PATH"`
+	KeyFile     string `envconfig:"API_KEY_PATH"`
+	ReadOnly    bool   `envconfig:"API_READONLY"`
+	Credentials Credentials
+}
+
 // IsHTTPS checks if you have https enabled
-func (s *Specification) IsHTTPS() bool {
-	return s.CertPathTLS != "" && s.KeyPathTLS != ""
+func (s *Web) IsHTTPS() bool {
+	return s.CertFile != "" && s.KeyFile != ""
+}
+
+// Storage holds the configuration for a storage
+type Storage struct {
+	DSN string `envconfig:"STORAGE_DSN"`
 }
 
 // Database holds the configuration for a database
 type Database struct {
-	DSN string `envconfig:"DATABASE_DSN" default:"file:///etc/janus"`
+	DSN string `envconfig:"DATABASE_DSN"`
 }
 
 // Stats holds the configuration for stats
@@ -46,9 +62,9 @@ type Stats struct {
 // Credentials represents the credentials that are going to be
 // used by JWT configuration
 type Credentials struct {
-	Secret   string `envconfig:"SECRET" required:"true"`
-	Username string `envconfig:"ADMIN_USERNAME" default:"admin"`
-	Password string `envconfig:"ADMIN_PASSWORD" default:"admin"`
+	Secret   string `envconfig:"SECRET"`
+	Username string `envconfig:"ADMIN_USERNAME"`
+	Password string `envconfig:"ADMIN_PASSWORD"`
 }
 
 // GoogleCloudTracing holds the Google Application Default Credentials
@@ -67,8 +83,8 @@ type AppdashTracing struct {
 
 // Tracing represents the distributed tracing configuration
 type Tracing struct {
-	GoogleCloudTracing GoogleCloudTracing
-	AppdashTracing     AppdashTracing
+	GoogleCloudTracing GoogleCloudTracing `mapstructure:"googleCloud"`
+	AppdashTracing     AppdashTracing     `mapstructure:"appdash"`
 }
 
 // IsGoogleCloudEnabled checks if google cloud is enabled
@@ -81,9 +97,53 @@ func (t Tracing) IsAppdashEnabled() bool {
 	return len(t.AppdashTracing.DSN) > 0
 }
 
-//LoadEnv loads environment variables
+func init() {
+	viper.SetDefault("port", "8080")
+	viper.SetDefault("logLevel", "info")
+	viper.SetDefault("backendFlushInterval", "20ms")
+	viper.SetDefault("database.dsn", "file:///etc/janus")
+	viper.SetDefault("storage.dsn", "memory://localhost")
+	viper.SetDefault("web.port", "8081")
+	viper.SetDefault("web.credentials.username", "admin")
+	viper.SetDefault("web.credentials.password", "admin")
+}
+
+//Load configuration variables
+func Load(configFile string) (*Specification, error) {
+	if configFile != "" {
+		viper.SetConfigFile(configFile)
+	} else {
+		viper.SetConfigName("janus")
+		viper.AddConfigPath("/etc/janus")
+		viper.AddConfigPath(".")
+	}
+
+	viper.WatchConfig()
+	viper.OnConfigChange(func(e fsnotify.Event) {
+		log.Debug("Configuration changed")
+	})
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.WithError(err).Warn("No config file found")
+		return LoadEnv()
+	}
+
+	var config Specification
+	if err := viper.Unmarshal(&config); err != nil {
+		return nil, err
+	}
+
+	return &config, nil
+}
+
+//LoadEnv loads configuration from environment variables
 func LoadEnv() (*Specification, error) {
 	var config Specification
+
+	if err := viper.Unmarshal(&config); err != nil {
+		return nil, err
+	}
+
 	err := envconfig.Process("", &config)
 	if err != nil {
 		return nil, err

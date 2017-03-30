@@ -11,6 +11,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/router"
+	stats "github.com/hellofresh/stats-go"
 )
 
 const (
@@ -24,7 +25,8 @@ const (
 
 // Params initialization options.
 type Params struct {
-	Transport Transport
+	// StatsClient defines the stats client for tracing
+	StatsClient stats.StatsClient
 
 	// When set, the proxy will skip the TLS verification on outgoing requests.
 	InsecureSkipVerify bool
@@ -48,7 +50,7 @@ type Params struct {
 // Proxy instances implement Janus proxying functionality. For
 // initializing, see the WithParams the constructor and Params.
 type Proxy struct {
-	roundTripper  http.RoundTripper
+	statsClient   stats.StatsClient
 	quit          chan struct{}
 	flushInterval time.Duration
 }
@@ -69,18 +71,17 @@ func WithParams(o Params) *Proxy {
 		o.CloseIdleConnsPeriod = DefaultCloseIdleConnsPeriod
 	}
 
-	tr := &http.Transport{
-		Proxy: http.ProxyFromEnvironment,
-		DialContext: (&net.Dialer{
-			Timeout:   30 * time.Second,
-			KeepAlive: 30 * time.Second,
-		}).DialContext,
-		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ExpectContinueTimeout: 1 * time.Second,
-		MaxIdleConnsPerHost:   o.IdleConnectionsPerHost,
-	}
+	tr := http.DefaultTransport.(*http.Transport)
+	tr.Proxy = http.ProxyFromEnvironment
+	tr.DialContext = (&net.Dialer{
+		Timeout:   30 * time.Second,
+		KeepAlive: 30 * time.Second,
+	}).DialContext
+	tr.MaxIdleConns = 100
+	tr.IdleConnTimeout = 90 * time.Second
+	tr.TLSHandshakeTimeout = 10 * time.Second
+	tr.ExpectContinueTimeout = 1 * time.Second
+	tr.MaxIdleConnsPerHost = o.IdleConnectionsPerHost
 
 	quit := make(chan struct{})
 	if o.CloseIdleConnsPeriod > 0 {
@@ -101,14 +102,14 @@ func WithParams(o Params) *Proxy {
 	}
 
 	return &Proxy{
-		roundTripper:  o.Transport.GetRoundTripper(tr),
+		statsClient:   o.StatsClient,
 		quit:          quit,
 		flushInterval: o.FlushInterval,
 	}
 }
 
-// Reverse creates a reverse proxy from a proxy definition
-func (p *Proxy) Reverse(proxyDefinition *Definition) *httputil.ReverseProxy {
+// Reverse given a target and chains of inbound/outbound plugins, we make a ReverseProxy
+func (p *Proxy) Reverse(proxyDefinition *Definition, inbound InChain, outbound OutChain) *httputil.ReverseProxy {
 	target, _ := url.Parse(proxyDefinition.UpstreamURL)
 	targetQuery := target.RawQuery
 
@@ -150,10 +151,11 @@ func (p *Proxy) Reverse(proxyDefinition *Definition) *httputil.ReverseProxy {
 		}
 	}
 
-	reverseProxy := &httputil.ReverseProxy{Director: director, Transport: p.roundTripper}
-	reverseProxy.FlushInterval = p.flushInterval
-
-	return reverseProxy
+	return &httputil.ReverseProxy{
+		Director:      director,
+		Transport:     &Shackles{p.statsClient, inbound, outbound},
+		FlushInterval: p.flushInterval,
+	}
 }
 
 // Close causes the proxy to stop closing idle

@@ -36,6 +36,7 @@ func (p *Params) ByName(name string) string {
 
 // Router defines the basic methods for a router
 type Router interface {
+	ServeHTTP(w http.ResponseWriter, req *http.Request)
 	Handle(method string, path string, handler http.HandlerFunc, handlers ...Constructor)
 	Any(path string, handler http.HandlerFunc, handlers ...Constructor)
 	GET(path string, handler http.HandlerFunc, handlers ...Constructor)
