@@ -2,9 +2,9 @@ package oauth
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"github.com/hellofresh/janus/pkg/cors"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/store"
+	"github.com/rs/cors"
 )
 
 // Loader handles the loading of the api specs
@@ -29,66 +29,70 @@ func (m *Loader) RegisterOAuthServers(oauthServers []*Spec, repo Repository) {
 	log.Debug("Loading OAuth servers configurations")
 
 	for _, oauthServer := range oauthServers {
-		log.Debug("Loading oauth configuration")
-		corsHandler := cors.NewMiddleware(oauthServer.CorsMeta, false).Handler
-		//oauth proxy
+		corsHandler := cors.New(cors.Options{
+			AllowedOrigins:   oauthServer.CorsMeta.Domains,
+			AllowedMethods:   oauthServer.CorsMeta.Methods,
+			AllowedHeaders:   oauthServer.CorsMeta.RequestHeaders,
+			ExposedHeaders:   oauthServer.CorsMeta.ExposedHeaders,
+			AllowCredentials: true,
+		}).Handler
+
 		log.Debug("Registering authorize endpoint")
 		authorizeProxy := oauthServer.Endpoints.Authorize
-		if proxy.Validate(authorizeProxy) {
+		if isValid, err := authorizeProxy.Validate(); isValid && err == nil {
 			m.register.Add(proxy.NewRoute(authorizeProxy, corsHandler))
 		} else {
-			log.Debug("No authorize endpoint")
+			log.WithError(err).Debug("No authorize endpoint")
 		}
 
 		log.Debug("Registering token endpoint")
 		tokenProxy := oauthServer.Endpoints.Token
-		if proxy.Validate(tokenProxy) {
+		if isValid, err := tokenProxy.Validate(); isValid && err == nil {
 			m.register.AddWithInOut(
 				proxy.NewRoute(tokenProxy, NewSecretMiddleware(oauthServer).Handler, corsHandler),
 				nil,
 				proxy.NewOutChain(NewTokenPlugin(m.storage, repo).Out),
 			)
 		} else {
-			log.Debug("No token endpoint")
+			log.WithError(err).Debug("No token endpoint")
 		}
 
 		log.Debug("Registering info endpoint")
 		infoProxy := oauthServer.Endpoints.Info
-		if proxy.Validate(infoProxy) {
+		if isValid, err := infoProxy.Validate(); isValid && err == nil {
 			m.register.Add(proxy.NewRoute(infoProxy, corsHandler))
 		} else {
-			log.Debug("No info endpoint")
+			log.WithError(err).Debug("No info endpoint")
 		}
 
 		log.Debug("Registering revoke endpoint")
 		revokeProxy := oauthServer.Endpoints.Revoke
-		if proxy.Validate(revokeProxy) {
+		if isValid, err := revokeProxy.Validate(); isValid && err == nil {
 			m.register.Add(proxy.NewRoute(revokeProxy, corsHandler, NewRevokeMiddleware(oauthServer).Handler))
 		} else {
-			log.Debug("No revoke endpoint")
+			log.WithError(err).Debug("No revoke endpoint")
 		}
 
 		log.Debug("Registering create client endpoint")
 		createProxy := oauthServer.ClientEndpoints.Create
-		if proxy.Validate(createProxy) {
+		if isValid, err := createProxy.Validate(); isValid && err == nil {
 			m.register.Add(proxy.NewRoute(createProxy, corsHandler))
 		} else {
-			log.Debug("No client create endpoint")
+			log.WithError(err).Debug("No client create endpoint")
 		}
 
 		log.Debug("Registering remove client endpoint")
 		removeProxy := oauthServer.ClientEndpoints.Remove
-		if proxy.Validate(removeProxy) {
+		if isValid, err := createProxy.Validate(); isValid && err == nil {
 			m.register.Add(proxy.NewRoute(removeProxy, corsHandler))
 		} else {
-			log.Debug("No client remove endpoint")
+			log.WithError(err).Debug("No client remove endpoint")
 		}
 	}
 
 	log.Debug("Done loading OAuth servers configurations")
 }
 
-//getOAuthServers Load oauth servers from datasource
 func (m *Loader) getOAuthServers(repo Repository) []*Spec {
 	oauthServers, err := repo.FindAll()
 	if err != nil {
