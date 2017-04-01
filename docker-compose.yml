@@ -5,10 +5,10 @@ services:
   janus:
     image: quay.io/hellofresh/janus
     ports:
-      - 8080
-      - 8081
-      - 8443
-      - 8444
+      - "8080:8080"
+      - "8081:8081"
+      - "8443:8443"
+      - "8444:8444"
     depends_on:
       - janus-database
       - janus-storage
