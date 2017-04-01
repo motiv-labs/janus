@@ -1,7 +1,6 @@
 package oauth
 
 import (
-	"github.com/hellofresh/janus/pkg/cors"
 	"github.com/hellofresh/janus/pkg/proxy"
 )
 
@@ -26,7 +25,7 @@ type OAuth struct {
 	AllowedAuthorizeTypes  []AuthorizeRequestType `bson:"allowed_authorize_types" json:"allowed_authorize_types"`
 	AuthorizeLoginRedirect string                 `bson:"auth_login_redirect" json:"auth_login_redirect"`
 	Secrets                map[string]string      `bson:"secrets" json:"secrets"`
-	CorsMeta               cors.Meta              `bson:"cors_meta" json:"cors_meta" valid:"cors_meta"`
+	CorsMeta               meta                   `bson:"cors_meta" json:"cors_meta" valid:"cors_meta"`
 	TokenStrategy          TokenStrategy          `bson:"token_strategy" json:"token_strategy"`
 }
 
@@ -52,3 +51,11 @@ type TokenStrategy struct {
 
 // TokenStrategySettings represents the settings for the token strategy
 type TokenStrategySettings map[string]string
+
+type meta struct {
+	Domains        []string `mapstructure:"domains" bson:"domains" json:"domains"`
+	Methods        []string `mapstructure:"methods" bson:"methods" json:"methods"`
+	RequestHeaders []string `mapstructure:"request_headers" bson:"request_headers" json:"request_headers"`
+	ExposedHeaders []string `mapstructure:"exposed_headers" bson:"exposed_headers" json:"exposed_headers"`
+	Enabled        bool     `bson:"enabled" json:"enabled"`
+}
