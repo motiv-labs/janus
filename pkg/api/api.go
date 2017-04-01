@@ -1,7 +1,7 @@
 package api
 
 import (
-	"github.com/hellofresh/janus/pkg/cors"
+	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
 )
@@ -12,29 +12,32 @@ type Spec struct {
 	Manager oauth.Manager
 }
 
+// Config represents the configuration for a plugin
+type Config map[string]interface{}
+
+// Plugin represents the plugins for an API
+type Plugin struct {
+	Name    string `bson:"name" json:"name"`
+	Enabled bool   `bson:"enabled" json:"enabled"`
+	Config  Config `bson:"config" json:"config"`
+}
+
 // Definition Represents an API that you want to proxy
 type Definition struct {
-	Name            string            `bson:"name" json:"name" valid:"required"`
-	Active          bool              `bson:"active" json:"active"`
-	Proxy           *proxy.Definition `bson:"proxy" json:"proxy" valid:"required"`
-	AllowedIPs      []string          `mapstructure:"allowed_ips" bson:"allowed_ips" json:"allowed_ips"`
-	UseBasicAuth    bool              `bson:"use_basic_auth" json:"use_basic_auth"`
-	UseOauth2       bool              `bson:"use_oauth2" json:"use_oauth2"`
-	OAuthServerName string            `bson:"oauth_server_name" json:"oauth_server_name"`
-	RateLimit       RateLimitMeta     `bson:"rate_limit" json:"rate_limit" valid:"required"`
-	CorsMeta        cors.Meta         `bson:"cors_meta" json:"cors_meta" valid:"cors_meta"`
-	UseCompression  bool              `bson:"use_compression" json:"use_compression"`
+	Name    string            `bson:"name" json:"name" valid:"required"`
+	Active  bool              `bson:"active" json:"active"`
+	Proxy   *proxy.Definition `bson:"proxy" json:"proxy"`
+	Plugins map[string]Plugin `bson:"plugins" json:"plugins"`
 }
 
 // NewDefinition creates a new API Definition with default values
 func NewDefinition() *Definition {
 	return &Definition{
-		UseCompression: true,
+		Active: true,
 	}
 }
 
-// RateLimitMeta holds configuration for a rate limit
-type RateLimitMeta struct {
-	Enabled bool   `bson:"enabled" json:"enabled"`
-	Limit   string `bson:"limit" json:"limit"`
+// Validate validates proxy data
+func (d *Definition) Validate() (bool, error) {
+	return govalidator.ValidateStruct(d)
 }
