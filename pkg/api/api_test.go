@@ -16,5 +16,5 @@ func TestNewInstanceOfDefinition(t *testing.T) {
 	instance := api.NewDefinition()
 
 	assert.IsType(t, &api.Definition{}, instance)
-	assert.True(t, instance.UseCompression)
+	assert.True(t, instance.Active)
 }
