@@ -9,47 +9,50 @@ import (
 
 func TestSuccessfulValidation(t *testing.T) {
 	definition := proxy.Definition{
-		ListenPath: "/*",
+		ListenPath:  "/*",
+		UpstreamURL: "http://test.com",
 	}
+	isValid, err := definition.Validate()
 
-	assert.True(t, proxy.Validate(&definition))
+	assert.NoError(t, err)
+	assert.True(t, isValid)
 }
 
 func TestEmptyListenPathValidation(t *testing.T) {
 	definition := proxy.Definition{}
+	isValid, err := definition.Validate()
 
-	assert.False(t, proxy.Validate(&definition))
+	assert.Error(t, err)
+	assert.False(t, isValid)
 }
 
-func TestNilProxy(t *testing.T) {
-	assert.False(t, proxy.Validate(nil))
-}
-
-func TestSpaceInListenPathValidation(t *testing.T) {
+func TestInvalidTargetURLValidation(t *testing.T) {
 	definition := proxy.Definition{
-		ListenPath: " ",
+		ListenPath:  " ",
+		UpstreamURL: "wrong",
 	}
+	isValid, err := definition.Validate()
 
-	assert.False(t, proxy.Validate(&definition))
+	assert.Error(t, err)
+	assert.False(t, isValid)
 }
 
 func TestRouteToJSON(t *testing.T) {
 	definition := proxy.Definition{
 		Methods: make([]string, 0),
-		Hosts:   make([]string, 0),
 	}
 	route := proxy.NewRoute(&definition)
 	json, err := route.JSONMarshal()
 	assert.NoError(t, err)
 	assert.JSONEq(
 		t,
-		`{"proxy": {"append_path":false, "enable_load_balancing":false, "methods":[], "hosts":[], "preserve_host":false, "listen_path":"", "upstream_url":"", "strip_path":false}}`,
+		`{"proxy": {"append_path":false, "enable_load_balancing":false, "methods":[], "preserve_host":false, "listen_path":"", "upstream_url":"", "strip_path":false}}`,
 		string(json),
 	)
 }
 
 func TestJSONToRoute(t *testing.T) {
-	route, err := proxy.JSONUnmarshalRoute([]byte(`{"proxy": {"append_path":false, "enable_load_balancing":false, "methods":[], "hosts":[], "preserve_host":false, "listen_path":"", "upstream_url":"/*", "strip_path":false}}`))
+	route, err := proxy.JSONUnmarshalRoute([]byte(`{"proxy": {"append_path":false, "enable_load_balancing":false, "methods":[], "preserve_host":false, "listen_path":"", "upstream_url":"/*", "strip_path":false}}`))
 
 	assert.NoError(t, err)
 	assert.IsType(t, &proxy.Route{}, route)
