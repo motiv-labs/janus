@@ -2,9 +2,8 @@ package proxy
 
 import (
 	"encoding/json"
-	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/router"
 )
 
@@ -46,24 +45,9 @@ type Definition struct {
 	AppendPath          bool     `bson:"append_path" json:"append_path"`
 	EnableLoadBalancing bool     `bson:"enable_load_balancing" json:"enable_load_balancing"`
 	Methods             []string `bson:"methods" json:"methods"`
-	Hosts               []string `bson:"hosts" json:"hosts"`
 }
 
 // Validate validates proxy data
-func Validate(proxy *Definition) bool {
-	if nil == proxy {
-		return false
-	}
-
-	if proxy.ListenPath == "" {
-		log.Warning("Listen path is empty")
-		return false
-	}
-
-	if strings.Contains(proxy.ListenPath, " ") {
-		log.Warning("Listen path contains spaces, is invalid")
-		return false
-	}
-
-	return true
+func (d *Definition) Validate() (bool, error) {
+	return govalidator.ValidateStruct(d)
 }
