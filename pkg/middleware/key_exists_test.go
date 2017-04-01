@@ -1,26 +1,17 @@
-package api_test
+package middleware_test
 
 import (
+	"encoding/json"
+	"fmt"
+	"net/http"
 	"testing"
 
-	"encoding/json"
-
-	"net/http"
-
-	"fmt"
-
-	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/session"
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/hellofresh/janus/pkg/test"
-	"github.com/hellofresh/janus/pkg/web"
 	"github.com/stretchr/testify/assert"
-)
-
-var (
-	recovery = middleware.NewRecovery(web.RecoveryHandler).Handler
 )
 
 func TestValidKeyStorage(t *testing.T) {
@@ -114,7 +105,7 @@ func TestMissingKeyStorage(t *testing.T) {
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 }
 
-func createMiddlewareWithSession(session session.State) (*api.KeyExistsMiddleware, error) {
+func createMiddlewareWithSession(session session.State) (*middleware.KeyExistsMiddleware, error) {
 	sessionJSON, err := json.Marshal(session)
 	if err != nil {
 		return nil, err
@@ -128,7 +119,5 @@ func createMiddlewareWithSession(session session.State) (*api.KeyExistsMiddlewar
 		return nil, err
 	}
 
-	return api.NewKeyExistsMiddleware(&api.Spec{
-		Manager: manager,
-	}), nil
+	return middleware.NewKeyExistsMiddleware(manager), nil
 }

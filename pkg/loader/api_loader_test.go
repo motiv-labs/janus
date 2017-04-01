@@ -1,17 +1,15 @@
-package api_test
+package loader_test
 
 import (
 	"net/http"
 	"testing"
 
 	"github.com/hellofresh/janus/pkg/api"
-	"github.com/hellofresh/janus/pkg/middleware"
-	"github.com/hellofresh/janus/pkg/oauth"
+	"github.com/hellofresh/janus/pkg/loader"
+	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
-	"github.com/hellofresh/janus/pkg/store"
 	"github.com/hellofresh/janus/pkg/test"
-	"github.com/hellofresh/janus/pkg/web"
 	stats "github.com/hellofresh/stats-go"
 	"github.com/stretchr/testify/assert"
 )
@@ -78,36 +76,23 @@ func TestSuccessfulLoader(t *testing.T) {
 
 func createRegisterAndRouter() (router.Router, error) {
 	r := createRouter()
-	r.Use(middleware.NewRecovery(web.RecoveryHandler).Handler)
+	// r.Use(middleware.NewRecovery(web.RecoveryHandler).Handler)
 
 	register := proxy.NewRegister(r, createProxy())
-	storage := createStorage()
-	authRepo, err := createAuthRepo()
-	if err != nil {
-		return nil, err
-	}
-
 	proxyRepo, err := createProxyRepo()
 	if err != nil {
 		return nil, err
 	}
 
-	loader := api.NewLoader(register, storage, authRepo)
+	pluginLoader := plugin.NewLoader()
+	loader := loader.NewLoader(register, pluginLoader)
 	loader.LoadDefinitions(proxyRepo)
 
 	return r, nil
 }
 
-func createAuthRepo() (oauth.Repository, error) {
-	return oauth.NewFileSystemRepository("../../examples/auth")
-}
-
 func createProxyRepo() (api.Repository, error) {
 	return api.NewFileSystemRepository("../../examples/apis")
-}
-
-func createStorage() store.Store {
-	return store.NewInMemoryStore()
 }
 
 func createRouter() router.Router {

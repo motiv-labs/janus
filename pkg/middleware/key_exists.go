@@ -1,4 +1,4 @@
-package api
+package middleware
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/errors"
+	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/request"
 )
 
@@ -19,12 +20,12 @@ var (
 
 // KeyExistsMiddleware checks the integrity of the provided OAuth headers
 type KeyExistsMiddleware struct {
-	spec *Spec
+	Manager oauth.Manager
 }
 
 // NewKeyExistsMiddleware creates a new instance of KeyExistsMiddleware
-func NewKeyExistsMiddleware(spec *Spec) *KeyExistsMiddleware {
-	return &KeyExistsMiddleware{spec}
+func NewKeyExistsMiddleware(manager oauth.Manager) *KeyExistsMiddleware {
+	return &KeyExistsMiddleware{manager}
 }
 
 // Handler is the middleware method.
@@ -50,7 +51,7 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 		}
 
 		accessToken := parts[1]
-		thisSessionState, keyExists := m.spec.Manager.IsKeyAuthorised(accessToken)
+		thisSessionState, keyExists := m.Manager.IsKeyAuthorised(accessToken)
 
 		if !keyExists {
 			log.WithFields(log.Fields{
