@@ -48,12 +48,6 @@
                     "X-Debug-Token-Link"
                 ]
             }
-        },
-        "oauth2" : {
-            "enabled" : true,
-            "config": {
-                    "server_name" : "local"
-            }
         }
     }
 }
