@@ -5,15 +5,17 @@ services:
   janus:
     image: quay.io/hellofresh/janus
     ports:
-      - 8080
-      - 8081
-      - 8443
-      - 8444
+      - "8080:8080"
+      - "8081:8081"
+      - "8443:8443"
+      - "8444:8444"
     depends_on:
       - janus-database
       - janus-storage
     volumes:
-      - ./janus.toml:/etc/janus/janus.toml
+      - ./janus.sample.toml:/etc/janus/janus.toml
+      - ./examples/apis:/etc/janus/apis
+      - ./examples/auth:/etc/janus/auth
 
    # Janus Database (if you choose a database as storage)
   janus-database:
