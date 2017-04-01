@@ -9,8 +9,10 @@ import (
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/errors"
+	"github.com/hellofresh/janus/pkg/loader"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/oauth"
+	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/web"
@@ -104,10 +106,19 @@ func RunServer(cmd *cobra.Command, args []string) {
 		middleware.NewOpenTracing(globalConfig.Web.IsHTTPS()).Handler,
 	)
 
+	pluginLoader := plugin.NewLoader()
+	pluginLoader.Add(
+		plugin.NewHostMatcher(),
+		plugin.NewRateLimit(storage),
+		plugin.NewCORS(),
+		plugin.NewOAuth2(oAuthServersRepo, storage),
+		plugin.NewCompression(),
+	)
+
 	// create proxy register
 	register := proxy.NewRegister(r, p)
 
-	apiLoader := api.NewLoader(register, storage, oAuthServersRepo)
+	apiLoader := loader.NewLoader(register, pluginLoader)
 	apiLoader.LoadDefinitions(repo)
 
 	oauthLoader := oauth.NewLoader(register, storage)
