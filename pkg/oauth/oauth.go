@@ -19,14 +19,14 @@ type Spec struct {
 // OAuth holds the configuration for oauth proxies
 type OAuth struct {
 	Name                   string                 `bson:"name" json:"name" valid:"required"`
-	Endpoints              Endpoints              `bson:"oauth_endpoints" json:"oauth_endpoints"`
-	ClientEndpoints        ClientEndpoints        `bson:"oauth_client_endpoints" json:"oauth_client_endpoints"`
-	AllowedAccessTypes     []AccessRequestType    `bson:"allowed_access_types" json:"allowed_access_types"`
-	AllowedAuthorizeTypes  []AuthorizeRequestType `bson:"allowed_authorize_types" json:"allowed_authorize_types"`
-	AuthorizeLoginRedirect string                 `bson:"auth_login_redirect" json:"auth_login_redirect"`
+	Endpoints              Endpoints              `bson:"oauth_endpoints" json:"oauth_endpoints" mapstructure:"oauth_endpoints"`
+	ClientEndpoints        ClientEndpoints        `bson:"oauth_client_endpoints" json:"oauth_client_endpoints" mapstructure:"oauth_client_endpoints"`
+	AllowedAccessTypes     []AccessRequestType    `bson:"allowed_access_types" json:"allowed_access_types" mapstructure:"allowed_access_types" `
+	AllowedAuthorizeTypes  []AuthorizeRequestType `bson:"allowed_authorize_types" json:"allowed_authorize_types" mapstructure:"allowed_authorize_types"`
+	AuthorizeLoginRedirect string                 `bson:"auth_login_redirect" json:"auth_login_redirect" mapstructure:"auth_login_redirect"`
 	Secrets                map[string]string      `bson:"secrets" json:"secrets"`
-	CorsMeta               meta                   `bson:"cors_meta" json:"cors_meta" valid:"cors_meta"`
-	TokenStrategy          TokenStrategy          `bson:"token_strategy" json:"token_strategy"`
+	CorsMeta               meta                   `bson:"cors_meta" json:"cors_meta" valid:"cors_meta" mapstructure:"cors_meta"`
+	TokenStrategy          TokenStrategy          `bson:"token_strategy" json:"token_strategy" mapstructure:"token_strategy"`
 }
 
 // Endpoints defines the oauth endpoints that wil be proxied

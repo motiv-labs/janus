@@ -110,10 +110,10 @@ func WithParams(o Params) *Proxy {
 
 // Reverse given a target and chains of inbound/outbound plugins, we make a ReverseProxy
 func (p *Proxy) Reverse(proxyDefinition *Definition, inbound InChain, outbound OutChain) *httputil.ReverseProxy {
-	target, _ := url.Parse(proxyDefinition.UpstreamURL)
-	targetQuery := target.RawQuery
-
 	director := func(req *http.Request) {
+		target, _ := url.Parse(proxyDefinition.UpstreamURL)
+		targetQuery := target.RawQuery
+
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
 		path := target.Path
