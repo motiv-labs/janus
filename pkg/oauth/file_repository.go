@@ -1,15 +1,15 @@
 package oauth
 
 import (
-	"encoding/json"
 	"io/ioutil"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	"net/url"
 
 	log "github.com/Sirupsen/logrus"
+	"github.com/fsnotify/fsnotify"
+	"github.com/spf13/viper"
 )
 
 // FileSystemRepository represents a mongodb repository
@@ -28,21 +28,31 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 	}
 
 	for _, f := range files {
-		if strings.Contains(f.Name(), ".json") {
-			filePath := filepath.Join(dir, f.Name())
-			log.WithField("path", filePath).Info("Loading OAuth Server definition from file")
-			appConfigBody, err := ioutil.ReadFile(filePath)
-			if err != nil {
-				log.WithError(err).WithField("path", filePath).Error("Couldn't load oauth server definition file")
-				return nil, err
-			}
+		filePath := filepath.Join(dir, f.Name())
+		definition := new(OAuth)
 
-			definition := repo.parseDefinition(appConfigBody)
-			err = repo.Add(definition)
-			if err != nil {
-				log.WithError(err).Error("Can't add the oauth server to the repository")
-				return nil, err
+		v := viper.New()
+		v.SetConfigFile(filePath)
+		v.WatchConfig()
+		v.OnConfigChange(func(e fsnotify.Event) {
+			log.Debug("OAauth2 configuration changed, reloading...")
+			if err := v.Unmarshal(definition); err != nil {
+				log.WithError(err).Error("Can't unmarshal the OAauth2 configuration")
 			}
+		})
+
+		if err := v.ReadInConfig(); err != nil {
+			log.WithError(err).Error("Couldn't load the OAauth2 definition file")
+			return nil, err
+		}
+
+		if err := v.Unmarshal(definition); err != nil {
+			return nil, err
+		}
+
+		if err = repo.Add(definition); err != nil {
+			log.WithError(err).Error("Can't add the definition to the repository")
+			return nil, err
 		}
 	}
 
@@ -97,13 +107,4 @@ func (r *FileSystemRepository) FindByTokenURL(url url.URL) (*OAuth, error) {
 	}
 
 	return nil, ErrOauthServerNotFound
-}
-
-func (r *FileSystemRepository) parseDefinition(apiDef []byte) *OAuth {
-	appConfig := &OAuth{}
-	if err := json.Unmarshal(apiDef, appConfig); err != nil {
-		log.Error("[RPC] --> Couldn't unmarshal api configuration: ", err)
-	}
-
-	return appConfig
 }
