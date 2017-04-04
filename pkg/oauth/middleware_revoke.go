@@ -6,7 +6,11 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-// RevokeMiddleware prevents requests to an API from exceeding a specified rate limit.
+// RevokeMiddleware is used to revoked a token from the gateway datastore.
+// If you configure Janus to use a datastore and you are not suing JWT as
+// your token strategy, then this middleware will be enabled.
+// It will look for the provided access_token send to the configured
+// revoke endpoint and removed it from the datastore.
 type RevokeMiddleware struct {
 	oauthServer *Spec
 }
