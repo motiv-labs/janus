@@ -1,6 +1,7 @@
 package store
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
 	"github.com/ulule/limiter"
 )
@@ -100,6 +101,42 @@ func (s *RedisStore) ToLimiterStore(prefix string) (limiter.Store, error) {
 		Prefix:   prefix,
 		MaxRetry: limiter.DefaultMaxRetry,
 	})
+}
+
+func (s *RedisStore) Publish(topic string, data []byte) error {
+	c := s.getConnection()
+	_, err := c.Do("PUBLISH", topic, data)
+	return err
+}
+
+func (s *RedisStore) Subscribe(topic string) *Subscription {
+	sub := NewSubscription()
+
+	go func() {
+		for {
+			// Get a connection from a pool
+			c := s.getConnection()
+			psc := redis.PubSubConn{Conn: c}
+
+			// Set up subscriptions
+			psc.Subscribe(topic)
+
+			// While not a permanent error on the connection.
+			for c.Err() == nil {
+				switch v := psc.Receive().(type) {
+				case redis.Message:
+					log.WithField("channel", v.Channel).Debug("Received a message")
+					sub.Message <- Message(v.Data)
+				case error:
+					log.WithError(v).Debug("An error ocurred when getting the message")
+					return
+				}
+			}
+			c.Close()
+		}
+	}()
+
+	return sub
 }
 
 func (s *RedisStore) exists(conn redis.Conn, key string) (bool, error) {
