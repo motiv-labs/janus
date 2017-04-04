@@ -85,7 +85,7 @@ func createRegisterAndRouter() (router.Router, error) {
 	}
 
 	pluginLoader := plugin.NewLoader()
-	loader := loader.NewLoader(register, pluginLoader)
+	loader := loader.NewAPILoader(register, pluginLoader, nil)
 	loader.LoadDefinitions(proxyRepo)
 
 	return r, nil
