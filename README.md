@@ -51,7 +51,7 @@ This API Gateway offers powerful, yet lightweight features that allows fine gain
 
 ### Docker
 
-The simplest way of installing janus is to run the docker image for it. Just check the [docker-compose.yml](ci/assets/docker-compose.yml)
+The simplest way of installing janus is to run the docker image for it. Just check the [docker-compose.yml](docker-compose.yml)
 example and then run it.
 
 ```sh
