@@ -1,6 +1,7 @@
 package oauth
 
 import (
+	"encoding/json"
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/errors"
@@ -8,16 +9,18 @@ import (
 	"github.com/hellofresh/janus/pkg/request"
 	"github.com/hellofresh/janus/pkg/response"
 	"github.com/hellofresh/janus/pkg/router"
+	"github.com/hellofresh/janus/pkg/store"
 )
 
 // Controller is the api rest controller
 type Controller struct {
-	repo Repository
+	repo      Repository
+	publisher store.Publisher
 }
 
 // NewController creates a new instance of Controller
-func NewController(repo Repository) *Controller {
-	return &Controller{repo}
+func NewController(repo Repository, publisher store.Publisher) *Controller {
+	return &Controller{repo, publisher}
 }
 
 // Get is the find all handler
@@ -80,6 +83,7 @@ func (c *Controller) PutBy() http.HandlerFunc {
 
 		span = opentracing.FromContext(r.Context(), "datastore.Add")
 		err = c.repo.Add(oauth)
+		c.dispatch(oauth)
 		span.Finish()
 
 		if nil != err {
@@ -102,6 +106,7 @@ func (c *Controller) Post() http.HandlerFunc {
 
 		span := opentracing.FromContext(r.Context(), "datastore.Add")
 		err = c.repo.Add(&oauth)
+		c.dispatch(&oauth)
 		span.Finish()
 
 		if nil != err {
@@ -126,5 +131,12 @@ func (c *Controller) DeleteBy() http.HandlerFunc {
 		}
 
 		response.JSON(w, http.StatusNoContent, nil)
+	}
+}
+
+func (c *Controller) dispatch(server *OAuth) {
+	if c.publisher != nil {
+		raw, _ := json.Marshal(server)
+		c.publisher.Publish("oauth_updates", raw)
 	}
 }
