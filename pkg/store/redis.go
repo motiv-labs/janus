@@ -103,12 +103,14 @@ func (s *RedisStore) ToLimiterStore(prefix string) (limiter.Store, error) {
 	})
 }
 
+// Publish publishes to a topic in redis
 func (s *RedisStore) Publish(topic string, data []byte) error {
 	c := s.getConnection()
 	_, err := c.Do("PUBLISH", topic, data)
 	return err
 }
 
+// Subscribe subscribes to a topic in redis
 func (s *RedisStore) Subscribe(topic string) *Subscription {
 	sub := NewSubscription()
 
