@@ -1,34 +1,43 @@
-package oauth
+package loader
 
 import (
+	"encoding/json"
+
 	log "github.com/Sirupsen/logrus"
+	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/rs/cors"
 )
 
-// Loader handles the loading of the api specs
-type Loader struct {
+// OAuthLoader handles the loading of the api specs
+type OAuthLoader struct {
 	register *proxy.Register
 	storage  store.Store
+	subs     *store.Subscription
 }
 
-// NewLoader creates a new instance of the Loader
-func NewLoader(register *proxy.Register, storage store.Store) *Loader {
-	return &Loader{register, storage}
+// NewOAuthLoader creates a new instance of the Loader
+func NewOAuthLoader(register *proxy.Register, storage store.Store, subs *store.Subscription) *OAuthLoader {
+	return &OAuthLoader{register, storage, subs}
 }
 
 // LoadDefinitions loads all oauth servers from a datasource
-func (m *Loader) LoadDefinitions(repo Repository) {
+func (m *OAuthLoader) LoadDefinitions(repo oauth.Repository) {
 	oAuthServers := m.getOAuthServers(repo)
 	m.RegisterOAuthServers(oAuthServers, repo)
 }
 
 // RegisterOAuthServers register many oauth servers
-func (m *Loader) RegisterOAuthServers(oauthServers []*Spec, repo Repository) {
+func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oauth.Repository) {
 	log.Debug("Loading OAuth servers configurations")
 
 	for _, oauthServer := range oauthServers {
+		if m.subs != nil {
+			log.Debug("Listening for changes on for the OAuth definitions")
+			go m.listenForChanges(oauthServer.OAuth)
+		}
+
 		corsHandler := cors.New(cors.Options{
 			AllowedOrigins:   oauthServer.CorsMeta.Domains,
 			AllowedMethods:   oauthServer.CorsMeta.Methods,
@@ -49,9 +58,9 @@ func (m *Loader) RegisterOAuthServers(oauthServers []*Spec, repo Repository) {
 		tokenProxy := oauthServer.Endpoints.Token
 		if isValid, err := tokenProxy.Validate(); isValid && err == nil {
 			m.register.AddWithInOut(
-				proxy.NewRoute(tokenProxy, NewSecretMiddleware(oauthServer).Handler, corsHandler),
+				proxy.NewRoute(tokenProxy, oauth.NewSecretMiddleware(oauthServer).Handler, corsHandler),
 				nil,
-				proxy.NewOutChain(NewTokenPlugin(m.storage, repo).Out),
+				proxy.NewOutChain(oauth.NewTokenPlugin(m.storage, repo).Out),
 			)
 		} else {
 			log.WithError(err).Debug("No token endpoint")
@@ -68,7 +77,7 @@ func (m *Loader) RegisterOAuthServers(oauthServers []*Spec, repo Repository) {
 		log.Debug("Registering revoke endpoint")
 		revokeProxy := oauthServer.Endpoints.Revoke
 		if isValid, err := revokeProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRoute(revokeProxy, corsHandler, NewRevokeMiddleware(oauthServer).Handler))
+			m.register.Add(proxy.NewRoute(revokeProxy, corsHandler, oauth.NewRevokeMiddleware(oauthServer).Handler))
 		} else {
 			log.WithError(err).Debug("No revoke endpoint")
 		}
@@ -93,15 +102,15 @@ func (m *Loader) RegisterOAuthServers(oauthServers []*Spec, repo Repository) {
 	log.Debug("Done loading OAuth servers configurations")
 }
 
-func (m *Loader) getOAuthServers(repo Repository) []*Spec {
+func (m *OAuthLoader) getOAuthServers(repo oauth.Repository) []*oauth.Spec {
 	oauthServers, err := repo.FindAll()
 	if err != nil {
 		log.Panic(err)
 	}
 
-	var specs []*Spec
+	var specs []*oauth.Spec
 	for _, oauthServer := range oauthServers {
-		spec := new(Spec)
+		spec := new(oauth.Spec)
 		spec.OAuth = oauthServer
 		manager, err := m.getManager(oauthServer)
 		if nil != err {
@@ -115,11 +124,26 @@ func (m *Loader) getOAuthServers(repo Repository) []*Spec {
 	return specs
 }
 
-func (m *Loader) getManager(oauthServer *OAuth) (Manager, error) {
-	managerType, err := ParseType(oauthServer.TokenStrategy.Name)
+func (m *OAuthLoader) getManager(oauthServer *oauth.OAuth) (oauth.Manager, error) {
+	managerType, err := oauth.ParseType(oauthServer.TokenStrategy.Name)
 	if nil != err {
 		return nil, err
 	}
 
-	return NewManagerFactory(m.storage, oauthServer.TokenStrategy.Settings).Build(managerType)
+	return oauth.NewManagerFactory(m.storage, oauthServer.TokenStrategy.Settings).Build(managerType)
+}
+
+func (m *OAuthLoader) listenForChanges(def *oauth.OAuth) {
+	for {
+		select {
+		case msg := <-m.subs.Message:
+			var msgDefinition *oauth.OAuth
+			json.Unmarshal(msg, &msgDefinition)
+
+			if def.Name == msgDefinition.Name {
+				*def = *msgDefinition
+				log.Debug(def)
+			}
+		}
+	}
 }

@@ -1,39 +1,47 @@
 package loader
 
 import (
+	"encoding/json"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
+	"github.com/hellofresh/janus/pkg/store"
 )
 
-// Loader is responsible for loading all apis form a datastore and configure them in a register
-type Loader struct {
+// APILoader is responsible for loading all apis form a datastore and configure them in a register
+type APILoader struct {
 	register     *proxy.Register
 	pluginLoader *plugin.Loader
+	subs         *store.Subscription
 }
 
-// NewLoader creates a new instance of the api manager
-func NewLoader(register *proxy.Register, pluginLoader *plugin.Loader) *Loader {
-	return &Loader{register, pluginLoader}
+// NewAPILoader creates a new instance of the api manager
+func NewAPILoader(register *proxy.Register, pluginLoader *plugin.Loader, subs *store.Subscription) *APILoader {
+	return &APILoader{register, pluginLoader, subs}
 }
 
 // LoadDefinitions will connect and download ApiDefintions from a Mongo DB instance.
-func (m *Loader) LoadDefinitions(repo api.Repository) {
+func (m *APILoader) LoadDefinitions(repo api.Repository) {
 	specs := m.getAPISpecs(repo)
 	m.RegisterApis(specs)
 }
 
 // RegisterApis load application middleware
-func (m *Loader) RegisterApis(apiSpecs []*api.Spec) {
+func (m *APILoader) RegisterApis(apiSpecs []*api.Spec) {
 	for _, referenceSpec := range apiSpecs {
+		if m.subs != nil {
+			log.Debug("Listening for changes on for the API definitions")
+			go m.listenForChanges(referenceSpec.Definition)
+		}
 		m.RegisterAPI(referenceSpec)
 	}
 }
 
 // RegisterAPI register an API Spec in the register
-func (m *Loader) RegisterAPI(referenceSpec *api.Spec) {
+func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 	logger := log.WithField("api_name", referenceSpec.Name)
 
 	active, err := referenceSpec.Validate()
@@ -78,7 +86,7 @@ func (m *Loader) RegisterAPI(referenceSpec *api.Spec) {
 }
 
 //getAPISpecs Load application specs from datasource
-func (m *Loader) getAPISpecs(repo api.Repository) []*api.Spec {
+func (m *APILoader) getAPISpecs(repo api.Repository) []*api.Spec {
 	definitions, err := repo.FindAll()
 	if err != nil {
 		log.Panic(err)
@@ -90,4 +98,18 @@ func (m *Loader) getAPISpecs(repo api.Repository) []*api.Spec {
 	}
 
 	return specs
+}
+
+func (m *APILoader) listenForChanges(def *api.Definition) {
+	for {
+		select {
+		case msg := <-m.subs.Message:
+			var msgDefinition *api.Definition
+			json.Unmarshal(msg, &msgDefinition)
+
+			if def.Name == msgDefinition.Name {
+				*def = *msgDefinition
+			}
+		}
+	}
 }
