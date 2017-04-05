@@ -3,12 +3,6 @@ package store
 import (
 	log "github.com/Sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
-	"github.com/ulule/limiter"
-)
-
-const (
-	// DefaultPrefix is the default prefix to use for the key in the store.
-	DefaultPrefix = "limiter"
 )
 
 // RedisStore is the redis store.
@@ -26,7 +20,7 @@ type RedisStore struct {
 // NewRedisStore returns an instance of redis store.
 func NewRedisStore(pool *redis.Pool) (Store, error) {
 	return NewRedisStoreWithOptions(pool, Options{
-		Prefix: DefaultPrefix,
+		Prefix: "janus",
 	})
 }
 
@@ -91,16 +85,6 @@ func (s *RedisStore) Set(key string, value string, expire int64) error {
 	defer conn.Close()
 
 	return s.set(conn, key, value, expire)
-}
-
-// ToLimiterStore converts a storage into a limmiter compliant storage
-func (s *RedisStore) ToLimiterStore(prefix string) (limiter.Store, error) {
-	// Alternatively, you can pass options to the store with the "WithOptions"
-	// function. For example, for Redis store:
-	return limiter.NewRedisStoreWithOptions(s.Pool, limiter.StoreOptions{
-		Prefix:   prefix,
-		MaxRetry: limiter.DefaultMaxRetry,
-	})
 }
 
 // Publish publishes to a topic in redis

@@ -6,7 +6,6 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
-	"github.com/ulule/limiter"
 )
 
 const (
@@ -24,7 +23,6 @@ type Store interface {
 	Get(key string) (string, error)
 	Remove(key string) error
 	Set(key string, value string, expire int64) error
-	ToLimiterStore(prefix string) (limiter.Store, error)
 }
 
 // Subscriber holds the basic methods to subscribe to a topic
