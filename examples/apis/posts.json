@@ -8,21 +8,15 @@
         "strip_path" : true,
         "append_path" : false,
         "enable_load_balancing" : false,
-        "methods" : [
-            "GET"
-        ]
+        "methods" : ["GET"],
+        "hosts": ["hellofresh.*"]
     },
     "plugins": {
-        "host_matcher": {
-            "enabled": true,
-            "config": {
-                "hosts": ["hellofresh.*"]
-            }
-        },
         "rate_limit" : {
             "enabled" : true,
             "config": {
-                    "limit" : "10-S"
+                    "limit" : "10-S",
+                    "policy": "local"
             }
         },
         "cors" : {
