@@ -1,4 +1,4 @@
-package mock
+package test
 
 // Tag represents the recipe tags
 type Tag string

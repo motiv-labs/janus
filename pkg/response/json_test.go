@@ -6,15 +6,15 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/mock"
 	"github.com/hellofresh/janus/pkg/response"
+	"github.com/hellofresh/janus/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRespondAsJson(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	recipe := mock.Recipe{Name: "Test"}
+	recipe := test.Recipe{Name: "Test"}
 	response.JSON(w, http.StatusOK, recipe)
 
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
@@ -24,7 +24,7 @@ func TestRespondAsJson(t *testing.T) {
 func TestRespondExpectedBody(t *testing.T) {
 	w := httptest.NewRecorder()
 
-	recipe := mock.Recipe{Name: "Test"}
+	recipe := test.Recipe{Name: "Test"}
 	response.JSON(w, http.StatusOK, recipe)
 
 	expectedWriter := httptest.NewRecorder()
