@@ -1,4 +1,4 @@
-package middleware_test
+package middleware
 
 import (
 	"encoding/json"
@@ -6,7 +6,6 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/session"
 	"github.com/hellofresh/janus/pkg/store"
@@ -19,7 +18,7 @@ func TestValidKeyStorage(t *testing.T) {
 		AccessToken: "123",
 	}
 
-	middleware, err := createMiddlewareWithSession(session)
+	mw, err := createMiddlewareWithSession(session)
 	assert.NoError(t, err)
 
 	w, err := test.Record(
@@ -29,7 +28,7 @@ func TestValidKeyStorage(t *testing.T) {
 			"Content-Type":  "application/json",
 			"Authorization": fmt.Sprintf("Bearer %s", session.AccessToken),
 		},
-		middleware.Handler(http.HandlerFunc(test.Ping)),
+		mw.Handler(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 
@@ -105,7 +104,7 @@ func TestMissingKeyStorage(t *testing.T) {
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 }
 
-func createMiddlewareWithSession(session session.State) (*middleware.KeyExistsMiddleware, error) {
+func createMiddlewareWithSession(session session.State) (*KeyExistsMiddleware, error) {
 	sessionJSON, err := json.Marshal(session)
 	if err != nil {
 		return nil, err
@@ -119,5 +118,5 @@ func createMiddlewareWithSession(session session.State) (*middleware.KeyExistsMi
 		return nil, err
 	}
 
-	return middleware.NewKeyExistsMiddleware(manager), nil
+	return NewKeyExistsMiddleware(manager), nil
 }

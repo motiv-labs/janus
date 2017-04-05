@@ -1,17 +1,16 @@
-package middleware_test
+package middleware
 
 import (
 	"testing"
 
 	"net/http"
 
-	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSuccessfulTrace(t *testing.T) {
-	mw := middleware.NewOpenTracing(false)
+	mw := NewOpenTracing(false)
 	w, err := test.Record(
 		"GET",
 		"/",

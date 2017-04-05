@@ -1,22 +1,20 @@
-package middleware_test
+package middleware
 
 import (
 	"testing"
 
 	"net/http"
 
-	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/test"
-	"github.com/hellofresh/janus/pkg/web"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	recovery = middleware.NewRecovery(web.RecoveryHandler).Handler
+	recovery = NewRecovery(test.RecoveryHandler).Handler
 )
 
 func TestMatchSimpleHeader(t *testing.T) {
-	mw := middleware.NewHostMatcher([]string{"hellofresh.com"})
+	mw := NewHostMatcher([]string{"hellofresh.com"})
 	w, err := test.Record(
 		"GET",
 		"/",
@@ -33,7 +31,7 @@ func TestMatchSimpleHeader(t *testing.T) {
 }
 
 func TestNotMatchSimpleHeader(t *testing.T) {
-	mw := middleware.NewHostMatcher([]string{"hellofresh.com"})
+	mw := NewHostMatcher([]string{"hellofresh.com"})
 	w, err := test.Record(
 		"GET",
 		"/",
@@ -50,7 +48,7 @@ func TestNotMatchSimpleHeader(t *testing.T) {
 }
 
 func TestMatchRegexHeader(t *testing.T) {
-	mw := middleware.NewHostMatcher([]string{"hellofresh.*"})
+	mw := NewHostMatcher([]string{"hellofresh.*"})
 	w, err := test.Record(
 		"GET",
 		"/",
@@ -67,7 +65,7 @@ func TestMatchRegexHeader(t *testing.T) {
 }
 
 func TestNotMatchRegexHeader(t *testing.T) {
-	mw := middleware.NewHostMatcher([]string{"hellofresh.*"})
+	mw := NewHostMatcher([]string{"hellofresh.*"})
 	w, err := test.Record(
 		"GET",
 		"/",

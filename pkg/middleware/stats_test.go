@@ -1,18 +1,17 @@
-package middleware_test
+package middleware
 
 import (
 	"testing"
 
 	"net/http"
 
-	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/test"
 	stats "github.com/hellofresh/stats-go"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSuccessfulStats(t *testing.T) {
-	mw := middleware.NewStats(stats.NewStatsdStatsClient("", ""))
+	mw := NewStats(stats.NewStatsdStatsClient("", ""))
 	w, err := test.Record(
 		"GET",
 		"/",
