@@ -45,6 +45,7 @@ type Definition struct {
 	AppendPath          bool     `bson:"append_path" json:"append_path" mapstructure:"append_path"`
 	EnableLoadBalancing bool     `bson:"enable_load_balancing" json:"enable_load_balancing" mapstructure:"enable_load_balancing"`
 	Methods             []string `bson:"methods" json:"methods"`
+	Hosts               []string `bson:"hosts" json:"hosts"`
 }
 
 // Validate validates proxy data
