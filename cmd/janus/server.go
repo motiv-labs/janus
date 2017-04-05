@@ -109,7 +109,6 @@ func RunServer(cmd *cobra.Command, args []string) {
 
 	pluginLoader := plugin.NewLoader()
 	pluginLoader.Add(
-		plugin.NewHostMatcher(),
 		plugin.NewRateLimit(storage),
 		plugin.NewCORS(),
 		plugin.NewOAuth2(oAuthServersRepo, storage),
