@@ -79,7 +79,10 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 			}
 		}
 
-		handlers = append(handlers, middleware.NewHostMatcher(referenceSpec.Definition.Proxy.Hosts).Handler)
+		if len(referenceSpec.Definition.Proxy.Hosts) > 0 {
+			handlers = append(handlers, middleware.NewHostMatcher(referenceSpec.Definition.Proxy.Hosts).Handler)
+		}
+
 		m.register.Add(proxy.NewRoute(referenceSpec.Proxy, handlers...))
 		logger.Debug("API registered")
 	} else {

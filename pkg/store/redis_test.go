@@ -6,7 +6,6 @@ import (
 
 	"github.com/garyburd/redigo/redis"
 	"github.com/stretchr/testify/assert"
-	"github.com/ulule/limiter"
 )
 
 type mockConnDoAssert struct {
@@ -70,11 +69,6 @@ func (s *mockRedisStore) Set(key string, value string, expire int64) error {
 	defer conn.Close()
 
 	return s.redisStore.set(conn, key, value, expire)
-}
-
-func (s *mockRedisStore) ToLimiterStore(prefix string) (limiter.Store, error) {
-	// TODO: implement tests for limiter
-	return nil, nil
 }
 
 func TestRedisStore_getSetCommandAndArgs(t *testing.T) {

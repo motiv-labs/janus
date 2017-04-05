@@ -1,11 +1,10 @@
-package loader_test
+package loader
 
 import (
 	"net/http"
 	"testing"
 
 	"github.com/hellofresh/janus/pkg/api"
-	"github.com/hellofresh/janus/pkg/loader"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -87,7 +86,7 @@ func createRegisterAndRouter() (router.Router, error) {
 	}
 
 	pluginLoader := plugin.NewLoader()
-	loader := loader.NewAPILoader(register, pluginLoader, nil)
+	loader := NewAPILoader(register, pluginLoader, nil)
 	loader.LoadDefinitions(proxyRepo)
 
 	return r, nil
