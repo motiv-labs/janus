@@ -5,7 +5,7 @@ By choosing a File System based configuration we have a static way of configure 
 ## 1. Preparing the folder structure
 
 By default all apis configurations are splited in separeted files (one for each API) and they live in
-`/etc/janus`. Of course you can configure that route by simply defining the `DATABASE_DSN`, for instance,
+`/etc/janus`. Of course you can configure that route by simply defining the configuration `database.dsn`, for instance,
 you can define the value to `file:///usr/local/janus`.
 
 Let's use the default directory and create it `/etc/janus`. We need two main folders `apis` and `auth` each one of them
@@ -21,24 +21,17 @@ mkdir -p /etc/janus/auth
 The main feature of the API Gateway is to proxy the requests to a different service, so let's do this.
 
 Just place [this example](../examples/apis/posts.json) in your `apis` directory.
-This will create a proxy to `https://jsonplaceholder.typicode.com/posts` when you hit the api gateway on `GET /posts`.
-Now just make a request to `GET /posts`
+This will create a proxy to `https://jsonplaceholder.typicode.com/posts` when you hit Janus on `GET /posts`.
+
+Now restart Janus to apply the changes.
 
 ```bash
-http -v --json GET http://localhost:8080/posts/1
+sudo sv restart janus
 ```
-
-<p align="center">
-  <a href="http://g.recordit.co/vufeMjwEfg.gif">
-    <img src="http://g.recordit.co/vufeMjwEfg.gif">
-  </a>
-</p>
-
-Done! You just made your first request through the gateway.
 
 ## 3. Verify that your API has been added
 
-You can use the REST API to query (Read Only) all available APIs and Auth Providers. Simply make a request 
+You can use the REST API to query all available APIs and Auth Providers. Simply make a request 
 to `/apis`.
 
 ```bash
@@ -55,9 +48,15 @@ requests on port `:8080`:
 $ http -v GET http://localhost:8080/posts/1
 ```
 
+<p align="center">
+  <a href="http://g.recordit.co/vufeMjwEfg.gif">
+    <img src="http://g.recordit.co/vufeMjwEfg.gif">
+  </a>
+</p>
+
+
 A successful response means Janus is now forwarding requests made to
 `http://localhost:8000` to the `upstream_url` we configured in step #1,
-and is forwarding the response back to us. Janus knows how to do this through
-the header defined in the above cURL request.
+and is forwarding the response back to us.
 
 Do you want to protect your API? Check it out [here](proxy_auth_methods.md) how to do it.
