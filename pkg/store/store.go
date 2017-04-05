@@ -48,7 +48,7 @@ type Options struct {
 }
 
 // Message represents the message that comes
-// form an update
+// from an update
 type Message []byte
 
 // Subscription holds a message channel
