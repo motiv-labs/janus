@@ -5,6 +5,7 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
+	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
@@ -78,6 +79,7 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 			}
 		}
 
+		handlers = append(handlers, middleware.NewHostMatcher(referenceSpec.Definition.Proxy.Hosts).Handler)
 		m.register.Add(proxy.NewRoute(referenceSpec.Proxy, handlers...))
 		logger.Debug("API registered")
 	} else {
