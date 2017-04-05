@@ -142,7 +142,6 @@ func (m *OAuthLoader) listenForChanges(def *oauth.OAuth) {
 
 			if def.Name == msgDefinition.Name {
 				*def = *msgDefinition
-				log.Debug(def)
 			}
 		}
 	}

@@ -6,10 +6,12 @@ import (
 
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/loader"
+	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/test"
+	"github.com/hellofresh/janus/pkg/web"
 	stats "github.com/hellofresh/stats-go"
 	"github.com/stretchr/testify/assert"
 )
@@ -76,7 +78,7 @@ func TestSuccessfulLoader(t *testing.T) {
 
 func createRegisterAndRouter() (router.Router, error) {
 	r := createRouter()
-	// r.Use(middleware.NewRecovery(web.RecoveryHandler).Handler)
+	r.Use(middleware.NewRecovery(web.RecoveryHandler).Handler)
 
 	register := proxy.NewRegister(r, createProxy())
 	proxyRepo, err := createProxyRepo()
