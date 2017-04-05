@@ -47,7 +47,7 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 
 	active, err := referenceSpec.Validate()
 	if false == active && err != nil {
-		logger.WithField("errors", err.Error()).Warn("Validation errors")
+		logger.WithError(err).Warn("Validation errors")
 	}
 
 	if false == referenceSpec.Active {
@@ -61,7 +61,7 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 		for pName, pDefinition := range referenceSpec.Plugins {
 			pDefinition.Name = pName
 			if pDefinition.Enabled {
-				logger.Debugf("Plugin %s enabled", pName)
+				logger.WithField("name", pName).Debug("Plugin enabled")
 				if p := m.pluginLoader.Get(pDefinition.Name); p != nil {
 					middlewares, err := p.GetMiddlewares(pDefinition.Config, referenceSpec)
 					if err != nil {
@@ -75,7 +75,7 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 					}
 				}
 			} else {
-				logger.Debugf("Plugin %s not enabled", pName)
+				logger.WithField("name", pName).Debug("Plugin not enabled")
 			}
 		}
 
@@ -83,7 +83,7 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 		m.register.Add(proxy.NewRoute(referenceSpec.Proxy, handlers...))
 		logger.Debug("API registered")
 	} else {
-		logger.Warn("API URI is invalid or not active, skipping...")
+		logger.WithError(err).Warn("API URI is invalid or not active, skipping...")
 	}
 }
 

@@ -35,7 +35,7 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 		v.SetConfigFile(filePath)
 		v.WatchConfig()
 		v.OnConfigChange(func(e fsnotify.Event) {
-			log.Debug("OAauth2 configuration changed, reloading...")
+			log.WithFields(log.Fields{"name": e.Name, "op": e.Op.String()}).Debug("OAauth2 configuration changed, reloading...")
 			if err := v.Unmarshal(definition); err != nil {
 				log.WithError(err).Error("Can't unmarshal the OAauth2 configuration")
 			}
