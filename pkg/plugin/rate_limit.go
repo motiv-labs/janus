@@ -39,7 +39,7 @@ func (h *RateLimit) GetMiddlewares(config api.Config, referenceSpec *api.Spec) (
 		return nil, err
 	}
 
-	limiterStore, err := h.getLimmiterStore(policy, referenceSpec.Name)
+	limiterStore, err := h.getLimiterStore(policy, referenceSpec.Name)
 	if err != nil {
 		return nil, err
 	}
@@ -50,7 +50,7 @@ func (h *RateLimit) GetMiddlewares(config api.Config, referenceSpec *api.Spec) (
 	}, nil
 }
 
-func (h *RateLimit) getLimmiterStore(policy string, prefix string) (limiter.Store, error) {
+func (h *RateLimit) getLimiterStore(policy string, prefix string) (limiter.Store, error) {
 	if prefix == "" {
 		prefix = DefaultPrefix
 	}

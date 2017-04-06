@@ -51,7 +51,7 @@ func (m *SecretMiddleware) Handler(handler http.Handler) http.Handler {
 	})
 }
 
-// ChangeRequest modifies the request to add the Authorization headers.
+// changeRequest modifies the request to add the Authorization headers.
 func (m *SecretMiddleware) changeRequest(req *http.Request, clientID, clientSecret string) {
 	log.Debug("Modifying request")
 	authString := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", clientID, clientSecret)))

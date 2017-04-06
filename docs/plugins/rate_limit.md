@@ -8,7 +8,7 @@ Configuring the plugin is straightforward, you can add it on top of an API by ex
 
 | Configuration | Description                                                                                                                                                                                                                                            |
 |---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| limit         | Defines the limit rule for the proxy. i.e. "10-S", means 10 req/s                                                                                                                                                                                      |
+| limit         | Defines the limit rule for the proxy. i.e. 5 reqs/second: "5-S", 10 reqs/minute: "10-M", 1000 reqs/hour: "1000-H"                                                                                                                                                                                      |
 | policy        | The rate-limiting policies to use for retrieving and incrementing the limits. Available values are local(counters will be stored locally in-memory on the node) and redis (counters are stored on a Redis server and will be shared across the nodes). |                                                        |
 
 ## Headers sent to the client

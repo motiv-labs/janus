@@ -1,6 +1,6 @@
 # Authenticating in Janus
 
-To start using the Janus adminstration API you need to get a [Json Web Token](https://jwt.io) and provide it in every single request
+To start using the Janus adminstration API you need to get a [JSON Web Token](https://jwt.io) and provide it in every single request
 using the `Authorization` header.
 
 To get a token you must execute:

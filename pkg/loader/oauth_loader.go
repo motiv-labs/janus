@@ -33,8 +33,11 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 	log.Debug("Loading OAuth servers configurations")
 
 	for _, oauthServer := range oauthServers {
+		logger := log.WithField("name", oauthServer.Name)
+		logger.Debug("Registering OAuth server")
+
 		if m.subs != nil {
-			log.Debug("Listening for changes on for the OAuth definitions")
+			logger.Debug("Listening for changes on for the OAuth definitions")
 			go m.listenForChanges(oauthServer.OAuth)
 		}
 
@@ -46,15 +49,15 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 			AllowCredentials: true,
 		}).Handler
 
-		log.Debug("Registering authorize endpoint")
+		logger.Debug("Registering authorize endpoint")
 		authorizeProxy := oauthServer.Endpoints.Authorize
 		if isValid, err := authorizeProxy.Validate(); isValid && err == nil {
 			m.register.Add(proxy.NewRoute(authorizeProxy, corsHandler))
 		} else {
-			log.WithError(err).Debug("No authorize endpoint")
+			logger.WithError(err).Debug("No authorize endpoint")
 		}
 
-		log.Debug("Registering token endpoint")
+		logger.Debug("Registering token endpoint")
 		tokenProxy := oauthServer.Endpoints.Token
 		if isValid, err := tokenProxy.Validate(); isValid && err == nil {
 			m.register.AddWithInOut(
@@ -63,40 +66,42 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 				proxy.NewOutChain(oauth.NewTokenPlugin(m.storage, repo).Out),
 			)
 		} else {
-			log.WithError(err).Debug("No token endpoint")
+			logger.WithError(err).Debug("No token endpoint")
 		}
 
-		log.Debug("Registering info endpoint")
+		logger.Debug("Registering info endpoint")
 		infoProxy := oauthServer.Endpoints.Info
 		if isValid, err := infoProxy.Validate(); isValid && err == nil {
 			m.register.Add(proxy.NewRoute(infoProxy, corsHandler))
 		} else {
-			log.WithError(err).Debug("No info endpoint")
+			logger.WithError(err).Debug("No info endpoint")
 		}
 
-		log.Debug("Registering revoke endpoint")
+		logger.Debug("Registering revoke endpoint")
 		revokeProxy := oauthServer.Endpoints.Revoke
 		if isValid, err := revokeProxy.Validate(); isValid && err == nil {
 			m.register.Add(proxy.NewRoute(revokeProxy, corsHandler, oauth.NewRevokeMiddleware(oauthServer).Handler))
 		} else {
-			log.WithError(err).Debug("No revoke endpoint")
+			logger.WithError(err).Debug("No revoke endpoint")
 		}
 
-		log.Debug("Registering create client endpoint")
+		logger.Debug("Registering create client endpoint")
 		createProxy := oauthServer.ClientEndpoints.Create
 		if isValid, err := createProxy.Validate(); isValid && err == nil {
 			m.register.Add(proxy.NewRoute(createProxy, corsHandler))
 		} else {
-			log.WithError(err).Debug("No client create endpoint")
+			logger.WithError(err).Debug("No client create endpoint")
 		}
 
-		log.Debug("Registering remove client endpoint")
+		logger.Debug("Registering remove client endpoint")
 		removeProxy := oauthServer.ClientEndpoints.Remove
 		if isValid, err := createProxy.Validate(); isValid && err == nil {
 			m.register.Add(proxy.NewRoute(removeProxy, corsHandler))
 		} else {
-			log.WithError(err).Debug("No client remove endpoint")
+			logger.WithError(err).Debug("No client remove endpoint")
 		}
+
+		logger.Debug("Oauth server registered")
 	}
 
 	log.Debug("Done loading OAuth servers configurations")
