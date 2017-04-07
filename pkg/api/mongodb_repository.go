@@ -45,7 +45,7 @@ func (r *MongoRepository) FindAll() ([]*Definition, error) {
 
 // FindByName find an API definition by name
 func (r *MongoRepository) FindByName(name string) (*Definition, error) {
-	var result *Definition
+	var result = NewDefinition()
 	session, coll := r.getSession()
 	defer session.Close()
 
@@ -55,7 +55,7 @@ func (r *MongoRepository) FindByName(name string) (*Definition, error) {
 
 // FindByListenPath searches an existing API definition by its listen_path
 func (r *MongoRepository) FindByListenPath(path string) (*Definition, error) {
-	var result *Definition
+	var result = NewDefinition()
 	session, coll := r.getSession()
 	defer session.Close()
 

@@ -29,7 +29,7 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 
 	for _, f := range files {
 		filePath := filepath.Join(dir, f.Name())
-		definition := new(Definition)
+		definition := NewDefinition()
 
 		v := viper.New()
 		v.SetConfigFile(filePath)
