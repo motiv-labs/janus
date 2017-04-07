@@ -26,7 +26,7 @@ const (
 // Params initialization options.
 type Params struct {
 	// StatsClient defines the stats client for tracing
-	StatsClient stats.StatsClient
+	StatsClient stats.Client
 
 	// When set, the proxy will skip the TLS verification on outgoing requests.
 	InsecureSkipVerify bool
@@ -50,7 +50,7 @@ type Params struct {
 // Proxy instances implement Janus proxying functionality. For
 // initializing, see the WithParams the constructor and Params.
 type Proxy struct {
-	statsClient   stats.StatsClient
+	statsClient   stats.Client
 	quit          chan struct{}
 	flushInterval time.Duration
 }
@@ -110,10 +110,10 @@ func WithParams(o Params) *Proxy {
 
 // Reverse given a target and chains of inbound/outbound plugins, we make a ReverseProxy
 func (p *Proxy) Reverse(proxyDefinition *Definition, inbound InChain, outbound OutChain) *httputil.ReverseProxy {
-	target, _ := url.Parse(proxyDefinition.UpstreamURL)
-	targetQuery := target.RawQuery
-
 	director := func(req *http.Request) {
+		target, _ := url.Parse(proxyDefinition.UpstreamURL)
+		targetQuery := target.RawQuery
+
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
 		path := target.Path

@@ -9,24 +9,32 @@ import (
 
 func TestSuccessfulValidation(t *testing.T) {
 	definition := proxy.Definition{
-		ListenPath: "/*",
+		ListenPath:  "/*",
+		UpstreamURL: "http://test.com",
 	}
+	isValid, err := definition.Validate()
 
-	assert.True(t, proxy.Validate(&definition))
+	assert.NoError(t, err)
+	assert.True(t, isValid)
 }
 
 func TestEmptyListenPathValidation(t *testing.T) {
 	definition := proxy.Definition{}
+	isValid, err := definition.Validate()
 
-	assert.False(t, proxy.Validate(&definition))
+	assert.Error(t, err)
+	assert.False(t, isValid)
 }
 
-func TestSpaceInListenPathValidation(t *testing.T) {
+func TestInvalidTargetURLValidation(t *testing.T) {
 	definition := proxy.Definition{
-		ListenPath: " ",
+		ListenPath:  " ",
+		UpstreamURL: "wrong",
 	}
+	isValid, err := definition.Validate()
 
-	assert.False(t, proxy.Validate(&definition))
+	assert.Error(t, err)
+	assert.False(t, isValid)
 }
 
 func TestRouteToJSON(t *testing.T) {
@@ -49,4 +57,10 @@ func TestJSONToRoute(t *testing.T) {
 
 	assert.NoError(t, err)
 	assert.IsType(t, &proxy.Route{}, route)
+}
+
+func TestJSONToRouteError(t *testing.T) {
+	_, err := proxy.JSONUnmarshalRoute([]byte{})
+
+	assert.Error(t, err)
 }

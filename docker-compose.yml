@@ -13,7 +13,9 @@ services:
       - janus-database
       - janus-storage
     volumes:
-      - ./janus.toml:/etc/janus/janus.toml
+      - ./janus.sample.toml:/etc/janus/janus.toml
+      - ./examples/apis:/etc/janus/apis
+      - ./examples/auth:/etc/janus/auth
 
    # Janus Database (if you choose a database as storage)
   janus-database:

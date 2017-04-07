@@ -1,10 +1,9 @@
-package proxy_test
+package proxy
 
 import (
 	"net/http"
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/test"
 	stats "github.com/hellofresh/stats-go"
@@ -63,20 +62,20 @@ func TestSuccessfulProxy(t *testing.T) {
 	}
 }
 
-func createProxyDefinitions() []*proxy.Definition {
-	return []*proxy.Definition{
-		&proxy.Definition{
+func createProxyDefinitions() []*Definition {
+	return []*Definition{
+		&Definition{
 			ListenPath:  "/example/*",
 			UpstreamURL: "http://www.mocky.io/v2/58c6c60710000040151b7cad",
 			Methods:     []string{"ALL"},
 		},
-		&proxy.Definition{
+		&Definition{
 			ListenPath:  "/posts/*",
 			UpstreamURL: "https://jsonplaceholder.typicode.com/posts",
 			StripPath:   true,
-			Methods:     []string{"GET"},
+			Methods:     []string{"ALL"},
 		},
-		&proxy.Definition{
+		&Definition{
 			ListenPath:  "/append/*",
 			UpstreamURL: "http://www.mocky.io/v2/58c6c60710000040151b7cad",
 			AppendPath:  true,
@@ -92,25 +91,25 @@ func createRegisterAndRouter() router.Router {
 }
 
 func createRouter() router.Router {
-	return router.NewHTTPTreeMuxRouter()
+	return router.NewChiRouter()
 }
 
-func createRegister(r router.Router) *proxy.Register {
-	var routes []*proxy.Route
+func createRegister(r router.Router) *Register {
+	var routes []*Route
 
 	definitions := createProxyDefinitions()
 	for _, def := range definitions {
-		routes = append(routes, proxy.NewRoute(def))
+		routes = append(routes, NewRoute(def))
 	}
 
-	register := proxy.NewRegister(r, createProxy())
+	register := NewRegister(r, createProxy())
 	register.AddMany(routes)
 
 	return register
 }
 
-func createProxy() *proxy.Proxy {
-	return proxy.WithParams(proxy.Params{
-		StatsClient: stats.NewStatsdStatsClient("", ""),
+func createProxy() *Proxy {
+	return WithParams(Params{
+		StatsClient: stats.NewStatsdClient("", ""),
 	})
 }

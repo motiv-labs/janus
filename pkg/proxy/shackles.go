@@ -25,7 +25,7 @@ type OutChain []OutLink
 
 // Shackles construct holding plugin sequences
 type Shackles struct {
-	statsClient stats.StatsClient
+	statsClient stats.Client
 	inbound     InChain
 	outbound    OutChain
 }
@@ -47,43 +47,43 @@ func (s *Shackles) RoundTrip(req *http.Request) (resp *http.Response, err error)
 	// apply inbound request plugins (if any)
 	req, err = s.applyInboundLinks(req)
 	if err != nil {
-		s.statsClient.SetHttpRequestSection(statsSectionRoundTrip).
+		s.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
 			TrackRequest(req, timing, false).
-			ResetHttpRequestSection()
+			ResetHTTPRequestSection()
 		return nil, err
 	}
 
 	// use default RoundTrip function handle the actual request/response
 	resp, err = http.DefaultTransport.RoundTrip(req)
 	if err != nil {
-		s.statsClient.SetHttpRequestSection(statsSectionRoundTrip).
+		s.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
 			TrackRequest(req, timing, false).
-			ResetHttpRequestSection()
+			ResetHTTPRequestSection()
 		return nil, err
 	}
 
 	// block until the entire body has been read
 	_, err = httputil.DumpResponse(resp, true)
 	if err != nil {
-		s.statsClient.SetHttpRequestSection(statsSectionRoundTrip).
+		s.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
 			TrackRequest(req, timing, false).
-			ResetHttpRequestSection()
+			ResetHTTPRequestSection()
 		return nil, err
 	}
 
 	// apply outbound response plugins (if any)
 	resp, err = s.applyOutboundLinks(req, resp)
 	if err != nil {
-		s.statsClient.SetHttpRequestSection(statsSectionRoundTrip).
+		s.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
 			TrackRequest(req, timing, false).
-			ResetHttpRequestSection()
+			ResetHTTPRequestSection()
 		return nil, err
 	}
 
 	statusCodeSuccess := resp.StatusCode < http.StatusInternalServerError
-	s.statsClient.SetHttpRequestSection(statsSectionRoundTrip).
+	s.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
 		TrackRequest(req, timing, statusCodeSuccess).
-		ResetHttpRequestSection()
+		ResetHTTPRequestSection()
 
 	// pass response back to client
 	return resp, nil

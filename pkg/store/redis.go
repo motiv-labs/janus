@@ -1,13 +1,8 @@
 package store
 
 import (
+	log "github.com/Sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
-	"github.com/ulule/limiter"
-)
-
-const (
-	// DefaultPrefix is the default prefix to use for the key in the store.
-	DefaultPrefix = "limiter"
 )
 
 // RedisStore is the redis store.
@@ -25,7 +20,7 @@ type RedisStore struct {
 // NewRedisStore returns an instance of redis store.
 func NewRedisStore(pool *redis.Pool) (Store, error) {
 	return NewRedisStoreWithOptions(pool, Options{
-		Prefix: DefaultPrefix,
+		Prefix: "janus",
 	})
 }
 
@@ -92,14 +87,42 @@ func (s *RedisStore) Set(key string, value string, expire int64) error {
 	return s.set(conn, key, value, expire)
 }
 
-// ToLimiterStore converts a storage into a limmiter compliant storage
-func (s *RedisStore) ToLimiterStore(prefix string) (limiter.Store, error) {
-	// Alternatively, you can pass options to the store with the "WithOptions"
-	// function. For example, for Redis store:
-	return limiter.NewRedisStoreWithOptions(s.Pool, limiter.StoreOptions{
-		Prefix:   prefix,
-		MaxRetry: limiter.DefaultMaxRetry,
-	})
+// Publish publishes to a topic in redis
+func (s *RedisStore) Publish(topic string, data []byte) error {
+	c := s.getConnection()
+	_, err := c.Do("PUBLISH", topic, data)
+	return err
+}
+
+// Subscribe subscribes to a topic in redis
+func (s *RedisStore) Subscribe(topic string) *Subscription {
+	sub := NewSubscription()
+
+	go func() {
+		for {
+			// Get a connection from a pool
+			c := s.getConnection()
+			psc := redis.PubSubConn{Conn: c}
+
+			// Set up subscriptions
+			psc.Subscribe(topic)
+
+			// While not a permanent error on the connection.
+			for c.Err() == nil {
+				switch v := psc.Receive().(type) {
+				case redis.Message:
+					log.WithField("channel", v.Channel).Debug("Received a message")
+					sub.Message <- Message(v.Data)
+				case error:
+					log.WithError(v).Debug("An error ocurred when getting the message")
+					return
+				}
+			}
+			c.Close()
+		}
+	}()
+
+	return sub
 }
 
 func (s *RedisStore) exists(conn redis.Conn, key string) (bool, error) {

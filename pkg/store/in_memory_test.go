@@ -4,7 +4,6 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
-	"github.com/ulule/limiter"
 )
 
 const (
@@ -68,12 +67,4 @@ func TestInMemoryStore_Remove(t *testing.T) {
 	val, err = instance.Get(testKey)
 	assert.Nil(t, err)
 	assert.Empty(t, val)
-}
-
-func TestInMemoryStore_ToLimiterStore(t *testing.T) {
-	instance := NewInMemoryStore()
-
-	limiterStore, err := instance.ToLimiterStore("prefix")
-	assert.Nil(t, err)
-	assert.IsType(t, &limiter.MemoryStore{}, limiterStore)
 }

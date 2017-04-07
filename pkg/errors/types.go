@@ -17,4 +17,8 @@ var (
 	ErrAccessTokenNotAuthorized = New(http.StatusUnauthorized, "access token not authorized")
 	// ErrInvalidScheme is used when the access token is not found on the storage
 	ErrInvalidScheme = New(http.StatusBadRequest, "scheme is not supported")
+	// ErrInvalidPolicy is used when an invalid policy was provided
+	ErrInvalidPolicy = New(http.StatusBadRequest, "policy is not supported")
+	// ErrInvalidStorage is used when an invalid storage was provided
+	ErrInvalidStorage = New(http.StatusBadRequest, "the storage that you are using is not supported for this feature")
 )

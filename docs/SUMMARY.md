@@ -1,12 +1,13 @@
 # Summary
 
 * [Introduction](README.md)
-* [Installation](README.md)
+* Installation
     * [Docker](install/docker.md)
-* [Quick Start](quick_start.md)
+* Quick Start
     * [Auth](quick_start/auth.md)
     * [File System](quick_start/file_system.md)
     * [MongoDB](quick_start/mongodb.md)
+    * [Proxy Authentication Methods](quick_start/proxy_auth_methods.md)
 * [Proxy Reference](proxy/README.md)
     * [Terminology](proxy/terminology.md)
     * [Overview](proxy/overview.md)
@@ -20,5 +21,11 @@
     * [Request HTTP method](proxy/request_http_method.md)
     * [Routing priorities](proxy/routing_priorities.md)
     * [Conclusion](proxy/conclusion.md)
+* Auth
+    * [OAuth 2.0](auth/oauth.md)
+* Plugins
+    * [OAuth](plugins/oauth.md)
+    * [Rate Limit](plugins/rate_limit.md)
+    * [CORS](plugins/cors.md)
 * Misc
     * [Monitoring](misc/monitoring.md)

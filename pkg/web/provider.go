@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/NYTimes/gziphandler"
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
@@ -12,38 +11,43 @@ import (
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/router"
+	"github.com/hellofresh/janus/pkg/store"
+	chimiddleware "github.com/pressly/chi/middleware"
 )
 
 // Provider is a provider.Provider implementation that provides the REST API.
 type Provider struct {
-	Port     int    `description:"Web administration port"`
-	CertFile string `description:"SSL certificate"`
-	KeyFile  string `description:"SSL certificate"`
-	ReadOnly bool   `description:"Enable read only API"`
-	Cred     config.Credentials
-	APIRepo  api.Repository
-	AuthRepo oauth.Repository
+	Port      int    `description:"Web administration port"`
+	CertFile  string `description:"SSL certificate"`
+	KeyFile   string `description:"SSL certificate"`
+	ReadOnly  bool   `description:"Enable read only API"`
+	Cred      config.Credentials
+	APIRepo   api.Repository
+	AuthRepo  oauth.Repository
+	Publisher store.Publisher
 }
 
 // Provide executes the provider functionality
 // This is normally the entry point of the
 // provider.
 func (p *Provider) Provide() error {
-	r := router.NewHTTPTreeMuxRouter()
+	r := router.NewChiRouter()
 
 	// create authentication for Janus
 	authConfig := jwt.NewConfig(p.Cred)
 	authMiddleware := jwt.NewMiddleware(authConfig)
 	r.Use(
+		chimiddleware.StripSlashes,
+		chimiddleware.DefaultCompress,
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(RecoveryHandler).Handler,
-		gziphandler.GzipHandler,
 		middleware.NewOpenTracing(p.IsHTTPS()).Handler,
 	)
 
 	// create endpoints
 	r.GET("/", Home())
 	r.GET("/status", Heartbeat())
+
 	handlers := jwt.Handler{Config: authConfig}
 	r.POST("/login", handlers.Login())
 	authGroup := r.Group("/auth")
@@ -51,8 +55,7 @@ func (p *Provider) Provide() error {
 		authGroup.GET("/refresh_token", handlers.Refresh())
 	}
 
-	r.Use(authMiddleware.Handler)
-	p.loadAPIEndpoints(r)
+	p.loadAPIEndpoints(r, authMiddleware.Handler)
 	p.loadOAuthEndpoints(r)
 
 	go func() {
@@ -74,39 +77,39 @@ func (p *Provider) listenAndServe(handler http.Handler) error {
 }
 
 //loadAPIEndpoints register api endpoints
-func (p *Provider) loadAPIEndpoints(router router.Router) {
+func (p *Provider) loadAPIEndpoints(router router.Router, handlers ...router.Constructor) {
 	log.Debug("Loading API Endpoints")
 
 	// Apis endpoints
-	handler := api.NewController(p.APIRepo)
+	handler := api.NewController(p.APIRepo, p.Publisher)
 	group := router.Group("/apis")
 	{
-		group.GET("", handler.Get())
-		group.GET("/:name", handler.GetBy())
+		group.GET("/", handler.Get(), handlers...)
+		group.GET("/:name", handler.GetBy(), handlers...)
 
 		if false == p.ReadOnly {
-			group.POST("", handler.Post())
-			group.PUT("/:name", handler.PutBy())
-			group.DELETE("/:name", handler.DeleteBy())
+			group.POST("/", handler.Post(), handlers...)
+			group.PUT("/:name", handler.PutBy(), handlers...)
+			group.DELETE("/:name", handler.DeleteBy(), handlers...)
 		}
 	}
 }
 
 //loadOAuthEndpoints register api endpoints
-func (p *Provider) loadOAuthEndpoints(router router.Router) {
+func (p *Provider) loadOAuthEndpoints(router router.Router, handlers ...router.Constructor) {
 	log.Debug("Loading OAuth Endpoints")
 
 	// Oauth servers endpoints
-	oAuthHandler := oauth.NewController(p.AuthRepo)
+	oAuthHandler := oauth.NewController(p.AuthRepo, p.Publisher)
 	oauthGroup := router.Group("/oauth/servers")
 	{
-		oauthGroup.GET("", oAuthHandler.Get())
-		oauthGroup.GET("/:name", oAuthHandler.GetBy())
+		oauthGroup.GET("/", oAuthHandler.Get(), handlers...)
+		oauthGroup.GET("/:name", oAuthHandler.GetBy(), handlers...)
 
 		if false == p.ReadOnly {
-			oauthGroup.POST("", oAuthHandler.Post())
-			oauthGroup.PUT("/:name", oAuthHandler.PutBy())
-			oauthGroup.DELETE("/:name", oAuthHandler.DeleteBy())
+			oauthGroup.POST("/", oAuthHandler.Post(), handlers...)
+			oauthGroup.PUT("/:name", oAuthHandler.PutBy(), handlers...)
+			oauthGroup.DELETE("/:name", oAuthHandler.DeleteBy(), handlers...)
 		}
 	}
 }

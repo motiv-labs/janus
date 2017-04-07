@@ -9,10 +9,13 @@ import (
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/errors"
+	"github.com/hellofresh/janus/pkg/loader"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/oauth"
+	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
+	"github.com/hellofresh/janus/pkg/store"
 	"github.com/hellofresh/janus/pkg/web"
 	"github.com/spf13/cobra"
 	mgo "gopkg.in/mgo.v2"
@@ -96,7 +99,7 @@ func RunServer(cmd *cobra.Command, args []string) {
 
 	// create router with a custom not found handler
 	router.DefaultOptions.NotFoundHandler = web.NotFound
-	r := router.NewHTTPTreeMuxWithOptions(router.DefaultOptions)
+	r := router.NewChiRouterWithOptions(router.DefaultOptions)
 	r.Use(
 		middleware.NewStats(statsClient).Handler,
 		middleware.NewLogger().Handler,
@@ -104,13 +107,30 @@ func RunServer(cmd *cobra.Command, args []string) {
 		middleware.NewOpenTracing(globalConfig.Web.IsHTTPS()).Handler,
 	)
 
+	pluginLoader := plugin.NewLoader()
+	pluginLoader.Add(
+		plugin.NewRateLimit(storage),
+		plugin.NewCORS(),
+		plugin.NewOAuth2(oAuthServersRepo, storage),
+		plugin.NewCompression(),
+	)
+
 	// create proxy register
 	register := proxy.NewRegister(r, p)
+	var (
+		apiSubs   *store.Subscription
+		oauthSubs *store.Subscription
+	)
 
-	apiLoader := api.NewLoader(register, storage, oAuthServersRepo)
+	if subscriber, ok := storage.(store.Subscriber); ok {
+		apiSubs = subscriber.Subscribe("api_updates")
+		oauthSubs = subscriber.Subscribe("oauth_updates")
+	}
+
+	apiLoader := loader.NewAPILoader(register, pluginLoader, apiSubs)
 	apiLoader.LoadDefinitions(repo)
 
-	oauthLoader := oauth.NewLoader(register, storage)
+	oauthLoader := loader.NewOAuthLoader(register, storage, oauthSubs)
 	oauthLoader.LoadDefinitions(oAuthServersRepo)
 
 	wp := web.Provider{
@@ -122,6 +142,11 @@ func RunServer(cmd *cobra.Command, args []string) {
 		AuthRepo: oAuthServersRepo,
 		ReadOnly: globalConfig.Web.ReadOnly,
 	}
+
+	if publisher, ok := storage.(store.Publisher); ok {
+		wp.Publisher = publisher
+	}
+
 	wp.Provide()
 
 	log.Fatal(listenAndServe(r))

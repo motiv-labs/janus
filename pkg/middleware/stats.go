@@ -12,11 +12,11 @@ import (
 
 // Stats represents the stats middleware
 type Stats struct {
-	statsClient stats.StatsClient
+	statsClient stats.Client
 }
 
 // NewStats creates a new instance of Stats
-func NewStats(statsClient stats.StatsClient) *Stats {
+func NewStats(statsClient stats.Client) *Stats {
 	return &Stats{statsClient}
 }
 

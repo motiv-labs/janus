@@ -1,10 +1,6 @@
 package store
 
-import (
-	"sync"
-
-	"github.com/ulule/limiter"
-)
+import "sync"
 
 // InMemoryStore is the redis store.
 type InMemoryStore struct {
@@ -54,11 +50,6 @@ func (s *InMemoryStore) Set(key string, value string, expire int64) error {
 	defer s.Unlock()
 
 	return s.set(key, value, expire)
-}
-
-// ToLimiterStore converts a storage into a limmiter compliant storage
-func (s *InMemoryStore) ToLimiterStore(prefix string) (limiter.Store, error) {
-	return limiter.NewMemoryStore(), nil
 }
 
 func (s *InMemoryStore) exists(key string) (bool, error) {

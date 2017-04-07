@@ -2,9 +2,8 @@ package proxy
 
 import (
 	"encoding/json"
-	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/router"
 )
 
@@ -39,31 +38,25 @@ func JSONUnmarshalRoute(rawRoute []byte) (*Route, error) {
 
 // Definition defines proxy rules for a route
 type Definition struct {
-	PreserveHost        bool     `bson:"preserve_host" json:"preserve_host"`
-	ListenPath          string   `bson:"listen_path" json:"listen_path" valid:"required"`
-	UpstreamURL         string   `bson:"upstream_url" json:"upstream_url" valid:"url,required"`
-	StripPath           bool     `bson:"strip_path" json:"strip_path"`
-	AppendPath          bool     `bson:"append_path" json:"append_path"`
-	EnableLoadBalancing bool     `bson:"enable_load_balancing" json:"enable_load_balancing"`
+	PreserveHost        bool     `bson:"preserve_host" json:"preserve_host" mapstructure:"preserve_host"`
+	ListenPath          string   `bson:"listen_path" json:"listen_path" mapstructure:"listen_path" valid:"required"`
+	UpstreamURL         string   `bson:"upstream_url" json:"upstream_url" mapstructure:"upstream_url" valid:"url,required"`
+	StripPath           bool     `bson:"strip_path" json:"strip_path" mapstructure:"strip_path"`
+	AppendPath          bool     `bson:"append_path" json:"append_path" mapstructure:"append_path"`
+	EnableLoadBalancing bool     `bson:"enable_load_balancing" json:"enable_load_balancing" mapstructure:"enable_load_balancing"`
 	Methods             []string `bson:"methods" json:"methods"`
 	Hosts               []string `bson:"hosts" json:"hosts"`
 }
 
+// NewDefinition creates a new Proxy Definition with default values
+func NewDefinition() *Definition {
+	return &Definition{
+		Methods: make([]string, 0),
+		Hosts:   make([]string, 0),
+	}
+}
+
 // Validate validates proxy data
-func Validate(proxy *Definition) bool {
-	if nil == proxy {
-		return false
-	}
-
-	if proxy.ListenPath == "" {
-		log.Warning("Listen path is empty")
-		return false
-	}
-
-	if strings.Contains(proxy.ListenPath, " ") {
-		log.Warning("Listen path contains spaces, is invalid")
-		return false
-	}
-
-	return true
+func (d *Definition) Validate() (bool, error) {
+	return govalidator.ValidateStruct(d)
 }

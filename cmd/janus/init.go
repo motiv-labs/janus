@@ -48,7 +48,7 @@ func initStorage(config config.Storage) store.Store {
 	return storage
 }
 
-func initStatsdClient(config config.Stats) *stats.StatsdStatsClient {
+func initStatsdClient(config config.Stats) stats.Client {
 	sectionsTestsMap, err := stats.ParseSectionsTestsMap(config.IDs)
 	if err != nil {
 		log.WithError(err).WithField("config", config.IDs).
@@ -59,8 +59,11 @@ func initStatsdClient(config config.Stats) *stats.StatsdStatsClient {
 		WithField("map", sectionsTestsMap.String()).
 		Debug("Setting stats second level IDs")
 
-	client := stats.NewStatsdStatsClient(config.DSN, config.Prefix)
-	client.SetHttpMetricCallback(stats.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
+	client, err := stats.NewClient(config.DSN, config.Prefix)
+	if err != nil {
+		log.WithError(err).Panic("Error initializing statsd client")
+	}
 
+	client.SetHTTPMetricCallback(stats.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
 	return client
 }

@@ -8,7 +8,12 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-// SecretMiddleware prevents requests to an API from exceeding a specified rate limit.
+// SecretMiddleware is used as a helper for client applications that don't want to send the client secret
+// on the request. The applications should only send the `client_id` and this middleware will try to find
+// the secret on it's configuration.
+// If the secret is found then the middleware will build a valid `Authorization` header to be sent to the
+// authentication provider.
+// If the secret is not found then and error is returned to the client application.
 type SecretMiddleware struct {
 	oauth *Spec
 }
@@ -41,13 +46,13 @@ func (m *SecretMiddleware) Handler(handler http.Handler) http.Handler {
 			panic(ErrClientIDNotFound)
 		}
 
-		m.ChangeRequest(r, clientID, clientSecret)
+		m.changeRequest(r, clientID, clientSecret)
 		handler.ServeHTTP(w, r)
 	})
 }
 
-// ChangeRequest modifies the request to add the Authorization headers.
-func (m *SecretMiddleware) ChangeRequest(req *http.Request, clientID, clientSecret string) {
+// changeRequest modifies the request to add the Authorization headers.
+func (m *SecretMiddleware) changeRequest(req *http.Request, clientID, clientSecret string) {
 	log.Debug("Modifying request")
 	authString := base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", clientID, clientSecret)))
 	req.Header.Set("Authorization", fmt.Sprintf("Basic %s", authString))

@@ -1,7 +1,6 @@
 {
-    "name" : "Posts",
+    "name" : "posts",
     "active" : true,
-    "use_basic_auth" : false,
     "proxy" : {
         "preserve_host" : false,
         "listen_path" : "/posts/*",
@@ -9,39 +8,43 @@
         "strip_path" : true,
         "append_path" : false,
         "enable_load_balancing" : false,
-        "hosts": ["hellofresh.*"],
-        "methods" : [
-            "GET"
-        ]
+        "methods" : ["ALL"],
+        "hosts": ["hellofresh.*"]
     },
-    "allowed_ips" : [],
-    "use_oauth2" : false,
-    "oauth_server_name" : "local",
-    "rate_limit" : {
-        "enabled" : true,
-        "limit" : "10-S"
-    },
-    "cors_meta" : {
-        "domains" : [
-            "*"
-        ],
-        "methods" : [
-            "GET",
-            "POST",
-            "PUT",
-            "PATCH",
-            "DELETE"
-        ],
-        "request_headers" : [
-            "Origin",
-            "Authorization",
-            "Content-Type"
-        ],
-        "exposed_headers" : [
-            "X-Debug-Token",
-            "X-Debug-Token-Link"
-        ],
-        "enabled" : true
-    },
-    "use_compression" : false
+    "plugins": {
+        "compression": {
+            "enabled": true
+        },
+        "rate_limit" : {
+            "enabled" : true,
+            "config": {
+                    "limit" : "10-S",
+                    "policy": "local"
+            }
+        },
+        "cors" : {
+            "enabled" : true,
+            "config": {
+                "domains" : [
+                    "*"
+                ],
+                "methods" : [
+                    "GET",
+                    "POST",
+                    "PUT",
+                    "PATCH",
+                    "DELETE"
+                ],
+                "request_headers" : [
+                    "Origin",
+                    "Authorization",
+                    "Content-Type"
+                ],
+                "exposed_headers" : [
+                    "X-Debug-Token",
+                    "X-Debug-Token-Link"
+                ]
+            }
+        }
+    }
 }
