@@ -99,7 +99,7 @@ func RunServer(cmd *cobra.Command, args []string) {
 
 	// create router with a custom not found handler
 	router.DefaultOptions.NotFoundHandler = web.NotFound
-	r := router.NewHTTPTreeMuxWithOptions(router.DefaultOptions)
+	r := router.NewChiRouterWithOptions(router.DefaultOptions)
 	r.Use(
 		middleware.NewStats(statsClient).Handler,
 		middleware.NewLogger().Handler,
