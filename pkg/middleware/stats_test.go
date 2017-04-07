@@ -11,7 +11,7 @@ import (
 )
 
 func TestSuccessfulStats(t *testing.T) {
-	mw := NewStats(stats.NewStatsdStatsClient("", ""))
+	mw := NewStats(stats.NewStatsdClient("", ""))
 	w, err := test.Record(
 		"GET",
 		"/",
