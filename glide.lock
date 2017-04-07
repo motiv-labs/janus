@@ -1,5 +1,5 @@
-hash: 1c351a52b899b273223d9567e41fb19794040a67d0038ce7b4bba89c061b8d39
-updated: 2017-03-29T18:06:00.042274581+02:00
+hash: e0cd66e929fd627ae97ee932e416ccbb625d8b3cba6232337bf68982eb3c3287
+updated: 2017-04-07T11:20:44.905064595+02:00
 imports:
 - name: cloud.google.com/go
   version: 8790afb57dfdb470da0b1f441c177e6e49ba66e7
@@ -19,6 +19,10 @@ imports:
   version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
 - name: github.com/dimfeld/httptreemux
   version: 86f7c217d9043ebc6adfd8e2ed04a0bb1e1db651
+- name: github.com/fiam/gounidecode
+  version: 8deddbd03fec2c28969266e52f27b6fb22be1823
+  subpackages:
+  - unidecode
 - name: github.com/fsnotify/fsnotify
   version: ff7bc41d4007f67e5456703c34342df4e0113f64
 - name: github.com/garyburd/redigo
@@ -55,19 +59,15 @@ imports:
 - name: github.com/hellofresh/gcloud-opentracing
   version: 8c9c9c8a60b3d4b71ad91d6aa60cd24399f355a7
 - name: github.com/hellofresh/stats-go
-  version: 47f7950a30e6f2c5f5769dd06856647d58ecf9f6
+  version: 440bc1431609ee30279972cdf26c650e98f4526f
 - name: github.com/inconshreveable/mousetrap
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
-- name: github.com/justinas/alice
-  version: 052b8b6c18edb9db317af86806d8e00ebaa94160
 - name: github.com/kelseyhightower/envconfig
   version: f611eb38b3875cc3bd991ca91c51d06446afa14c
 - name: github.com/magiconair/properties
   version: 51463bfca2576e06c62a8504b5c0f06d61312647
 - name: github.com/mitchellh/mapstructure
   version: 53818660ed4955e899c0bcafa97299a388bd7c8e
-- name: github.com/NYTimes/gziphandler
-  version: d8206bba2a6097c0d75f4ac204a4814e47125cdd
 - name: github.com/opentracing/basictracer-go
   version: 1b32af207119a14b1b231d451df3ed04a72efebf
   subpackages:
@@ -83,6 +83,10 @@ imports:
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
   version: f6e7596e8daafd44dc9e5c208dc73035020c8481
+- name: github.com/pressly/chi
+  version: e6033ea75479391a4bce3918fc119cad31e1cb30
+  subpackages:
+  - middleware
 - name: github.com/rs/cors
   version: a62a804a8a009876ca59105f7899938a1349f4b3
 - name: github.com/rs/xhandler
@@ -106,7 +110,7 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: c4f37062e123971566edb19fb0554351464f8a98
+  version: d1e1b351919c6738fdeb9893d5c998b161464f0c
   subpackages:
   - context
   - context/ctxhttp
