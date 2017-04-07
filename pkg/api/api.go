@@ -33,7 +33,9 @@ type Definition struct {
 // NewDefinition creates a new API Definition with default values
 func NewDefinition() *Definition {
 	return &Definition{
-		Active: true,
+		Active:  true,
+		Plugins: make(map[string]Plugin, 0),
+		Proxy:   proxy.NewDefinition(),
 	}
 }
 
