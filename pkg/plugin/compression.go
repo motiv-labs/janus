@@ -1,9 +1,9 @@
 package plugin
 
 import (
-	"github.com/NYTimes/gziphandler"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/router"
+	"github.com/pressly/chi/middleware"
 )
 
 // Compression represents the compression plugin
@@ -22,6 +22,6 @@ func (h *Compression) GetName() string {
 // GetMiddlewares retrieves the plugin's middlewares
 func (h *Compression) GetMiddlewares(config api.Config, referenceSpec *api.Spec) ([]router.Constructor, error) {
 	return []router.Constructor{
-		gziphandler.GzipHandler,
+		middleware.DefaultCompress,
 	}, nil
 }
