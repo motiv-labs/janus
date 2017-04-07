@@ -48,6 +48,14 @@ type Definition struct {
 	Hosts               []string `bson:"hosts" json:"hosts"`
 }
 
+// NewDefinition creates a new Proxy Definition with default values
+func NewDefinition() *Definition {
+	return &Definition{
+		Methods: make([]string, 0),
+		Hosts:   make([]string, 0),
+	}
+}
+
 // Validate validates proxy data
 func (d *Definition) Validate() (bool, error) {
 	return govalidator.ValidateStruct(d)
