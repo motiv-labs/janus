@@ -8,10 +8,13 @@
         "strip_path" : true,
         "append_path" : false,
         "enable_load_balancing" : false,
-        "methods" : ["GET"],
+        "methods" : ["ALL"],
         "hosts": ["hellofresh.*"]
     },
     "plugins": {
+        "compression": {
+            "enabled": true
+        },
         "rate_limit" : {
             "enabled" : true,
             "config": {

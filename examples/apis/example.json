@@ -8,8 +8,6 @@
         "strip_path" : false,
         "append_path" : false,
         "enable_load_balancing" : false,
-        "methods" : [
-            "ALL"
-        ]
+        "methods" : ["GET"]
     }
 }
