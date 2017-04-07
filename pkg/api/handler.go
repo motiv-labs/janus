@@ -44,7 +44,7 @@ func (c *Controller) Get() http.HandlerFunc {
 // GetBy is the find by handler
 func (c *Controller) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		name := router.FromContext(r.Context()).ByName("name")
+		name := router.URLParam(r, "name")
 		span := opentracing.FromContext(r.Context(), "datastore.FindByName")
 		data, err := c.repo.FindByName(name)
 		span.Finish()
@@ -66,7 +66,7 @@ func (c *Controller) PutBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
-		name := router.FromContext(r.Context()).ByName("name")
+		name := router.URLParam(r, "name")
 		span := opentracing.FromContext(r.Context(), "datastore.FindByName")
 		definition, err := c.repo.FindByName(name)
 		span.Finish()
@@ -136,7 +136,7 @@ func (c *Controller) Post() http.HandlerFunc {
 // DeleteBy is the delete handler
 func (c *Controller) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		name := router.FromContext(r.Context()).ByName("name")
+		name := router.URLParam(r, "name")
 
 		span := opentracing.FromContext(r.Context(), "datastore.Remove")
 		err := c.repo.Remove(name)
