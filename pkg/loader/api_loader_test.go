@@ -97,11 +97,11 @@ func createProxyRepo() (api.Repository, error) {
 }
 
 func createRouter() router.Router {
-	return router.NewHTTPTreeMuxRouter()
+	return router.NewChiRouter()
 }
 
 func createProxy() *proxy.Proxy {
 	return proxy.WithParams(proxy.Params{
-		StatsClient: stats.NewStatsdStatsClient("", ""),
+		StatsClient: stats.NewStatsdClient("", ""),
 	})
 }
