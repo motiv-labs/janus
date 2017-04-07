@@ -26,7 +26,7 @@ const (
 // Params initialization options.
 type Params struct {
 	// StatsClient defines the stats client for tracing
-	StatsClient stats.StatsClient
+	StatsClient stats.Client
 
 	// When set, the proxy will skip the TLS verification on outgoing requests.
 	InsecureSkipVerify bool
@@ -50,7 +50,7 @@ type Params struct {
 // Proxy instances implement Janus proxying functionality. For
 // initializing, see the WithParams the constructor and Params.
 type Proxy struct {
-	statsClient   stats.StatsClient
+	statsClient   stats.Client
 	quit          chan struct{}
 	flushInterval time.Duration
 }

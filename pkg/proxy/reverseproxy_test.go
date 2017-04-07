@@ -73,7 +73,7 @@ func createProxyDefinitions() []*Definition {
 			ListenPath:  "/posts/*",
 			UpstreamURL: "https://jsonplaceholder.typicode.com/posts",
 			StripPath:   true,
-			Methods:     []string{"GET"},
+			Methods:     []string{"ALL"},
 		},
 		&Definition{
 			ListenPath:  "/append/*",
@@ -91,7 +91,7 @@ func createRegisterAndRouter() router.Router {
 }
 
 func createRouter() router.Router {
-	return router.NewHTTPTreeMuxRouter()
+	return router.NewChiRouter()
 }
 
 func createRegister(r router.Router) *Register {
@@ -110,6 +110,6 @@ func createRegister(r router.Router) *Register {
 
 func createProxy() *Proxy {
 	return WithParams(Params{
-		StatsClient: stats.NewStatsdStatsClient("", ""),
+		StatsClient: stats.NewStatsdClient("", ""),
 	})
 }
