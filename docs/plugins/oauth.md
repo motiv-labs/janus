@@ -9,23 +9,10 @@ to the oauth flow and it simply delegate that to the oauth server.
 
 ## Configuration
 
-Configuring the plugin is straightforward, you can add it on top of an API by executing the following request on your Janus server:
+> To enable this plugin to your API you should configure an [OAuth Server](auth/oauth.md) first!
 
-```
-http -v POST localhost:8081/oauth/servers "Authorization:Bearer yourToken" "Content-Type: application/json" < examples/apis/auth0.json
-```
+Here is a simple definition of the available configurations.
 
-Here is a simple definition of the available configurations
-
-| Configuration                 | Description                                                                               |
-|-------------------------------|-------------------------------------------------------------------------------------------|
-| name                          | The unique name of your OAuth Server                                                      |
-| oauth_endpoints.authorize     | Defines the [proxy configuration](/docs/config/proxy.md) for the `authorize` endpoint     |
-| oauth_endpoints.token         | Defines the [proxy configuration](/docs/config/proxy.md) for the `token` endpoint         |
-| oauth_endpoints.info          | Defines the [proxy configuration](/docs/config/proxy.md) for the `info` endpoint          |
-| oauth_endpoints.revoke        | Defines the [proxy configuration](/docs/config/proxy.md) for the `revoke` endpoint        |
-| oauth_client_endpoints.create | Defines the [proxy configuration](/docs/config/proxy.md) for the `create` client endpoint |
-| oauth_client_endpoints.remove | Defines the [proxy configuration](/docs/config/proxy.md) for the `remove` client endpoint |
-| allowed_access_types          | The allowed access types for this oauth server                                            |
-| allowed_authorize_types       | The allowed authorize types for this oauth server                                         |
-| auth_login_redirect           | The auth login redirect URL                                                               |
+| Configuration                 | Description                                                         |
+|-------------------------------|---------------------------------------------------------------------|
+| server_name                   | Defines the `oauth server name` to be used as your oauth provider |
