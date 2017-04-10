@@ -20,7 +20,7 @@ mkdir -p /etc/janus/auth
 
 The main feature of the API Gateway is to proxy the requests to a different service, so let's do this.
 
-Just place [this example](../examples/apis/posts.json) in your `apis` directory.
+Just place [this example](../../examples/apis/posts.json) in your `apis` directory.
 This will create a proxy to `https://jsonplaceholder.typicode.com/posts` when you hit Janus on `GET /posts`.
 
 Now restart Janus to apply the changes.
