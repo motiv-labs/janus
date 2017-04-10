@@ -6,6 +6,9 @@ set -e
 CWD=$(pwd)
 BINARY=janus
 
+VERSION=$(cat ./version/version | sed 's/-.*$//g')
+cd ./source-code/ && GITHASH=$(git rev-parse --short HEAD) && cd ${CWD}
+
 # Goes to the application source code
 cd source-code/
 # Creates the project source on the gopath
@@ -14,6 +17,8 @@ mkdir -p ${PROJECT_SRC}
 cp -r . ${PROJECT_SRC}
 # Goes to the application on the gopath
 cd ${PROJECT_SRC}
+# Set version to inject it into application in compile-time
+export VERSION="${VERSION}-${GITHASH}"
 # Build the go application
 make
 

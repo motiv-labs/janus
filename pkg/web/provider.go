@@ -30,7 +30,7 @@ type Provider struct {
 // Provide executes the provider functionality
 // This is normally the entry point of the
 // provider.
-func (p *Provider) Provide() error {
+func (p *Provider) Provide(version string) error {
 	r := router.NewChiRouter()
 
 	// create authentication for Janus
@@ -45,7 +45,7 @@ func (p *Provider) Provide() error {
 	)
 
 	// create endpoints
-	r.GET("/", Home())
+	r.GET("/", Home(version))
 	r.GET("/status", Heartbeat())
 
 	handlers := jwt.Handler{Config: authConfig}
