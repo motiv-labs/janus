@@ -3,12 +3,10 @@ platform: linux
 
 image_resource:
   type: docker-image
-  source:
-    repository: golang
-    tag: "1"
+  source: {repository: golang, tag: "1"}
 
 inputs:
-- name: source-code
+  - name: source-code
 
 run:
   path: ci/scripts/run-unit-tests.sh

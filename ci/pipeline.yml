@@ -5,6 +5,11 @@
 #-----------------------------------------------------------------------------------------------------------------------
 resource_types:
 
+- name: pull-request
+  type: docker-image
+  source:
+    repository: jtarchie/pr
+
 - name: slack-notification
   type: docker-image
   source:
@@ -19,6 +24,13 @@ resource_types:
 # Resources
 #-----------------------------------------------------------------------------------------------------------------------
 resources:
+
+- name: janus-pr
+  type: pull-request
+  source:
+    uri: {{github_repository_uri}}
+    repo: {{github_pr_repository}}
+    access_token: {{github_access_token}}
 
 - name: source-code
   type: git
@@ -74,6 +86,21 @@ resources:
 #-----------------------------------------------------------------------------------------------------------------------
 groups:
 
+- name: all
+  jobs:
+  - pr-unit-tests
+  - run-unit-tests
+  - create-release-candidate
+  - staging-deployment
+  - docker-deployment
+  - create-release
+  - live-deployment
+  - increment-patch-version
+
+- name: pr
+  jobs:
+  - pr-unit-tests
+
 - name: staging
   jobs:
   - run-unit-tests
@@ -91,6 +118,44 @@ groups:
 # Jobs
 #-----------------------------------------------------------------------------------------------------------------------
 jobs:
+
+- name: pr-unit-tests
+  public: false
+  serial: true
+  plan:
+
+  # Trigger unit tests when a PR is submitted
+  - get: janus-pr
+    trigger: true
+
+  # Set the unit test github status for this PR to pending
+  - put: janus-pr
+    params:
+      path: janus-pr
+      context: unit-tests
+      status: pending
+
+  # Run unit tests
+  - task: unit-tests
+    file: janus-pr/ci/tasks/pr-unit-tests.yml
+    params:
+      PROJECT_SRC: {{project_src}}
+
+    # If successful, set the unit test github status for this PR to success
+    on_success:
+      put: janus-pr
+      params:
+        path: janus-pr
+        context: unit-tests
+        status: success
+
+    # If unsuccessful, set the unit test github status for this PR to unsuccessful
+    on_failure:
+      put: janus-pr
+      params:
+        path: janus-pr
+        context: unit-tests
+        status: failure
 
 - name: run-unit-tests
   serial: true
@@ -181,7 +246,7 @@ jobs:
 
   # Get the application version to use it in docker
   - get: version
-  
+
   # Upload the image to quay.io
   - put: docker-image
     params:
@@ -221,14 +286,14 @@ jobs:
       put: slack-alert
       params:
         channel: {{slack_channel}}
-        text: {{slack_staging_failure_text}}
+        text: {{slack_message_staging_fail}}
 
     # Notify the slack channel of deployment failure
     on_success:
       put: slack-alert
       params:
         channel: {{slack_channel}}
-        text: {{slack_staging_success_text}}
+        text: {{slack_message_staging_ok}}
 
 # Live Deployments
 #-----------------------------------------------------------------------------------------------------------------------
@@ -264,16 +329,16 @@ jobs:
       put: slack-alert
       params:
         channel: {{slack_channel}}
-        text: {{slack_live_failure_text}}
+        text: {{slack_message_live_fail}}
 
     # Notify the slack channel of deployment failure
     on_success:
       put: slack-alert
       params:
         channel: {{slack_channel}}
-        text: {{slack_live_success_text}}
+        text: {{slack_message_live_ok}}
 
-# Increament Patch Version
+# Increment Patch Version
 #-----------------------------------------------------------------------------------------------------------------------
 - name: increment-patch-version
   serial: true
@@ -282,6 +347,7 @@ jobs:
   # Trigger a deployment to staging after build
   - get: release
     passed: [live-deployment]
+    trigger: true
 
   # Bump the version of the release
   - put: version
