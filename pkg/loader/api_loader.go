@@ -58,15 +58,14 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 	if active {
 		var handlers []router.Constructor
 
-		for pName, pDefinition := range referenceSpec.Plugins {
-			pDefinition.Name = pName
+		for _, pDefinition := range referenceSpec.Plugins {
 			if pDefinition.Enabled {
-				logger.WithField("name", pName).Debug("Plugin enabled")
+				logger.WithField("name", pDefinition.Name).Debug("Plugin enabled")
 				if p := m.pluginLoader.Get(pDefinition.Name); p != nil {
 					middlewares, err := p.GetMiddlewares(pDefinition.Config, referenceSpec)
 					if err != nil {
 						logger.WithError(err).
-							WithField("plugin_name", pName).
+							WithField("plugin_name", pDefinition.Name).
 							Error("Error loading plugin")
 					}
 
@@ -75,7 +74,7 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 					}
 				}
 			} else {
-				logger.WithField("name", pName).Debug("Plugin not enabled")
+				logger.WithField("name", pDefinition.Name).Debug("Plugin not enabled")
 			}
 		}
 

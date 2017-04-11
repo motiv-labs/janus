@@ -11,18 +11,9 @@
         "methods" : ["ALL"],
         "hosts": ["hellofresh.*"]
     },
-    "plugins": {
-        "compression": {
-            "enabled": true
-        },
-        "rate_limit" : {
-            "enabled" : true,
-            "config": {
-                    "limit" : "10-S",
-                    "policy": "local"
-            }
-        },
-        "cors" : {
+    "plugins": [
+        {
+            "name": "cors",
             "enabled" : true,
             "config": {
                 "domains" : [
@@ -45,6 +36,25 @@
                     "X-Debug-Token-Link"
                 ]
             }
+        },
+        {
+            "name": "rate_limit",
+            "enabled" : true,
+            "config": {
+                    "limit" : "10-S",
+                    "policy": "local"
+            }
+        },
+        {
+            "name": "oauth2",
+            "enabled" : true,
+            "config": {
+                "server_name": "local"
+            }
+        },
+        {
+            "name": "compression",
+            "enabled": true
         }
-    }
+    ]
 }
