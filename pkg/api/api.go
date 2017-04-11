@@ -27,14 +27,14 @@ type Definition struct {
 	Name    string            `bson:"name" json:"name" valid:"required"`
 	Active  bool              `bson:"active" json:"active"`
 	Proxy   *proxy.Definition `bson:"proxy" json:"proxy"`
-	Plugins map[string]Plugin `bson:"plugins" json:"plugins"`
+	Plugins []Plugin          `bson:"plugins" json:"plugins"`
 }
 
 // NewDefinition creates a new API Definition with default values
 func NewDefinition() *Definition {
 	return &Definition{
 		Active:  true,
-		Plugins: make(map[string]Plugin, 0),
+		Plugins: make([]Plugin, 0),
 		Proxy:   proxy.NewDefinition(),
 	}
 }
