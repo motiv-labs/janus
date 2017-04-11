@@ -30,16 +30,6 @@ var (
 
 // RunServer is the run command to start Janus
 func RunServer(cmd *cobra.Command, args []string) {
-	var printVersion bool
-	printVersion, err = cmd.Flags().GetBool(flagVersion)
-	if nil != err {
-		log.WithError(err).Panic("Failed to read version flag")
-	}
-	if printVersion {
-		cmd.Println("Janus v" + version)
-		return
-	}
-
 	log.WithField("version", version).Info("Janus starting...")
 
 	globalConfig, err = config.Load(configFile)

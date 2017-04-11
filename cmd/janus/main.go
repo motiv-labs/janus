@@ -7,15 +7,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const flagVersion = "version"
-
 var (
-	version    string
-	configFile string
+	version     string
+	configFile  string
+	versionFlag bool
 )
 
 func main() {
 	versionString := "Janus v" + version
+	cobra.OnInitialize(func() {
+		if versionFlag {
+			fmt.Println(versionString)
+			os.Exit(0)
+		}
+	})
+
 	var RootCmd = &cobra.Command{
 		Use:   "janus",
 		Short: "Janus is an API Gateway",
@@ -28,7 +34,7 @@ Complete documentation is available at https://hellofresh.gitbooks.io/janus`,
 		Run: RunServer,
 	}
 	RootCmd.Flags().StringVarP(&configFile, "config", "c", "", "Source of a configuration file")
-	RootCmd.Flags().BoolP(flagVersion, "v", false, "Print application version")
+	RootCmd.Flags().BoolVarP(&versionFlag, "version", "v", false, "Print application version")
 
 	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
