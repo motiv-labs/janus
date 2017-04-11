@@ -118,16 +118,16 @@ jobs:
     trigger: true
     passed: [run-unit-tests]
 
+  # Bump the rc version
+  - put: version
+    params:
+      pre: 'rc'
+
   # Create a release artifact
   - task: create-artifact
     file: source-code/ci/tasks/create-artifact.yml
     params:
       PROJECT_SRC: {{project_src}}
-
-  # Bump the rc version
-  - put: version
-    params:
-      pre: 'rc'
 
   # Upload a release candidate to GitHub
   - put: release-candidate
@@ -181,7 +181,7 @@ jobs:
 
   # Get the application version to use it in docker
   - get: version
-  
+
   # Upload the image to quay.io
   - put: docker-image
     params:

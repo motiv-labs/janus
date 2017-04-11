@@ -9,6 +9,7 @@ image_resource:
 
 inputs:
   - name: source-code
+  - name: version
 
 outputs:
   - name: artifacts

@@ -30,7 +30,7 @@ var (
 
 // RunServer is the run command to start Janus
 func RunServer(cmd *cobra.Command, args []string) {
-	log.Info("Janus starting...")
+	log.WithField("version", version).Info("Janus starting...")
 
 	globalConfig, err = config.Load(configFile)
 	if nil != err {
@@ -147,7 +147,7 @@ func RunServer(cmd *cobra.Command, args []string) {
 		wp.Publisher = publisher
 	}
 
-	wp.Provide()
+	wp.Provide(version)
 
 	log.Fatal(listenAndServe(r))
 }

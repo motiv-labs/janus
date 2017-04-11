@@ -9,16 +9,16 @@ import (
 )
 
 // Home handler is just a nice home page message
-func Home() http.HandlerFunc {
+func Home(version string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		response.JSON(w, http.StatusOK, "Welcome to Janus")
+		response.JSON(w, http.StatusOK, "Welcome to Janus v"+version)
 	}
 }
 
 // NotFound handler is called when no route is matched
 func NotFound(w http.ResponseWriter, r *http.Request) {
-	notfoundError := errors.ErrRouteNotFound
-	response.JSON(w, notfoundError.Code, notfoundError)
+	notFoundError := errors.ErrRouteNotFound
+	response.JSON(w, notFoundError.Code, notFoundError)
 }
 
 // RecoveryHandler handler is used when a panic happens
