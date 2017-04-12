@@ -1,7 +1,9 @@
 <p align="center">
-  <a href="https://hellofresh.com">
-    <img width="120" src="https://www.hellofresh.de/images/hellofresh/press/HelloFresh_Logo.png">
+  <a href="https://hellofresh.com" style="text-decoration:none; margin-right:2rem;">
+    <img height="110" src="https://www.hellofresh.de/images/hellofresh/press/HelloFresh_Logo.png">
   </a>
+  
+  <img height="110" src="./janus-logo.png">
 </p>
 
 # Janus
