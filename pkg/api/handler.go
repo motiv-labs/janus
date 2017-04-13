@@ -107,16 +107,16 @@ func (c *Controller) Post() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
-		span := opentracing.FromContext(r.Context(), "datastore.FindByListenPath")
-		def, err := c.repo.FindByListenPath(definition.Proxy.ListenPath)
+		span := opentracing.FromContext(r.Context(), "datastore.Exists")
+		exists, err := c.repo.Exists(definition)
 		span.Finish()
 
 		if nil != err && err != mgo.ErrNotFound {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		if def != nil {
-			panic(errors.ErrProxyExists)
+		if exists {
+			panic(err)
 		}
 
 		span = opentracing.FromContext(r.Context(), "datastore.Add")

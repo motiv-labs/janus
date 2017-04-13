@@ -79,15 +79,20 @@ func (r *FileSystemRepository) FindByName(name string) (*Definition, error) {
 	return definition, nil
 }
 
-// FindByListenPath searches an existing Proxy definition by its listen_path
-func (r *FileSystemRepository) FindByListenPath(path string) (*Definition, error) {
+// Exists searches an existing Proxy definition by its listen_path
+func (r *FileSystemRepository) Exists(def *Definition) (bool, error) {
+	_, ok := r.definitions[def.Name]
+	if ok {
+		return true, ErrAPINameExists
+	}
+
 	for _, definition := range r.definitions {
-		if definition.Proxy.ListenPath == path {
-			return definition, nil
+		if definition.Proxy.ListenPath == def.Proxy.ListenPath {
+			return true, ErrAPIListenPathExists
 		}
 	}
 
-	return nil, ErrAPIDefinitionNotFound
+	return false, nil
 }
 
 // Add adds an api definition to the repository

@@ -14,7 +14,7 @@ const (
 type Repository interface {
 	FindAll() ([]*Definition, error)
 	FindByName(name string) (*Definition, error)
-	FindByListenPath(path string) (*Definition, error)
+	Exists(def *Definition) (bool, error)
 	Add(app *Definition) error
 	Remove(name string) error
 }
@@ -53,15 +53,30 @@ func (r *MongoRepository) FindByName(name string) (*Definition, error) {
 	return result, err
 }
 
-// FindByListenPath searches an existing API definition by its listen_path
-func (r *MongoRepository) FindByListenPath(path string) (*Definition, error) {
-	var result = NewDefinition()
+// Exists searches an existing API definition by its listen_path
+func (r *MongoRepository) Exists(def *Definition) (bool, error) {
 	session, coll := r.getSession()
 	defer session.Close()
 
-	err := coll.Find(bson.M{"proxy.listen_path": path}).One(&result)
+	count, err := coll.Find(bson.M{"name": def.Name}).Count()
+	if err != nil {
+		return false, err
+	}
 
-	return result, err
+	if count <= 0 {
+		return false, ErrAPINameExists
+	}
+
+	count, err = coll.Find(bson.M{"proxy.listen_path": def.Proxy.ListenPath}).Count()
+	if err != nil {
+		return false, err
+	}
+
+	if count <= 0 {
+		return false, ErrAPIListenPathExists
+	}
+
+	return true, nil
 }
 
 // Add adds an API definition to the repository
