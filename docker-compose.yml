@@ -21,10 +21,10 @@ services:
   janus-database:
       image: mongo
       ports:
-          - 27017
+          - "27017:27017"
 
   # Janus Key Value Store (if you want to use redis instead of an in memory store)
   janus-storage:
       image: redis
       ports:
-          - 6379
+          - "6379:6379"
