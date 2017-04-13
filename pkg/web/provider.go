@@ -13,6 +13,7 @@ import (
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/store"
 	chimiddleware "github.com/pressly/chi/middleware"
+	"github.com/rs/cors"
 )
 
 // Provider is a provider.Provider implementation that provides the REST API.
@@ -42,6 +43,10 @@ func (p *Provider) Provide(version string) error {
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(RecoveryHandler).Handler,
 		middleware.NewOpenTracing(p.IsHTTPS()).Handler,
+		cors.New(cors.Options{
+			AllowedOrigins:   []string{"*"},
+			AllowCredentials: true,
+		}).Handler,
 	)
 
 	// create endpoints
@@ -84,13 +89,13 @@ func (p *Provider) loadAPIEndpoints(router router.Router, handlers ...router.Con
 	handler := api.NewController(p.APIRepo, p.Publisher)
 	group := router.Group("/apis")
 	{
-		group.GET("/", handler.Get(), handlers...)
-		group.GET("/:name", handler.GetBy(), handlers...)
+		group.GET("/", handler.Get())
+		group.GET("/:name", handler.GetBy())
 
 		if false == p.ReadOnly {
-			group.POST("/", handler.Post(), handlers...)
-			group.PUT("/:name", handler.PutBy(), handlers...)
-			group.DELETE("/:name", handler.DeleteBy(), handlers...)
+			group.POST("/", handler.Post())
+			group.PUT("/:name", handler.PutBy())
+			group.DELETE("/:name", handler.DeleteBy())
 		}
 	}
 }
