@@ -13,7 +13,7 @@ import (
 
 // FileSystemRepository represents a mongodb repository
 type FileSystemRepository struct {
-	sync.Mutex
+	sync.RWMutex
 	definitions map[string]*Definition
 }
 
@@ -61,6 +61,9 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 
 // FindAll fetches all the api definitions available
 func (r *FileSystemRepository) FindAll() ([]*Definition, error) {
+	r.RLock()
+	defer r.RUnlock()
+
 	var definitions []*Definition
 	for _, definition := range r.definitions {
 		definitions = append(definitions, definition)
@@ -71,6 +74,9 @@ func (r *FileSystemRepository) FindAll() ([]*Definition, error) {
 
 // FindByName find an api definition by name
 func (r *FileSystemRepository) FindByName(name string) (*Definition, error) {
+	r.RLock()
+	defer r.RUnlock()
+
 	definition, ok := r.definitions[name]
 	if false == ok {
 		return nil, ErrAPIDefinitionNotFound
@@ -81,6 +87,9 @@ func (r *FileSystemRepository) FindByName(name string) (*Definition, error) {
 
 // Exists searches an existing Proxy definition by its listen_path
 func (r *FileSystemRepository) Exists(def *Definition) (bool, error) {
+	r.RLock()
+	defer r.RUnlock()
+
 	_, ok := r.definitions[def.Name]
 	if ok {
 		return true, ErrAPINameExists

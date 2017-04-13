@@ -63,8 +63,8 @@ func (r *MongoRepository) Exists(def *Definition) (bool, error) {
 		return false, err
 	}
 
-	if count <= 0 {
-		return false, ErrAPINameExists
+	if count >= 1 {
+		return true, ErrAPINameExists
 	}
 
 	count, err = coll.Find(bson.M{"proxy.listen_path": def.Proxy.ListenPath}).Count()
@@ -72,11 +72,11 @@ func (r *MongoRepository) Exists(def *Definition) (bool, error) {
 		return false, err
 	}
 
-	if count <= 0 {
-		return false, ErrAPIListenPathExists
+	if count >= 1 {
+		return true, ErrAPIListenPathExists
 	}
 
-	return true, nil
+	return false, nil
 }
 
 // Add adds an API definition to the repository
