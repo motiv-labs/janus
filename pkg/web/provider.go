@@ -46,6 +46,7 @@ func (p *Provider) Provide(version string) error {
 		cors.New(cors.Options{
 			AllowedOrigins:   []string{"*"},
 			AllowedHeaders:   []string{"*"},
+			AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 			AllowCredentials: true,
 		}).Handler,
 	)
