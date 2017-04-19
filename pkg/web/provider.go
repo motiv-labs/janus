@@ -45,6 +45,8 @@ func (p *Provider) Provide(version string) error {
 		middleware.NewOpenTracing(p.IsHTTPS()).Handler,
 		cors.New(cors.Options{
 			AllowedOrigins:   []string{"*"},
+			AllowedHeaders:   []string{"*"},
+			AllowedMethods:   []string{"GET", "POST", "PUT", "PATCH", "DELETE"},
 			AllowCredentials: true,
 		}).Handler,
 	)
