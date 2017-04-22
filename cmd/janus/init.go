@@ -13,9 +13,24 @@ import (
 	opentracing "github.com/opentracing/opentracing-go"
 )
 
+var (
+	globalConfig *config.Specification
+	statsClient  stats.Client
+	storage      store.Store
+)
+
+func init() {
+	c, err := config.Load(configFile)
+	if nil != err {
+		log.WithError(err).Panic("Could not parse the environment configurations")
+	}
+
+	globalConfig = c
+}
+
 // initializes the basic configuration for the log wrapper
-func initLogger(levelStr string) {
-	level, err := log.ParseLevel(strings.ToLower(levelStr))
+func init() {
+	level, err := log.ParseLevel(strings.ToLower(globalConfig.LogLevel))
 	if err != nil {
 		log.WithError(err).Error("Error getting log level")
 	}
@@ -28,9 +43,9 @@ func initLogger(levelStr string) {
 }
 
 // initializes distributed tracing
-func initTracing(config config.Tracing) {
+func init() {
 	log.Debug("initializing Open Tracing")
-	tracer, err := tracerfactory.Build(config)
+	tracer, err := tracerfactory.Build(globalConfig.Tracing)
 	if err != nil {
 		log.WithError(err).Panic("Could not build a tracer for open tracing")
 	}
@@ -38,32 +53,31 @@ func initTracing(config config.Tracing) {
 	opentracing.InitGlobalTracer(tracer)
 }
 
-// initializes the storage and managers
-func initStorage(config config.Storage) store.Store {
-	storage, err := store.Build(config.DSN)
-	if nil != err {
-		log.Panic(err)
-	}
-
-	return storage
-}
-
-func initStatsdClient(config config.Stats) stats.Client {
-	sectionsTestsMap, err := stats.ParseSectionsTestsMap(config.IDs)
+func init() {
+	sectionsTestsMap, err := stats.ParseSectionsTestsMap(globalConfig.Stats.IDs)
 	if err != nil {
-		log.WithError(err).WithField("config", config.IDs).
+		log.WithError(err).WithField("config", globalConfig.Stats.IDs).
 			Error("Failed to parse stats second level IDs from env")
 		sectionsTestsMap = map[stats.PathSection]stats.SectionTestDefinition{}
 	}
-	log.WithField("config", config.IDs).
+	log.WithField("config", globalConfig.Stats.IDs).
 		WithField("map", sectionsTestsMap.String()).
 		Debug("Setting stats second level IDs")
 
-	client, err := stats.NewClient(config.DSN, config.Prefix)
+	statsClient, err = stats.NewClient(globalConfig.Stats.DSN, globalConfig.Stats.Prefix)
 	if err != nil {
 		log.WithError(err).Panic("Error initializing statsd client")
 	}
 
-	client.SetHTTPMetricCallback(stats.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
-	return client
+	statsClient.SetHTTPMetricCallback(stats.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
+}
+
+// initializes the storage and managers
+func init() {
+	s, err := store.Build(globalConfig.Storage.DSN)
+	if nil != err {
+		log.Panic(err)
+	}
+
+	storage = s
 }
