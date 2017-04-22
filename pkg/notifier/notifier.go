@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/hellofresh/janus/pkg/store"
 )
 
+// NotificationCommand represents a notification command
 type NotificationCommand string
 
 const (
@@ -22,16 +22,18 @@ const (
 	NoticeOAuthServerRemoved NotificationCommand = "OAuthRemoved"
 	// NoticeOAuthServerAdded notifies when an OAuth server is added
 	NoticeOAuthServerAdded NotificationCommand = "OAuthAdded"
+	// DefaultChannel represents the defualt channel's name
+	DefaultChannel = "janus.cluster.notifications"
 )
 
-// RequireReload checks if a given command requires reload
-func RequireReload(cmd NotificationCommand) bool {
-	switch cmd {
-	case NoticeAPIUpdated, NoticeAPIRemoved, NoticeAPIAdded, NoticeOAuthServerUpdated, NoticeOAuthServerRemoved, NoticeOAuthServerAdded:
-		return true
-	default:
-		return false
-	}
+// Subscriber holds the basic methods to subscribe to a topic
+type Subscriber interface {
+	Subscribe(channel string, callback func(Notification)) error
+}
+
+// Publisher holds the basic methods to publish a message
+type Publisher interface {
+	Publish(topic string, data []byte) error
 }
 
 // Notification is a type that encodes a message published to a pub sub channel (shared between implementations)
@@ -43,12 +45,16 @@ type Notification struct {
 
 // Notifier will use redis pub/sub channels to send notifications
 type Notifier struct {
-	publisher store.Publisher
+	publisher Publisher
 	channel   string
 }
 
 // New creates a new instance of Notifier
-func New(publisher store.Publisher, channel string) *Notifier {
+func New(publisher Publisher, channel string) *Notifier {
+	if channel == "" {
+		channel = DefaultChannel
+	}
+
 	return &Notifier{publisher, channel}
 }
 
@@ -65,4 +71,14 @@ func (r *Notifier) Notify(notification Notification) bool {
 		return false
 	}
 	return true
+}
+
+// RequireReload checks if a given command requires reload
+func RequireReload(cmd NotificationCommand) bool {
+	switch cmd {
+	case NoticeAPIUpdated, NoticeAPIRemoved, NoticeAPIAdded, NoticeOAuthServerUpdated, NoticeOAuthServerRemoved, NoticeOAuthServerAdded:
+		return true
+	default:
+		return false
+	}
 }
