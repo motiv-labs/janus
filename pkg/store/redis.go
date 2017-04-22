@@ -1,8 +1,11 @@
 package store
 
 import (
+	"encoding/json"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
+	"github.com/hellofresh/janus/pkg/notifier"
 )
 
 // RedisStore is the redis store.
@@ -95,7 +98,7 @@ func (s *RedisStore) Publish(topic string, data []byte) error {
 }
 
 // Subscribe subscribes to a topic in redis
-func (s *RedisStore) Subscribe(channel string, callback func(interface{})) error {
+func (s *RedisStore) Subscribe(channel string, callback func(notifier.Notification)) error {
 	// Get a connection from a pool
 	c := s.getConnection()
 	defer c.Close()
@@ -108,7 +111,12 @@ func (s *RedisStore) Subscribe(channel string, callback func(interface{})) error
 	for {
 		switch v := psc.Receive().(type) {
 		case redis.Message:
-			callback(v)
+			notif := notifier.Notification{}
+			if err := json.Unmarshal(v.Data, &notif); err != nil {
+				log.Error("Unmarshalling message body failed, malformed: ", err)
+				return err
+			}
+			callback(notif)
 		case error:
 			log.WithError(v).Debug("An error ocurred when getting the message")
 			return v
