@@ -3,7 +3,6 @@ package router
 import (
 	"net/http"
 
-	"github.com/dimfeld/httptreemux"
 	"github.com/pressly/chi"
 )
 
@@ -39,17 +38,10 @@ type Router interface {
 type Options struct {
 	NotFoundHandler           http.HandlerFunc
 	SafeAddRoutesWhileRunning bool
-	RedirectMethodBehavior    map[string]httptreemux.RedirectBehavior
 }
 
 // DefaultOptions are the default router options
 var DefaultOptions = Options{
 	NotFoundHandler:           http.NotFound,
 	SafeAddRoutesWhileRunning: true,
-	RedirectMethodBehavior: map[string]httptreemux.RedirectBehavior{
-		// tree mux router uses Redirect301 behavior by default for paths that differs with slash at the end
-		// from registered, that causes problems with some services, e.g. api-v2 OPTIONS /menus/ gives 301 and we
-		// want by-pass it as is, but only for OPTIONS method, that is processed by CORS
-		http.MethodOptions: httptreemux.UseHandler,
-	},
 }
