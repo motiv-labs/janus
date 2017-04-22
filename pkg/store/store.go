@@ -25,16 +25,6 @@ type Store interface {
 	Set(key string, value string, expire int64) error
 }
 
-// Subscriber holds the basic methods to subscribe to a topic
-type Subscriber interface {
-	Subscribe(channel string, callback func(interface{})) error
-}
-
-// Publisher holds the basic methods to publish a message
-type Publisher interface {
-	Publish(topic string, data []byte) error
-}
-
 // Options are options for store.
 type Options struct {
 	// Prefix is the prefix to use for the key.
@@ -45,22 +35,6 @@ type Options struct {
 
 	// CleanUpInterval is the interval for cleanup.
 	CleanUpInterval time.Duration
-}
-
-// Message represents the message that comes
-// from an update
-type Message []byte
-
-// Subscription holds a message channel
-type Subscription struct {
-	Message chan Message
-}
-
-// NewSubscription creates a new instance of Subscription
-func NewSubscription() *Subscription {
-	return &Subscription{
-		Message: make(chan Message),
-	}
 }
 
 // Build creates a new storage based on the provided DSN
