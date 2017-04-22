@@ -9,23 +9,23 @@ import (
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/middleware"
+	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/router"
-	"github.com/hellofresh/janus/pkg/store"
 	chimiddleware "github.com/pressly/chi/middleware"
 	"github.com/rs/cors"
 )
 
 // Provider is a provider.Provider implementation that provides the REST API.
 type Provider struct {
-	Port      int    `description:"Web administration port"`
-	CertFile  string `description:"SSL certificate"`
-	KeyFile   string `description:"SSL certificate"`
-	ReadOnly  bool   `description:"Enable read only API"`
-	Cred      config.Credentials
-	APIRepo   api.Repository
-	AuthRepo  oauth.Repository
-	Publisher store.Publisher
+	Port     int    `description:"Web administration port"`
+	CertFile string `description:"SSL certificate"`
+	KeyFile  string `description:"SSL certificate"`
+	ReadOnly bool   `description:"Enable read only API"`
+	Cred     config.Credentials
+	APIRepo  api.Repository
+	AuthRepo oauth.Repository
+	Notifier *notifier.Notifier
 }
 
 // Provide executes the provider functionality
@@ -88,7 +88,7 @@ func (p *Provider) loadAPIEndpoints(router router.Router, handlers ...router.Con
 	log.Debug("Loading API Endpoints")
 
 	// Apis endpoints
-	handler := api.NewController(p.APIRepo, p.Publisher)
+	handler := api.NewController(p.APIRepo, p.Notifier)
 	group := router.Group("/apis")
 	{
 		group.GET("/", handler.Get())
@@ -107,7 +107,7 @@ func (p *Provider) loadOAuthEndpoints(router router.Router, handlers ...router.C
 	log.Debug("Loading OAuth Endpoints")
 
 	// Oauth servers endpoints
-	oAuthHandler := oauth.NewController(p.AuthRepo, p.Publisher)
+	oAuthHandler := oauth.NewController(p.AuthRepo, p.Notifier)
 	oauthGroup := router.Group("/oauth/servers")
 	{
 		oauthGroup.GET("/", oAuthHandler.Get(), handlers...)
