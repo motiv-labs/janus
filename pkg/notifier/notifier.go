@@ -3,7 +3,7 @@ package notifier
 import (
 	"encoding/json"
 
-	"github.com/containous/traefik/log"
+	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/store"
 )
 
