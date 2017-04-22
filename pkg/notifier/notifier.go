@@ -10,18 +10,24 @@ import (
 type NotificationCommand string
 
 const (
-	NoticeApiUpdated         NotificationCommand = "ApiUpdated"
-	NoticeApiRemoved         NotificationCommand = "ApiRemoved"
-	NoticeApiAdded           NotificationCommand = "ApiAdded"
+	// NoticeAPIUpdated notifies when an API is updated
+	NoticeAPIUpdated NotificationCommand = "ApiUpdated"
+	// NoticeAPIRemoved notifies when an API is removed
+	NoticeAPIRemoved NotificationCommand = "ApiRemoved"
+	// NoticeAPIAdded notifies when an API is added
+	NoticeAPIAdded NotificationCommand = "ApiAdded"
+	// NoticeOAuthServerUpdated notifies when an OAuth server is updated
 	NoticeOAuthServerUpdated NotificationCommand = "OAuthUpdated"
+	// NoticeOAuthServerRemoved notifies when an OAuth server is removed
 	NoticeOAuthServerRemoved NotificationCommand = "OAuthRemoved"
-	NoticeOAuthServerAdded   NotificationCommand = "OAuthAdded"
+	// NoticeOAuthServerAdded notifies when an OAuth server is added
+	NoticeOAuthServerAdded NotificationCommand = "OAuthAdded"
 )
 
 // RequireReload checks if a given command requires reload
 func RequireReload(cmd NotificationCommand) bool {
 	switch cmd {
-	case NoticeApiUpdated, NoticeApiRemoved, NoticeApiAdded, NoticeOAuthServerUpdated, NoticeOAuthServerRemoved, NoticeOAuthServerAdded:
+	case NoticeAPIUpdated, NoticeAPIRemoved, NoticeAPIAdded, NoticeOAuthServerUpdated, NoticeOAuthServerRemoved, NoticeOAuthServerAdded:
 		return true
 	default:
 		return false
