@@ -18,6 +18,7 @@ type Params struct {
 	ProxyParams proxy.Params
 }
 
+// Load loads all the basic components and definitions into a router
 func Load(params Params) {
 	pluginLoader := plugin.NewLoader()
 	pluginLoader.Add(
