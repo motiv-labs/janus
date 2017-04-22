@@ -95,34 +95,25 @@ func (s *RedisStore) Publish(topic string, data []byte) error {
 }
 
 // Subscribe subscribes to a topic in redis
-func (s *RedisStore) Subscribe(topic string) *Subscription {
-	sub := NewSubscription()
+func (s *RedisStore) Subscribe(channel string, callback func(interface{})) error {
+	// Get a connection from a pool
+	c := s.getConnection()
+	defer c.Close()
 
-	go func() {
-		for {
-			// Get a connection from a pool
-			c := s.getConnection()
-			psc := redis.PubSubConn{Conn: c}
+	psc := redis.PubSubConn{Conn: c}
+	if err := psc.Subscribe(channel); err != nil {
+		return err
+	}
 
-			// Set up subscriptions
-			psc.Subscribe(topic)
-
-			// While not a permanent error on the connection.
-			for c.Err() == nil {
-				switch v := psc.Receive().(type) {
-				case redis.Message:
-					log.WithField("channel", v.Channel).Debug("Received a message")
-					sub.Message <- Message(v.Data)
-				case error:
-					log.WithError(v).Debug("An error ocurred when getting the message")
-					return
-				}
-			}
-			c.Close()
+	for {
+		switch v := psc.Receive().(type) {
+		case redis.Message:
+			callback(v)
+		case error:
+			log.WithError(v).Debug("An error ocurred when getting the message")
+			return v
 		}
-	}()
-
-	return sub
+	}
 }
 
 func (s *RedisStore) exists(conn redis.Conn, key string) (bool, error) {

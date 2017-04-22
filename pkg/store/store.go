@@ -27,7 +27,7 @@ type Store interface {
 
 // Subscriber holds the basic methods to subscribe to a topic
 type Subscriber interface {
-	Subscribe(topic string) *Subscription
+	Subscribe(channel string, callback func(interface{})) error
 }
 
 // Publisher holds the basic methods to publish a message
