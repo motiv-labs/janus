@@ -1,17 +1,12 @@
-<p align="center">
-  <a href="https://hellofresh.com" style="text-decoration:none; margin-right:2rem;">
-    <img height="110" src="https://www.hellofresh.de/images/hellofresh/press/HelloFresh_Logo.png">
-  </a>
-  
-  <img height="110" src="./janus-logo.png">
+<p align="center">  
+  <img height="150" src="./janus-logo.png"  alt="Janus" title="Janus">
 </p>
-
-# Janus
 
 [![Build Status](https://travis-ci.org/hellofresh/janus.svg?branch=master)](https://travis-ci.org/hellofresh/janus)
 [![Coverage Status](https://coveralls.io/repos/github/hellofresh/janus/badge.svg?branch=master)](https://coveralls.io/github/hellofresh/janus?branch=master)
 [![GoDoc](https://godoc.org/github.com/hellofresh/janus?status.svg)](https://godoc.org/github.com/hellofresh/janus)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hellofresh/janus)](https://goreportcard.com/report/github.com/hellofresh/janus)
+
 
 > An API Gateway written in Go
 
@@ -40,13 +35,14 @@ integrating an API gateway is a faster, more secure route than writing your own 
 This API Gateway offers powerful, yet lightweight features that allows fine gained control over your API ecosystem.
 
 * No dependency hell, single binary made with go
+* REST API, full programatic access to the internals makes it easy to manage your API users, keys and API Configuration from within your systems
+* Hot-reloading of configuration. No need to restart the process
+* Graceful shutdown of http connections
 * [OpenTracing](http://opentracing.io/) support for Distributed tracing (Supports Google Cloud Platform, Zipkin and Appdash)
 * HTTP/2 support
-* REST API, full programatic access to the internals makes it easy to manage your API users, keys and API Configuration from within your systems
 * Rate Limiting, easily rate limit your API users, rate limiting is granular and can be applied on a per-key basis
 * CORS Filter, enable cors for your API, or even for specific endpoints
 * Multiple auth protocols, out of the box, we support JWT, OAuth 2.0 and Basic Auth access methods
-* Graceful shutdown of http connections
 * Small [official](https://quay.io/repository/hellofresh/janus) docker image included
 
 ## Installation
@@ -89,3 +85,10 @@ To start contributing, please check [CONTRIBUTING](CONTRIBUTING.md).
 * Janus Docs: https://hellofresh.gitbooks.io/janus
 * Janus Go Docs: https://godoc.org/github.com/hellofresh/janus
 * Go lang: https://golang.org/
+
+##
+<p align="center">  
+    <a href="https://hellofresh.com" style="text-decoration:none; margin-right:2rem;">
+    <img height="110" src="https://www.hellofresh.de/images/hellofresh/press/HelloFresh_Logo.png">
+  </a>
+</p>
