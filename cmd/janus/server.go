@@ -91,7 +91,7 @@ func RunServer(cmd *cobra.Command, args []string) {
 	}
 
 	if publisher, ok := storage.(notifier.Publisher); ok {
-		wp.Notifier = notifier.New(publisher, "")
+		wp.Notifier = notifier.NewPublisherNotifier(publisher, "")
 	}
 
 	wp.Provide(version)

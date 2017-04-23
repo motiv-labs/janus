@@ -25,7 +25,7 @@ type Provider struct {
 	Cred     config.Credentials
 	APIRepo  api.Repository
 	AuthRepo oauth.Repository
-	Notifier *notifier.Notifier
+	Notifier notifier.Notifier
 }
 
 // Provide executes the provider functionality

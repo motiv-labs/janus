@@ -43,23 +43,28 @@ type Notification struct {
 	Signature string              `json:"signature"`
 }
 
-// Notifier will use redis pub/sub channels to send notifications
-type Notifier struct {
+// Notifier holds the basic methods to notify listeners
+type Notifier interface {
+	Notify(notification Notification) bool
+}
+
+// PublisherNotifier will use redis pub/sub channels to send notifications
+type PublisherNotifier struct {
 	publisher Publisher
 	channel   string
 }
 
-// New creates a new instance of Notifier
-func New(publisher Publisher, channel string) *Notifier {
+// NewPublisherNotifier creates a new instance of Notifier
+func NewPublisherNotifier(publisher Publisher, channel string) *PublisherNotifier {
 	if channel == "" {
 		channel = DefaultChannel
 	}
 
-	return &Notifier{publisher, channel}
+	return &PublisherNotifier{publisher, channel}
 }
 
 // Notify will send a notification to a channel
-func (r *Notifier) Notify(notification Notification) bool {
+func (r *PublisherNotifier) Notify(notification Notification) bool {
 	toSend, err := json.Marshal(notification)
 	if err != nil {
 		log.Error("Problem marshalling notification: ", err)

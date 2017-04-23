@@ -16,11 +16,11 @@ import (
 // Controller is the api rest controller
 type Controller struct {
 	repo     Repository
-	notifier *notifier.Notifier
+	notifier notifier.Notifier
 }
 
 // NewController creates a new instance of Controller
-func NewController(repo Repository, notifier *notifier.Notifier) *Controller {
+func NewController(repo Repository, notifier notifier.Notifier) *Controller {
 	return &Controller{repo, notifier}
 }
 
