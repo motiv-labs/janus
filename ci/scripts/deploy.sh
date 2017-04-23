@@ -8,13 +8,12 @@ mkdir -p /root/.ssh/ && chmod 0600 /root/.ssh
 echo "${DEPLOYMENT_PRIVATE_KEY}" > /root/.ssh/id_rsa && chmod 0600 /root/.ssh/id_rsa
 
 # Untar the automation release
-zcat automation-source-code/automation-artifact.tar.gz | tar -xf -
+echo "Using the following automation artifact:"
+ls -1 automation-source-code/
+tar -xf automation-source-code/janus-automation-*.tar.gz
 
 # Change to plays directory
-cd automation-artifact/plays
-
-# Temporary fix for the socket
-sed -i 's/%%h-%%p-%%r/%%h-%%r/g' ansible.cfg
+cd janus-automation-*/plays
 
 # Deploy to staging using ansible
 export ANSIBLE_FORCE_COLOR=true
@@ -22,6 +21,6 @@ ansible-playbook \
     -i ../${DEPLOYMENT_ENVIRONMENT}.ini \
     -u policy \
     -vvvv \
-    -t deployment \
+    --skip-tags=provision \
     -e deployment_force=true \
     ${GROUP_NAME}.yml

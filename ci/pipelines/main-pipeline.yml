@@ -57,7 +57,7 @@ resources:
   type: github-release
   source:
     user: {{github_organization}}
-    repository: automation
+    repository: {{automation_repository}}
     access_token: {{github_access_token}}
 
 - name: version
