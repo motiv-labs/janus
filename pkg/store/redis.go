@@ -1,8 +1,11 @@
 package store
 
 import (
+	"encoding/json"
+
 	log "github.com/Sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
+	"github.com/hellofresh/janus/pkg/notifier"
 )
 
 // RedisStore is the redis store.
@@ -95,34 +98,30 @@ func (s *RedisStore) Publish(topic string, data []byte) error {
 }
 
 // Subscribe subscribes to a topic in redis
-func (s *RedisStore) Subscribe(topic string) *Subscription {
-	sub := NewSubscription()
+func (s *RedisStore) Subscribe(channel string, callback func(notifier.Notification)) error {
+	// Get a connection from a pool
+	c := s.getConnection()
+	defer c.Close()
 
-	go func() {
-		for {
-			// Get a connection from a pool
-			c := s.getConnection()
-			psc := redis.PubSubConn{Conn: c}
+	psc := redis.PubSubConn{Conn: c}
+	if err := psc.Subscribe(channel); err != nil {
+		return err
+	}
 
-			// Set up subscriptions
-			psc.Subscribe(topic)
-
-			// While not a permanent error on the connection.
-			for c.Err() == nil {
-				switch v := psc.Receive().(type) {
-				case redis.Message:
-					log.WithField("channel", v.Channel).Debug("Received a message")
-					sub.Message <- Message(v.Data)
-				case error:
-					log.WithError(v).Debug("An error ocurred when getting the message")
-					return
-				}
+	for {
+		switch v := psc.Receive().(type) {
+		case redis.Message:
+			notif := notifier.Notification{}
+			if err := json.Unmarshal(v.Data, &notif); err != nil {
+				log.Error("Unmarshalling message body failed, malformed: ", err)
+				return err
 			}
-			c.Close()
+			callback(notif)
+		case error:
+			log.WithError(v).Debug("An error ocurred when getting the message")
+			return v
 		}
-	}()
-
-	return sub
+	}
 }
 
 func (s *RedisStore) exists(conn redis.Conn, key string) (bool, error) {

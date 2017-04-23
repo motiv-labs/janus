@@ -1,6 +1,8 @@
 package plugin
 
 import (
+	"sync"
+
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/router"
 )
@@ -13,6 +15,7 @@ type Plugin interface {
 
 // Loader holds all availables plugins
 type Loader struct {
+	sync.RWMutex
 	plugins map[string]Plugin
 }
 
@@ -25,6 +28,9 @@ func NewLoader() *Loader {
 
 // Add a new plugin to the loader
 func (l *Loader) Add(plugins ...Plugin) {
+	l.Lock()
+	defer l.Unlock()
+
 	for _, p := range plugins {
 		l.plugins[p.GetName()] = p
 	}
@@ -32,5 +38,8 @@ func (l *Loader) Add(plugins ...Plugin) {
 
 // Get a plugin by name
 func (l *Loader) Get(name string) Plugin {
+	l.RLock()
+	defer l.RUnlock()
+
 	return l.plugins[name]
 }

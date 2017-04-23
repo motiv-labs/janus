@@ -4,6 +4,7 @@
 
 - Using viper to load the API definitions when using file based configurations. This allows you to configure your API definitions in YAML, JSON and TOML.
 - The underling router was changed from [httptreemux](https://github.com/dimfeld/httptreemux) to [Chi](https://github.com/pressly/chi).
+- Proper Mux reload when an API or OAuth server is changed 
 
 ## Added
 
@@ -13,6 +14,7 @@
 ## Fixed
 
 - Rate limit bug that was around for quite a while.
+- Problems when creating a new API definition
 
 # 2.2.0
 

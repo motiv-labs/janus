@@ -7,15 +7,13 @@ import (
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
-	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/loader"
 	"github.com/hellofresh/janus/pkg/middleware"
+	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/hellofresh/janus/pkg/oauth"
-	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
-	"github.com/hellofresh/janus/pkg/store"
 	"github.com/hellofresh/janus/pkg/web"
 	"github.com/spf13/cobra"
 	mgo "gopkg.in/mgo.v2"
@@ -24,24 +22,18 @@ import (
 var (
 	repo             api.Repository
 	oAuthServersRepo oauth.Repository
-	err              error
-	globalConfig     *config.Specification
+	server           *http.Server
 )
 
 // RunServer is the run command to start Janus
 func RunServer(cmd *cobra.Command, args []string) {
 	log.WithField("version", version).Info("Janus starting...")
-
-	globalConfig, err = config.Load(configFile)
-	if nil != err {
-		log.WithError(err).Panic("Could not parse the environment configurations")
-	}
-
-	initLogger(globalConfig.LogLevel)
-	initTracing(globalConfig.Tracing)
-	storage := initStorage(globalConfig.Storage)
-	statsClient := initStatsdClient(globalConfig.Stats)
 	defer statsClient.Close()
+
+	if subscriber, ok := storage.(notifier.Subscriber); ok {
+		listerner := notifier.NewNotificationListener(subscriber)
+		listerner.Start(handleEvent)
+	}
 
 	dsnURL, err := url.Parse(globalConfig.Database.DSN)
 	switch dsnURL.Scheme {
@@ -88,51 +80,6 @@ func RunServer(cmd *cobra.Command, args []string) {
 		log.WithError(errors.ErrInvalidScheme).Error("No Database selected")
 	}
 
-	p := proxy.WithParams(proxy.Params{
-		StatsClient:            statsClient,
-		FlushInterval:          globalConfig.BackendFlushInterval,
-		IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
-		CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
-		InsecureSkipVerify:     globalConfig.InsecureSkipVerify,
-	})
-	defer p.Close()
-
-	// create router with a custom not found handler
-	router.DefaultOptions.NotFoundHandler = web.NotFound
-	r := router.NewChiRouterWithOptions(router.DefaultOptions)
-	r.Use(
-		middleware.NewStats(statsClient).Handler,
-		middleware.NewLogger().Handler,
-		middleware.NewRecovery(web.RecoveryHandler).Handler,
-		middleware.NewOpenTracing(globalConfig.Web.IsHTTPS()).Handler,
-	)
-
-	pluginLoader := plugin.NewLoader()
-	pluginLoader.Add(
-		plugin.NewRateLimit(storage),
-		plugin.NewCORS(),
-		plugin.NewOAuth2(oAuthServersRepo, storage),
-		plugin.NewCompression(),
-	)
-
-	// create proxy register
-	register := proxy.NewRegister(r, p)
-	var (
-		apiSubs   *store.Subscription
-		oauthSubs *store.Subscription
-	)
-
-	if subscriber, ok := storage.(store.Subscriber); ok {
-		apiSubs = subscriber.Subscribe("api_updates")
-		oauthSubs = subscriber.Subscribe("oauth_updates")
-	}
-
-	apiLoader := loader.NewAPILoader(register, pluginLoader, apiSubs)
-	apiLoader.LoadDefinitions(repo)
-
-	oauthLoader := loader.NewOAuthLoader(register, storage, oauthSubs)
-	oauthLoader.LoadDefinitions(oAuthServersRepo)
-
 	wp := web.Provider{
 		Port:     globalConfig.Web.Port,
 		Cred:     globalConfig.Web.Credentials,
@@ -143,23 +90,73 @@ func RunServer(cmd *cobra.Command, args []string) {
 		ReadOnly: globalConfig.Web.ReadOnly,
 	}
 
-	if publisher, ok := storage.(store.Publisher); ok {
-		wp.Publisher = publisher
+	if publisher, ok := storage.(notifier.Publisher); ok {
+		wp.Notifier = notifier.NewPublisherNotifier(publisher, "")
 	}
 
 	wp.Provide(version)
 
-	log.Fatal(listenAndServe(r))
-}
+	r := createRouter()
 
-func listenAndServe(handler http.Handler) error {
+	loader.Load(loader.Params{
+		Router:    r,
+		Storage:   storage,
+		APIRepo:   repo,
+		OAuthRepo: oAuthServersRepo,
+		ProxyParams: proxy.Params{
+			StatsClient:            statsClient,
+			FlushInterval:          globalConfig.BackendFlushInterval,
+			IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
+			CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
+			InsecureSkipVerify:     globalConfig.InsecureSkipVerify,
+		},
+	})
+
 	address := fmt.Sprintf(":%v", globalConfig.Port)
 	log.WithField("address", address).Info("Listening on")
+	server = &http.Server{Addr: address, Handler: r}
+	log.Fatal(listenAndServe(server))
+}
+
+func listenAndServe(server *http.Server) error {
 	log.Info("Janus started")
 	if globalConfig.Web.IsHTTPS() {
-		return http.ListenAndServeTLS(address, globalConfig.CertFile, globalConfig.KeyFile, handler)
+		return server.ListenAndServeTLS(globalConfig.CertFile, globalConfig.KeyFile)
 	}
 
 	log.Info("Certificate and certificate key were not found, defaulting to HTTP")
-	return http.ListenAndServe(address, handler)
+	return server.ListenAndServe()
+}
+
+func createRouter() router.Router {
+	// create router with a custom not found handler
+	router.DefaultOptions.NotFoundHandler = web.NotFound
+	r := router.NewChiRouterWithOptions(router.DefaultOptions)
+	r.Use(
+		middleware.NewStats(statsClient).Handler,
+		middleware.NewLogger().Handler,
+		middleware.NewRecovery(web.RecoveryHandler).Handler,
+		middleware.NewOpenTracing(globalConfig.Web.IsHTTPS()).Handler,
+	)
+	return r
+}
+
+func handleEvent(notif notifier.Notification) {
+	if notifier.RequireReload(notif.Command) {
+		newRouter := createRouter()
+		loader.Load(loader.Params{
+			Router:    newRouter,
+			Storage:   storage,
+			APIRepo:   repo,
+			OAuthRepo: oAuthServersRepo,
+			ProxyParams: proxy.Params{
+				StatsClient:            statsClient,
+				FlushInterval:          globalConfig.BackendFlushInterval,
+				IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
+				CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
+				InsecureSkipVerify:     globalConfig.InsecureSkipVerify,
+			},
+		})
+		server.Handler = newRouter
+	}
 }

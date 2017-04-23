@@ -1,8 +1,6 @@
 package loader
 
 import (
-	"encoding/json"
-
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -14,12 +12,11 @@ import (
 type OAuthLoader struct {
 	register *proxy.Register
 	storage  store.Store
-	subs     *store.Subscription
 }
 
 // NewOAuthLoader creates a new instance of the Loader
-func NewOAuthLoader(register *proxy.Register, storage store.Store, subs *store.Subscription) *OAuthLoader {
-	return &OAuthLoader{register, storage, subs}
+func NewOAuthLoader(register *proxy.Register, storage store.Store) *OAuthLoader {
+	return &OAuthLoader{register, storage}
 }
 
 // LoadDefinitions loads all oauth servers from a datasource
@@ -35,11 +32,6 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 	for _, oauthServer := range oauthServers {
 		logger := log.WithField("name", oauthServer.Name)
 		logger.Debug("Registering OAuth server")
-
-		if m.subs != nil {
-			logger.Debug("Listening for changes on for the OAuth definitions")
-			go m.listenForChanges(oauthServer.OAuth)
-		}
 
 		corsHandler := cors.New(cors.Options{
 			AllowedOrigins:   oauthServer.CorsMeta.Domains,
@@ -136,18 +128,4 @@ func (m *OAuthLoader) getManager(oauthServer *oauth.OAuth) (oauth.Manager, error
 	}
 
 	return oauth.NewManagerFactory(m.storage, oauthServer.TokenStrategy.Settings).Build(managerType)
-}
-
-func (m *OAuthLoader) listenForChanges(def *oauth.OAuth) {
-	for {
-		select {
-		case msg := <-m.subs.Message:
-			var msgDefinition *oauth.OAuth
-			json.Unmarshal(msg, &msgDefinition)
-
-			if def.Name == msgDefinition.Name {
-				*def = *msgDefinition
-			}
-		}
-	}
 }

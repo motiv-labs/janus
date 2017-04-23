@@ -5,25 +5,23 @@ import (
 
 	mgo "gopkg.in/mgo.v2"
 
-	"encoding/json"
-
 	"github.com/hellofresh/janus/pkg/errors"
+	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/request"
 	"github.com/hellofresh/janus/pkg/response"
 	"github.com/hellofresh/janus/pkg/router"
-	"github.com/hellofresh/janus/pkg/store"
 )
 
 // Controller is the api rest controller
 type Controller struct {
-	repo      Repository
-	publisher store.Publisher
+	repo     Repository
+	notifier notifier.Notifier
 }
 
 // NewController creates a new instance of Controller
-func NewController(repo Repository, publisher store.Publisher) *Controller {
-	return &Controller{repo, publisher}
+func NewController(repo Repository, notifier notifier.Notifier) *Controller {
+	return &Controller{repo, notifier}
 }
 
 // Get is the find all handler
@@ -86,7 +84,7 @@ func (c *Controller) PutBy() http.HandlerFunc {
 
 		span = opentracing.FromContext(r.Context(), "datastore.Add")
 		err = c.repo.Add(definition)
-		c.dispatch(definition)
+		c.dispatch(notifier.NoticeAPIUpdated)
 		span.Finish()
 
 		if nil != err {
@@ -121,7 +119,7 @@ func (c *Controller) Post() http.HandlerFunc {
 
 		span = opentracing.FromContext(r.Context(), "datastore.Add")
 		err = c.repo.Add(definition)
-		c.dispatch(definition)
+		c.dispatch(notifier.NoticeAPIAdded)
 		span.Finish()
 
 		if nil != err {
@@ -146,13 +144,13 @@ func (c *Controller) DeleteBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
+		c.dispatch(notifier.NoticeAPIRemoved)
 		response.JSON(w, http.StatusNoContent, nil)
 	}
 }
 
-func (c *Controller) dispatch(definition *Definition) {
-	if c.publisher != nil {
-		raw, _ := json.Marshal(definition)
-		c.publisher.Publish("api_updates", raw)
+func (c *Controller) dispatch(cmd notifier.NotificationCommand) {
+	if c.notifier != nil {
+		c.notifier.Notify(notifier.Notification{Command: cmd})
 	}
 }
