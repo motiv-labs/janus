@@ -69,6 +69,14 @@ resources:
     branch: version
     file: version
 
+- name: release-janus-automation
+  type: github-release
+  source:
+    user: {{github_organization}}
+    repository: {{automation_repository}}
+    access_token: {{github_access_token}}
+    release: True
+
 #-----------------------------------------------------------------------------------------------------------------------
 # Groups
 #-----------------------------------------------------------------------------------------------------------------------
@@ -80,12 +88,14 @@ groups:
   - create-release-candidate
   - staging-deployment
   - docker-deployment
+  - staging-policy-enforcement
 
 - name: live
   jobs:
   - create-release
   - live-deployment
   - increment-patch-version
+  - live-policy-enforcement
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Jobs
@@ -159,7 +169,7 @@ jobs:
       globs:
       - release-candidate/*.tar.gz
 
-# Docker Deployments
+# Docker Deployment
 #-----------------------------------------------------------------------------------------------------------------------
 - name: docker-deployment
   public: false
@@ -189,7 +199,7 @@ jobs:
       tag_as_latest: true
       tag: version/version
 
-# Staging Deployments
+# Staging Deployment
 #-----------------------------------------------------------------------------------------------------------------------
 - name: staging-deployment
   public: false
@@ -218,21 +228,67 @@ jobs:
       GROUP_NAME: {{automation_group_name}}
       VPASS: {{automation_vpass}}
 
-    # Notify the slack channel of deployment success
+    # Notify the slack channel of deployment failure
     on_failure:
       put: slack-alert
       params:
         channel: {{slack_channel}}
         text: {{slack_staging_failure_text}}
 
-    # Notify the slack channel of deployment failure
+    # Notify the slack channel of deployment success
     on_success:
       put: slack-alert
       params:
         channel: {{slack_channel}}
         text: {{slack_staging_success_text}}
 
-# Live Deployments
+# Enforce automation policy for staging - deploy the latest RC with the latest automation
+#-----------------------------------------------------------------------------------------------------------------------
+- name: staging-policy-enforcement
+  public: false
+  serial: true
+  plan:
+
+  # Trigger a deployment after an automation release has been created
+  - get: release-janus-automation
+    trigger: True
+    version: every
+
+  # Get the application latest release candidate artifact
+  - get: release-candidate
+
+  # Get the application source for the scripts
+  - get: source-code
+
+  # Get automation so that we can deploy to staging
+  - get: automation-source-code
+    params:
+      include_source_tarball: true
+
+  # Deploy the release candidate to staging
+  - task: deploy
+    file: source-code/ci/tasks/deploy-staging.yml
+    params:
+      DEPLOYMENT_PRIVATE_KEY: {{automation_private_key}}
+      DEPLOYMENT_ENVIRONMENT: staging
+      GROUP_NAME: {{automation_group_name}}
+      VPASS: {{automation_vpass}}
+
+    # Notify the slack channel of deployment failure
+    on_failure:
+      put: slack-alert
+      params:
+        channel: {{slack_channel}}
+        text: {{slack_staging_failure_text}}
+
+    # Notify the slack channel of deployment success
+    on_success:
+      put: slack-alert
+      params:
+        channel: {{slack_channel}}
+        text: {{slack_staging_success_text}}
+
+# Live Deployment
 #-----------------------------------------------------------------------------------------------------------------------
 - name: live-deployment
   public: false
@@ -248,13 +304,13 @@ jobs:
   - get: source-code
     trigger: false
 
-  # Get automation so that we can deploy to staging
+  # Get automation so that we can deploy to live
   - get: automation-source-code
     trigger: false
     params:
       include_source_tarball: true
 
-  # Deploy the release candidate to staging
+  # Deploy the release to staging
   - task: deploy
     file: source-code/ci/tasks/deploy-live.yml
     params:
@@ -263,21 +319,21 @@ jobs:
       GROUP_NAME: {{automation_group_name}}
       VPASS: {{automation_vpass}}
 
-    # Notify the slack channel of deployment success
+    # Notify the slack channel of deployment failure
     on_failure:
       put: slack-alert
       params:
         channel: {{slack_channel}}
         text: {{slack_live_failure_text}}
 
-    # Notify the slack channel of deployment failure
+    # Notify the slack channel of deployment success
     on_success:
       put: slack-alert
       params:
         channel: {{slack_channel}}
         text: {{slack_live_success_text}}
 
-# Increament Patch Version
+# Increment Patch Version
 #-----------------------------------------------------------------------------------------------------------------------
 - name: increment-patch-version
   serial: true
@@ -292,3 +348,44 @@ jobs:
   - put: version
     params:
       bump: patch
+
+# Enforce automation policy for live - deploy the latest release with the latest automation
+#-----------------------------------------------------------------------------------------------------------------------
+- name: live-policy-enforcement
+  public: false
+  serial: true
+  plan:
+
+  # Get the application latest release artifact
+  - get: release
+
+  # Get the application source for the scripts
+  - get: source-code
+
+  # Get automation so that we can deploy to live
+  - get: automation-source-code
+    params:
+      include_source_tarball: true
+
+  # Deploy the release to staging
+  - task: deploy
+    file: source-code/ci/tasks/deploy-staging.yml
+    params:
+      DEPLOYMENT_PRIVATE_KEY: {{automation_private_key}}
+      DEPLOYMENT_ENVIRONMENT: live
+      GROUP_NAME: {{automation_group_name}}
+      VPASS: {{automation_vpass}}
+
+    # Notify the slack channel of deployment failure
+    on_failure:
+      put: slack-alert
+      params:
+        channel: {{slack_channel}}
+        text: {{slack_live_failure_text}}
+
+    # Notify the slack channel of deployment success
+    on_success:
+      put: slack-alert
+      params:
+        channel: {{slack_channel}}
+        text: {{slack_live_success_text}}
