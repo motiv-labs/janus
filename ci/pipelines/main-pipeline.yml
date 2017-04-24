@@ -88,14 +88,12 @@ groups:
   - create-release-candidate
   - staging-deployment
   - docker-deployment
-  - staging-policy-enforcement
 
 - name: live
   jobs:
   - create-release
   - live-deployment
   - increment-patch-version
-  - live-policy-enforcement
 
 #-----------------------------------------------------------------------------------------------------------------------
 # Jobs
@@ -211,51 +209,9 @@ jobs:
     trigger: true
     passed: [create-release-candidate]
 
-  # Get the application source for the scripts
-  - get: source-code
-
-  # Get automation so that we can deploy to staging
-  - get: automation-source-code
-    params:
-      include_source_tarball: true
-
-  # Deploy the release candidate to staging
-  - task: deploy
-    file: source-code/ci/tasks/deploy-staging.yml
-    params:
-      DEPLOYMENT_PRIVATE_KEY: {{automation_private_key}}
-      DEPLOYMENT_ENVIRONMENT: staging
-      GROUP_NAME: {{automation_group_name}}
-      VPASS: {{automation_vpass}}
-
-    # Notify the slack channel of deployment failure
-    on_failure:
-      put: slack-alert
-      params:
-        channel: {{slack_channel}}
-        text: {{slack_staging_failure_text}}
-
-    # Notify the slack channel of deployment success
-    on_success:
-      put: slack-alert
-      params:
-        channel: {{slack_channel}}
-        text: {{slack_staging_success_text}}
-
-# Enforce automation policy for staging - deploy the latest RC with the latest automation
-#-----------------------------------------------------------------------------------------------------------------------
-- name: staging-policy-enforcement
-  public: false
-  serial: true
-  plan:
-
-  # Trigger a deployment after an automation release has been created
+  # Enforce automation policy for staging - deploy the latest RC with the latest automation
   - get: release-janus-automation
     trigger: True
-    version: every
-
-  # Get the application latest release candidate artifact
-  - get: release-candidate
     version: every
 
   # Get the application source for the scripts
@@ -351,47 +307,3 @@ jobs:
   - put: version
     params:
       bump: patch
-
-# Enforce automation policy for live - deploy the latest release with the latest automation
-#-----------------------------------------------------------------------------------------------------------------------
-- name: live-policy-enforcement
-  public: false
-  serial: true
-  plan:
-
-  # Get the application latest release artifact
-  - get: release
-    version: every
-
-  # Get the application source for the scripts
-  - get: source-code
-    version: every
-
-  # Get automation so that we can deploy to live
-  - get: automation-source-code
-    version: every
-    params:
-      include_source_tarball: true
-
-  # Deploy the release to staging
-  - task: deploy
-    file: source-code/ci/tasks/deploy-staging.yml
-    params:
-      DEPLOYMENT_PRIVATE_KEY: {{automation_private_key}}
-      DEPLOYMENT_ENVIRONMENT: live
-      GROUP_NAME: {{automation_group_name}}
-      VPASS: {{automation_vpass}}
-
-    # Notify the slack channel of deployment failure
-    on_failure:
-      put: slack-alert
-      params:
-        channel: {{slack_channel}}
-        text: {{slack_live_failure_text}}
-
-    # Notify the slack channel of deployment success
-    on_success:
-      put: slack-alert
-      params:
-        channel: {{slack_channel}}
-        text: {{slack_live_success_text}}
