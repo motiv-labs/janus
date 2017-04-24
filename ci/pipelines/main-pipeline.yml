@@ -206,6 +206,8 @@ jobs:
 
   # Get automation so that we can deploy to staging
   - get: automation-source-code
+    params:
+      include_source_tarball: true
 
   # Deploy the release candidate to staging
   - task: deploy
@@ -249,6 +251,8 @@ jobs:
   # Get automation so that we can deploy to staging
   - get: automation-source-code
     trigger: false
+    params:
+      include_source_tarball: true
 
   # Deploy the release candidate to staging
   - task: deploy
