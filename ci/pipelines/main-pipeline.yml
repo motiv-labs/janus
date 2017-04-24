@@ -256,12 +256,15 @@ jobs:
 
   # Get the application latest release candidate artifact
   - get: release-candidate
+    version: every
 
   # Get the application source for the scripts
   - get: source-code
+    version: every
 
   # Get automation so that we can deploy to staging
   - get: automation-source-code
+    version: every
     params:
       include_source_tarball: true
 
@@ -358,12 +361,15 @@ jobs:
 
   # Get the application latest release artifact
   - get: release
+    version: every
 
   # Get the application source for the scripts
   - get: source-code
+    version: every
 
   # Get automation so that we can deploy to live
   - get: automation-source-code
+    version: every
     params:
       include_source_tarball: true
 
