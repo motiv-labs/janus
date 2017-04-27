@@ -125,7 +125,7 @@ func (r *MongoRepository) FindValidAPIHealthChecks() ([]*Definition, error) {
 	session, coll := r.getSession()
 	defer session.Close()
 
-	err := coll.Find(bson.M{"health_check.url": bson.M{"$not": ""}}).All(&result)
+	err := coll.Find(bson.M{"health_check.url": bson.M{"$exists": true}}).All(&result)
 	if err != nil {
 		return nil, err
 	}
