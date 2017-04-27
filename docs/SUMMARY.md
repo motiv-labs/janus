@@ -29,3 +29,4 @@
     * [CORS](plugins/cors.md)
 * Misc
     * [Monitoring](misc/monitoring.md)
+    * [Health Checks](misc/health_checks.md)

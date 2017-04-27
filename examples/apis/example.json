@@ -9,5 +9,8 @@
         "append_path" : false,
         "enable_load_balancing" : false,
         "methods" : ["GET"]
+    },
+    "health_check": {
+        "url": "https://example.com/status"
     }
 }
