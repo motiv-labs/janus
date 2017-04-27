@@ -17,6 +17,7 @@ type Repository interface {
 	Exists(def *Definition) (bool, error)
 	Add(app *Definition) error
 	Remove(name string) error
+	FindValidAPIHealthChecks() ([]*Definition, error)
 }
 
 // MongoRepository represents a mongodb repository
@@ -116,6 +117,19 @@ func (r *MongoRepository) Remove(name string) error {
 
 	log.Debugf("Resource %s removed", name)
 	return nil
+}
+
+func (r *MongoRepository) FindValidAPIHealthChecks() ([]*Definition, error) {
+	result := []*Definition{}
+	session, coll := r.getSession()
+	defer session.Close()
+
+	err := coll.Find(bson.M{"health_check.url": bson.M{"$not": ""}}).All(&result)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
 
 func (r *MongoRepository) getSession() (*mgo.Session, *mgo.Collection) {
