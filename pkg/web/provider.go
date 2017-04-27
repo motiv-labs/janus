@@ -53,7 +53,7 @@ func (p *Provider) Provide(version string) error {
 
 	// create endpoints
 	r.GET("/", Home(version))
-	r.GET("/status", Heartbeat())
+	r.GET("/status", Heartbeat(p.APIRepo))
 
 	handlers := jwt.Handler{Config: authConfig}
 	r.POST("/login", handlers.Login())
@@ -63,7 +63,7 @@ func (p *Provider) Provide(version string) error {
 	}
 
 	p.loadAPIEndpoints(r, authMiddleware.Handler)
-	p.loadOAuthEndpoints(r)
+	p.loadOAuthEndpoints(r, authMiddleware.Handler)
 
 	go func() {
 		log.Fatal(p.listenAndServe(r))
@@ -90,6 +90,7 @@ func (p *Provider) loadAPIEndpoints(router router.Router, handlers ...router.Con
 	// Apis endpoints
 	handler := api.NewController(p.APIRepo, p.Notifier)
 	group := router.Group("/apis")
+	group.Use(handlers...)
 	{
 		group.GET("/", handler.Get())
 		group.GET("/:name", handler.GetBy())

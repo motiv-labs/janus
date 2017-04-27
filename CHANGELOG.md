@@ -10,6 +10,7 @@
 
 - Adds the ability to hot reload proxy definitions. To enable this feature you MUST use Redis as your datastore. If you use in memory storage this feature will not be enabled.
 - Added the ability to enable or disable plugins per API definitions. This will bring us a lot of flexibility in developing new plugins and hooking them up. This feature is a BC and we should upgrade the major version because of that.
+- Added health check feature
 
 ## Fixed
 

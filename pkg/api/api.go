@@ -24,10 +24,16 @@ type Plugin struct {
 
 // Definition Represents an API that you want to proxy
 type Definition struct {
-	Name    string            `bson:"name" json:"name" valid:"required"`
-	Active  bool              `bson:"active" json:"active"`
-	Proxy   *proxy.Definition `bson:"proxy" json:"proxy"`
-	Plugins []Plugin          `bson:"plugins" json:"plugins"`
+	Name        string            `bson:"name" json:"name" valid:"required"`
+	Active      bool              `bson:"active" json:"active"`
+	Proxy       *proxy.Definition `bson:"proxy" json:"proxy"`
+	Plugins     []Plugin          `bson:"plugins" json:"plugins"`
+	HealthCheck HealthCheck       `bson:"health_check" json:"health_check" mapstructure:"health_check"`
+}
+
+// HealthCheck represents the health check configs
+type HealthCheck struct {
+	URL string `bson:"url" json:"url" valid:"url"`
 }
 
 // NewDefinition creates a new API Definition with default values

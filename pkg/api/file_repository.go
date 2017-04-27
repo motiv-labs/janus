@@ -72,6 +72,21 @@ func (r *FileSystemRepository) FindAll() ([]*Definition, error) {
 	return definitions, nil
 }
 
+// FindValidAPIHealthChecks retreives all apis that has health check configured
+func (r *FileSystemRepository) FindValidAPIHealthChecks() ([]*Definition, error) {
+	r.RLock()
+	defer r.RUnlock()
+
+	var definitions []*Definition
+	for _, definition := range r.definitions {
+		if definition.HealthCheck.URL != "" {
+			definitions = append(definitions, definition)
+		}
+	}
+
+	return definitions, nil
+}
+
 // FindByName find an api definition by name
 func (r *FileSystemRepository) FindByName(name string) (*Definition, error) {
 	r.RLock()
