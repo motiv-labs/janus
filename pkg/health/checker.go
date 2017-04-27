@@ -3,7 +3,7 @@ package health
 import (
 	"net/http"
 
-	"github.com/containous/traefik/log"
+	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
 )
 
@@ -74,6 +74,7 @@ func doRequest(name string, url string, checker *Checker) {
 	res, err := http.Get(url)
 	if err != nil {
 		checker.Err <- err
+		return
 	}
 
 	response := &Response{Name: name, Check: Check{}}
