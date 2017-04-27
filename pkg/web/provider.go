@@ -53,7 +53,7 @@ func (p *Provider) Provide(version string) error {
 
 	// create endpoints
 	r.GET("/", Home(version))
-	r.GET("/status", Heartbeat())
+	r.GET("/status", Heartbeat(p.APIRepo))
 
 	handlers := jwt.Handler{Config: authConfig}
 	r.POST("/login", handlers.Login())
