@@ -119,6 +119,7 @@ func (r *MongoRepository) Remove(name string) error {
 	return nil
 }
 
+// FindValidAPIHealthChecks retreives all apis that has health check configured
 func (r *MongoRepository) FindValidAPIHealthChecks() ([]*Definition, error) {
 	result := []*Definition{}
 	session, coll := r.getSession()
