@@ -11,7 +11,7 @@
 > An API Gateway written in Go
 
 This is a lightweight API Gateway and Management Platform that enables you to control who accesses your API,
-when they access it and how they access it. API Gateway will also record detailed analytics on how your
+when they access it and how they access it. Janus will also record detailed analytics on how your
 users are interacting with your API and when things go wrong.
 
 ## Why Janus?
@@ -49,8 +49,7 @@ This API Gateway offers powerful, yet lightweight features that allows fine gain
 
 ### Docker
 
-The simplest way of installing Janus is to run the docker image for it. Just check the [docker-compose.yml](docker-compose.yml)
-example and then run it.
+The simplest way of installing Janus is to run the docker image for it. Just check the [docker-compose.yml](docker-compose.yml) example and then run:
 
 ```sh
 docker-compose up -d
@@ -61,7 +60,7 @@ Now you should be able to get a response from the gateway.
 Try the following command:
 
 ```sh
-http http://localhost:8080/
+http http://localhost:8081/
 ```
 
 ### Manual
