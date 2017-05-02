@@ -30,3 +30,5 @@
 * Misc
     * [Monitoring](misc/monitoring.md)
     * [Health Checks](misc/health_checks.md)
+* Upgrade Notes
+    * [2.x to 3.x](upgrade/3x.md)
