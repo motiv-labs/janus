@@ -50,7 +50,7 @@ func init() {
 		log.WithError(err).Panic("Could not build a tracer for open tracing")
 	}
 
-	opentracing.InitGlobalTracer(tracer)
+	opentracing.SetGlobalTracer(tracer)
 }
 
 func init() {
