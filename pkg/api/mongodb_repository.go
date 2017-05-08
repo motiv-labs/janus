@@ -51,6 +51,10 @@ func (r *MongoRepository) FindByName(name string) (*Definition, error) {
 	defer session.Close()
 
 	err := coll.Find(bson.M{"name": name}).One(&result)
+	if err != nil {
+		return nil, ErrAPIDefinitionNotFound
+	}
+
 	return result, err
 }
 
