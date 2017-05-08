@@ -48,7 +48,7 @@ func (c *Controller) GetBy() http.HandlerFunc {
 		span.Finish()
 
 		if err != nil {
-			if err == mgo.ErrNotFound {
+			if err == ErrAPIDefinitionNotFound {
 				panic(err)
 			}
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
