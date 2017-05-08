@@ -52,7 +52,10 @@ func (r *MongoRepository) FindByName(name string) (*Definition, error) {
 
 	err := coll.Find(bson.M{"name": name}).One(&result)
 	if err != nil {
-		return nil, ErrAPIDefinitionNotFound
+		if err == mgo.ErrNotFound {
+			return nil, ErrAPIDefinitionNotFound
+		}
+		return nil, err
 	}
 
 	return result, err
