@@ -47,11 +47,10 @@ func (c *Controller) GetBy() http.HandlerFunc {
 		data, err := c.repo.FindByName(name)
 		span.Finish()
 
-		if data == nil {
-			panic(ErrAPIDefinitionNotFound)
-		}
-
 		if err != nil {
+			if err == ErrAPIDefinitionNotFound {
+				panic(err)
+			}
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
