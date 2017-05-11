@@ -36,9 +36,16 @@ func (h *CORS) GetMiddlewares(config api.Config, referenceSpec *api.Spec) ([]rou
 
 func convertToSlice(config interface{}) []string {
 	var values []string
-	aInterface := config.([]interface{})
-	for _, v := range aInterface {
-		values = append(values, v.(string))
+
+	// config comes from map and may be undefined there,
+	// so do test here to avoid problems for missed config keys
+	if nil != config {
+		aInterface := config.([]interface{})
+		for _, v := range aInterface {
+			values = append(values, v.(string))
+		}
+	} else {
+		values = make([]string, 0)
 	}
 
 	return values
