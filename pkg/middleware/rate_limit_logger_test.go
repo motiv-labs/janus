@@ -1,16 +1,22 @@
 package middleware
 
 import (
+	"net/http"
 	"testing"
 
-	"net/http"
-
 	"github.com/hellofresh/janus/pkg/test"
+	"github.com/hellofresh/stats-go"
 	"github.com/stretchr/testify/assert"
+	"github.com/ulule/limiter"
 )
 
 func TestSuccessfulRateLimitLog(t *testing.T) {
-	mw := NewRateLimitLogger()
+	statsClient, _ := stats.NewClient("noop://", "")
+	limiterStore := limiter.NewMemoryStore()
+	rate, _ := limiter.NewRateFromFormatted("100-M")
+	limiterInstance := limiter.NewLimiter(limiterStore, rate)
+
+	mw := NewRateLimitLogger(limiterInstance, statsClient)
 	w, err := test.Record(
 		"GET",
 		"/",

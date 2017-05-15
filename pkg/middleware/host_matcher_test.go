@@ -1,10 +1,12 @@
 package middleware
 
 import (
+	"io/ioutil"
+	"net/http"
+	"os"
 	"testing"
 
-	"net/http"
-
+	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -12,6 +14,11 @@ import (
 var (
 	recovery = NewRecovery(test.RecoveryHandler).Handler
 )
+
+func TestMain(m *testing.M) {
+	log.SetOutput(ioutil.Discard)
+	os.Exit(m.Run())
+}
 
 func TestMatchSimpleHeader(t *testing.T) {
 	mw := NewHostMatcher([]string{"hellofresh.com"})

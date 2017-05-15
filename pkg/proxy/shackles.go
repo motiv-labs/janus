@@ -42,7 +42,7 @@ func NewOutChain(out ...OutLink) OutChain {
 
 // RoundTrip provides the Transport.RoundTrip function to handle requests the proxy receives
 func (s *Shackles) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	timing := s.statsClient.BuildTimeTracker().Start()
+	timing := s.statsClient.BuildTimer().Start()
 
 	// apply inbound request plugins (if any)
 	req, err = s.applyInboundLinks(req)

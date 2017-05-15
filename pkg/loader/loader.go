@@ -22,7 +22,7 @@ type Params struct {
 func Load(params Params) {
 	pluginLoader := plugin.NewLoader()
 	pluginLoader.Add(
-		plugin.NewRateLimit(params.Storage),
+		plugin.NewRateLimit(params.Storage, params.ProxyParams.StatsClient),
 		plugin.NewCORS(),
 		plugin.NewOAuth2(params.OAuthRepo, params.Storage),
 		plugin.NewCompression(),

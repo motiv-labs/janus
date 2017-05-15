@@ -43,7 +43,7 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 			},
 		}
 
-		timing := m.statsClient.BuildTimeTracker().Start()
+		timing := m.statsClient.BuildTimer().Start()
 
 		// reverse proxy replaces original request with target request, so keep required fields of the original one
 		originalURL := &url.URL{}
