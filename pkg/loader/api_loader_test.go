@@ -1,9 +1,11 @@
 package loader
 
 import (
+	"io/ioutil"
 	"net/http"
 	"testing"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/plugin"
@@ -55,6 +57,8 @@ var tests = []struct {
 }
 
 func TestSuccessfulLoader(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
+
 	router, err := createRegisterAndRouter()
 	assert.NoError(t, err)
 	ts := test.NewServer(router)

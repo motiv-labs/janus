@@ -1,9 +1,11 @@
 package proxy
 
 import (
+	"io/ioutil"
 	"net/http"
 	"testing"
 
+	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/test"
 	stats "github.com/hellofresh/stats-go"
@@ -47,6 +49,8 @@ var tests = []struct {
 }
 
 func TestSuccessfulProxy(t *testing.T) {
+	log.SetOutput(ioutil.Discard)
+
 	ts := test.NewServer(createRegisterAndRouter())
 	defer ts.Close()
 
