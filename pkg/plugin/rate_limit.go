@@ -6,6 +6,7 @@ import (
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/store"
+	"github.com/hellofresh/stats-go"
 	"github.com/ulule/limiter"
 )
 
@@ -16,12 +17,13 @@ const (
 
 // RateLimit represents the rate limit plugin
 type RateLimit struct {
-	storage store.Store
+	storage     store.Store
+	statsClient stats.Client
 }
 
 // NewRateLimit creates a new instance of HostMatcher
-func NewRateLimit(storage store.Store) *RateLimit {
-	return &RateLimit{storage}
+func NewRateLimit(storage store.Store, statsClient stats.Client) *RateLimit {
+	return &RateLimit{storage, statsClient}
 }
 
 // GetName retrieves the plugin's name
@@ -44,9 +46,10 @@ func (h *RateLimit) GetMiddlewares(config api.Config, referenceSpec *api.Spec) (
 		return nil, err
 	}
 
+	limiterInstance := limiter.NewLimiter(limiterStore, rate)
 	return []router.Constructor{
-		limiter.NewHTTPMiddleware(limiter.NewLimiter(limiterStore, rate)).Handler,
-		middleware.NewRateLimitLogger().Handler,
+		middleware.NewRateLimitLogger(limiterInstance, h.statsClient).Handler,
+		limiter.NewHTTPMiddleware(limiterInstance).Handler,
 	}, nil
 }
 

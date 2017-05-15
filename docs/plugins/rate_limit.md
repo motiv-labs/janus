@@ -6,10 +6,10 @@ Rate limit how many HTTP requests a developer can make in a given period of seco
 
 Configuring the plugin is straightforward, you can add it on top of an API by executing the following request on your Janus server:
 
-| Configuration | Description                                                                                                                                                                                                                                            |
-|---------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| limit         | Defines the limit rule for the proxy. i.e. 5 reqs/second: "5-S", 10 reqs/minute: "10-M", 1000 reqs/hour: "1000-H"                                                                                                                                                                                      |
-| policy        | The rate-limiting policies to use for retrieving and incrementing the limits. Available values are local(counters will be stored locally in-memory on the node) and redis (counters are stored on a Redis server and will be shared across the nodes). |                                                        |
+| Configuration | Description                                                                                                                                                                                                                                                 |
+|---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| limit         | Defines the limit rule for the proxy. i.e. 5 reqs/second: `5-S`, 10 reqs/minute: `10-M`, 1000 reqs/hour: `1000-H`                                                                                                                                           |
+| policy        | The rate-limiting policies to use for retrieving and incrementing the limits. Available values are `local` (counters will be stored locally in-memory on the node) and `redis` (counters are stored on a Redis server and will be shared across the nodes). |                                                        |
 
 ## Headers sent to the client
 
@@ -21,9 +21,11 @@ X-Ratelimit-Remaining: 9
 X-Ratelimit-Reset: 1491383478
 ```
 
-If any of the limits configured is being reached, the plugin will return a HTTP/1.1 429 status code to the client with the following JSON body:
+If any of the limits configured is being reached, the plugin will return a HTTP/1.1 `429` status code to the client with the following plain text body:
 
-{"message":"API rate limit exceeded"}
+```
+Limit exceeded
+```
 
 # Implementation considerations
 

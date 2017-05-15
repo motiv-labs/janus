@@ -10,6 +10,7 @@ import (
 	tracerfactory "github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/store"
 	stats "github.com/hellofresh/stats-go"
+	"github.com/hellofresh/stats-go/bucket"
 	opentracing "github.com/opentracing/opentracing-go"
 )
 
@@ -54,11 +55,11 @@ func init() {
 }
 
 func init() {
-	sectionsTestsMap, err := stats.ParseSectionsTestsMap(globalConfig.Stats.IDs)
+	sectionsTestsMap, err := bucket.ParseSectionsTestsMap(globalConfig.Stats.IDs)
 	if err != nil {
 		log.WithError(err).WithField("config", globalConfig.Stats.IDs).
 			Error("Failed to parse stats second level IDs from env")
-		sectionsTestsMap = map[stats.PathSection]stats.SectionTestDefinition{}
+		sectionsTestsMap = map[bucket.PathSection]bucket.SectionTestDefinition{}
 	}
 	log.WithField("config", globalConfig.Stats.IDs).
 		WithField("map", sectionsTestsMap.String()).
@@ -69,7 +70,7 @@ func init() {
 		log.WithError(err).Panic("Error initializing statsd client")
 	}
 
-	statsClient.SetHTTPMetricCallback(stats.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
+	statsClient.SetHTTPMetricCallback(bucket.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
 }
 
 // initializes the storage and managers
