@@ -61,6 +61,10 @@ func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, metho
 	}).Debug("Registering a route")
 
 	for _, method := range methods {
+		if "" == listenPath {
+			listenPath = "/*"
+		}
+
 		if strings.ToUpper(method) == methodAll {
 			p.router.Any(listenPath, handler, handlers...)
 		} else {
