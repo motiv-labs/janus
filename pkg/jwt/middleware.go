@@ -6,6 +6,7 @@ import (
 	"net/http"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"fmt"
 )
 
 // Payload Represents the context key
@@ -37,7 +38,11 @@ func (m *Middleware) Handler(handler http.Handler) http.Handler {
 
 		claims := token.Claims.(jwt.MapClaims)
 
-		id := claims["id"].(string)
+		id, err := m.getUserId(claims)
+		if err != nil {
+			m.Config.Unauthorized(w, r, errors.New("The user identifier is not found in token"))
+		}
+
 		context.WithValue(r.Context(), Payload{}, claims)
 		context.WithValue(r.Context(), UserID{}, id)
 
@@ -48,4 +53,18 @@ func (m *Middleware) Handler(handler http.Handler) http.Handler {
 
 		handler.ServeHTTP(w, r)
 	})
+}
+
+func (m *Middleware) getUserId(claims jwt.MapClaims) (string, error) {
+	var userKey = m.Config.UserIDKey
+	if "" == userKey {
+		userKey = "sub"
+	}
+
+	id, ok := claims[userKey].(string)
+	if !ok {
+		return "", fmt.Errorf("User key \"%s\" not found in token payload", userKey)
+	}
+
+	return id, nil
 }
