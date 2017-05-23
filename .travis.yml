@@ -18,4 +18,4 @@ install:
 script:
 - make test
 - $GOPATH/bin/overalls -project=github.com/hellofresh/janus -covermode=count
-- if [ "$COVERALLS_TOKEN" != "false" ]; then $GOPATH/bin/goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN; fi
+- if [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then $GOPATH/bin/goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN; fi
