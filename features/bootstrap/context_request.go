@@ -27,9 +27,11 @@ func RegisterRequestContext(s *godog.Suite, port, apiPort int) {
 	s.Step(`^header "([^"]*)" should start with "([^"]*)"$`, ctx.headerShouldStartWith)
 	s.Step(`^the response should contain "([^"]*)"$`, ctx.responseShouldContain)
 	s.Step(`^response JSON body has "([^"]*)" field with value \'([^']*)\'$`, ctx.responseJSONBodyHasFieldWithValue)
+	s.Step(`^response JSON body has "([^"]*)" field$`, ctx.responseJSONBodyHasField)
 	s.Step(`^response JSON body is an array of length (\d+)$`, ctx.responseJSONBodyIsAnArrayOfLength)
 	s.Step(`^response JSON body array element (\d+) has "([^"]*)" field with value \'([^']*)\'$`, ctx.responseJSONBodyArrayElementHasFieldWithValue)
 	s.Step(`^request JSON payload \'([^']*)\'$`, ctx.requestJSONPayload)
+	s.Step(`^request header "([^"]*)" is set to "([^"]*)"$`, ctx.requestHeaderIsSetTo)
 }
 
 type requestContext struct {
@@ -138,6 +140,21 @@ func (c *requestContext) responseJSONBodyHasFieldWithValue(field, value string) 
 	return nil
 }
 
+func (c *requestContext) responseJSONBodyHasField(field string) error {
+	var jsonResponse map[string]interface{}
+	err := json.Unmarshal(c.responseBody, &jsonResponse)
+	if nil != err {
+		return err
+	}
+
+	_, ok := jsonResponse[field]
+	if !ok {
+		return fmt.Errorf("expected field %s in JSON response, but not found", field)
+	}
+
+	return nil
+}
+
 func (c *requestContext) responseJSONBodyIsAnArrayOfLength(length int) error {
 	var jsonResponse []interface{}
 	err := json.Unmarshal(c.responseBody, &jsonResponse)
@@ -180,5 +197,10 @@ func (c *requestContext) responseJSONBodyArrayElementHasFieldWithValue(idx int, 
 
 func (c *requestContext) requestJSONPayload(payload string) error {
 	c.requestBody = bytes.NewBufferString(payload)
+	return nil
+}
+
+func (c *requestContext) requestHeaderIsSetTo(header, value string) error {
+	c.requestHeaders.Set(header, value)
 	return nil
 }
