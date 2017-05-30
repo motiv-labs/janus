@@ -37,6 +37,8 @@ import:
 - package: github.com/spf13/cobra
 - package: github.com/pressly/chi
   version: ^2.1.0
+- package: github.com/DATA-DOG/godog
+  version: ^0.7.2
 testImport:
 - package: github.com/stretchr/testify
   version: ^1.1.4
