@@ -4,6 +4,7 @@ import (
 	"flag"
 	"net/url"
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/DATA-DOG/godog"
@@ -56,8 +57,19 @@ func FeatureContext(s *godog.Suite) {
 		panic(errors.ErrInvalidScheme)
 	}
 
-	bootstrap.RegisterRequestContext(s, c.Port, c.Web.Port, c.Web.Credentials)
+	portSecondary, err := strconv.Atoi(os.Getenv("PORT_SECONDARY"))
+	if nil != err {
+		panic(err)
+	}
+
+	apiPortSecondary, err := strconv.Atoi(os.Getenv("API_PORT_SECONDARY"))
+	if nil != err {
+		panic(err)
+	}
+
+	bootstrap.RegisterRequestContext(s, c.Port, c.Web.Port, portSecondary, apiPortSecondary, c.Web.Credentials)
 	bootstrap.RegisterAPIContext(s, c.Web.ReadOnly, apiRepo)
+	bootstrap.RegisterMiscContext(s)
 }
 
 func TestMain(m *testing.M) {

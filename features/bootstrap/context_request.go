@@ -19,13 +19,21 @@ const (
 )
 
 // RegisterRequestContext registers godog suite context for handling HTTP-requests related steps
-func RegisterRequestContext(s *godog.Suite, port, apiPort int, adminCred config.Credentials) {
-	ctx := &requestContext{port: port, apiPort: apiPort, adminCred: adminCred}
+func RegisterRequestContext(s *godog.Suite, port, apiPort, portSecondary, apiPortSecondary int, adminCred config.Credentials) {
+	ctx := &requestContext{
+		port:             port,
+		apiPort:          apiPort,
+		portSecondary:    portSecondary,
+		apiPortSecondary: apiPortSecondary,
+		adminCred:        adminCred,
+	}
 
 	ctx.requestHeaders = make(http.Header)
 
 	s.Step(`^I request "([^"]*)" path with "([^"]*)" method$`, ctx.iRequestPathWithMethod)
 	s.Step(`^I request "([^"]*)" API path with "([^"]*)" method$`, ctx.iRequestAPIPathWithMethod)
+	s.Step(`^I request "([^"]*)" secondary path with "([^"]*)" method$`, ctx.iRequestSecondaryPathWithMethod)
+	s.Step(`^I request "([^"]*)" secondary API path with "([^"]*)" method$`, ctx.iRequestSecondaryAPIPathWithMethod)
 	s.Step(`^I should receive (\d+) response code$`, ctx.iShouldReceiveResponseCode)
 	s.Step(`^header "([^"]*)" should be "([^"]*)"$`, ctx.headerShouldBe)
 	s.Step(`^header "([^"]*)" should start with "([^"]*)"$`, ctx.headerShouldStartWith)
@@ -40,8 +48,12 @@ func RegisterRequestContext(s *godog.Suite, port, apiPort int, adminCred config.
 }
 
 type requestContext struct {
-	port      int
-	apiPort   int
+	port    int
+	apiPort int
+
+	portSecondary    int
+	apiPortSecondary int
+
 	adminCred config.Credentials
 
 	requestBody    *bytes.Buffer
@@ -57,6 +69,16 @@ func (c *requestContext) iRequestAPIPathWithMethod(path, method string) error {
 
 func (c *requestContext) iRequestPathWithMethod(path, method string) error {
 	url := fmt.Sprintf("http://localhost:%d%s", c.port, path)
+	return c.doRequest(url, method)
+}
+
+func (c *requestContext) iRequestSecondaryAPIPathWithMethod(path, method string) error {
+	url := fmt.Sprintf("http://localhost:%d%s", c.apiPortSecondary, path)
+	return c.doRequest(url, method)
+}
+
+func (c *requestContext) iRequestSecondaryPathWithMethod(path, method string) error {
+	url := fmt.Sprintf("http://localhost:%d%s", c.portSecondary, path)
 	return c.doRequest(url, method)
 }
 

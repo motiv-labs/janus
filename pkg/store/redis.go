@@ -8,6 +8,8 @@ import (
 	"github.com/hellofresh/janus/pkg/notifier"
 )
 
+const defaultPrefix = "janus"
+
 // RedisStore is the redis store.
 type RedisStore struct {
 	// The prefix to use for the key.
@@ -21,9 +23,13 @@ type RedisStore struct {
 }
 
 // NewRedisStore returns an instance of redis store.
-func NewRedisStore(pool *redis.Pool) (Store, error) {
+func NewRedisStore(pool *redis.Pool, prefix string) (Store, error) {
+	if prefix == "" {
+		prefix = defaultPrefix
+	}
+
 	return NewRedisStoreWithOptions(pool, Options{
-		Prefix: "janus",
+		Prefix: prefix,
 	})
 }
 
