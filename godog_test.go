@@ -2,13 +2,16 @@ package janus
 
 import (
 	"flag"
+	"net/url"
 	"os"
 	"testing"
 
 	"github.com/DATA-DOG/godog"
-	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/features/bootstrap"
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
+	"github.com/hellofresh/janus/pkg/errors"
+	"gopkg.in/mgo.v2"
 )
 
 var runGoDogTests bool
@@ -23,10 +26,38 @@ func init() {
 func FeatureContext(s *godog.Suite) {
 	c, err := config.Load("")
 	if nil != err {
-		log.WithError(err).Panic("Error initializing statsd client")
+		panic(err)
 	}
 
-	bootstrap.RegisterRequestContext(s, c.Port, c.Web.Port)
+	var apiRepo api.Repository
+
+	dsnURL, err := url.Parse(c.Database.DSN)
+	switch dsnURL.Scheme {
+	case "mongodb":
+		session, err := mgo.Dial(c.Database.DSN)
+		if err != nil {
+			panic(err)
+		}
+
+		session.SetMode(mgo.Monotonic, true)
+
+		apiRepo, err = api.NewMongoAppRepository(session)
+		if err != nil {
+			panic(err)
+		}
+	case "file":
+		var apiPath = dsnURL.Path + "/apis"
+
+		apiRepo, err = api.NewFileSystemRepository(apiPath)
+		if err != nil {
+			panic(err)
+		}
+	default:
+		panic(errors.ErrInvalidScheme)
+	}
+
+	bootstrap.RegisterRequestContext(s, c.Port, c.Web.Port, c.Web.Credentials)
+	bootstrap.RegisterAPIContext(s, c.Web.ReadOnly, apiRepo)
 }
 
 func TestMain(m *testing.M) {

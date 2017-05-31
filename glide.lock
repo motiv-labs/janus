@@ -1,5 +1,5 @@
-hash: 0ac4cf163acb76a82e109ecaf8a12a6322f3f5e3786086775ee1abfc40c12a70
-updated: 2017-05-30T13:05:09.917567492+02:00
+hash: b030900de47ecebe32f75e7cb53619e116f804761b6d2df1beca6bfaf75cc587
+updated: 2017-05-31T13:27:33.270596969+02:00
 imports:
 - name: cloud.google.com/go
   version: 01b9e8cbca61bf2c704946d6f1790ec412519180
@@ -16,6 +16,9 @@ imports:
   version: cf321b0839ac25d63a7c06163650047ee0b7f12d
 - name: github.com/DATA-DOG/godog
   version: 92fbee719c9593813b24a6ef042bcad40324ede4
+  subpackages:
+  - colors
+  - gherkin
 - name: github.com/dgrijalva/jwt-go
   version: d2709f9f1f31ebcda9651b03077758c1f3a0018c
 - name: github.com/fiam/gounidecode
@@ -109,10 +112,14 @@ imports:
   version: 9a906f17374922ed0f74e1b2f593d3723f2ffb00
 - name: github.com/spf13/viper
   version: 84f94806c67f59dd7ae87bc5351f7a9c94a4558d
+- name: github.com/tidwall/gjson
+  version: c784c417818f59d6597274642d8ac1d09efc9b01
+- name: github.com/tidwall/match
+  version: 173748da739a410c5b0b813b956f89ff94730b4c
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: 513929065c19401a1c7b76ecd942f9f86a0c061b
+  version: 3da985ce5951d99de868be4385f21ea6c2b22f24
   subpackages:
   - context
   - context/ctxhttp

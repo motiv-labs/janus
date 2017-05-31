@@ -2,7 +2,6 @@ package oauth
 
 import (
 	"fmt"
-
 	"time"
 
 	log "github.com/Sirupsen/logrus"

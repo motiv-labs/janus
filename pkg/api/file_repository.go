@@ -92,6 +92,10 @@ func (r *FileSystemRepository) FindByName(name string) (*Definition, error) {
 	r.RLock()
 	defer r.RUnlock()
 
+	return r.findByName(name)
+}
+
+func (r *FileSystemRepository) findByName(name string) (*Definition, error) {
 	definition, ok := r.definitions[name]
 	if false == ok {
 		return nil, ErrAPIDefinitionNotFound
@@ -100,23 +104,23 @@ func (r *FileSystemRepository) FindByName(name string) (*Definition, error) {
 	return definition, nil
 }
 
-// Exists searches an existing Proxy definition by its listen_path
-func (r *FileSystemRepository) Exists(def *Definition) (bool, error) {
+// FindByListenPath find an API definition by proxy listen path
+func (r *FileSystemRepository) FindByListenPath(path string) (*Definition, error) {
 	r.RLock()
 	defer r.RUnlock()
 
-	_, ok := r.definitions[def.Name]
-	if ok {
-		return true, ErrAPINameExists
-	}
-
 	for _, definition := range r.definitions {
-		if definition.Proxy.ListenPath == def.Proxy.ListenPath {
-			return true, ErrAPIListenPathExists
+		if definition.Proxy.ListenPath == path {
+			return definition, nil
 		}
 	}
 
-	return false, nil
+	return nil, ErrAPIDefinitionNotFound
+}
+
+// Exists searches an existing Proxy definition by its listen_path
+func (r *FileSystemRepository) Exists(def *Definition) (bool, error) {
+	return exists(r, def)
 }
 
 // Add adds an api definition to the repository
@@ -133,6 +137,10 @@ func (r *FileSystemRepository) Add(definition *Definition) error {
 func (r *FileSystemRepository) Remove(name string) error {
 	r.Lock()
 	defer r.Unlock()
+
+	if _, err := r.findByName(name); err != nil {
+		return err
+	}
 
 	delete(r.definitions, name)
 

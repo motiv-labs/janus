@@ -2,10 +2,9 @@ package oauth
 
 import (
 	"io/ioutil"
+	"net/url"
 	"path/filepath"
 	"sync"
-
-	"net/url"
 
 	log "github.com/Sirupsen/logrus"
 	"github.com/fsnotify/fsnotify"
