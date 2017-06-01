@@ -10,7 +10,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestNewFileSystemRepository(t *testing.T) {
+func newRepo(t *testing.T) *FileSystemRepository {
 	wd, err := os.Getwd()
 	assert.NoError(t, err)
 	assert.Contains(t, wd, "github.com/hellofresh/janus")
@@ -23,6 +23,12 @@ func TestNewFileSystemRepository(t *testing.T) {
 
 	fsRepo, err := NewFileSystemRepository(exampleAPIsPath)
 	assert.NoError(t, err)
+
+	return fsRepo
+}
+
+func TestNewFileSystemRepository(t *testing.T) {
+	fsRepo := newRepo(t)
 
 	allDefinitions, err := fsRepo.FindAll()
 	assert.NoError(t, err)
@@ -135,4 +141,12 @@ func assertExists(t *testing.T, fsRepo *FileSystemRepository) {
 	exists, err = fsRepo.Exists(&Definition{Name: "posts1", Proxy: &proxy.Definition{ListenPath: "/posts1/*"}})
 	assert.False(t, exists)
 	assert.NoError(t, err)
+}
+
+func TestFileSystemRepository_Add(t *testing.T) {
+	fsRepo := newRepo(t)
+
+	invalidName := &Definition{Name: ""}
+	err := fsRepo.Add(invalidName)
+	assert.Error(t, err)
 }
