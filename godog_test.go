@@ -74,7 +74,7 @@ func FeatureContext(s *godog.Suite) {
 
 func TestMain(m *testing.M) {
 	if !runGoDogTests {
-		os.Exit(0)
+		os.Exit(m.Run())
 	}
 
 	status := godog.RunWithOptions("godogs", func(s *godog.Suite) {
@@ -83,9 +83,5 @@ func TestMain(m *testing.M) {
 		Format: "progress",
 		Paths:  []string{"features"},
 	})
-
-	if st := m.Run(); st > status {
-		status = st
-	}
 	os.Exit(status)
 }

@@ -1,6 +1,6 @@
 # Storage
 
-Some Janus functionality requires key/value storage. This functionality is:
+Some Janus functionality requires key/value storage. These functionalities are:
 
 * [Rate Limit](../plugins/rate_limit.md) Plugin
 * [OAuth 2.0](../auth/oauth.md) Token validation strategy (when set to `storage`)
