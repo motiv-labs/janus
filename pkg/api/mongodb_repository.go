@@ -72,20 +72,17 @@ func (r *MongoRepository) Add(definition *Definition) error {
 
 	isValid, err := definition.Validate()
 	if false == isValid && err != nil {
-		fields := log.Fields{
-			"errors": err.Error(),
-		}
-		log.WithFields(fields).Error("Validation errors")
+		log.WithError(err).Error("Validation errors")
 		return err
 	}
 
 	_, err = coll.Upsert(bson.M{"name": definition.Name}, definition)
 	if err != nil {
-		log.Errorf("There was an error adding the resource %s", definition.Name)
+		log.WithField("name", definition.Name).Error("There was an error adding the resource")
 		return err
 	}
 
-	log.Debugf("Resource %s added", definition.Name)
+	log.WithField("name", definition.Name).Debug("Resource added")
 	return nil
 }
 
@@ -99,15 +96,15 @@ func (r *MongoRepository) Remove(name string) error {
 		if err == mgo.ErrNotFound {
 			return ErrAPIDefinitionNotFound
 		}
-		log.Errorf("There was an error removing the resource %s", name)
+		log.WithField("name", name).Error("There was an error removing the resource")
 		return err
 	}
 
-	log.Debugf("Resource %s removed", name)
+	log.WithField("name", name).Debug("Resource removed")
 	return nil
 }
 
-// FindValidAPIHealthChecks retreives all apis that has health check configured
+// FindValidAPIHealthChecks retrieves all apis that has health check configured
 func (r *MongoRepository) FindValidAPIHealthChecks() ([]*Definition, error) {
 	result := []*Definition{}
 	session, coll := r.getSession()

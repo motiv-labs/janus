@@ -117,14 +117,14 @@ func (s *RedisStore) Subscribe(channel string, callback func(notifier.Notificati
 	for {
 		switch v := psc.Receive().(type) {
 		case redis.Message:
-			notif := notifier.Notification{}
-			if err := json.Unmarshal(v.Data, &notif); err != nil {
-				log.Error("Unmarshalling message body failed, malformed: ", err)
+			notification := notifier.Notification{}
+			if err := json.Unmarshal(v.Data, &notification); err != nil {
+				log.WithError(err).Error("Unmarshalling message body failed, malformed")
 				return err
 			}
-			callback(notif)
+			callback(notification)
 		case error:
-			log.WithError(v).Debug("An error ocurred when getting the message")
+			log.WithError(v).Debug("An error occurred when getting the message")
 			return v
 		}
 	}

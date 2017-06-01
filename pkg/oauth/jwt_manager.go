@@ -42,7 +42,7 @@ func (m *JWTManager) IsKeyAuthorised(accessToken string) (session.State, bool) {
 	})
 
 	if err != nil {
-		log.WithError(err).Error("Could not parse the JWT")
+		log.WithError(err).Warn("Could not parse the JWT")
 		return session, false
 	}
 

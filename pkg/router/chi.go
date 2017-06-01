@@ -113,6 +113,21 @@ func (r *ChiRouter) Use(handlers ...Constructor) Router {
 	return r
 }
 
+// RoutesCount returns number of routes registered
+func (r *ChiRouter) RoutesCount() int {
+	return r.routesCount(r.mux)
+}
+
+func (r *ChiRouter) routesCount(routes chi.Routes) int {
+	count := len(routes.Routes())
+	for _, route := range routes.Routes() {
+		if nil != route.SubRoutes {
+			count += r.routesCount(route.SubRoutes)
+		}
+	}
+	return count
+}
+
 func (r *ChiRouter) with(handlers ...Constructor) chi.Router {
 	return r.mux.With(r.wrapConstructor(handlers)...)
 }

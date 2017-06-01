@@ -72,7 +72,7 @@ func (r *FileSystemRepository) FindAll() ([]*Definition, error) {
 	return definitions, nil
 }
 
-// FindValidAPIHealthChecks retreives all apis that has health check configured
+// FindValidAPIHealthChecks retrieves all apis that has health check configured
 func (r *FileSystemRepository) FindValidAPIHealthChecks() ([]*Definition, error) {
 	r.RLock()
 	defer r.RUnlock()
@@ -127,6 +127,12 @@ func (r *FileSystemRepository) Exists(def *Definition) (bool, error) {
 func (r *FileSystemRepository) Add(definition *Definition) error {
 	r.Lock()
 	defer r.Unlock()
+
+	isValid, err := definition.Validate()
+	if false == isValid && err != nil {
+		log.WithError(err).Error("Validation errors")
+		return err
+	}
 
 	r.definitions[definition.Name] = definition
 
