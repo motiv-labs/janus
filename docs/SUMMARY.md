@@ -8,6 +8,7 @@
     * [File System](quick_start/file_system.md)
     * [MongoDB](quick_start/mongodb.md)
     * [Proxy Authentication Methods](quick_start/proxy_auth_methods.md)
+    * [Storage](quick_start/storage.md)
 * [Proxy Reference](proxy/README.md)
     * [Terminology](proxy/terminology.md)
     * [Overview](proxy/overview.md)

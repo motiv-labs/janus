@@ -19,7 +19,7 @@ func NewOAuthLoader(register *proxy.Register, storage store.Store) *OAuthLoader 
 	return &OAuthLoader{register, storage}
 }
 
-// LoadDefinitions loads all oauth servers from a datasource
+// LoadDefinitions loads all oauth servers from a data source
 func (m *OAuthLoader) LoadDefinitions(repo oauth.Repository) {
 	oAuthServers := m.getOAuthServers(repo)
 	m.RegisterOAuthServers(oAuthServers, repo)

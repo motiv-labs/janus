@@ -67,12 +67,13 @@ func NewPublisherNotifier(publisher Publisher, channel string) *PublisherNotifie
 func (r *PublisherNotifier) Notify(notification Notification) bool {
 	toSend, err := json.Marshal(notification)
 	if err != nil {
-		log.Error("Problem marshalling notification: ", err)
+		log.WithError(err).Error("Problem marshalling notification")
 		return false
 	}
-	log.Debug("Sending notification", notification)
+
+	log.WithField("type", notification.Command).Debug("Sending notification")
 	if err := r.publisher.Publish(r.channel, toSend); err != nil {
-		log.Error("Could not send notification: ", err)
+		log.WithError(err).Error("Could not send notification")
 		return false
 	}
 	return true

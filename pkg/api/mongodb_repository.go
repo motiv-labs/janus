@@ -2,23 +2,13 @@ package api
 
 import (
 	log "github.com/Sirupsen/logrus"
-	"gopkg.in/mgo.v2"
+	mgo "gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
 )
 
 const (
 	collectionName string = "api_specs"
 )
-
-// Repository defines the behaviour of a country repository
-type Repository interface {
-	FindAll() ([]*Definition, error)
-	FindByName(name string) (*Definition, error)
-	Exists(def *Definition) (bool, error)
-	Add(app *Definition) error
-	Remove(name string) error
-	FindValidAPIHealthChecks() ([]*Definition, error)
-}
 
 // MongoRepository represents a mongodb repository
 type MongoRepository struct {
@@ -46,11 +36,20 @@ func (r *MongoRepository) FindAll() ([]*Definition, error) {
 
 // FindByName find an API definition by name
 func (r *MongoRepository) FindByName(name string) (*Definition, error) {
+	return r.findOneByQuery(bson.M{"name": name})
+}
+
+// FindByListenPath find an API definition by proxy listen path
+func (r *MongoRepository) FindByListenPath(path string) (*Definition, error) {
+	return r.findOneByQuery(bson.M{"proxy.listen_path": path})
+}
+
+func (r *MongoRepository) findOneByQuery(query interface{}) (*Definition, error) {
 	var result = NewDefinition()
 	session, coll := r.getSession()
 	defer session.Close()
 
-	err := coll.Find(bson.M{"name": name}).One(&result)
+	err := coll.Find(query).One(&result)
 	if err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, ErrAPIDefinitionNotFound
@@ -63,28 +62,7 @@ func (r *MongoRepository) FindByName(name string) (*Definition, error) {
 
 // Exists searches an existing API definition by its listen_path
 func (r *MongoRepository) Exists(def *Definition) (bool, error) {
-	session, coll := r.getSession()
-	defer session.Close()
-
-	count, err := coll.Find(bson.M{"name": def.Name}).Count()
-	if err != nil {
-		return false, err
-	}
-
-	if count >= 1 {
-		return true, ErrAPINameExists
-	}
-
-	count, err = coll.Find(bson.M{"proxy.listen_path": def.Proxy.ListenPath}).Count()
-	if err != nil {
-		return false, err
-	}
-
-	if count >= 1 {
-		return true, ErrAPIListenPathExists
-	}
-
-	return false, nil
+	return exists(r, def)
 }
 
 // Add adds an API definition to the repository
@@ -94,20 +72,17 @@ func (r *MongoRepository) Add(definition *Definition) error {
 
 	isValid, err := definition.Validate()
 	if false == isValid && err != nil {
-		fields := log.Fields{
-			"errors": err.Error(),
-		}
-		log.WithFields(fields).Error("Validation errors")
+		log.WithError(err).Error("Validation errors")
 		return err
 	}
 
 	_, err = coll.Upsert(bson.M{"name": definition.Name}, definition)
 	if err != nil {
-		log.Errorf("There was an error adding the resource %s", definition.Name)
+		log.WithField("name", definition.Name).Error("There was an error adding the resource")
 		return err
 	}
 
-	log.Debugf("Resource %s added", definition.Name)
+	log.WithField("name", definition.Name).Debug("Resource added")
 	return nil
 }
 
@@ -118,15 +93,18 @@ func (r *MongoRepository) Remove(name string) error {
 
 	err := coll.Remove(bson.M{"name": name})
 	if err != nil {
-		log.Errorf("There was an error removing the resource %s", name)
+		if err == mgo.ErrNotFound {
+			return ErrAPIDefinitionNotFound
+		}
+		log.WithField("name", name).Error("There was an error removing the resource")
 		return err
 	}
 
-	log.Debugf("Resource %s removed", name)
+	log.WithField("name", name).Debug("Resource removed")
 	return nil
 }
 
-// FindValidAPIHealthChecks retreives all apis that has health check configured
+// FindValidAPIHealthChecks retrieves all apis that has health check configured
 func (r *MongoRepository) FindValidAPIHealthChecks() ([]*Definition, error) {
 	result := []*Definition{}
 	session, coll := r.getSession()

@@ -1,9 +1,8 @@
 package api
 
 import (
+	"fmt"
 	"net/http"
-
-	mgo "gopkg.in/mgo.v2"
 
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/notifier"
@@ -81,6 +80,20 @@ func (c *Controller) PutBy() http.HandlerFunc {
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
+		// avoid situation when trying to update existing definition with new path
+		// that is already registered with another name
+		span = opentracing.FromContext(r.Context(), "datastore.FindByName")
+		existingPathDefinition, err := c.repo.FindByListenPath(definition.Proxy.ListenPath)
+		span.Finish()
+
+		if err != nil && err != ErrAPIDefinitionNotFound {
+			panic(errors.New(http.StatusInternalServerError, err.Error()))
+		}
+
+		if nil != existingPathDefinition && existingPathDefinition.Name != definition.Name {
+			panic(ErrAPIListenPathExists)
+		}
+
 		span = opentracing.FromContext(r.Context(), "datastore.Add")
 		err = c.repo.Add(definition)
 		c.dispatch(notifier.NoticeAPIUpdated)
@@ -108,12 +121,12 @@ func (c *Controller) Post() http.HandlerFunc {
 		exists, err := c.repo.Exists(definition)
 		span.Finish()
 
-		if nil != err && err != mgo.ErrNotFound {
-			panic(errors.New(http.StatusBadRequest, err.Error()))
-		}
-
 		if exists {
 			panic(err)
+		}
+
+		if nil != err {
+			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
 		span = opentracing.FromContext(r.Context(), "datastore.Add")
@@ -125,7 +138,7 @@ func (c *Controller) Post() http.HandlerFunc {
 			panic(errors.New(http.StatusBadRequest, err.Error()))
 		}
 
-		w.Header().Add("Location", "")
+		w.Header().Add("Location", fmt.Sprintf("/apis/%s", definition.Name))
 		response.JSON(w, http.StatusCreated, nil)
 	}
 }
@@ -140,6 +153,9 @@ func (c *Controller) DeleteBy() http.HandlerFunc {
 		span.Finish()
 
 		if err != nil {
+			if err == ErrAPIDefinitionNotFound {
+				panic(err)
+			}
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 

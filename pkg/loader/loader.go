@@ -7,6 +7,7 @@ import (
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/store"
+	"github.com/hellofresh/janus/pkg/web"
 )
 
 // Params initialization options.
@@ -38,4 +39,9 @@ func Load(params Params) {
 
 	oauthLoader := NewOAuthLoader(register, params.Storage)
 	oauthLoader.LoadDefinitions(params.OAuthRepo)
+
+	// some routers may panic when have empty routes list, so add one dummy 404 route to avoid this
+	if params.Router.RoutesCount() < 1 {
+		params.Router.Any("/", web.NotFound)
+	}
 }

@@ -1,3 +1,4 @@
+sudo: required
 language: go
 
 go:
@@ -8,7 +9,7 @@ before_install:
   - sudo add-apt-repository ppa:masterminds/glide -y
   - sudo apt-get update -q
   - sudo apt-get install glide -y
-  
+
 install:
   - mkdir -p $GOPATH/bin
   - go get github.com/mattn/goveralls
