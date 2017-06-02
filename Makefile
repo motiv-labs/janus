@@ -20,6 +20,7 @@ deps:
 	@echo "$(OK_COLOR)==> Installing glide dependencies$(NO_COLOR)"
 	@go get -u github.com/Masterminds/glide
 	@go get -u github.com/golang/lint/golint
+	@go get -u github.com/DATA-DOG/godog/cmd/godog
 	@glide install
 
 build:
