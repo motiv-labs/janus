@@ -57,7 +57,8 @@ Feature: Apply proxy changes to all instances, when changing via API on single i
         Then I should receive 201 response code
         And header "Location" should be "/apis/example"
 
-        When I request "/example" path with "GET" method
+        When I wait for a while
+        And I request "/example" path with "GET" method
         Then I should receive 200 response code
         And response JSON body has "hello" path with value 'world'
 
