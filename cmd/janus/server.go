@@ -31,8 +31,8 @@ func RunServer(cmd *cobra.Command, args []string) {
 	defer statsClient.Close()
 
 	if subscriber, ok := storage.(notifier.Subscriber); ok {
-		listerner := notifier.NewNotificationListener(subscriber)
-		listerner.Start(handleEvent)
+		listener := notifier.NewNotificationListener(subscriber)
+		listener.Start(handleEvent)
 	}
 
 	dsnURL, err := url.Parse(globalConfig.Database.DSN)
@@ -141,8 +141,8 @@ func createRouter() router.Router {
 	return r
 }
 
-func handleEvent(notif notifier.Notification) {
-	if notifier.RequireReload(notif.Command) {
+func handleEvent(notification notifier.Notification) {
+	if notifier.RequireReload(notification.Command) {
 		newRouter := createRouter()
 		loader.Load(loader.Params{
 			Router:    newRouter,
