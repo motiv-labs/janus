@@ -18,6 +18,8 @@ _cgo_gotypes.go
 _cgo_export.*
 
 _testmain.go
+profile.coverprofile
+overalls.coverprofile
 
 *.exe
 *.test
@@ -28,6 +30,5 @@ _book
 /vendor
 
 # HF config files
-ci/vars_enc.yml
 /dist
 debug

@@ -56,8 +56,8 @@ func Build(dsn string) (Store, error) {
 			Dial:        func() (redis.Conn, error) { return redis.DialURL(dsn) },
 		}
 
-		log.Debugf("Trying to connect to redis pool: %s", dsn)
-		return NewRedisStore(pool)
+		log.WithField("dsn", dsn).Debug("Trying to connect to redis pool")
+		return NewRedisStore(pool, url.Query().Get("prefix"))
 	}
 
 	return nil, ErrUnknownStorage

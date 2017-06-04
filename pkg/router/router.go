@@ -32,6 +32,8 @@ type Router interface {
 	CONNECT(path string, handler http.HandlerFunc, handlers ...Constructor)
 	Group(path string) Router
 	Use(handlers ...Constructor) Router
+
+	RoutesCount() int
 }
 
 // Options are the HTTPTreeMuxRouter options
