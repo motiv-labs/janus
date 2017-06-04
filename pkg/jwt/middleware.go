@@ -5,8 +5,8 @@ import (
 	"errors"
 	"net/http"
 
-	jwt "github.com/dgrijalva/jwt-go"
 	"fmt"
+	jwt "github.com/dgrijalva/jwt-go"
 )
 
 // Payload Represents the context key
