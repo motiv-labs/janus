@@ -40,10 +40,6 @@ func (j *Handler) Login() http.HandlerFunc {
 			return
 		}
 
-		// Create the token
-		token := jwt.New(jwt.GetSigningMethod(j.Config.SigningAlgorithm))
-		claims := token.Claims.(jwt.MapClaims)
-
 		if userID == "" {
 			userID = loginVals.Username
 		}
@@ -53,11 +49,8 @@ func (j *Handler) Login() http.HandlerFunc {
 		}
 
 		expire := time.Now().Add(j.Config.Timeout)
-		claims["id"] = userID
-		claims["exp"] = expire.Unix()
-		claims["iat"] = time.Now().Unix()
 
-		tokenString, err := token.SignedString(j.Config.Secret)
+		tokenString, err := IssueAdminToken(j.Config.SigningAlgorithm, userID, j.Config.Secret, j.Config.Timeout)
 
 		if err != nil {
 			j.Config.Unauthorized(w, r, errors.New("problem signing JWT"))

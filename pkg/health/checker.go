@@ -27,7 +27,7 @@ type Checker struct {
 	Err         chan error
 }
 
-// Response represents a sigle check response of a service
+// Response represents a single check response of a service
 type Response struct {
 	Name    string `json:"name"`
 	Check   Check  `json:"check"`

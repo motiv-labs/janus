@@ -1,3 +1,4 @@
+sudo: required
 language: go
 
 go:
@@ -8,7 +9,7 @@ before_install:
   - sudo add-apt-repository ppa:masterminds/glide -y
   - sudo apt-get update -q
   - sudo apt-get install glide -y
-  
+
 install:
   - mkdir -p $GOPATH/bin
   - go get github.com/mattn/goveralls
@@ -18,4 +19,4 @@ install:
 script:
 - make test
 - $GOPATH/bin/overalls -project=github.com/hellofresh/janus -covermode=count
-- if [ "$COVERALLS_TOKEN" != "false" ]; then $GOPATH/bin/goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN; fi
+- if [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then $GOPATH/bin/goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN; fi

@@ -20,7 +20,7 @@ func NewAPILoader(register *proxy.Register, pluginLoader *plugin.Loader) *APILoa
 	return &APILoader{register, pluginLoader}
 }
 
-// LoadDefinitions will connect and download ApiDefintions from a Mongo DB instance.
+// LoadDefinitions registers all ApiDefinitions from a data source
 func (m *APILoader) LoadDefinitions(repo api.Repository) {
 	specs := m.getAPISpecs(repo)
 	m.RegisterApis(specs)
@@ -39,11 +39,11 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 
 	active, err := referenceSpec.Validate()
 	if false == active && err != nil {
-		logger.WithError(err).Warn("Validation errors")
+		logger.WithError(err).Error("Validation errors")
 	}
 
 	if false == referenceSpec.Active {
-		logger.Warn("API is not active, skiping...")
+		logger.Warn("API is not active, skipping...")
 		active = false
 	}
 
@@ -81,7 +81,7 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 	}
 }
 
-//getAPISpecs Load application specs from datasource
+// getAPISpecs Load application specs from data source
 func (m *APILoader) getAPISpecs(repo api.Repository) []*api.Spec {
 	definitions, err := repo.FindAll()
 	if err != nil {
