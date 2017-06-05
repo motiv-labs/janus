@@ -38,7 +38,7 @@ func (m *Middleware) Handler(handler http.Handler) http.Handler {
 
 		claims := token.Claims.(jwt.MapClaims)
 
-		id, err := m.getUserId(claims)
+		id, err := m.getUserID(claims)
 		if err != nil {
 			m.Config.Unauthorized(w, r, errors.New("The user identifier is not found in token"))
 		}
@@ -55,7 +55,7 @@ func (m *Middleware) Handler(handler http.Handler) http.Handler {
 	})
 }
 
-func (m *Middleware) getUserId(claims jwt.MapClaims) (string, error) {
+func (m *Middleware) getUserID(claims jwt.MapClaims) (string, error) {
 	var userKey = m.Config.UserIDKey
 	if "" == userKey {
 		userKey = "sub"
