@@ -58,3 +58,18 @@ Host: foo.com
 All three of these requests satisfy only two of configured conditions. The first request's URI is not a match for any of the configured uris, same for the second request's HTTP method, and the third request's Host header.
 
 Now that we understand how the hosts, uris, and methods properties work together, let's explore each property individually.
+
+*Insecure upstream:* if your upstream uses a self-signed SSL certificate, you can let Janus accept it, by using the `insecure_skip_verify` configuration, like the following:
+
+```json
+{
+    "name": "My API",
+    "hosts": ["example.com", "service.com"],
+    "proxy": {
+        "listen_path": "/foo/*",
+        "upstream_url": "http://my-api.com",
+        "insecure_skip_verify": true,
+        "methods": ["GET"]
+    }
+}
+```
