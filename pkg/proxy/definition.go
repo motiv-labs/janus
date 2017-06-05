@@ -41,6 +41,7 @@ type Definition struct {
 	PreserveHost        bool     `bson:"preserve_host" json:"preserve_host" mapstructure:"preserve_host"`
 	ListenPath          string   `bson:"listen_path" json:"listen_path" mapstructure:"listen_path" valid:"required"`
 	UpstreamURL         string   `bson:"upstream_url" json:"upstream_url" mapstructure:"upstream_url" valid:"url,required"`
+	InsecureSkipVerify  bool     `bson:"insecure_skip_verify" json:"insecure_skip_verify" mapstructure:"insecure_skip_verify"`
 	StripPath           bool     `bson:"strip_path" json:"strip_path" mapstructure:"strip_path"`
 	AppendPath          bool     `bson:"append_path" json:"append_path" mapstructure:"append_path"`
 	EnableLoadBalancing bool     `bson:"enable_load_balancing" json:"enable_load_balancing" mapstructure:"enable_load_balancing"`

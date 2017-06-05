@@ -151,9 +151,25 @@ func (p *Proxy) Reverse(proxyDefinition *Definition, inbound InChain, outbound O
 		}
 	}
 
+	transport := &http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		TLSClientConfig: &tls.Config{
+			InsecureSkipVerify: proxyDefinition.InsecureSkipVerify,
+		},
+	}
+
 	return &httputil.ReverseProxy{
 		Director:      director,
-		Transport:     &Shackles{p.statsClient, inbound, outbound},
+		Transport:     &Shackles{p.statsClient, inbound, outbound, transport},
 		FlushInterval: p.flushInterval,
 	}
 }

@@ -47,13 +47,13 @@ func TestRouteToJSON(t *testing.T) {
 	assert.NoError(t, err)
 	assert.JSONEq(
 		t,
-		`{"proxy": {"append_path":false, "enable_load_balancing":false, "methods":[], "hosts":[], "preserve_host":false, "listen_path":"", "upstream_url":"", "strip_path":false}}`,
+		`{"proxy": {"insecure_skip_verify": false, "append_path":false, "enable_load_balancing":false, "methods":[], "hosts":[], "preserve_host":false, "listen_path":"", "upstream_url":"", "strip_path":false}}`,
 		string(json),
 	)
 }
 
 func TestJSONToRoute(t *testing.T) {
-	route, err := proxy.JSONUnmarshalRoute([]byte(`{"proxy": {"append_path":false, "enable_load_balancing":false, "methods":[], "hosts":[], "preserve_host":false, "listen_path":"", "upstream_url":"/*", "strip_path":false}}`))
+	route, err := proxy.JSONUnmarshalRoute([]byte(`{"proxy": {"insecure_skip_verify": false, "append_path":false, "enable_load_balancing":false, "methods":[], "hosts":[], "preserve_host":false, "listen_path":"", "upstream_url":"/*", "strip_path":false}}`))
 
 	assert.NoError(t, err)
 	assert.IsType(t, &proxy.Route{}, route)

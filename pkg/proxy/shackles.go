@@ -28,6 +28,7 @@ type Shackles struct {
 	statsClient stats.Client
 	inbound     InChain
 	outbound    OutChain
+	transport   http.RoundTripper
 }
 
 // NewInChain variadic constructor for inbound plugin sequence
@@ -53,8 +54,12 @@ func (s *Shackles) RoundTrip(req *http.Request) (resp *http.Response, err error)
 		return nil, err
 	}
 
+	if nil == s.transport {
+		s.transport = http.DefaultTransport
+	}
+
 	// use default RoundTrip function handle the actual request/response
-	resp, err = http.DefaultTransport.RoundTrip(req)
+	resp, err = s.transport.RoundTrip(req)
 	if err != nil {
 		s.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
 			TrackRequest(req, timing, false).
