@@ -1,6 +1,8 @@
 package api
 
 import (
+	"encoding/json"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -12,14 +14,11 @@ type Spec struct {
 	Manager oauth.Manager
 }
 
-// Config represents the configuration for a plugin
-type Config map[string]interface{}
-
 // Plugin represents the plugins for an API
 type Plugin struct {
-	Name    string `bson:"name" json:"name"`
-	Enabled bool   `bson:"enabled" json:"enabled"`
-	Config  Config `bson:"config" json:"config"`
+	Name    string          `bson:"name" json:"name"`
+	Enabled bool            `bson:"enabled" json:"enabled"`
+	Config  json.RawMessage `bson:"config" json:"config"`
 }
 
 // Definition Represents an API that you want to proxy
@@ -28,7 +27,7 @@ type Definition struct {
 	Active      bool              `bson:"active" json:"active"`
 	Proxy       *proxy.Definition `bson:"proxy" json:"proxy"`
 	Plugins     []Plugin          `bson:"plugins" json:"plugins"`
-	HealthCheck HealthCheck       `bson:"health_check" json:"health_check" mapstructure:"health_check"`
+	HealthCheck HealthCheck       `bson:"health_check" json:"health_check"`
 }
 
 // HealthCheck represents the health check configs
