@@ -1,3 +1,15 @@
+# Unrealeased
+
+## Changed
+
+- Moved Concourse CI scripts to another repo
+
+## Added
+
+- Added plugin to transform a request to an upstream. You can now modify headers and query string before the request is sent
+- Added godog for behaviour tests
+- Allow insecure upstream SSL certificate
+
 # 3.0.0
 
 ## Changed
