@@ -2,6 +2,7 @@ package middleware
 
 import (
 	"net/http"
+	"net/url"
 )
 
 type headerFn func(headerName string, headerValue string)
@@ -9,8 +10,7 @@ type headerFn func(headerName string, headerValue string)
 // RequestTransformerOptions represents the available options to transform
 type RequestTransformerOptions struct {
 	Headers     map[string]string `json:"headers"`
-	QueryString string            `json:"querystring"`
-	Body        string            `json:"body"`
+	QueryString map[string]string `json:"querystring"`
 }
 
 // RequestTransformerConfig represent the configuration of the modify headers middleware
@@ -34,11 +34,22 @@ func NewRequestTransformer(headers RequestTransformerConfig) *RequestTransformer
 // Handler is the middleware function
 func (h *RequestTransformer) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		query := r.URL.Query()
 
-		h.trasnformHeaders(h.config.Add.Headers, h.addHeaders(r))
-		h.trasnformHeaders(h.config.Append.Headers, h.appendHeaders(r))
-		h.trasnformHeaders(h.config.Replace.Headers, h.replaceHeaders(r))
-		h.trasnformHeaders(h.config.Remove.Headers, h.removeHeaders(r))
+		h.trasnform(h.config.Remove.Headers, h.removeHeaders(r))
+		h.trasnform(h.config.Remove.QueryString, h.removeQueryString(query))
+
+		h.trasnform(h.config.Replace.Headers, h.replaceHeaders(r))
+		h.trasnform(h.config.Replace.QueryString, h.replaceQueryString(query))
+
+		h.trasnform(h.config.Add.Headers, h.addHeaders(r))
+		h.trasnform(h.config.Add.QueryString, h.addQueryString(query))
+
+		h.trasnform(h.config.Append.Headers, h.appendHeaders(r))
+		h.trasnform(h.config.Append.QueryString, h.appendQueryString(query))
+
+		r.URL.RawQuery = query.Encode()
+
 		handler.ServeHTTP(w, r)
 	})
 }
@@ -75,12 +86,40 @@ func (h *RequestTransformer) replaceHeaders(r *http.Request) headerFn {
 	}
 }
 
-func (h *RequestTransformer) trasnformHeaders(headers map[string]string, fn headerFn) {
-	if len(headers) <= 0 {
+func (h *RequestTransformer) trasnform(values map[string]string, fn headerFn) {
+	if len(values) <= 0 {
 		return
 	}
 
-	for headerName, headerValue := range headers {
-		fn(headerName, headerValue)
+	for name, value := range values {
+		fn(name, value)
+	}
+}
+
+func (h *RequestTransformer) addQueryString(query url.Values) headerFn {
+	return func(name string, value string) {
+		if query.Get(name) == "" {
+			query.Add(name, value)
+		}
+	}
+}
+
+func (h *RequestTransformer) appendQueryString(query url.Values) headerFn {
+	return func(name string, value string) {
+		query.Add(name, value)
+	}
+}
+
+func (h *RequestTransformer) removeQueryString(query url.Values) headerFn {
+	return func(name string, value string) {
+		query.Del(name)
+	}
+}
+
+func (h *RequestTransformer) replaceQueryString(query url.Values) headerFn {
+	return func(name string, value string) {
+		if query.Get(name) != "" {
+			query.Set(name, value)
+		}
 	}
 }
