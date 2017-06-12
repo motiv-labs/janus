@@ -1,7 +1,6 @@
 package plugin
 
 import (
-	"encoding/json"
 	"sync"
 
 	"github.com/hellofresh/janus/pkg/api"
@@ -11,7 +10,7 @@ import (
 // Plugin defines basic methods for plugins
 type Plugin interface {
 	GetName() string
-	GetMiddlewares(rawConfig json.RawMessage, referenceSpec *api.Spec) ([]router.Constructor, error)
+	GetMiddlewares(rawConfig map[string]interface{}, referenceSpec *api.Spec) ([]router.Constructor, error)
 }
 
 // Loader holds all availables plugins

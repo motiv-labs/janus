@@ -1,10 +1,9 @@
 package plugin
 
 import (
-	"encoding/json"
-
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/router"
+	"github.com/mitchellh/mapstructure"
 	"github.com/rs/cors"
 )
 
@@ -29,9 +28,9 @@ func (h *CORS) GetName() string {
 }
 
 // GetMiddlewares retrieves the plugin's middlewares
-func (h *CORS) GetMiddlewares(rawConfig json.RawMessage, referenceSpec *api.Spec) ([]router.Constructor, error) {
+func (h *CORS) GetMiddlewares(rawConfig map[string]interface{}, referenceSpec *api.Spec) ([]router.Constructor, error) {
 	var corsConfig corsConfig
-	err := json.Unmarshal(rawConfig, &corsConfig)
+	err := mapstructure.Decode(rawConfig, &corsConfig)
 	if err != nil {
 		return nil, err
 	}

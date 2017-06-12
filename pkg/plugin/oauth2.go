@@ -1,14 +1,13 @@
 package plugin
 
 import (
-	"encoding/json"
-
 	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/store"
+	"github.com/mitchellh/mapstructure"
 )
 
 type oauth2Config struct {
@@ -32,9 +31,9 @@ func (h *OAuth2) GetName() string {
 }
 
 // GetMiddlewares retrieves the plugin's middlewares
-func (h *OAuth2) GetMiddlewares(rawConfig json.RawMessage, referenceSpec *api.Spec) ([]router.Constructor, error) {
+func (h *OAuth2) GetMiddlewares(rawConfig map[string]interface{}, referenceSpec *api.Spec) ([]router.Constructor, error) {
 	var oauth2Config oauth2Config
-	err := json.Unmarshal(rawConfig, &oauth2Config)
+	err := mapstructure.Decode(rawConfig, &oauth2Config)
 	if err != nil {
 		return nil, err
 	}

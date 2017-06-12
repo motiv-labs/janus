@@ -1,8 +1,6 @@
 package plugin
 
 import (
-	"encoding/json"
-
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/pressly/chi/middleware"
@@ -22,7 +20,7 @@ func (h *Compression) GetName() string {
 }
 
 // GetMiddlewares retrieves the plugin's middlewares
-func (h *Compression) GetMiddlewares(rawConfig json.RawMessage, referenceSpec *api.Spec) ([]router.Constructor, error) {
+func (h *Compression) GetMiddlewares(rawConfig map[string]interface{}, referenceSpec *api.Spec) ([]router.Constructor, error) {
 	return []router.Constructor{
 		middleware.DefaultCompress,
 	}, nil

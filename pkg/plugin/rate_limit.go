@@ -1,14 +1,13 @@
 package plugin
 
 import (
-	"encoding/json"
-
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/hellofresh/stats-go"
+	"github.com/mitchellh/mapstructure"
 	"github.com/ulule/limiter"
 )
 
@@ -39,9 +38,9 @@ func (h *RateLimit) GetName() string {
 }
 
 // GetMiddlewares retrieves the plugin's middlewares
-func (h *RateLimit) GetMiddlewares(rawConfig json.RawMessage, referenceSpec *api.Spec) ([]router.Constructor, error) {
+func (h *RateLimit) GetMiddlewares(rawConfig map[string]interface{}, referenceSpec *api.Spec) ([]router.Constructor, error) {
 	var rateLimitConfig rateLimitConfig
-	err := json.Unmarshal(rawConfig, &rateLimitConfig)
+	err := mapstructure.Decode(rawConfig, &rateLimitConfig)
 	if err != nil {
 		return nil, err
 	}
