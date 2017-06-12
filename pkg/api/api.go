@@ -1,8 +1,6 @@
 package api
 
 import (
-	"encoding/json"
-
 	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -16,9 +14,9 @@ type Spec struct {
 
 // Plugin represents the plugins for an API
 type Plugin struct {
-	Name    string          `bson:"name" json:"name"`
-	Enabled bool            `bson:"enabled" json:"enabled"`
-	Config  json.RawMessage `bson:"config" json:"config"`
+	Name    string                 `bson:"name" json:"name"`
+	Enabled bool                   `bson:"enabled" json:"enabled"`
+	Config  map[string]interface{} `bson:"config" json:"config"`
 }
 
 // Definition Represents an API that you want to proxy
