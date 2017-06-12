@@ -13,7 +13,7 @@ func JSON(w http.ResponseWriter, code int, obj interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 
-	if nil != obj || http.StatusNoContent == code {
+	if nil != obj && http.StatusNoContent != code {
 		err := json.NewEncoder(w).Encode(obj)
 		if err != nil {
 			panic(err.Error())
