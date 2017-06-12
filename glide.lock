@@ -1,5 +1,5 @@
 hash: b030900de47ecebe32f75e7cb53619e116f804761b6d2df1beca6bfaf75cc587
-updated: 2017-05-31T13:27:33.270596969+02:00
+updated: 2017-06-12T16:58:11.999112443+02:00
 imports:
 - name: cloud.google.com/go
   version: 01b9e8cbca61bf2c704946d6f1790ec412519180
@@ -13,7 +13,7 @@ imports:
 - name: github.com/asaskevich/govalidator
   version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
 - name: github.com/bshuster-repo/logrus-logstash-hook
-  version: cf321b0839ac25d63a7c06163650047ee0b7f12d
+  version: c78042226c66460be064be6d1c26d276de19fbcf
 - name: github.com/DATA-DOG/godog
   version: 92fbee719c9593813b24a6ef042bcad40324ede4
   subpackages:
@@ -119,7 +119,7 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: 3da985ce5951d99de868be4385f21ea6c2b22f24
+  version: 59a0b19b5533c7977ddeb86b017bf507ed407b12
   subpackages:
   - context
   - context/ctxhttp
