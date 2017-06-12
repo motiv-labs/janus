@@ -54,10 +54,6 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 			if pDefinition.Enabled {
 				logger.WithField("name", pDefinition.Name).Debug("Plugin enabled")
 				if p := m.pluginLoader.Get(pDefinition.Name); p != nil {
-					if pDefinition.Config == nil {
-						continue
-					}
-
 					middlewares, err := p.GetMiddlewares(pDefinition.Config, referenceSpec)
 					if err != nil {
 						logger.WithError(err).
