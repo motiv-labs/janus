@@ -14,6 +14,9 @@ func JSON(w http.ResponseWriter, code int, obj interface{}) {
 	w.WriteHeader(code)
 
 	if nil != obj || http.StatusNoContent == code {
-		json.NewEncoder(w).Encode(obj)
+		err := json.NewEncoder(w).Encode(obj)
+		if err != nil {
+			panic(err.Error())
+		}
 	}
 }
