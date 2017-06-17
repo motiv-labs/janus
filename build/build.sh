@@ -14,6 +14,11 @@ echo "Building application version $VERSION"
 echo "Building default binary"
 CGO_ENABLED=0 go build -ldflags "-s -w" -ldflags "-X main.version=${VERSION}" -o "dist/janus" $PKG_SRC
 
+if [ ! -z "${JANUS_BUILD_ONLY_DEFAULT}" ]; then
+    echo "Only default binary was requested to build"
+    exit 0
+fi
+
 # Build 386 amd64 binaries
 OS_PLATFORM_ARG=(linux darwin windows freebsd openbsd)
 OS_ARCH_ARG=(386 amd64)

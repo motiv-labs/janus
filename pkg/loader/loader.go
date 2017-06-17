@@ -27,6 +27,7 @@ func Load(params Params) {
 		plugin.NewCORS(),
 		plugin.NewOAuth2(params.OAuthRepo, params.Storage),
 		plugin.NewCompression(),
+		plugin.NewRequestTransformer(),
 	)
 
 	prx := proxy.WithParams(params.ProxyParams)

@@ -7,7 +7,12 @@ import (
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/store"
+	"github.com/mitchellh/mapstructure"
 )
+
+type oauth2Config struct {
+	ServerName string `json:"server_name"`
+}
 
 // OAuth2 checks the integrity of the provided OAuth headers
 type OAuth2 struct {
@@ -26,8 +31,14 @@ func (h *OAuth2) GetName() string {
 }
 
 // GetMiddlewares retrieves the plugin's middlewares
-func (h *OAuth2) GetMiddlewares(config api.Config, referenceSpec *api.Spec) ([]router.Constructor, error) {
-	manager, err := h.getManager(config["server_name"].(string))
+func (h *OAuth2) GetMiddlewares(rawConfig map[string]interface{}, referenceSpec *api.Spec) ([]router.Constructor, error) {
+	var oauth2Config oauth2Config
+	err := mapstructure.Decode(rawConfig, &oauth2Config)
+	if err != nil {
+		return nil, err
+	}
+
+	manager, err := h.getManager(oauth2Config.ServerName)
 	if nil != err {
 		log.WithError(err).Error("OAuth Configuration for this API is incorrect, skipping...")
 		return nil, err
