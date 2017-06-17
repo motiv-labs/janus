@@ -1,14 +1,14 @@
 package api
 
 import (
+	"encoding/json"
 	"io/ioutil"
 	"path/filepath"
+	"strings"
 
 	"sync"
 
 	log "github.com/Sirupsen/logrus"
-	"github.com/fsnotify/fsnotify"
-	"github.com/spf13/viper"
 )
 
 // FileSystemRepository represents a mongodb repository
@@ -28,31 +28,19 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 	}
 
 	for _, f := range files {
-		filePath := filepath.Join(dir, f.Name())
-		definition := NewDefinition()
-
-		v := viper.New()
-		v.SetConfigFile(filePath)
-		v.WatchConfig()
-		v.OnConfigChange(func(e fsnotify.Event) {
-			log.WithFields(log.Fields{"name": e.Name, "op": e.Op.String()}).Debug("API configuration changed, reloading...")
-			if err := v.Unmarshal(definition); err != nil {
-				log.WithError(err).Error("Can't unmarshal the API configuration")
+		if strings.Contains(f.Name(), ".json") {
+			filePath := filepath.Join(dir, f.Name())
+			appConfigBody, err := ioutil.ReadFile(filePath)
+			if err != nil {
+				log.WithError(err).WithField("path", filePath).Error("Couldn't load the api definition file")
+				return nil, err
 			}
-		})
 
-		if err := v.ReadInConfig(); err != nil {
-			log.WithError(err).Error("Couldn't load the api definition file")
-			return nil, err
-		}
-
-		if err := v.Unmarshal(definition); err != nil {
-			return nil, err
-		}
-
-		if err = repo.Add(definition); err != nil {
-			log.WithError(err).Error("Can't add the definition to the repository")
-			return nil, err
+			definition := repo.parseDefinition(appConfigBody)
+			if err = repo.Add(definition); err != nil {
+				log.WithError(err).Error("Can't add the definition to the repository")
+				return nil, err
+			}
 		}
 	}
 
@@ -151,4 +139,13 @@ func (r *FileSystemRepository) Remove(name string) error {
 	delete(r.definitions, name)
 
 	return nil
+}
+
+func (r *FileSystemRepository) parseDefinition(apiDef []byte) *Definition {
+	appConfig := NewDefinition()
+	if err := json.Unmarshal(apiDef, appConfig); err != nil {
+		log.WithError(err).Error("[RPC] --> Couldn't unmarshal api configuration")
+	}
+
+	return appConfig
 }

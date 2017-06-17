@@ -20,7 +20,7 @@ func (h *Compression) GetName() string {
 }
 
 // GetMiddlewares retrieves the plugin's middlewares
-func (h *Compression) GetMiddlewares(config api.Config, referenceSpec *api.Spec) ([]router.Constructor, error) {
+func (h *Compression) GetMiddlewares(rawConfig map[string]interface{}, referenceSpec *api.Spec) ([]router.Constructor, error) {
 	return []router.Constructor{
 		middleware.DefaultCompress,
 	}, nil

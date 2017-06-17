@@ -55,6 +55,18 @@
         {
             "name": "compression",
             "enabled": true
+        },
+        {
+            "name": "request_transformer",
+            "enabled" : true,
+            "config": {
+                "add" : {
+                   "headers": {
+                        "TEST": "TEST"
+                   },
+                   "querystring": "test"
+                }
+            }
         }
     ]
 }

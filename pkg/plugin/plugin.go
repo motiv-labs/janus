@@ -10,7 +10,7 @@ import (
 // Plugin defines basic methods for plugins
 type Plugin interface {
 	GetName() string
-	GetMiddlewares(config api.Config, referenceSpec *api.Spec) ([]router.Constructor, error)
+	GetMiddlewares(rawConfig map[string]interface{}, referenceSpec *api.Spec) ([]router.Constructor, error)
 }
 
 // Loader holds all availables plugins

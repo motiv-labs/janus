@@ -7,6 +7,7 @@ import (
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/hellofresh/stats-go"
+	"github.com/mitchellh/mapstructure"
 	"github.com/ulule/limiter"
 )
 
@@ -14,6 +15,11 @@ const (
 	// DefaultPrefix is the default prefix to use for the key in the store.
 	DefaultPrefix = "limiter"
 )
+
+type rateLimitConfig struct {
+	Limit  string `json:"limit"`
+	Policy string `json:"policy"`
+}
 
 // RateLimit represents the rate limit plugin
 type RateLimit struct {
@@ -32,16 +38,19 @@ func (h *RateLimit) GetName() string {
 }
 
 // GetMiddlewares retrieves the plugin's middlewares
-func (h *RateLimit) GetMiddlewares(config api.Config, referenceSpec *api.Spec) ([]router.Constructor, error) {
-	limit := config["limit"].(string)
-	policy := config["policy"].(string)
-
-	rate, err := limiter.NewRateFromFormatted(limit)
+func (h *RateLimit) GetMiddlewares(rawConfig map[string]interface{}, referenceSpec *api.Spec) ([]router.Constructor, error) {
+	var rateLimitConfig rateLimitConfig
+	err := mapstructure.Decode(rawConfig, &rateLimitConfig)
 	if err != nil {
 		return nil, err
 	}
 
-	limiterStore, err := h.getLimiterStore(policy, referenceSpec.Name)
+	rate, err := limiter.NewRateFromFormatted(rateLimitConfig.Limit)
+	if err != nil {
+		return nil, err
+	}
+
+	limiterStore, err := h.getLimiterStore(rateLimitConfig.Policy, referenceSpec.Name)
 	if err != nil {
 		return nil, err
 	}

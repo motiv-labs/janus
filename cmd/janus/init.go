@@ -37,7 +37,7 @@ func init() {
 	}
 
 	log.SetLevel(level)
-	log.SetFormatter(&logrus_logstash.LogstashFormatter{
+	log.SetFormatter(&logrustash.LogstashFormatter{
 		Type:            "Janus",
 		TimestampFormat: time.RFC3339Nano,
 	})
