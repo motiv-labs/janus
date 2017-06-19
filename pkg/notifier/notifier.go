@@ -22,7 +22,7 @@ const (
 	NoticeOAuthServerRemoved NotificationCommand = "OAuthRemoved"
 	// NoticeOAuthServerAdded notifies when an OAuth server is added
 	NoticeOAuthServerAdded NotificationCommand = "OAuthAdded"
-	// DefaultChannel represents the defualt channel's name
+	// DefaultChannel represents the default channel's name
 	DefaultChannel = "janus.cluster.notifications"
 )
 

@@ -36,17 +36,17 @@ func (h *RequestTransformer) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		query := r.URL.Query()
 
-		h.trasnform(h.config.Remove.Headers, h.removeHeaders(r))
-		h.trasnform(h.config.Remove.QueryString, h.removeQueryString(query))
+		h.transform(h.config.Remove.Headers, h.removeHeaders(r))
+		h.transform(h.config.Remove.QueryString, h.removeQueryString(query))
 
-		h.trasnform(h.config.Replace.Headers, h.replaceHeaders(r))
-		h.trasnform(h.config.Replace.QueryString, h.replaceQueryString(query))
+		h.transform(h.config.Replace.Headers, h.replaceHeaders(r))
+		h.transform(h.config.Replace.QueryString, h.replaceQueryString(query))
 
-		h.trasnform(h.config.Add.Headers, h.addHeaders(r))
-		h.trasnform(h.config.Add.QueryString, h.addQueryString(query))
+		h.transform(h.config.Add.Headers, h.addHeaders(r))
+		h.transform(h.config.Add.QueryString, h.addQueryString(query))
 
-		h.trasnform(h.config.Append.Headers, h.appendHeaders(r))
-		h.trasnform(h.config.Append.QueryString, h.appendQueryString(query))
+		h.transform(h.config.Append.Headers, h.appendHeaders(r))
+		h.transform(h.config.Append.QueryString, h.appendQueryString(query))
 
 		r.URL.RawQuery = query.Encode()
 
@@ -86,7 +86,7 @@ func (h *RequestTransformer) replaceHeaders(r *http.Request) headerFn {
 	}
 }
 
-func (h *RequestTransformer) trasnform(values map[string]string, fn headerFn) {
+func (h *RequestTransformer) transform(values map[string]string, fn headerFn) {
 	if len(values) <= 0 {
 		return
 	}
