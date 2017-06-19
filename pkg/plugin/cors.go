@@ -1,6 +1,8 @@
 package plugin
 
 import (
+	"encoding/json"
+
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/mitchellh/mapstructure"
@@ -32,6 +34,18 @@ func (h *CORS) GetMiddlewares(rawConfig map[string]interface{}, referenceSpec *a
 	var corsConfig corsConfig
 	err := mapstructure.Decode(rawConfig, &corsConfig)
 	if err != nil {
+		return nil, err
+	}
+
+	// for some reasons mapstructure.Decode() gives empty arrays for all resulting config fields
+	// this is quick workaround hack t make it work
+	// TODO: investigate and fix mapstructure.Decode() behaviour and remove this dirty hack
+	valJSON, err := json.Marshal(rawConfig)
+	if nil != err {
+		return nil, err
+	}
+	err = json.Unmarshal(valJSON, &corsConfig)
+	if nil != err {
 		return nil, err
 	}
 
