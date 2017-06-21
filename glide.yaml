@@ -45,8 +45,6 @@ import:
 - package: github.com/tidwall/gjson
 - package: github.com/hellofresh/health-go
   version: ^1.0.0
-- package: github.com/bshuster-repo/logrus-logstash-hook
-  version: ^1.0.0-beta
 testImport:
 - package: github.com/stretchr/testify
   version: ^1.1.4
