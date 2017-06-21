@@ -8,6 +8,7 @@ WARN_COLOR=\033[33;01m
 # If you change this, run `make clean`.
 IMPORT_PATH := github.com/hellofresh/janus
 PKG_SRC := $(IMPORT_PATH)/cmd/janus
+HEALTH_SRC := $(IMPORT_PATH)/cmd/healthcheck
 
 # Space separated patterns of packages to skip in list, test, format.
 IGNORED_PACKAGES := /vendor/
@@ -25,7 +26,7 @@ deps:
 
 build:
 	@echo "$(OK_COLOR)==> Building... $(NO_COLOR)"
-	/bin/sh -c "PKG_SRC=$(PKG_SRC) VERSION=${VERSION} ./build/build.sh"
+	/bin/sh -c "PKG_SRC=$(PKG_SRC) HEALTH_SRC=$(HEALTH_SRC) VERSION=${VERSION} ./build/build.sh"
 
 test:
 	@/bin/sh -c "./build/test.sh $(allpackages)"
