@@ -82,7 +82,7 @@ func (c *Controller) PutBy() http.HandlerFunc {
 
 		// avoid situation when trying to update existing definition with new path
 		// that is already registered with another name
-		span = opentracing.FromContext(r.Context(), "datastore.FindByName")
+		span = opentracing.FromContext(r.Context(), "datastore.FindByListenPath")
 		existingPathDefinition, err := c.repo.FindByListenPath(definition.Proxy.ListenPath)
 		span.Finish()
 
