@@ -7,9 +7,12 @@
         "upstream_url" : "https://jsonplaceholder.typicode.com/posts",
         "strip_path" : true,
         "append_path" : false,
-        "enable_load_balancing" : false,
         "methods" : ["ALL"],
         "hosts": ["hellofresh.*"]
+    },
+    "health_check": {
+        "url": "https://jsonplaceholder.typicode.com",
+        "timeout": 10
     },
     "plugins": [
         {

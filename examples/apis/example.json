@@ -7,10 +7,10 @@
         "upstream_url" : "http://www.mocky.io/v2/58c6c60710000040151b7cad",
         "strip_path" : false,
         "append_path" : false,
-        "enable_load_balancing" : false,
         "methods" : ["GET"]
     },
     "health_check": {
-        "url": "https://example.com/status"
+        "url": "https://example.com/status",
+        "timeout": 10
     }
 }
