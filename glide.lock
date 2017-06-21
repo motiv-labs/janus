@@ -1,5 +1,5 @@
-hash: 671a460d0a6c28b0c9574400692828c4b17662f474ffc94b8ba5ad13cc41fcb9
-updated: 2017-06-21T19:51:24.710158297+02:00
+hash: afc5c90c72d48ecaeff6e10e2ffa58113f58f4064a3193db8255f8f8f8e4f319
+updated: 2017-06-21T19:57:00.117311249+02:00
 imports:
 - name: cloud.google.com/go
   version: 01b9e8cbca61bf2c704946d6f1790ec412519180
@@ -98,7 +98,7 @@ imports:
   version: ed27b6fd65218132ee50cd95f38474a3d8a2cd12
 - name: github.com/Sirupsen/logrus
   version: 202f25545ea4cf9b191ff7f846df5d87c9382c2b
-  repo: git@github.com:/sirupsen/logrus
+  repo: https://github.com/sirupsen/logrus.git
   vcs: git
 - name: github.com/sirupsen/logrus
   version: 202f25545ea4cf9b191ff7f846df5d87c9382c2b

@@ -3,7 +3,7 @@ import:
 - package: github.com/sirupsen/logrus
   version: ^1.0.0
 - package: github.com/Sirupsen/logrus
-  repo: git@github.com:/sirupsen/logrus
+  repo: https://github.com/sirupsen/logrus.git
   vcs: git
   version: ^1.0.0
 - package: github.com/asaskevich/govalidator
