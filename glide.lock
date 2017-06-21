@@ -1,5 +1,5 @@
-hash: cf7b820ea6f8bd96222b84a12944ab2910eb3ed0f87eddcd348e858d298ebd82
-updated: 2017-06-21T12:19:32.72524125+02:00
+hash: 6fedb8eb2f0fa6eb4e19991ebebff87cfc1162af0bb0d098183f8f3cc313e7e1
+updated: 2017-06-21T13:27:05.694549287+02:00
 imports:
 - name: cloud.google.com/go
   version: 01b9e8cbca61bf2c704946d6f1790ec412519180
@@ -12,8 +12,6 @@ imports:
   - rest/trie
 - name: github.com/asaskevich/govalidator
   version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
-- name: github.com/bshuster-repo/logrus-logstash-hook
-  version: ea59b04518367f2aafe8cf6d46a7d60605d075ce
 - name: github.com/DATA-DOG/godog
   version: 92fbee719c9593813b24a6ef042bcad40324ede4
   subpackages:
