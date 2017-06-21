@@ -1,5 +1,5 @@
-hash: 6fedb8eb2f0fa6eb4e19991ebebff87cfc1162af0bb0d098183f8f3cc313e7e1
-updated: 2017-06-21T13:27:05.694549287+02:00
+hash: 671a460d0a6c28b0c9574400692828c4b17662f474ffc94b8ba5ad13cc41fcb9
+updated: 2017-06-21T19:51:24.710158297+02:00
 imports:
 - name: cloud.google.com/go
   version: 01b9e8cbca61bf2c704946d6f1790ec412519180
@@ -97,11 +97,11 @@ imports:
 - name: github.com/rs/xhandler
   version: ed27b6fd65218132ee50cd95f38474a3d8a2cd12
 - name: github.com/Sirupsen/logrus
-  version: 3d4380f53a34dcdc95f0c1db702615992b38d9a4
+  version: 202f25545ea4cf9b191ff7f846df5d87c9382c2b
   repo: git@github.com:/sirupsen/logrus
   vcs: git
 - name: github.com/sirupsen/logrus
-  version: 3d4380f53a34dcdc95f0c1db702615992b38d9a4
+  version: 202f25545ea4cf9b191ff7f846df5d87c9382c2b
 - name: github.com/spf13/afero
   version: 9be650865eab0c12963d8753212f4f9c66cdcf12
   subpackages:

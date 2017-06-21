@@ -1,11 +1,11 @@
 package: github.com/hellofresh/janus
 import:
 - package: github.com/sirupsen/logrus
-  version: master
+  version: ^1.0.0
 - package: github.com/Sirupsen/logrus
-  version: master
   repo: git@github.com:/sirupsen/logrus
   vcs: git
+  version: ^1.0.0
 - package: github.com/asaskevich/govalidator
   version: ^5.0.0
 - package: github.com/dgrijalva/jwt-go
