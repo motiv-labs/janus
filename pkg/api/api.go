@@ -30,7 +30,8 @@ type Definition struct {
 
 // HealthCheck represents the health check configs
 type HealthCheck struct {
-	URL string `bson:"url" json:"url" valid:"url"`
+	URL     string `bson:"url" json:"url" valid:"url"`
+	Timeout int    `bson:"timeout" json:"timeout"`
 }
 
 // NewDefinition creates a new API Definition with default values
