@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/session"
+	log "github.com/sirupsen/logrus"
 )
 
 // JWTManager is responsible for managing the JWT tokens

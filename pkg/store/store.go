@@ -4,8 +4,8 @@ import (
 	"net/url"
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
+	log "github.com/sirupsen/logrus"
 )
 
 const (

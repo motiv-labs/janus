@@ -1,11 +1,11 @@
 package loader
 
 import (
-	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/rs/cors"
+	log "github.com/sirupsen/logrus"
 )
 
 // OAuthLoader handles the loading of the api specs

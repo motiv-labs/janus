@@ -3,9 +3,9 @@ package web
 import (
 	"net/http"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/response"
+	log "github.com/sirupsen/logrus"
 )
 
 // Home handler is just a nice home page message

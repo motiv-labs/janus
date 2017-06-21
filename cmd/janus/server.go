@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/url"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/loader"
@@ -15,6 +14,7 @@ import (
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/web"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	mgo "gopkg.in/mgo.v2"
 )

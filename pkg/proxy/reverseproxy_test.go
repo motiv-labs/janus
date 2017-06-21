@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"testing"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/test"
 	stats "github.com/hellofresh/stats-go"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 

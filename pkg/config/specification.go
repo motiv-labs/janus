@@ -3,9 +3,9 @@ package config
 import (
 	"time"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/fsnotify/fsnotify"
 	"github.com/kelseyhightower/envconfig"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 

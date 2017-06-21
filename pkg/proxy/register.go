@@ -4,8 +4,8 @@ import (
 	"net/http"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/router"
+	log "github.com/sirupsen/logrus"
 )
 
 const (

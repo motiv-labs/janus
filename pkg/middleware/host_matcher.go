@@ -6,8 +6,8 @@ import (
 	"regexp"
 	"strings"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 // HostMatcher is a middleware that matches any host with the given list of hosts.

@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/response"
 	"github.com/hellofresh/stats-go"
 	"github.com/hellofresh/stats-go/bucket"
+	log "github.com/sirupsen/logrus"
 	"github.com/ulule/limiter"
 )
 
