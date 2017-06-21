@@ -1,0 +1,13 @@
+{
+  "request": {
+    "method": "GET",
+    "url": "/error"
+  },
+  "response": {
+    "status": 500,
+    "jsonBody": {"message":"An unexpected error has ocurred"},
+    "headers": {
+        "Content-Type": "application/json"
+    }
+  }
+}
