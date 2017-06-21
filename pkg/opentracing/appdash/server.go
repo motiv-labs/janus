@@ -6,7 +6,7 @@ import (
 	"net/url"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	opentracing "github.com/opentracing/opentracing-go"
 	"sourcegraph.com/sourcegraph/appdash"
 	appdashtracer "sourcegraph.com/sourcegraph/appdash/opentracing"

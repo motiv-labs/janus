@@ -1,7 +1,7 @@
 package loader
 
 import (
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/plugin"

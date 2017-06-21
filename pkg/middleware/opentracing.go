@@ -7,7 +7,7 @@ import (
 	"os"
 	"strconv"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	base "github.com/hellofresh/janus/pkg/opentracing"
 	opentracing "github.com/opentracing/opentracing-go"
 	"github.com/opentracing/opentracing-go/ext"

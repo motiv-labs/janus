@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/session"
 )

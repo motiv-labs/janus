@@ -3,7 +3,7 @@ package notifier
 import (
 	"encoding/json"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // NotificationCommand represents a notification command

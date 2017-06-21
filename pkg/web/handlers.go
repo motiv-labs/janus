@@ -3,10 +3,8 @@ package web
 import (
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
-	"github.com/hellofresh/janus/pkg/api"
+	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/errors"
-	"github.com/hellofresh/janus/pkg/health"
 	"github.com/hellofresh/janus/pkg/response"
 )
 
@@ -33,18 +31,5 @@ func RecoveryHandler(w http.ResponseWriter, r *http.Request, err interface{}) {
 	default:
 		log.WithField("error", err).Error("Internal server error handled")
 		response.JSON(w, http.StatusInternalServerError, err)
-	}
-}
-
-// Heartbeat normally is used by the load balancers to identify if the application is alive
-func Heartbeat(apiRepo api.Repository) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		definitions, err := apiRepo.FindValidAPIHealthChecks()
-		if err != nil {
-			panic(err)
-		}
-
-		c := health.New(definitions)
-		response.JSON(w, http.StatusOK, c.Check())
 	}
 }

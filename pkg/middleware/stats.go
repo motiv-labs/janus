@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"sync"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/response"
 	"github.com/hellofresh/stats-go"
 )

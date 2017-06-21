@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/request"

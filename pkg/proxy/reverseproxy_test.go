@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"testing"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/test"
 	stats "github.com/hellofresh/stats-go"

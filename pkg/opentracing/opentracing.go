@@ -5,7 +5,7 @@ import (
 
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	gcloudtracer "github.com/hellofresh/gcloud-opentracing"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/opentracing/appdash"

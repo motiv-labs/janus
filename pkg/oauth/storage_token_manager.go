@@ -3,7 +3,7 @@ package oauth
 import (
 	"encoding/json"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/session"
 	"github.com/hellofresh/janus/pkg/store"
 )

@@ -8,7 +8,7 @@ import (
 	"strings"
 	"sync"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // FileSystemRepository represents a mongodb repository

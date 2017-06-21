@@ -3,7 +3,7 @@ package store
 import (
 	"encoding/json"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
 	"github.com/hellofresh/janus/pkg/notifier"
 )

@@ -3,7 +3,7 @@ package oauth
 import (
 	"net/url"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/asaskevich/govalidator"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"

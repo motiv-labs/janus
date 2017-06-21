@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"net/url"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/session"
 	"github.com/hellofresh/janus/pkg/store"
 )
