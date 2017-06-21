@@ -36,10 +36,7 @@ func TestNewFileSystemRepository(t *testing.T) {
 
 	healthDefinitions, err := fsRepo.FindValidAPIHealthChecks()
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(healthDefinitions))
-	assert.Equal(t, "example", healthDefinitions[0].Name)
-	assert.Equal(t, "/example/*", healthDefinitions[0].Proxy.ListenPath)
-	assert.Equal(t, "https://example.com/status", healthDefinitions[0].HealthCheck.URL)
+	assert.Equal(t, 2, len(healthDefinitions))
 
 	assertFindByName(t, fsRepo)
 	assertFindByFindByListenPath(t, fsRepo)
