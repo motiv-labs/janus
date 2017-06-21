@@ -33,7 +33,8 @@ type Provider struct {
 // This is normally the entry point of the
 // provider.
 func (p *Provider) Provide(version string) error {
-	r := router.NewChiRouter()
+	router.DefaultOptions.NotFoundHandler = NotFound
+	r := router.NewChiRouterWithOptions(router.DefaultOptions)
 
 	// create authentication for Janus
 	authConfig := jwt.NewConfig(p.Cred)
