@@ -1,10 +1,13 @@
 package: github.com/hellofresh/janus
 import:
+- package: github.com/sirupsen/logrus
+  version: master
 - package: github.com/Sirupsen/logrus
-  version: ^0.11.5
+  version: master
+  repo: git@github.com:/sirupsen/logrus
+  vcs: git
 - package: github.com/asaskevich/govalidator
   version: ^5.0.0
-- package: github.com/bshuster-repo/logrus-logstash-hook
 - package: github.com/dgrijalva/jwt-go
   version: ^3.0.0
 - package: github.com/garyburd/redigo
@@ -40,6 +43,10 @@ import:
 - package: github.com/DATA-DOG/godog
   version: ^0.7.2
 - package: github.com/tidwall/gjson
+- package: github.com/hellofresh/health-go
+  version: ^1.0.0
+- package: github.com/bshuster-repo/logrus-logstash-hook
+  version: ^1.0.0-beta
 testImport:
 - package: github.com/stretchr/testify
   version: ^1.1.4
