@@ -26,7 +26,7 @@ deps:
 
 build:
 	@echo "$(OK_COLOR)==> Building... $(NO_COLOR)"
-	/bin/sh -c "PKG_SRC=$(PKG_SRC) HEALTH_SRC=$(HEALTH_SRC) VERSION=${VERSION} ./build/build.sh"
+	@/bin/sh -c "PKG_SRC=$(PKG_SRC) HEALTH_SRC=$(HEALTH_SRC) VERSION=${VERSION} ./build/build.sh"
 
 test:
 	@/bin/sh -c "./build/test.sh $(allpackages)"
