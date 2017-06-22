@@ -42,7 +42,7 @@ func TestRouteToJSON(t *testing.T) {
 		Methods: make([]string, 0),
 		Hosts:   make([]string, 0),
 	}
-	route := proxy.NewRoute(&definition)
+	route := proxy.NewRoute(&definition, nil, nil)
 	json, err := route.JSONMarshal()
 	assert.NoError(t, err)
 	assert.JSONEq(

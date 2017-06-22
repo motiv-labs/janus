@@ -74,7 +74,7 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 			handlers = append(handlers, middleware.NewHostMatcher(referenceSpec.Definition.Proxy.Hosts).Handler)
 		}
 
-		m.register.Add(proxy.NewRoute(referenceSpec.Proxy, handlers...))
+		m.register.Add(proxy.NewRoute(referenceSpec.Proxy, handlers, nil))
 		logger.Debug("API registered")
 	} else {
 		logger.WithError(err).Warn("API URI is invalid or not active, skipping...")

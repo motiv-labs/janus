@@ -30,10 +30,8 @@ func Load(params Params) {
 		plugin.NewRequestTransformer(),
 	)
 
-	prx := proxy.WithParams(params.ProxyParams)
-
 	// create proxy register
-	register := proxy.NewRegister(params.Router, prx)
+	register := proxy.NewRegister(params.Router, params.ProxyParams)
 
 	apiLoader := NewAPILoader(register, pluginLoader)
 	apiLoader.LoadDefinitions(params.APIRepo)
