@@ -91,13 +91,9 @@ func createProxyDefinitions() []*Definition {
 }
 
 func createRegisterAndRouter() router.Router {
-	r := createRouter()
+	r := router.NewChiRouter()
 	createRegister(r)
 	return r
-}
-
-func createRouter() router.Router {
-	return router.NewChiRouter()
 }
 
 func createRegister(r router.Router) *Register {
@@ -105,17 +101,14 @@ func createRegister(r router.Router) *Register {
 
 	definitions := createProxyDefinitions()
 	for _, def := range definitions {
-		routes = append(routes, NewRoute(def))
+		routes = append(routes, NewRoute(def, nil, nil))
 	}
 
-	register := NewRegister(r, createProxy())
+	params := Params{
+		StatsClient: stats.NewStatsdClient("", ""),
+	}
+	register := NewRegister(r, params)
 	register.AddMany(routes)
 
 	return register
-}
-
-func createProxy() *Proxy {
-	return WithParams(Params{
-		StatsClient: stats.NewStatsdClient("", ""),
-	})
 }

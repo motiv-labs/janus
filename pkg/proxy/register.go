@@ -2,6 +2,8 @@ package proxy
 
 import (
 	"net/http"
+	"net/http/httputil"
+	"net/url"
 	"strings"
 
 	"github.com/hellofresh/janus/pkg/router"
@@ -16,12 +18,12 @@ const (
 // It also handles the conversion from a proxy to an http.HandlerFunc
 type Register struct {
 	router router.Router
-	proxy  *Proxy
+	params Params
 }
 
 // NewRegister creates a new instance of Register
-func NewRegister(router router.Router, proxy *Proxy) *Register {
-	return &Register{router: router, proxy: proxy}
+func NewRegister(router router.Router, params Params) *Register {
+	return &Register{router, params}
 }
 
 // AddMany registers many proxies at once
@@ -38,24 +40,67 @@ func (p *Register) AddMany(routes []*Route) error {
 
 // Add register a new route
 func (p *Register) Add(route *Route) error {
-	return p.AddWithInOut(route, InChain{}, OutChain{})
-}
-
-// AddWithInOut register a new route with inbound/outbounds plugins
-func (p *Register) AddWithInOut(route *Route, inbound InChain, outbound OutChain) error {
 	definition := route.proxy
 
-	handler := p.proxy.Reverse(definition, inbound, outbound).ServeHTTP
-	matcher := router.NewListenPathMatcher()
-	if matcher.Match(definition.ListenPath) {
-		p.doRegister(matcher.Extract(definition.ListenPath), handler, definition.Methods, route.handlers)
+	p.params.Outbound = route.outbound
+	handler := &httputil.ReverseProxy{
+		Director:  p.createDirector(definition),
+		Transport: NewTransportWithParams(p.params),
 	}
 
-	p.doRegister(definition.ListenPath, handler, definition.Methods, route.handlers)
+	matcher := router.NewListenPathMatcher()
+	if matcher.Match(definition.ListenPath) {
+		p.doRegister(matcher.Extract(definition.ListenPath), handler.ServeHTTP, definition.Methods, route.inbound)
+	}
+
+	p.doRegister(definition.ListenPath, handler.ServeHTTP, definition.Methods, route.inbound)
 	return nil
 }
 
-func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, methods []string, handlers []router.Constructor) {
+func (p *Register) createDirector(proxyDefinition *Definition) func(req *http.Request) {
+	return func(req *http.Request) {
+		target, _ := url.Parse(proxyDefinition.UpstreamURL)
+		targetQuery := target.RawQuery
+
+		req.URL.Scheme = target.Scheme
+		req.URL.Host = target.Host
+		path := target.Path
+
+		if proxyDefinition.AppendPath {
+			log.Debug("Appending listen path to the target url")
+			path = singleJoiningSlash(target.Path, req.URL.Path)
+		}
+
+		if proxyDefinition.StripPath {
+			path = singleJoiningSlash(target.Path, req.URL.Path)
+			matcher := router.NewListenPathMatcher()
+			listenPath := matcher.Extract(proxyDefinition.ListenPath)
+
+			log.Debugf("Stripping listen path: %s", listenPath)
+			path = strings.Replace(path, listenPath, "", 1)
+			if !strings.HasSuffix(target.Path, "/") && strings.HasSuffix(path, "/") {
+				path = path[:len(path)-1]
+			}
+		}
+
+		log.Debugf("Upstream Path is: %s", path)
+		req.URL.Path = path
+
+		// This is very important to avoid problems with ssl verification for the HOST header
+		if !proxyDefinition.PreserveHost {
+			log.Debug("Preserving the host header")
+			req.Host = target.Host
+		}
+
+		if targetQuery == "" || req.URL.RawQuery == "" {
+			req.URL.RawQuery = targetQuery + req.URL.RawQuery
+		} else {
+			req.URL.RawQuery = targetQuery + "&" + req.URL.RawQuery
+		}
+	}
+}
+
+func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, methods []string, handlers InChain) {
 	log.WithFields(log.Fields{
 		"listen_path": listenPath,
 	}).Debug("Registering a route")
@@ -67,4 +112,44 @@ func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, metho
 			p.router.Handle(strings.ToUpper(method), listenPath, handler, handlers...)
 		}
 	}
+}
+
+func cleanSlashes(a string) string {
+	endSlash := strings.HasSuffix(a, "//")
+	startSlash := strings.HasPrefix(a, "//")
+
+	if startSlash {
+		a = "/" + strings.TrimPrefix(a, "//")
+	}
+
+	if endSlash {
+		a = strings.TrimSuffix(a, "//") + "/"
+	}
+
+	return a
+}
+
+func singleJoiningSlash(a, b string) string {
+	a = cleanSlashes(a)
+	b = cleanSlashes(b)
+
+	aslash := strings.HasSuffix(a, "/")
+	bslash := strings.HasPrefix(b, "/")
+
+	switch {
+	case aslash && bslash:
+		log.Debug(a + b)
+		return a + b[1:]
+	case !aslash && !bslash:
+		if len(b) > 0 {
+			log.Debug(a + b)
+			return a + "/" + b
+		}
+
+		log.Debug(a + b)
+		return a
+	}
+
+	log.Debug(a + b)
+	return a + b
 }
