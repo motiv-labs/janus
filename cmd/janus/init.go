@@ -1,15 +1,12 @@
 package main
 
 import (
-	"strings"
-	"time"
-
 	"github.com/hellofresh/janus/pkg/config"
 	tracerfactory "github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/store"
-	stats "github.com/hellofresh/stats-go"
+	"github.com/hellofresh/stats-go"
 	"github.com/hellofresh/stats-go/bucket"
-	opentracing "github.com/opentracing/opentracing-go"
+	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -30,13 +27,10 @@ func init() {
 
 // initializes the basic configuration for the log wrapper
 func init() {
-	level, err := log.ParseLevel(strings.ToLower(globalConfig.LogLevel))
-	if err != nil {
-		log.WithError(err).Error("Error getting log level")
+	err := globalConfig.Log.Apply()
+	if nil != err {
+		log.WithError(err).Panic("Could not apply logging configurations")
 	}
-
-	log.SetLevel(level)
-	log.SetFormatter(&log.JSONFormatter{TimestampFormat: time.RFC3339Nano})
 }
 
 // initializes distributed tracing

@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"path/filepath"
 	"strings"
-
 	"sync"
 
 	log "github.com/sirupsen/logrus"

@@ -7,11 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-const (
-	testKey   = "key"
-	testValue = "value"
-)
-
 func TestNewInstanceOfDefinition(t *testing.T) {
 	instance := api.NewDefinition()
 

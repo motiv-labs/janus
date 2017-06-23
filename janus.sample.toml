@@ -18,13 +18,6 @@
 #
 # debug = true
 #
-# Log level
-#
-# Optional
-# Default: "info"
-#
-# logLevel = "info"
-#
 # Timeout in seconds.
 # Duration to give active requests a chance to finish during hot-reloads
 #
@@ -54,6 +47,16 @@
 # Defines the time period of how often the idle connections maintained by the proxy are closed.
 # Optional
 # CloseIdleConnsPeriod = 0
+
+################################################################
+# Logging
+################################################################
+# Configure Janus logging
+# See https://github.com/hellofresh/logging-go for complete documentation
+#[log]
+#    level = "info"
+#    format = "json"
+#    writer = "stderr"
 
 ################################################################
 # Management API configuration backend

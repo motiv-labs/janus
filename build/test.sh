@@ -49,7 +49,7 @@ if [ -n "${ERRS}" ]; then
 fi
 echo ${PASS}
 
-echo "${OK_COLOR}Lintting: ${NO_COLOR}"
+echo "${OK_COLOR}Linting: ${NO_COLOR}"
 ERRS=$(golint ${TARGETS} 2>&1 || true)
 if [ -n "${ERRS}" ]; then
     echo ${FAIL}

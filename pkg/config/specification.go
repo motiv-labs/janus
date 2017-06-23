@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/fsnotify/fsnotify"
+	"github.com/hellofresh/logging-go"
 	"github.com/kelseyhightower/envconfig"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
@@ -13,7 +14,6 @@ import (
 type Specification struct {
 	Port                 int           `envconfig:"PORT"`
 	Debug                bool          `envconfig:"DEBUG"`
-	LogLevel             string        `envconfig:"LOG_LEVEL"`
 	GraceTimeOut         int64         `envconfig:"GRACE_TIMEOUT"`
 	MaxIdleConnsPerHost  int           `envconfig:"MAX_IDLE_CONNS_PER_HOST"`
 	InsecureSkipVerify   bool          `envconfig:"INSECURE_SKIP_VERIFY"`
@@ -21,6 +21,7 @@ type Specification struct {
 	CloseIdleConnsPeriod time.Duration `envconfig:"CLOSE_IDLE_CONNS_PERIOD"`
 	CertFile             string        `envconfig:"CERT_PATH"`
 	KeyFile              string        `envconfig:"KEY_PATH"`
+	Log                  logging.LogConfig
 	Web                  Web
 	Database             Database
 	Storage              Storage
@@ -99,13 +100,14 @@ func (t Tracing) IsAppdashEnabled() bool {
 
 func init() {
 	viper.SetDefault("port", "8080")
-	viper.SetDefault("logLevel", "info")
 	viper.SetDefault("backendFlushInterval", "20ms")
 	viper.SetDefault("database.dsn", "file:///etc/janus")
 	viper.SetDefault("storage.dsn", "memory://localhost")
 	viper.SetDefault("web.port", "8081")
 	viper.SetDefault("web.credentials.username", "admin")
 	viper.SetDefault("web.credentials.password", "admin")
+
+	logging.InitDefaults(viper.GetViper(), "log")
 }
 
 //Load configuration variables
