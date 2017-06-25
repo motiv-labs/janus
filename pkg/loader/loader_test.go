@@ -33,6 +33,21 @@ func TestLoadValidAPIDefinitions(t *testing.T) {
 			UpstreamURL: "http://test1",
 			Methods:     []string{http.MethodGet},
 		},
+		Plugins: []api.Plugin{
+			api.Plugin{
+				Name:    "oauth2",
+				Enabled: false,
+			},
+			api.Plugin{
+				Name:    "compression",
+				Enabled: true,
+			},
+			api.Plugin{
+				Name:    "rate_limit",
+				Enabled: true,
+				Config:  map[string]interface{}{"limit": "10-S", "policy": "local"},
+			},
+		},
 	})
 	apiRepo.Add(&api.Definition{
 		Name:   "test2",
@@ -47,6 +62,28 @@ func TestLoadValidAPIDefinitions(t *testing.T) {
 	Load(loadParamsForTest(r, apiRepo))
 
 	assert.Equal(t, 2, r.RoutesCount())
+}
+
+func TestLoadInvalidAPIDefinitions(t *testing.T) {
+	r := router.NewChiRouter()
+
+	apiRepo := api.NewInMemoryRepository()
+	definition := &api.Definition{
+		Name:   "test2",
+		Active: true,
+		Proxy: &proxy.Definition{
+			ListenPath:  "/test2",
+			UpstreamURL: "http://test2",
+			Methods:     []string{http.MethodGet},
+		},
+	}
+	err := apiRepo.Add(definition)
+	assert.NoError(t, err)
+
+	definition.Name = ""
+	Load(loadParamsForTest(r, apiRepo))
+
+	assert.Equal(t, 1, r.RoutesCount())
 }
 
 func TestLoadAPIDefinitionsMissingHTTPMethods(t *testing.T) {

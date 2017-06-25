@@ -1,14 +1,18 @@
-package proxy_test
+package proxy
 
 import (
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/stretchr/testify/assert"
 )
 
+func TestNewDefinitions(t *testing.T) {
+	definition := NewDefinition()
+	assert.NotNil(t, definition)
+}
+
 func TestSuccessfulValidation(t *testing.T) {
-	definition := proxy.Definition{
+	definition := Definition{
 		ListenPath:  "/*",
 		UpstreamURL: "http://test.com",
 	}
@@ -19,7 +23,7 @@ func TestSuccessfulValidation(t *testing.T) {
 }
 
 func TestEmptyListenPathValidation(t *testing.T) {
-	definition := proxy.Definition{}
+	definition := Definition{}
 	isValid, err := definition.Validate()
 
 	assert.Error(t, err)
@@ -27,7 +31,7 @@ func TestEmptyListenPathValidation(t *testing.T) {
 }
 
 func TestInvalidTargetURLValidation(t *testing.T) {
-	definition := proxy.Definition{
+	definition := Definition{
 		ListenPath:  " ",
 		UpstreamURL: "wrong",
 	}
@@ -38,11 +42,11 @@ func TestInvalidTargetURLValidation(t *testing.T) {
 }
 
 func TestRouteToJSON(t *testing.T) {
-	definition := proxy.Definition{
+	definition := Definition{
 		Methods: make([]string, 0),
 		Hosts:   make([]string, 0),
 	}
-	route := proxy.NewRoute(&definition, nil, nil)
+	route := NewRoute(&definition, nil, nil)
 	json, err := route.JSONMarshal()
 	assert.NoError(t, err)
 	assert.JSONEq(
@@ -53,14 +57,14 @@ func TestRouteToJSON(t *testing.T) {
 }
 
 func TestJSONToRoute(t *testing.T) {
-	route, err := proxy.JSONUnmarshalRoute([]byte(`{"proxy": {"insecure_skip_verify": false, "append_path":false, "enable_load_balancing":false, "methods":[], "hosts":[], "preserve_host":false, "listen_path":"", "upstream_url":"/*", "strip_path":false}}`))
+	route, err := JSONUnmarshalRoute([]byte(`{"proxy": {"insecure_skip_verify": false, "append_path":false, "enable_load_balancing":false, "methods":[], "hosts":[], "preserve_host":false, "listen_path":"", "upstream_url":"/*", "strip_path":false}}`))
 
 	assert.NoError(t, err)
-	assert.IsType(t, &proxy.Route{}, route)
+	assert.IsType(t, &Route{}, route)
 }
 
 func TestJSONToRouteError(t *testing.T) {
-	_, err := proxy.JSONUnmarshalRoute([]byte{})
+	_, err := JSONUnmarshalRoute([]byte{})
 
 	assert.Error(t, err)
 }
