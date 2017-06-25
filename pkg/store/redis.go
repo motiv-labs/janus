@@ -40,10 +40,6 @@ func NewRedisStoreWithOptions(pool *redis.Pool, options Options) (Store, error) 
 		Prefix: options.Prefix,
 	}
 
-	if _, err := store.ping(); err != nil {
-		return nil, err
-	}
-
 	return store, nil
 }
 
