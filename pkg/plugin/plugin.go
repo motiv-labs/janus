@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"encoding/json"
 	"sync"
 
 	"github.com/hellofresh/janus/pkg/api"
@@ -42,4 +43,20 @@ func (l *Loader) Get(name string) Plugin {
 	defer l.RUnlock()
 
 	return l.plugins[name]
+}
+
+// for some reasons mapstructure.Decode() gives empty arrays for all resulting config fields
+// this is quick workaround hack t make it work
+// TODO: investigate and fix mapstructure.Decode() behaviour and remove this dirty hack
+func decode(rawConfig map[string]interface{}, obj interface{}) error {
+	valJSON, err := json.Marshal(rawConfig)
+	if nil != err {
+		return err
+	}
+	err = json.Unmarshal(valJSON, obj)
+	if nil != err {
+		return err
+	}
+
+	return nil
 }
