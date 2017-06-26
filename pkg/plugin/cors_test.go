@@ -3,6 +3,7 @@ package plugin
 import (
 	"testing"
 
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -39,4 +40,30 @@ func TestInvalidCORSConfig(t *testing.T) {
 
 	err := decode(rawConfig, &config)
 	assert.Error(t, err)
+}
+
+func TestCORSPluginGetName(t *testing.T) {
+	plugin := NewCORS()
+	assert.Equal(t, "cors", plugin.GetName())
+}
+
+func TestCORSPluginLocalPolicy(t *testing.T) {
+	rawConfig := map[string]interface{}{
+		"domains":         []string{"*"},
+		"methods":         []string{"GET"},
+		"request_headers": []string{"Content-Type", "Authorization"},
+		"exposed_headers": []string{"Test"},
+	}
+
+	spec := &api.Spec{
+		Definition: &api.Definition{
+			Name: "API Name",
+		},
+	}
+
+	plugin := NewCORS()
+	middleware, err := plugin.GetMiddlewares(rawConfig, spec)
+
+	assert.NoError(t, err)
+	assert.Len(t, middleware, 1)
 }

@@ -3,9 +3,9 @@ import:
 - package: github.com/sirupsen/logrus
   version: ^1.0.0
 - package: github.com/Sirupsen/logrus
+  version: ^1.0.0
   repo: https://github.com/sirupsen/logrus.git
   vcs: git
-  version: ^1.0.0
 - package: github.com/asaskevich/govalidator
   version: ^5.0.0
 - package: github.com/dgrijalva/jwt-go
@@ -50,3 +50,5 @@ testImport:
   version: ^1.1.4
   subpackages:
   - assert
+- package: github.com/rafaeljusto/redigomock
+  version: ^2.0.0
