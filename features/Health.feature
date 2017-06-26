@@ -16,6 +16,6 @@ Feature: Run health-check against registered proxies.
 
         When I request "/status" API path with "GET" method
         Then I should receive 200 response code
-        And response JSON body is an array of length 1
-        And response JSON body has "0.name" path with value 'example'
-        And response JSON body has "0.check.status" path with value 'partially_healthy'
+        And response JSON body has "system" path
+        And response JSON body has "status" path with value 'OK' 
+        And response JSON body has "timestamp" path
