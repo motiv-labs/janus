@@ -3,7 +3,7 @@ package router
 import (
 	"net/http"
 
-	"github.com/pressly/chi"
+	"github.com/go-chi/chi"
 )
 
 // ChiRouter is an adapter for chi router that implements the Router interface

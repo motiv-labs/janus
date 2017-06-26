@@ -31,8 +31,8 @@ import:
   version: ^0.1.2
 - package: github.com/spf13/viper
 - package: github.com/spf13/cobra
-- package: github.com/pressly/chi
-  version: ^2.1.0
+- package: github.com/go-chi/chi
+  version: ^3.0.0
 - package: github.com/DATA-DOG/godog
   version: ^0.7.2
 - package: github.com/tidwall/gjson

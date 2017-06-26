@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	chimiddleware "github.com/go-chi/chi/middleware"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/checker"
 	"github.com/hellofresh/janus/pkg/config"
@@ -12,7 +13,6 @@ import (
 	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/router"
-	chimiddleware "github.com/pressly/chi/middleware"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 )
@@ -95,12 +95,12 @@ func (p *Provider) loadAPIEndpoints(router router.Router, handlers ...router.Con
 	group.Use(handlers...)
 	{
 		group.GET("/", handler.Get())
-		group.GET("/:name", handler.GetBy())
+		group.GET("/{name}", handler.GetBy())
 
 		if false == p.ReadOnly {
 			group.POST("/", handler.Post())
-			group.PUT("/:name", handler.PutBy())
-			group.DELETE("/:name", handler.DeleteBy())
+			group.PUT("/{name}", handler.PutBy())
+			group.DELETE("/{name}", handler.DeleteBy())
 		}
 	}
 }
@@ -114,12 +114,12 @@ func (p *Provider) loadOAuthEndpoints(router router.Router, handlers ...router.C
 	oauthGroup := router.Group("/oauth/servers")
 	{
 		oauthGroup.GET("/", oAuthHandler.Get(), handlers...)
-		oauthGroup.GET("/:name", oAuthHandler.GetBy(), handlers...)
+		oauthGroup.GET("/{name}", oAuthHandler.GetBy(), handlers...)
 
 		if false == p.ReadOnly {
 			oauthGroup.POST("/", oAuthHandler.Post(), handlers...)
-			oauthGroup.PUT("/:name", oAuthHandler.PutBy(), handlers...)
-			oauthGroup.DELETE("/:name", oAuthHandler.DeleteBy(), handlers...)
+			oauthGroup.PUT("/{name}", oAuthHandler.PutBy(), handlers...)
+			oauthGroup.DELETE("/{name}", oAuthHandler.DeleteBy(), handlers...)
 		}
 	}
 }
