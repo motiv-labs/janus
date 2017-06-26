@@ -3,6 +3,7 @@
 ## Changed
 
 - Moved Concourse CI scripts to another repo
+- Changed health check JSON output to be in alignment with [health-go](https://github.com/hellofresh/health-go)
 
 ## Added
 

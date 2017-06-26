@@ -28,3 +28,10 @@ services:
       image: redis
       ports:
           - "6379:6379"
+
+  janus-mock:
+    image: rodolpheche/wiremock
+    ports:
+      - '9089:8080'
+    volumes:
+      - ./assets/stubs:/home/wiremock
