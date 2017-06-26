@@ -123,14 +123,13 @@ func TestLoadInactiveAPIDefinitions(t *testing.T) {
 }
 
 func loadParamsForTest(r router.Router, apiRepo api.Repository) Params {
+	statsClient, _ := stats.NewClient("memory://", "")
 	return Params{
-		Storage:   store.NewInMemoryStore(),
-		APIRepo:   apiRepo,
-		OAuthRepo: oauth.NewInMemoryRepository(),
-		Router:    r,
-		ProxyParams: proxy.Params{
-			StatsClient: stats.NewStatsdClient("", ""),
-		},
+		Storage:     store.NewInMemoryStore(),
+		APIRepo:     apiRepo,
+		OAuthRepo:   oauth.NewInMemoryRepository(),
+		Router:      r,
+		ProxyParams: proxy.Params{StatsClient: statsClient},
 	}
 
 }

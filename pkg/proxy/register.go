@@ -76,7 +76,7 @@ func (p *Register) createDirector(proxyDefinition *Definition) func(req *http.Re
 			matcher := router.NewListenPathMatcher()
 			listenPath := matcher.Extract(proxyDefinition.ListenPath)
 
-			log.Debugf("Stripping listen path: %s", listenPath)
+			log.WithField("listen_path", listenPath).Debug("Stripping listen path")
 			path = strings.Replace(path, listenPath, "", 1)
 			if !strings.HasSuffix(target.Path, "/") && strings.HasSuffix(path, "/") {
 				path = path[:len(path)-1]

@@ -104,10 +104,8 @@ func createRegister(r router.Router) *Register {
 		routes = append(routes, NewRoute(def, nil, nil))
 	}
 
-	params := Params{
-		StatsClient: stats.NewStatsdClient("", ""),
-	}
-	register := NewRegister(r, params)
+	statsClient, _ := stats.NewClient("memory://", "")
+	register := NewRegister(r, Params{StatsClient: statsClient})
 	register.AddMany(routes)
 
 	return register

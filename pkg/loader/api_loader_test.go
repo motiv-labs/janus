@@ -73,7 +73,8 @@ func createRegisterAndRouter() (router.Router, error) {
 	r := createRouter()
 	r.Use(middleware.NewRecovery(web.RecoveryHandler).Handler)
 
-	register := proxy.NewRegister(r, proxy.Params{StatsClient: stats.NewStatsdClient("", "")})
+	statsClient, _ := stats.NewClient("memory://", "")
+	register := proxy.NewRegister(r, proxy.Params{StatsClient: statsClient})
 	proxyRepo, err := api.NewFileSystemRepository("../../examples/apis")
 	if err != nil {
 		return nil, err
