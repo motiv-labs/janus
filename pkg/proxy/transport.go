@@ -93,11 +93,8 @@ func NewTransportWithParams(o Params) *Transport {
 
 	if o.CloseIdleConnsPeriod > 0 {
 		go func() {
-			for {
-				select {
-				case <-time.After(o.CloseIdleConnsPeriod):
-					tr.CloseIdleConnections()
-				}
+			for range time.After(o.CloseIdleConnsPeriod) {
+				tr.CloseIdleConnections()
 			}
 		}()
 	}
