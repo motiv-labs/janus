@@ -41,13 +41,17 @@ func check(definition *api.Definition) func() error {
 			return err
 		}
 
+		// Inform auth-service to close the connection after the transaction is complete
+		req.Header.Set("Connection", "close")
+
 		resp, err := http.DefaultClient.Do(req)
 		if err != nil {
 			log.WithError(err).Error("Making the request for the health check failed")
 			return err
 		}
+		defer resp.Body.Close()
 
-		if resp.StatusCode == http.StatusInternalServerError {
+		if resp.StatusCode >= http.StatusInternalServerError {
 			return fmt.Errorf("%s is not available at the moment", definition.Name)
 		}
 
