@@ -1,4 +1,4 @@
-package middleware
+package oauth2
 
 import (
 	"encoding/json"
@@ -6,11 +6,16 @@ import (
 	"net/http"
 	"testing"
 
+	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/session"
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/hellofresh/janus/pkg/test"
 	"github.com/stretchr/testify/assert"
+)
+
+var (
+	recovery = middleware.NewRecovery(test.RecoveryHandler)
 )
 
 func TestValidKeyStorage(t *testing.T) {
@@ -28,7 +33,7 @@ func TestValidKeyStorage(t *testing.T) {
 			"Content-Type":  "application/json",
 			"Authorization": fmt.Sprintf("Bearer %s", session.AccessToken),
 		},
-		mw.Handler(http.HandlerFunc(test.Ping)),
+		mw(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 
@@ -51,7 +56,7 @@ func TestWrongAuthHeader(t *testing.T) {
 			"Content-Type":  "application/json",
 			"Authorization": fmt.Sprintf("Wrong %s", session.AccessToken),
 		},
-		recovery(mw.Handler(http.HandlerFunc(test.Ping))),
+		recovery(mw(http.HandlerFunc(test.Ping))),
 	)
 	assert.NoError(t, err)
 
@@ -73,7 +78,7 @@ func TestMissingAuthHeader(t *testing.T) {
 		map[string]string{
 			"Content-Type": "application/json",
 		},
-		recovery(mw.Handler(http.HandlerFunc(test.Ping))),
+		recovery(mw(http.HandlerFunc(test.Ping))),
 	)
 	assert.NoError(t, err)
 
@@ -96,7 +101,7 @@ func TestMissingKeyStorage(t *testing.T) {
 			"Content-Type":  "application/json",
 			"Authorization": fmt.Sprintf("Bearer %s", "1234"),
 		},
-		recovery(mw.Handler(http.HandlerFunc(test.Ping))),
+		recovery(mw(http.HandlerFunc(test.Ping))),
 	)
 	assert.NoError(t, err)
 
@@ -104,7 +109,7 @@ func TestMissingKeyStorage(t *testing.T) {
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 }
 
-func createMiddlewareWithSession(session session.State) (*KeyExistsMiddleware, error) {
+func createMiddlewareWithSession(session session.State) (func(http.Handler) http.Handler, error) {
 	sessionJSON, err := json.Marshal(session)
 	if err != nil {
 		return nil, err

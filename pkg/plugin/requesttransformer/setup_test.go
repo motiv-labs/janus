@@ -1,15 +1,15 @@
-package plugin
+package requesttransformer
 
 import (
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/api"
-	"github.com/hellofresh/janus/pkg/middleware"
+	"github.com/hellofresh/janus/pkg/plugin"
+	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestRequestTransformerConfig(t *testing.T) {
-	var config middleware.RequestTransformerConfig
+	var config Config
 	rawConfig := map[string]interface{}{
 		"add": map[string]interface{}{
 			"headers": map[string]string{
@@ -21,7 +21,7 @@ func TestRequestTransformerConfig(t *testing.T) {
 		},
 	}
 
-	err := decode(rawConfig, &config)
+	err := plugin.Decode(rawConfig, &config)
 	assert.NoError(t, err)
 
 	assert.IsType(t, map[string]string{}, config.Add.Headers)
@@ -31,12 +31,7 @@ func TestRequestTransformerConfig(t *testing.T) {
 	assert.Contains(t, config.Add.QueryString, "name")
 }
 
-func TestRequestTransformerPluginGetName(t *testing.T) {
-	plugin := NewRequestTransformer()
-	assert.Equal(t, "request_transformer", plugin.GetName())
-}
-
-func TestRequestTransformerPluginLocalPolicy(t *testing.T) {
+func TestRequestTransformerPlugin(t *testing.T) {
 	rawConfig := map[string]interface{}{
 		"add": map[string]interface{}{
 			"headers": map[string]string{
@@ -48,15 +43,9 @@ func TestRequestTransformerPluginLocalPolicy(t *testing.T) {
 		},
 	}
 
-	spec := &api.Spec{
-		Definition: &api.Definition{
-			Name: "API Name",
-		},
-	}
-
-	plugin := NewRequestTransformer()
-	middleware, err := plugin.GetMiddlewares(rawConfig, spec)
-
+	route := proxy.NewRoute(&proxy.Definition{})
+	err := setupRequestTransformer(route, plugin.Params{Config: rawConfig})
 	assert.NoError(t, err)
-	assert.Len(t, middleware, 1)
+
+	assert.Len(t, route.Inbound, 1)
 }
