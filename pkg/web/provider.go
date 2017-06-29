@@ -43,7 +43,7 @@ func (p *Provider) Provide(version string) error {
 		chimiddleware.StripSlashes,
 		chimiddleware.DefaultCompress,
 		middleware.NewLogger().Handler,
-		middleware.NewRecovery(RecoveryHandler).Handler,
+		middleware.NewRecovery(RecoveryHandler),
 		middleware.NewOpenTracing(p.IsHTTPS()).Handler,
 		cors.New(cors.Options{
 			AllowedOrigins:   []string{"*"},

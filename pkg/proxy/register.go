@@ -40,9 +40,9 @@ func (p *Register) AddMany(routes []*Route) error {
 
 // Add register a new route
 func (p *Register) Add(route *Route) error {
-	definition := route.proxy
+	definition := route.Proxy
 
-	p.params.Outbound = route.outbound
+	p.params.Outbound = route.Outbound
 	handler := &httputil.ReverseProxy{
 		Director:  p.createDirector(definition),
 		Transport: NewTransportWithParams(p.params),
@@ -50,10 +50,10 @@ func (p *Register) Add(route *Route) error {
 
 	matcher := router.NewListenPathMatcher()
 	if matcher.Match(definition.ListenPath) {
-		p.doRegister(matcher.Extract(definition.ListenPath), handler.ServeHTTP, definition.Methods, route.inbound)
+		p.doRegister(matcher.Extract(definition.ListenPath), handler.ServeHTTP, definition.Methods, route.Inbound)
 	}
 
-	p.doRegister(definition.ListenPath, handler.ServeHTTP, definition.Methods, route.inbound)
+	p.doRegister(definition.ListenPath, handler.ServeHTTP, definition.Methods, route.Inbound)
 	return nil
 }
 
