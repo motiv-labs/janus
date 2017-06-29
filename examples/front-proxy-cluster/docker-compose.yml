@@ -1,0 +1,50 @@
+version: '3.3'
+services:
+
+  janus1:
+    image: quay.io/hellofresh/janus
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      - service1
+      - janus-storage
+    volumes:
+      - ./janus.toml:/etc/janus/janus.toml
+      - ./apis:/etc/janus/apis
+
+  janus2:
+    image: quay.io/hellofresh/janus
+    ports:
+      - "8082:8080"
+      - "8083:8081"
+    depends_on:
+      - service1
+      - janus-storage
+    volumes:
+      - ./janus.toml:/etc/janus/janus.toml
+      - ./apis:/etc/janus/apis
+
+  janus3:
+    image: quay.io/hellofresh/janus
+    ports:
+      - "8084:8080"
+      - "8085:8081"
+    depends_on:
+      - service1
+      - janus-storage
+    volumes:
+      - ./janus.toml:/etc/janus/janus.toml
+      - ./apis:/etc/janus/apis
+
+  service1:
+    image: rodolpheche/wiremock
+    ports:
+      - '9089:8080'
+    volumes:
+      - ../front-proxy/stubs:/home/wiremock/mappings
+
+  janus-storage:
+      image: redis
+      ports:
+          - "6379:6379"
