@@ -1,5 +1,7 @@
 # Unrealeased
 
+# 3.1.0
+
 ## Changed
 
 - Moved Concourse CI scripts to another repo
@@ -7,9 +9,10 @@
 
 ## Added
 
-- Added plugin to transform a request to an upstream. You can now modify headers and query string before the request is sent
+- Added [plugin to transform](./docs/plugins/request_transformer.md) a request to an upstream. You can now modify headers and query string before the request is sent
 - Added godog for behaviour tests
 - Allow insecure upstream SSL certificate
+- Added healthcheck statement on the Dockerfile. This will allow you to deploy the container to swarm/kubernetes/ecs and have it cheked the `/status` endpoint.
 
 # 3.0.0
 
