@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	recovery = NewRecovery(test.RecoveryHandler).Handler
+	recovery = NewRecovery(test.RecoveryHandler)
 )
 
 func TestMain(m *testing.M) {
