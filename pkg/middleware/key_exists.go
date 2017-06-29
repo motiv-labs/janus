@@ -58,7 +58,7 @@ func (m *KeyExistsMiddleware) Handler(handler http.Handler) http.Handler {
 				"path":   r.RequestURI,
 				"origin": r.RemoteAddr,
 				"key":    accessToken,
-			}).Warn("Attempted access with non-existent key.")
+			}).Debug("Attempted access with invalid key.")
 			panic(errors.ErrAccessTokenNotAuthorized)
 		}
 

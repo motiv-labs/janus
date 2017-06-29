@@ -26,7 +26,7 @@ func (m *JWTManager) Remove(accessToken string) error {
 
 // IsKeyAuthorised checks if the access token is valid
 func (m *JWTManager) IsKeyAuthorised(accessToken string) (session.State, bool) {
-	var session session.State
+	var sessionState session.State
 
 	// Parse takes the token string and a function for looking up the key. The latter is especially
 	// useful if you use multiple keys for your application.  The standard is to use 'kid' in the
@@ -34,7 +34,7 @@ func (m *JWTManager) IsKeyAuthorised(accessToken string) (session.State, bool) {
 	// to the callback, providing flexibility.
 	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			log.Errorf("Unexpected signing method: %v", token.Header["alg"])
+			log.WithField("alg", token.Header["alg"]).Error("Unexpected signing method")
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
 		}
 
@@ -42,18 +42,18 @@ func (m *JWTManager) IsKeyAuthorised(accessToken string) (session.State, bool) {
 	})
 
 	if err != nil {
-		log.WithError(err).Warn("Could not parse the JWT")
-		return session, false
+		log.WithError(err).Info("Could not parse the JWT")
+		return sessionState, false
 	}
 
 	if claims, ok := token.Claims.(jwt.StandardClaims); ok && token.Valid {
 		expiresAt := time.Unix(claims.ExpiresAt, 0)
 		if time.Now().After(expiresAt) {
-			return session, false
+			return sessionState, false
 		}
-		session.AccessToken = accessToken
-		session.ExpiresIn = claims.ExpiresAt
+		sessionState.AccessToken = accessToken
+		sessionState.ExpiresIn = claims.ExpiresAt
 	}
 
-	return session, true
+	return sessionState, true
 }
