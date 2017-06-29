@@ -71,7 +71,7 @@ func TestSuccessfulLoader(t *testing.T) {
 
 func createRegisterAndRouter() (router.Router, error) {
 	r := createRouter()
-	r.Use(middleware.NewRecovery(web.RecoveryHandler).Handler)
+	r.Use(middleware.NewRecovery(web.RecoveryHandler))
 
 	statsClient, _ := stats.NewClient("memory://", "")
 	register := proxy.NewRegister(r, proxy.Params{StatsClient: statsClient})
