@@ -41,7 +41,7 @@ func check(definition *api.Definition) func() error {
 			return err
 		}
 
-		// Inform auth-service to close the connection after the transaction is complete
+		// Inform to close the connection after the transaction is complete
 		req.Header.Set("Connection", "close")
 
 		resp, err := http.DefaultClient.Do(req)
