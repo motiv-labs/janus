@@ -99,10 +99,11 @@ func RunServer(cmd *cobra.Command, args []string) {
 	r := createRouter()
 
 	loader.Load(loader.Params{
-		Router:    r,
-		Storage:   storage,
-		APIRepo:   repo,
-		OAuthRepo: oAuthServersRepo,
+		Router:      r,
+		Storage:     storage,
+		APIRepo:     repo,
+		OAuthRepo:   oAuthServersRepo,
+		StatsClient: statsClient,
 		ProxyParams: proxy.Params{
 			StatsClient:            statsClient,
 			FlushInterval:          globalConfig.BackendFlushInterval,
@@ -135,7 +136,7 @@ func createRouter() router.Router {
 	r.Use(
 		middleware.NewStats(statsClient).Handler,
 		middleware.NewLogger().Handler,
-		middleware.NewRecovery(web.RecoveryHandler).Handler,
+		middleware.NewRecovery(web.RecoveryHandler),
 		middleware.NewOpenTracing(globalConfig.Web.IsHTTPS()).Handler,
 	)
 	return r
@@ -145,10 +146,11 @@ func handleEvent(notification notifier.Notification) {
 	if notifier.RequireReload(notification.Command) {
 		newRouter := createRouter()
 		loader.Load(loader.Params{
-			Router:    newRouter,
-			Storage:   storage,
-			APIRepo:   repo,
-			OAuthRepo: oAuthServersRepo,
+			Router:      newRouter,
+			Storage:     storage,
+			APIRepo:     repo,
+			OAuthRepo:   oAuthServersRepo,
+			StatsClient: statsClient,
 			ProxyParams: proxy.Params{
 				StatsClient:            statsClient,
 				FlushInterval:          globalConfig.BackendFlushInterval,
