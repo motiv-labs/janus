@@ -1,39 +1,29 @@
-package plugin
+package oauth2
 
 import (
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/oauth"
+	"github.com/hellofresh/janus/pkg/plugin"
+	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestOAuth2Config(t *testing.T) {
-	var config oauth2Config
+	var config Config
 	rawConfig := map[string]interface{}{
 		"server_name": "test",
 	}
 
-	err := decode(rawConfig, &config)
+	err := plugin.Decode(rawConfig, &config)
 	assert.NoError(t, err)
 	assert.Equal(t, "test", config.ServerName)
 }
 
-func TestOAuth2PluginGetName(t *testing.T) {
-	plugin := NewOAuth2(oauth.NewInMemoryRepository(), store.NewInMemoryStore())
-	assert.Equal(t, "oauth2", plugin.GetName())
-}
-
-func TestOAtuh2PluginWithValidOAuthServer(t *testing.T) {
+func TestSetupWithValidOAuthServer(t *testing.T) {
 	rawConfig := map[string]interface{}{
 		"server_name": "test",
-	}
-
-	spec := &api.Spec{
-		Definition: &api.Definition{
-			Name: "API Name",
-		},
 	}
 
 	repo := oauth.NewInMemoryRepository()
@@ -44,22 +34,21 @@ func TestOAtuh2PluginWithValidOAuthServer(t *testing.T) {
 			Settings: oauth.TokenStrategySettings{"secret": "1234"},
 		},
 	})
-	plugin := NewOAuth2(repo, store.NewInMemoryStore())
-	middleware, err := plugin.GetMiddlewares(rawConfig, spec)
+
+	route := proxy.NewRoute(&proxy.Definition{})
+	err := setupOAuth2(route, plugin.Params{
+		Config:    rawConfig,
+		Storage:   store.NewInMemoryStore(),
+		OAuthRepo: repo,
+	})
 
 	assert.NoError(t, err)
-	assert.Len(t, middleware, 1)
+	assert.Len(t, route.Inbound, 1)
 }
 
-func TestOAtuh2PluginWithInalidOAuthServer(t *testing.T) {
+func TestSetupWithInalidOAuthServer(t *testing.T) {
 	rawConfig := map[string]interface{}{
 		"server_name": "test",
-	}
-
-	spec := &api.Spec{
-		Definition: &api.Definition{
-			Name: "API Name",
-		},
 	}
 
 	repo := oauth.NewInMemoryRepository()
@@ -70,21 +59,19 @@ func TestOAtuh2PluginWithInalidOAuthServer(t *testing.T) {
 			Settings: oauth.TokenStrategySettings{"secret": "1234"},
 		},
 	})
-	plugin := NewOAuth2(repo, store.NewInMemoryStore())
-	_, err := plugin.GetMiddlewares(rawConfig, spec)
+	route := proxy.NewRoute(&proxy.Definition{})
+	err := setupOAuth2(route, plugin.Params{
+		Config:    rawConfig,
+		Storage:   store.NewInMemoryStore(),
+		OAuthRepo: repo,
+	})
 
 	assert.Error(t, err)
 }
 
-func TestOAtuh2PluginWithWrongStrategy(t *testing.T) {
+func TestSetupnWithWrongStrategy(t *testing.T) {
 	rawConfig := map[string]interface{}{
 		"server_name": "test",
-	}
-
-	spec := &api.Spec{
-		Definition: &api.Definition{
-			Name: "API Name",
-		},
 	}
 
 	repo := oauth.NewInMemoryRepository()
@@ -95,8 +82,12 @@ func TestOAtuh2PluginWithWrongStrategy(t *testing.T) {
 			Settings: oauth.TokenStrategySettings{"secret": "1234"},
 		},
 	})
-	plugin := NewOAuth2(repo, store.NewInMemoryStore())
-	_, err := plugin.GetMiddlewares(rawConfig, spec)
+	route := proxy.NewRoute(&proxy.Definition{})
+	err := setupOAuth2(route, plugin.Params{
+		Config:    rawConfig,
+		Storage:   store.NewInMemoryStore(),
+		OAuthRepo: repo,
+	})
 
 	assert.Error(t, err)
 }
