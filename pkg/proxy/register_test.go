@@ -1,3 +1,5 @@
+// +build integration
+
 package proxy
 
 import (
@@ -5,10 +7,10 @@ import (
 	"net/http"
 	"testing"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/test"
 	stats "github.com/hellofresh/stats-go"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -89,13 +91,9 @@ func createProxyDefinitions() []*Definition {
 }
 
 func createRegisterAndRouter() router.Router {
-	r := createRouter()
+	r := router.NewChiRouter()
 	createRegister(r)
 	return r
-}
-
-func createRouter() router.Router {
-	return router.NewChiRouter()
 }
 
 func createRegister(r router.Router) *Register {
@@ -103,17 +101,12 @@ func createRegister(r router.Router) *Register {
 
 	definitions := createProxyDefinitions()
 	for _, def := range definitions {
-		routes = append(routes, NewRoute(def))
+		routes = append(routes, NewRoute(def, nil, nil))
 	}
 
-	register := NewRegister(r, createProxy())
+	statsClient, _ := stats.NewClient("memory://", "")
+	register := NewRegister(r, Params{StatsClient: statsClient})
 	register.AddMany(routes)
 
 	return register
-}
-
-func createProxy() *Proxy {
-	return WithParams(Params{
-		StatsClient: stats.NewStatsdClient("", ""),
-	})
 }

@@ -3,7 +3,7 @@ package oauth
 import (
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
+	log "github.com/sirupsen/logrus"
 )
 
 // RevokeMiddleware is used to revoked a token from the gateway datastore.

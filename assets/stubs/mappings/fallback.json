@@ -1,0 +1,14 @@
+{
+  "priority":10,
+  "request": {
+    "method": "ANY",
+    "urlPattern": ".*"
+  },
+  "response": {
+    "status": 404,
+    "jsonBody": {"message":"Endpoint not found"},
+    "headers": {
+      "Content-Type": "application/json"
+    }
+  }
+}

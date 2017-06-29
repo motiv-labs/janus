@@ -1,5 +1,5 @@
-hash: b030900de47ecebe32f75e7cb53619e116f804761b6d2df1beca6bfaf75cc587
-updated: 2017-06-12T16:58:11.999112443+02:00
+hash: 8e804c3158f8ef76b5dd8ec7de31e3d4cdf511983dd3b8d2b01f258d41381f7b
+updated: 2017-06-26T23:54:41.54257837+02:00
 imports:
 - name: cloud.google.com/go
   version: 01b9e8cbca61bf2c704946d6f1790ec412519180
@@ -12,8 +12,6 @@ imports:
   - rest/trie
 - name: github.com/asaskevich/govalidator
   version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
-- name: github.com/bshuster-repo/logrus-logstash-hook
-  version: c78042226c66460be064be6d1c26d276de19fbcf
 - name: github.com/DATA-DOG/godog
   version: 92fbee719c9593813b24a6ef042bcad40324ede4
   subpackages:
@@ -58,8 +56,10 @@ imports:
   - json/token
 - name: github.com/hellofresh/gcloud-opentracing
   version: 8c9c9c8a60b3d4b71ad91d6aa60cd24399f355a7
+- name: github.com/hellofresh/health-go
+  version: ddba0b2914e4f362bd52e958d0aca2617a034baf
 - name: github.com/hellofresh/stats-go
-  version: d28a327300e706472e211bb7ad9838eb16072649
+  version: aeae428c686577aea5e7bbcab1bcab51b4fb3b78
   subpackages:
   - bucket
   - incrementer
@@ -97,7 +97,11 @@ imports:
 - name: github.com/rs/xhandler
   version: ed27b6fd65218132ee50cd95f38474a3d8a2cd12
 - name: github.com/Sirupsen/logrus
-  version: ba1b36c82c5e05c4f912a88eab0dcd91a171688f
+  version: 202f25545ea4cf9b191ff7f846df5d87c9382c2b
+  repo: https://github.com/sirupsen/logrus.git
+  vcs: git
+- name: github.com/sirupsen/logrus
+  version: 202f25545ea4cf9b191ff7f846df5d87c9382c2b
 - name: github.com/spf13/afero
   version: 9be650865eab0c12963d8753212f4f9c66cdcf12
   subpackages:
@@ -119,7 +123,7 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: 59a0b19b5533c7977ddeb86b017bf507ed407b12
+  version: 5f8847ae0d0e90b6a9dc8148e7ad616874625171
   subpackages:
   - context
   - context/ctxhttp
@@ -195,6 +199,8 @@ testImports:
   version: d8ed2627bdf02c080bf22230dbb337003b7aba2d
   subpackages:
   - difflib
+- name: github.com/rafaeljusto/redigomock
+  version: ca49a8af34fc0c903a37409317576da14b3f1cbd
 - name: github.com/stretchr/testify
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:

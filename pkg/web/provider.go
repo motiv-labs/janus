@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"net/http"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
+	"github.com/hellofresh/janus/pkg/checker"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/middleware"
@@ -14,6 +14,7 @@ import (
 	"github.com/hellofresh/janus/pkg/router"
 	chimiddleware "github.com/pressly/chi/middleware"
 	"github.com/rs/cors"
+	log "github.com/sirupsen/logrus"
 )
 
 // Provider is a provider.Provider implementation that provides the REST API.
@@ -32,7 +33,8 @@ type Provider struct {
 // This is normally the entry point of the
 // provider.
 func (p *Provider) Provide(version string) error {
-	r := router.NewChiRouter()
+	router.DefaultOptions.NotFoundHandler = NotFound
+	r := router.NewChiRouterWithOptions(router.DefaultOptions)
 
 	// create authentication for Janus
 	authConfig := jwt.NewConfig(p.Cred)
@@ -53,7 +55,6 @@ func (p *Provider) Provide(version string) error {
 
 	// create endpoints
 	r.GET("/", Home(version))
-	r.GET("/status", Heartbeat(p.APIRepo))
 
 	handlers := jwt.Handler{Config: authConfig}
 	r.POST("/login", handlers.Login())
@@ -64,6 +65,7 @@ func (p *Provider) Provide(version string) error {
 
 	p.loadAPIEndpoints(r, authMiddleware.Handler)
 	p.loadOAuthEndpoints(r, authMiddleware.Handler)
+	checker.Register(r, p.APIRepo) // register health check
 
 	go func() {
 		log.Fatal(p.listenAndServe(r))

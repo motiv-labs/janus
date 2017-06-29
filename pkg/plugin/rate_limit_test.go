@@ -3,9 +3,11 @@ package plugin
 import (
 	"testing"
 
+	"github.com/garyburd/redigo/redis"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/store"
 	stats "github.com/hellofresh/stats-go"
+	"github.com/rafaeljusto/redigomock"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -31,6 +33,13 @@ func TestInvalidRateLimitConfig(t *testing.T) {
 
 	err := decode(rawConfig, &config)
 	assert.Error(t, err)
+}
+
+func TestRateLimitPluginGetName(t *testing.T) {
+	statsClient, _ := stats.NewClient("memory://", "")
+	plugin := NewRateLimit(store.NewInMemoryStore(), statsClient)
+
+	assert.Equal(t, "rate_limit", plugin.GetName())
 }
 
 func TestRateLimitPluginLocalPolicy(t *testing.T) {
@@ -72,27 +81,46 @@ func TestRateLimitPluginRedisPolicyWithInvalidStorage(t *testing.T) {
 	assert.Error(t, err)
 }
 
-// func TestRateLimitPluginRedisPolicy(t *testing.T) {
-// 	rawConfig := map[string]interface{}{
-// 		"limit":  "10-S",
-// 		"policy": "redis",
-// 	}
+func TestRateLimitPluginRedisPolicy(t *testing.T) {
+	rawConfig := map[string]interface{}{
+		"limit":  "10-S",
+		"policy": "redis",
+	}
 
-// 	spec := &api.Spec{
-// 		Definition: &api.Definition{
-// 			Name: "API Name",
-// 		},
-// 	}
+	spec := &api.Spec{
+		Definition: &api.Definition{
+			Name: "API Name",
+		},
+	}
 
-// 	pool := redis.NewPool(func() (redis.Conn, error) {
-// 		return redigomock.NewConn(), nil
-// 	}, 0)
-// 	storage, err := store.NewRedisStore(pool, "")
-// 	assert.NoError(t, err)
+	pool := redis.NewPool(func() (redis.Conn, error) {
+		return redigomock.NewConn(), nil
+	}, 0)
+	storage, err := store.NewRedisStore(pool, "")
+	assert.NoError(t, err)
 
-// 	statsClient, _ := stats.NewClient("memory://", "")
-// 	plugin := NewRateLimit(storage, statsClient)
-// 	_, err = plugin.GetMiddlewares(rawConfig, spec)
+	statsClient, _ := stats.NewClient("memory://", "")
+	plugin := NewRateLimit(storage, statsClient)
+	_, err = plugin.GetMiddlewares(rawConfig, spec)
 
-// 	assert.Error(t, err)
-// }
+	assert.Error(t, err)
+}
+
+func TestRateLimitPluginInvalidPolicy(t *testing.T) {
+	rawConfig := map[string]interface{}{
+		"limit":  "10-S",
+		"policy": "wrong",
+	}
+
+	spec := &api.Spec{
+		Definition: &api.Definition{
+			Name: "API Name",
+		},
+	}
+
+	statsClient, _ := stats.NewClient("memory://", "")
+	plugin := NewRateLimit(store.NewInMemoryStore(), statsClient)
+	_, err := plugin.GetMiddlewares(rawConfig, spec)
+
+	assert.Error(t, err)
+}

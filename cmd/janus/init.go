@@ -4,14 +4,13 @@ import (
 	"strings"
 	"time"
 
-	log "github.com/Sirupsen/logrus"
-	"github.com/bshuster-repo/logrus-logstash-hook"
 	"github.com/hellofresh/janus/pkg/config"
 	tracerfactory "github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/store"
 	stats "github.com/hellofresh/stats-go"
 	"github.com/hellofresh/stats-go/bucket"
 	opentracing "github.com/opentracing/opentracing-go"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -37,10 +36,7 @@ func init() {
 	}
 
 	log.SetLevel(level)
-	log.SetFormatter(&logrustash.LogstashFormatter{
-		Type:            "Janus",
-		TimestampFormat: time.RFC3339Nano,
-	})
+	log.SetFormatter(&log.JSONFormatter{TimestampFormat: time.RFC3339Nano})
 }
 
 // initializes distributed tracing

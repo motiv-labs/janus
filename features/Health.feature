@@ -4,7 +4,7 @@ Feature: Run health-check against registered proxies.
         Given request JWT token is valid admin token
 
     Scenario: Request health-checks statuses
-        Given request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstream_url":"http://www.mocky.io/v2/58c6c60710000040151b7cad","strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
+        Given request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstream_url":"http://www.mocky.io/v2/58c6c60710000040151b7cad","strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com"}}'
         When I request "/apis" API path with "POST" method
         Then I should receive 201 response code
         And header "Location" should be "/apis/example"
@@ -16,6 +16,6 @@ Feature: Run health-check against registered proxies.
 
         When I request "/status" API path with "GET" method
         Then I should receive 200 response code
-        And response JSON body is an array of length 1
-        And response JSON body has "0.name" path with value 'example'
-        And response JSON body has "0.check.status" path with value 'partially_healthy'
+        And response JSON body has "system" path
+        And response JSON body has "status" path with value 'Partially Available' 
+        And response JSON body has "timestamp" path

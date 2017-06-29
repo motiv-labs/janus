@@ -21,3 +21,17 @@ func TestWrongInMemoryDSN(t *testing.T) {
 	assert.NotNil(t, err)
 	assert.IsType(t, store.ErrUnknownStorage, err)
 }
+
+func TestBuildNotParsableURL(t *testing.T) {
+	_, err := store.Build("broken")
+
+	assert.Error(t, err)
+}
+
+func TestBuildRedisPool(t *testing.T) {
+	storage, err := store.Build("redis://localhost")
+
+	assert.Nil(t, err)
+	assert.IsType(t, &store.RedisStore{}, storage)
+	assert.Implements(t, (*store.Store)(nil), storage)
+}

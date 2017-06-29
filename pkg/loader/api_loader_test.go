@@ -1,3 +1,5 @@
+// +build integration
+
 package loader
 
 import (
@@ -5,7 +7,6 @@ import (
 	"net/http"
 	"testing"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/plugin"
@@ -14,6 +15,7 @@ import (
 	"github.com/hellofresh/janus/pkg/test"
 	"github.com/hellofresh/janus/pkg/web"
 	stats "github.com/hellofresh/stats-go"
+	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,7 +32,7 @@ var tests = []struct {
 		method:      "GET",
 		url:         "/example",
 		expectedHeaders: map[string]string{
-			"Content-Type": "application/json; charset=utf-8",
+			"Content-Type": "application/json",
 		},
 		expectedCode: http.StatusOK,
 	}, {
@@ -38,21 +40,9 @@ var tests = []struct {
 		method:      "GET",
 		url:         "/invalid-route",
 		expectedHeaders: map[string]string{
-			"Content-Type": "text/plain; charset=utf-8",
+			"Content-Type": "application/json",
 		},
 		expectedCode: http.StatusNotFound,
-	},
-	{
-		description: "Get one posts - strip path",
-		method:      "GET",
-		url:         "/posts/1",
-		headers: map[string]string{
-			"Host": "hellofresh.com",
-		},
-		expectedHeaders: map[string]string{
-			"Content-Type": "application/json; charset=utf-8",
-		},
-		expectedCode: http.StatusOK,
 	},
 }
 
@@ -83,8 +73,9 @@ func createRegisterAndRouter() (router.Router, error) {
 	r := createRouter()
 	r.Use(middleware.NewRecovery(web.RecoveryHandler).Handler)
 
-	register := proxy.NewRegister(r, createProxy())
-	proxyRepo, err := createProxyRepo()
+	statsClient, _ := stats.NewClient("memory://", "")
+	register := proxy.NewRegister(r, proxy.Params{StatsClient: statsClient})
+	proxyRepo, err := api.NewFileSystemRepository("../../examples/apis")
 	if err != nil {
 		return nil, err
 	}
@@ -96,16 +87,7 @@ func createRegisterAndRouter() (router.Router, error) {
 	return r, nil
 }
 
-func createProxyRepo() (api.Repository, error) {
-	return api.NewFileSystemRepository("../../examples/apis")
-}
-
 func createRouter() router.Router {
-	return router.NewChiRouter()
-}
-
-func createProxy() *proxy.Proxy {
-	return proxy.WithParams(proxy.Params{
-		StatsClient: stats.NewStatsdClient("", ""),
-	})
+	router.DefaultOptions.NotFoundHandler = web.NotFound
+	return router.NewChiRouterWithOptions(router.DefaultOptions)
 }

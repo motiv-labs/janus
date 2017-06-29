@@ -5,9 +5,9 @@ import (
 	"net/url"
 	"sync"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/response"
 	"github.com/hellofresh/stats-go"
+	log "github.com/sirupsen/logrus"
 )
 
 // Stats represents the stats middleware

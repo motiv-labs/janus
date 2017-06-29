@@ -1,12 +1,12 @@
 package loader
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
+	log "github.com/sirupsen/logrus"
 )
 
 // APILoader is responsible for loading all apis form a datastore and configure them in a register
@@ -51,14 +51,13 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 		var handlers []router.Constructor
 
 		for _, pDefinition := range referenceSpec.Plugins {
+			l := logger.WithField("name", pDefinition.Name)
 			if pDefinition.Enabled {
-				logger.WithField("name", pDefinition.Name).Debug("Plugin enabled")
+				l.Debug("Plugin enabled")
 				if p := m.pluginLoader.Get(pDefinition.Name); p != nil {
 					middlewares, err := p.GetMiddlewares(pDefinition.Config, referenceSpec)
 					if err != nil {
-						logger.WithError(err).
-							WithField("plugin_name", pDefinition.Name).
-							Error("Error loading plugin")
+						l.WithError(err).Error("Error loading plugin")
 					}
 
 					for _, mw := range middlewares {
@@ -66,7 +65,7 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 					}
 				}
 			} else {
-				logger.WithField("name", pDefinition.Name).Debug("Plugin not enabled")
+				l.Debug("Plugin not enabled")
 			}
 		}
 
@@ -74,7 +73,7 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 			handlers = append(handlers, middleware.NewHostMatcher(referenceSpec.Definition.Proxy.Hosts).Handler)
 		}
 
-		m.register.Add(proxy.NewRoute(referenceSpec.Proxy, handlers...))
+		m.register.Add(proxy.NewRoute(referenceSpec.Proxy, handlers, nil))
 		logger.Debug("API registered")
 	} else {
 		logger.WithError(err).Warn("API URI is invalid or not active, skipping...")

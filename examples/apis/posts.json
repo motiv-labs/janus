@@ -4,12 +4,15 @@
     "proxy" : {
         "preserve_host" : false,
         "listen_path" : "/posts/*",
-        "upstream_url" : "https://jsonplaceholder.typicode.com/posts",
+        "upstream_url" : "http://localhost:9089/",
         "strip_path" : true,
         "append_path" : false,
-        "enable_load_balancing" : false,
         "methods" : ["ALL"],
         "hosts": ["hellofresh.*"]
+    },
+    "health_check": {
+        "url": "http://localhost:9089/status",
+        "timeout": 3
     },
     "plugins": [
         {

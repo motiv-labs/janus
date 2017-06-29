@@ -1,11 +1,11 @@
 package loader
 
 import (
-	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/rs/cors"
+	log "github.com/sirupsen/logrus"
 )
 
 // OAuthLoader handles the loading of the api specs
@@ -44,7 +44,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		logger.Debug("Registering authorize endpoint")
 		authorizeProxy := oauthServer.Endpoints.Authorize
 		if isValid, err := authorizeProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRoute(authorizeProxy, corsHandler))
+			m.register.Add(proxy.NewRoute(authorizeProxy, proxy.NewInChain(corsHandler), nil))
 		} else {
 			logger.WithError(err).Debug("No authorize endpoint")
 		}
@@ -52,10 +52,12 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		logger.Debug("Registering token endpoint")
 		tokenProxy := oauthServer.Endpoints.Token
 		if isValid, err := tokenProxy.Validate(); isValid && err == nil {
-			m.register.AddWithInOut(
-				proxy.NewRoute(tokenProxy, oauth.NewSecretMiddleware(oauthServer).Handler, corsHandler),
-				nil,
-				proxy.NewOutChain(oauth.NewTokenPlugin(m.storage, repo).Out),
+			m.register.Add(
+				proxy.NewRoute(
+					tokenProxy,
+					proxy.NewInChain(oauth.NewSecretMiddleware(oauthServer).Handler, corsHandler),
+					proxy.NewOutChain(oauth.NewTokenPlugin(m.storage, repo).Out),
+				),
 			)
 		} else {
 			logger.WithError(err).Debug("No token endpoint")
@@ -64,7 +66,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		logger.Debug("Registering info endpoint")
 		infoProxy := oauthServer.Endpoints.Info
 		if isValid, err := infoProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRoute(infoProxy, corsHandler))
+			m.register.Add(proxy.NewRoute(infoProxy, proxy.NewInChain(corsHandler), nil))
 		} else {
 			logger.WithError(err).Debug("No info endpoint")
 		}
@@ -72,7 +74,13 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		logger.Debug("Registering revoke endpoint")
 		revokeProxy := oauthServer.Endpoints.Revoke
 		if isValid, err := revokeProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRoute(revokeProxy, corsHandler, oauth.NewRevokeMiddleware(oauthServer).Handler))
+			m.register.Add(
+				proxy.NewRoute(
+					revokeProxy,
+					proxy.NewInChain(corsHandler, oauth.NewRevokeMiddleware(oauthServer).Handler),
+					nil,
+				),
+			)
 		} else {
 			logger.WithError(err).Debug("No revoke endpoint")
 		}
@@ -80,7 +88,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		logger.Debug("Registering create client endpoint")
 		createProxy := oauthServer.ClientEndpoints.Create
 		if isValid, err := createProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRoute(createProxy, corsHandler))
+			m.register.Add(proxy.NewRoute(createProxy, proxy.NewInChain(corsHandler), nil))
 		} else {
 			logger.WithError(err).Debug("No client create endpoint")
 		}
@@ -88,7 +96,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		logger.Debug("Registering remove client endpoint")
 		removeProxy := oauthServer.ClientEndpoints.Remove
 		if isValid, err := createProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRoute(removeProxy, corsHandler))
+			m.register.Add(proxy.NewRoute(removeProxy, proxy.NewInChain(corsHandler), nil))
 		} else {
 			logger.WithError(err).Debug("No client remove endpoint")
 		}

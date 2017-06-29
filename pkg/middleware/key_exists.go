@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"strings"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/request"
+	log "github.com/sirupsen/logrus"
 )
 
 // Enums for keys to be stored in a session context - this is how gorilla expects

@@ -4,13 +4,13 @@ import (
 	"encoding/json"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/hellofresh/janus/pkg/router"
 )
 
 // Route is the container for a proxy and it's handlers
 type Route struct {
 	proxy    *Definition
-	handlers []router.Constructor
+	inbound  InChain
+	outbound OutChain
 }
 
 type routeJSONProxy struct {
@@ -18,8 +18,8 @@ type routeJSONProxy struct {
 }
 
 // NewRoute creates an instance of Route
-func NewRoute(proxy *Definition, handlers ...router.Constructor) *Route {
-	return &Route{proxy, handlers}
+func NewRoute(proxy *Definition, inbound InChain, outbound OutChain) *Route {
+	return &Route{proxy, inbound, outbound}
 }
 
 // JSONMarshal encodes route struct to JSON
@@ -33,7 +33,7 @@ func JSONUnmarshalRoute(rawRoute []byte) (*Route, error) {
 	if err := json.Unmarshal(rawRoute, &proxyRoute); err != nil {
 		return nil, err
 	}
-	return NewRoute(proxyRoute.Proxy), nil
+	return NewRoute(proxyRoute.Proxy, nil, nil), nil
 }
 
 // Definition defines proxy rules for a route

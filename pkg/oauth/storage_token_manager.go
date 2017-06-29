@@ -3,9 +3,9 @@ package oauth
 import (
 	"encoding/json"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/hellofresh/janus/pkg/session"
 	"github.com/hellofresh/janus/pkg/store"
+	log "github.com/sirupsen/logrus"
 )
 
 // StorageTokenManager is responsible for managing the access tokens

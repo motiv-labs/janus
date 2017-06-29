@@ -3,9 +3,9 @@ package store
 import (
 	"encoding/json"
 
-	log "github.com/Sirupsen/logrus"
 	"github.com/garyburd/redigo/redis"
 	"github.com/hellofresh/janus/pkg/notifier"
+	log "github.com/sirupsen/logrus"
 )
 
 const defaultPrefix = "janus"
@@ -38,10 +38,6 @@ func NewRedisStoreWithOptions(pool *redis.Pool, options Options) (Store, error) 
 	store := &RedisStore{
 		Pool:   pool,
 		Prefix: options.Prefix,
-	}
-
-	if _, err := store.ping(); err != nil {
-		return nil, err
 	}
 
 	return store, nil
