@@ -8,6 +8,14 @@ import (
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/hellofresh/janus/pkg/web"
+	stats "github.com/hellofresh/stats-go"
+
+	// this is needed to call the init function on each plugin
+	_ "github.com/hellofresh/janus/pkg/plugin/compression"
+	_ "github.com/hellofresh/janus/pkg/plugin/cors"
+	_ "github.com/hellofresh/janus/pkg/plugin/oauth2"
+	_ "github.com/hellofresh/janus/pkg/plugin/rate"
+	_ "github.com/hellofresh/janus/pkg/plugin/requesttransformer"
 )
 
 // Params initialization options.
@@ -16,24 +24,21 @@ type Params struct {
 	Storage     store.Store
 	APIRepo     api.Repository
 	OAuthRepo   oauth.Repository
+	StatsClient stats.Client
 	ProxyParams proxy.Params
 }
 
 // Load loads all the basic components and definitions into a router
 func Load(params Params) {
-	pluginLoader := plugin.NewLoader()
-	pluginLoader.Add(
-		plugin.NewRateLimit(params.Storage, params.ProxyParams.StatsClient),
-		plugin.NewCORS(),
-		plugin.NewOAuth2(params.OAuthRepo, params.Storage),
-		plugin.NewCompression(),
-		plugin.NewRequestTransformer(),
-	)
-
 	// create proxy register
 	register := proxy.NewRegister(params.Router, params.ProxyParams)
 
-	apiLoader := NewAPILoader(register, pluginLoader)
+	apiLoader := NewAPILoader(register, plugin.Params{
+		Router:    params.Router,
+		Storage:   params.Storage,
+		APIRepo:   params.APIRepo,
+		OAuthRepo: params.OAuthRepo,
+	})
 	apiLoader.LoadDefinitions(params.APIRepo)
 
 	oauthLoader := NewOAuthLoader(register, params.Storage)
