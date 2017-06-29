@@ -2,7 +2,6 @@ FROM alpine
 
 ADD assets/ca-certificates.crt /etc/ssl/certs/
 ADD dist/janus_linux-amd64 /
-ADD dist/healthchecker-linux-amd64 /
 
 RUN mkdir -p /etc/janus/apis && mkdir -p /etc/janus/auth
 
