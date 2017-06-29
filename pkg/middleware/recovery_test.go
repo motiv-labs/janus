@@ -18,7 +18,7 @@ func TestSuccessfulRecovery(t *testing.T) {
 		map[string]string{
 			"Content-Type": "application/json",
 		},
-		mw.Handler(http.HandlerFunc(doPanic)),
+		mw(http.HandlerFunc(doPanic)),
 	)
 	assert.NoError(t, err)
 
