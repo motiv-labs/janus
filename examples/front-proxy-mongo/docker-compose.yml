@@ -31,4 +31,3 @@ services:
       - '9089:8080'
     volumes:
       - ../front-proxy/stubs:/home/wiremock/mappings
-      
