@@ -12,6 +12,7 @@ import (
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/errors"
+	"github.com/stretchr/testify/assert"
 	"gopkg.in/mgo.v2"
 )
 
@@ -70,6 +71,10 @@ func FeatureContext(s *godog.Suite) {
 	bootstrap.RegisterRequestContext(s, c.Port, c.Web.Port, portSecondary, apiPortSecondary, c.Web.Credentials)
 	bootstrap.RegisterAPIContext(s, c.Web.ReadOnly, apiRepo)
 	bootstrap.RegisterMiscContext(s)
+}
+
+func Test_Fake(t *testing.T) {
+	assert.True(t, true)
 }
 
 func TestMain(m *testing.M) {
