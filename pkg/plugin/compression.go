@@ -1,9 +1,9 @@
 package plugin
 
 import (
+	"github.com/go-chi/chi/middleware"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/router"
-	"github.com/pressly/chi/middleware"
 )
 
 // Compression represents the compression plugin

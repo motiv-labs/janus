@@ -6,13 +6,15 @@
 
 - Moved Concourse CI scripts to another repo
 - Changed health check JSON output to be in alignment with [health-go](https://github.com/hellofresh/health-go)
+- Logging configuring is now handled by [logging-go](https://github.com/hellofresh/logging-go), so more logging options now
+- Bumped Chi router to 3.0, see [changelog](https://github.com/go-chi/chi/blob/master/CHANGELOG.md) if you're using parametrised urls
 
 ## Added
 
 - Added [plugin to transform](./docs/plugins/request_transformer.md) a request to an upstream. You can now modify headers and query string before the request is sent
 - Added godog for behaviour tests
 - Allow insecure upstream SSL certificate
-- Added healthcheck statement on the Dockerfile. This will allow you to deploy the container to swarm/kubernetes/ecs and have it cheked the `/status` endpoint.
+- Added health-check statement on the Dockerfile. This will allow you to deploy the container to swarm/kubernetes/ecs and have it checked the `/status` endpoint.
 
 # 3.0.0
 

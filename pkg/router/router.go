@@ -3,7 +3,7 @@ package router
 import (
 	"net/http"
 
-	"github.com/pressly/chi"
+	"github.com/go-chi/chi"
 )
 
 // Constructor for a piece of middleware.
