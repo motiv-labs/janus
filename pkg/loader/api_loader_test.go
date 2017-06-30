@@ -14,7 +14,7 @@ import (
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/test"
 	"github.com/hellofresh/janus/pkg/web"
-	stats "github.com/hellofresh/stats-go"
+	"github.com/hellofresh/stats-go"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
@@ -49,9 +49,9 @@ var tests = []struct {
 func TestSuccessfulLoader(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 
-	router, err := createRegisterAndRouter()
+	routerInstance, err := createRegisterAndRouter()
 	assert.NoError(t, err)
-	ts := test.NewServer(router)
+	ts := test.NewServer(routerInstance)
 	defer ts.Close()
 
 	for _, tc := range tests {

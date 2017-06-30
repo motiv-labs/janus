@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	health "github.com/hellofresh/health-go"
+	"github.com/hellofresh/health-go"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/router"
 	log "github.com/sirupsen/logrus"

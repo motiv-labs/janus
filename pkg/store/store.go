@@ -39,13 +39,13 @@ type Options struct {
 
 // Build creates a new storage based on the provided DSN
 func Build(dsn string) (Store, error) {
-	url, err := url.Parse(dsn)
+	dsnURL, err := url.Parse(dsn)
 	if nil != err {
 		return nil, err
 	}
-	log.WithField("type", url.Scheme).Debug("Initializing storage")
+	log.WithField("type", dsnURL.Scheme).Debug("Initializing storage")
 
-	switch url.Scheme {
+	switch dsnURL.Scheme {
 	case InMemory:
 		return NewInMemoryStore(), nil
 	case Redis:
@@ -57,7 +57,7 @@ func Build(dsn string) (Store, error) {
 		}
 
 		log.WithField("dsn", dsn).Debug("Trying to connect to redis pool")
-		return NewRedisStore(pool, url.Query().Get("prefix"))
+		return NewRedisStore(pool, dsnURL.Query().Get("prefix"))
 	}
 
 	return nil, ErrUnknownStorage

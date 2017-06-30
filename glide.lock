@@ -1,5 +1,5 @@
-hash: 8e804c3158f8ef76b5dd8ec7de31e3d4cdf511983dd3b8d2b01f258d41381f7b
-updated: 2017-06-26T23:54:41.54257837+02:00
+hash: c0bb7dae7233b6931babf21787eb4e54e0abd2831a3bf6bf28f1535baf3445ab
+updated: 2017-06-30T12:15:34.766395276+02:00
 imports:
 - name: cloud.google.com/go
   version: 01b9e8cbca61bf2c704946d6f1790ec412519180
@@ -12,6 +12,8 @@ imports:
   - rest/trie
 - name: github.com/asaskevich/govalidator
   version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
+- name: github.com/bshuster-repo/logrus-logstash-hook
+  version: ea59b04518367f2aafe8cf6d46a7d60605d075ce
 - name: github.com/DATA-DOG/godog
   version: 92fbee719c9593813b24a6ef042bcad40324ede4
   subpackages:
@@ -58,6 +60,8 @@ imports:
   version: 8c9c9c8a60b3d4b71ad91d6aa60cd24399f355a7
 - name: github.com/hellofresh/health-go
   version: ddba0b2914e4f362bd52e958d0aca2617a034baf
+- name: github.com/hellofresh/logging-go
+  version: d8223759b8f540d61411b22fee8de5f3601392d2
 - name: github.com/hellofresh/stats-go
   version: aeae428c686577aea5e7bbcab1bcab51b4fb3b78
   subpackages:
@@ -88,6 +92,8 @@ imports:
   version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
   version: fe206efb84b2bc8e8cfafe6b4c1826622be969e3
+- name: github.com/pkg/errors
+  version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/pressly/chi
   version: e6033ea75479391a4bce3918fc119cad31e1cb30
   subpackages:
@@ -96,12 +102,10 @@ imports:
   version: a62a804a8a009876ca59105f7899938a1349f4b3
 - name: github.com/rs/xhandler
   version: ed27b6fd65218132ee50cd95f38474a3d8a2cd12
-- name: github.com/Sirupsen/logrus
-  version: 202f25545ea4cf9b191ff7f846df5d87c9382c2b
-  repo: https://github.com/sirupsen/logrus.git
-  vcs: git
 - name: github.com/sirupsen/logrus
   version: 202f25545ea4cf9b191ff7f846df5d87c9382c2b
+  subpackages:
+  - hooks/syslog
 - name: github.com/spf13/afero
   version: 9be650865eab0c12963d8753212f4f9c66cdcf12
   subpackages:
@@ -123,7 +127,7 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: 5f8847ae0d0e90b6a9dc8148e7ad616874625171
+  version: c81e7f25cb61200d8bf0ae971a0bac8cb638d5bc
   subpackages:
   - context
   - context/ctxhttp
@@ -170,6 +174,8 @@ imports:
   - urlfetch
 - name: gopkg.in/alexcesaro/statsd.v2
   version: 7fea3f0d2fab1ad973e641e51dba45443a311a90
+- name: gopkg.in/gemnasium/logrus-graylog-hook.v2
+  version: daf02e0efe6f4dee3f7085184f5d527cf5cf0f6b
 - name: gopkg.in/mgo.v2
   version: 3f83fa5005286a7fe593b055f0d7771a7dce4655
   subpackages:
