@@ -4,6 +4,49 @@ Transform the request sent by a client on the fly on Janus, before hitting the u
 
 ## Configuration
 
+The plain request transformer config:
+
+```json
+"request_transformer": {
+    "enabled": true,
+    "config": {
+        "add": {
+            "headers": {
+                "X-Something": "Value"
+            },
+            "querystring": {
+                "test": "value"
+            }
+        },
+        "append": {
+            "headers": {
+                "X-Something-More": "Value"
+            },
+            "querystring": {
+                "extra": "stuff"
+            }
+        },
+        "replace": {
+            "headers": {
+                "X-Something": "New Value"
+            },
+            "querystring": {
+                "test": "new value"
+            }
+        },
+        "remove": {
+            "headers": {
+                "X-Something": ""
+            },
+            "querystring": {
+                "test": ""
+            }
+        }
+    }
+}
+```
+
+
 Here is a simple definition of the available configurations.
 
 | Configuration                 | Description                                                         |

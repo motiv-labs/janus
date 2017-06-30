@@ -1,6 +1,6 @@
 # Docker Installation
 
-Details about how to use Janus in Docker can be found on the Quay.io repo hosting the image: [janus](https://quay.io/repository/hellofresh/janus). We also have a [Docker Compose template](https://github.com/hellofresh/janus/blob/master/docker-compose.yml) with built-in orchestration and scalability.
+Details about how to use Janus in Docker can be found on the Quay.io repo hosting the image: [janus](https://quay.io/repository/hellofresh/janus). We also have a some cool examples with [Docker Compose template](https://github.com/hellofresh/janus/blob/master/examples) with built-in orchestration and scalability.
 
 Here is a quick example showing how to link a Janus container to a Cassandra or PostgreSQL container:
 
@@ -49,7 +49,3 @@ You will also need to set the storage dsn using the `STORAGE_DNS` to something l
     ```bash
     $ curl http://127.0.0.1:8081/
     ```
-
-4. **Start using Janus:**
-
-    Quickly learn how to use Janus with the [Quickstart](/docs/getting-started/README.md).

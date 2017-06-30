@@ -4,6 +4,20 @@ Easily add Cross-origin resource sharing (CORS) to your API by enabling this plu
 
 ## Configuration
 
+The plain cors config:
+
+```json
+"cors": {
+    "enabled": true,
+    "config": {
+        "domains": ["*"],
+        "methods": ["GET", "POST"],
+        "request_headers": ["X-Custom-Header", "X-Foobar"],
+        "exposed_headers": ["X-Something-Special"]
+    }
+}
+```
+
 | Configuration   | Description                                                                                                                                                                  |
 |-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
 | domains         | A comma-separated list of allowed domains for the Access-Control-Allow-Origin header. If you wish to allow all origins, add * as a single value to this configuration field. |
