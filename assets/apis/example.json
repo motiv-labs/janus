@@ -1,0 +1,26 @@
+{
+    "name" : "example",
+    "active" : true,
+    "proxy" : {
+        "preserve_host" : false,
+        "listen_path" : "/example/*",
+        "upstream_url" : "http://service1:8080/",
+        "strip_path" : false,
+        "append_path" : false,
+        "methods" : ["GET"]
+    },
+    "plugins": [
+        {
+            "name": "rate_limit",
+            "enabled": true,
+            "config": {
+                "limit": "5-M",
+                "policy": "local"
+            }
+        }
+    ],
+    "health_check": {
+        "url": "http://service1:8080/status",
+        "timeout": 3
+    }
+}

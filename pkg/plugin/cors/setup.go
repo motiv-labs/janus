@@ -6,6 +6,7 @@ import (
 	"github.com/rs/cors"
 )
 
+// Config represents the CORS configuration
 type Config struct {
 	AllowedOrigins []string `json:"domains"`
 	AllowedMethods []string `json:"methods"`

@@ -14,6 +14,7 @@ func init() {
 	})
 }
 
+// Config represents the oauth configuration
 type Config struct {
 	ServerName string `json:"server_name"`
 }
