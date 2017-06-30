@@ -1,9 +1,9 @@
 package compression
 
 import (
+	"github.com/go-chi/chi/middleware"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
-	"github.com/pressly/chi/middleware"
 )
 
 func init() {
