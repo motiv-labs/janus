@@ -1,5 +1,5 @@
-hash: c0bb7dae7233b6931babf21787eb4e54e0abd2831a3bf6bf28f1535baf3445ab
-updated: 2017-06-30T12:15:34.766395276+02:00
+hash: fe42f009038f757672caf818da9ca2cb0073e1c92e2c1b606fe27e29d359a086
+updated: 2017-06-30T12:42:07.530968914+02:00
 imports:
 - name: cloud.google.com/go
   version: 01b9e8cbca61bf2c704946d6f1790ec412519180
@@ -32,6 +32,10 @@ imports:
   subpackages:
   - internal
   - redis
+- name: github.com/go-chi/chi
+  version: 967844826e58cf31213a7dfb82455d242ad85101
+  subpackages:
+  - middleware
 - name: github.com/gogo/protobuf
   version: 7efa791bd276fd4db00867cbd982b552627c24cb
   subpackages:
@@ -94,10 +98,6 @@ imports:
   version: fe206efb84b2bc8e8cfafe6b4c1826622be969e3
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
-- name: github.com/pressly/chi
-  version: e6033ea75479391a4bce3918fc119cad31e1cb30
-  subpackages:
-  - middleware
 - name: github.com/rs/cors
   version: a62a804a8a009876ca59105f7899938a1349f4b3
 - name: github.com/rs/xhandler
