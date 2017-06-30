@@ -1,12 +1,13 @@
 # Summary
 
 * [Introduction](README.md)
-* Installation
+* [Installation](install/README.md)
     * [Docker](install/docker.md)
-* Quick Start
-    * [Auth](quick_start/auth.md)
+* [Quick Start](quick_start/READMME.md)
+    * [Add an endoint](quick_start/add_endpoint.md)
+    * [Add Plugins](quick_start/add_plugins.md)
+    * [Authentication](quick_start/add_auth.md)
     * [File System](quick_start/file_system.md)
-    * [MongoDB](quick_start/mongodb.md)
     * [Proxy Authentication Methods](quick_start/proxy_auth_methods.md)
     * [Storage](quick_start/storage.md)
 * [Proxy Reference](proxy/README.md)

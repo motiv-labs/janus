@@ -8,7 +8,7 @@ Health checks can be added to each API definition by simply setting these proper
 You will be able to see all your health checks on the admin REST endpoint `/status`. 
 If everything is ok you will see something like this:
 
-```
+```json
 {
     "status": "OK",
     "timestamp": "2017-06-21T13:06:50.546685883+02:00"
@@ -17,7 +17,7 @@ If everything is ok you will see something like this:
 
 If you have any problems you'll see something like this:
 
-```
+```json
 {
     "status": "Partially Available",
     "timestamp": "2017-06-21T14:44:38.782346389+02:00",

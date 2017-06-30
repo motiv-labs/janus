@@ -7,7 +7,7 @@ The main feature of the API Gateway is to proxy the requests to a different serv
 Now that you are authenticated, you can send a request to `/oauth/servers` to create a proxy.
 
 ```
-http -v POST localhost:8081/oauth/servers "Authorization:Bearer yourToken" "Content-Type: application/json" < examples/apis/custom_auth.json
+http -v POST localhost:8081/oauth/servers "Authorization:Bearer yourToken" "Content-Type: application/json" < examples/front-proxy-auth/auth/auth.json
 ```
 
 ## 2. Verify that your API has been added
