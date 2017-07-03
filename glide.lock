@@ -1,5 +1,5 @@
 hash: fe42f009038f757672caf818da9ca2cb0073e1c92e2c1b606fe27e29d359a086
-updated: 2017-06-30T12:42:07.530968914+02:00
+updated: 2017-07-03T11:28:41.604976505+02:00
 imports:
 - name: cloud.google.com/go
   version: 01b9e8cbca61bf2c704946d6f1790ec412519180
@@ -15,7 +15,7 @@ imports:
 - name: github.com/bshuster-repo/logrus-logstash-hook
   version: ea59b04518367f2aafe8cf6d46a7d60605d075ce
 - name: github.com/DATA-DOG/godog
-  version: 92fbee719c9593813b24a6ef042bcad40324ede4
+  version: 70f777599da0f5de682b8848d356611c1738b695
   subpackages:
   - colors
   - gherkin
@@ -65,7 +65,7 @@ imports:
 - name: github.com/hellofresh/health-go
   version: ddba0b2914e4f362bd52e958d0aca2617a034baf
 - name: github.com/hellofresh/logging-go
-  version: d8223759b8f540d61411b22fee8de5f3601392d2
+  version: fce4db1e9c89fba6bdeda7385c3fb4e326a87e87
 - name: github.com/hellofresh/stats-go
   version: aeae428c686577aea5e7bbcab1bcab51b4fb3b78
   subpackages:
@@ -127,7 +127,7 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: c81e7f25cb61200d8bf0ae971a0bac8cb638d5bc
+  version: 1f9224279e98554b6a6432d4dd998a739f8b2b7c
   subpackages:
   - context
   - context/ctxhttp
