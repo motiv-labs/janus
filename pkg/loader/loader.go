@@ -34,10 +34,11 @@ func Load(params Params) {
 	register := proxy.NewRegister(params.Router, params.ProxyParams)
 
 	apiLoader := NewAPILoader(register, plugin.Params{
-		Router:    params.Router,
-		Storage:   params.Storage,
-		APIRepo:   params.APIRepo,
-		OAuthRepo: params.OAuthRepo,
+		Router:      params.Router,
+		Storage:     params.Storage,
+		APIRepo:     params.APIRepo,
+		OAuthRepo:   params.OAuthRepo,
+		StatsClient: params.StatsClient,
 	})
 	apiLoader.LoadDefinitions(params.APIRepo)
 
