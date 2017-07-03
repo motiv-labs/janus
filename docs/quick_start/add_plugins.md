@@ -6,7 +6,7 @@ In this tutorial we will add a [rate limit](/docs/plugins/rate_limit.md) plugin 
 
 ## 1. Add the plugin
 
-Let's create a file called `rate_limit.json` with our new additions to the API definition. We will create a rate limit rula that we can only send `5 req/m`
+Let's create a file called `rate_limit.json` with our new additions to the API definition. We will create a rate limit rule that we can only send `5 req/m`
  just for us to play around with it.
 
 ```json
@@ -47,7 +47,7 @@ X-Ratelimit-Remaining →4
 X-Ratelimit-Reset →1498773715
 ```
 
-This means the plugin is working properly. Now lets make the same requet 4 more times... On the fith time you should get:
+This means the plugin is working properly. Now lets make the same request 4 more times... On the fifth time you should get:
 
 ```
 Status Code: 429 Too Many Requests
