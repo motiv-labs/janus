@@ -75,7 +75,7 @@ func createRegisterAndRouter() (router.Router, error) {
 
 	statsClient, _ := stats.NewClient("memory://", "")
 	register := proxy.NewRegister(r, proxy.Params{StatsClient: statsClient})
-	proxyRepo, err := api.NewFileSystemRepository("../../examples/apis")
+	proxyRepo, err := api.NewFileSystemRepository("../../examples/front-proxy/apis")
 	if err != nil {
 		return nil, err
 	}
