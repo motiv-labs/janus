@@ -4,12 +4,9 @@
 * [Installation](install/README.md)
     * [Docker](install/docker.md)
 * [Quick Start](quick_start/READMME.md)
-    * [Add an endoint](quick_start/add_endpoint.md)
+    * [Add an endpoint](quick_start/add_endpoint.md)
     * [Add Plugins](quick_start/add_plugins.md)
     * [Authentication](quick_start/add_auth.md)
-    * [File System](quick_start/file_system.md)
-    * [Proxy Authentication Methods](quick_start/proxy_auth_methods.md)
-    * [Storage](quick_start/storage.md)
 * [Proxy Reference](proxy/README.md)
     * [Terminology](proxy/terminology.md)
     * [Overview](proxy/overview.md)
@@ -23,14 +20,16 @@
     * [Request HTTP method](proxy/request_http_method.md)
     * [Routing priorities](proxy/routing_priorities.md)
     * [Conclusion](proxy/conclusion.md)
-* Auth
-    * [OAuth 2.0](auth/oauth.md)
 * Plugins
     * [OAuth](plugins/oauth.md)
     * [Rate Limit](plugins/rate_limit.md)
     * [CORS](plugins/cors.md)
+    * [Request Transformer](plugins/request_transformer.md)
+* Auth
+    * [OAuth 2.0](auth/oauth.md)
 * Misc
     * [Monitoring](misc/monitoring.md)
     * [Health Checks](misc/health_checks.md)
+    * [Storage](misc/storage.md)
 * Upgrade Notes
     * [2.x to 3.x](upgrade/3x.md)
