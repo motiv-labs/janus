@@ -1,0 +1,19 @@
+################################################################
+# Global configuration
+################################################################
+port = 8080
+logLevel = "debug"
+
+################################################################
+# API configuration backend
+################################################################
+[web]
+  port = 8081
+
+  [credentials]
+    secret = "secret key"
+    username = "admin"
+    password = "admin"
+
+[database]
+   dsn = "mongodb://janus-database:27017/janus"

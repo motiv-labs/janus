@@ -91,19 +91,22 @@ func (c *requestContext) doRequest(url, method string) error {
 		req, err = http.NewRequest(method, url, c.requestBody)
 	}
 	if nil != err {
-		return err
+		return fmt.Errorf("Failed to instantiate request instance: %v", err)
 	}
 
 	req.Header = c.requestHeaders
 
+	// Inform to close the connection after the transaction is complete
+	req.Header.Set("Connection", "close")
+
 	c.response, err = http.DefaultClient.Do(req)
 	if err != nil {
-		return err
+		return fmt.Errorf("Failed to perform request: %v", err)
 	}
 
 	c.responseBody, err = ioutil.ReadAll(c.response.Body)
 	if nil != err {
-		return err
+		return fmt.Errorf("Failed to read response body: %v", err)
 	}
 
 	return nil
@@ -150,7 +153,7 @@ func (c *requestContext) responseJSONBodyHasPathWithValue(path, value string) er
 	}
 
 	if val.String() != value {
-		return fmt.Errorf("expected path %s in JSON response to be %s, but actual is %s", path, value, val.String())
+		return fmt.Errorf("expected path %s in JSON response to be %s, but actual is %s; response: %s", path, value, val.String(), c.responseBody)
 	}
 
 	return nil
@@ -169,7 +172,7 @@ func (c *requestContext) responseJSONBodyIsAnArrayOfLength(length int) error {
 	var jsonResponse []interface{}
 	err := json.Unmarshal(c.responseBody, &jsonResponse)
 	if nil != err {
-		return err
+		return fmt.Errorf("Failed to unmarshal JSON: %v", err)
 	}
 
 	if len(jsonResponse) != length {
@@ -198,7 +201,7 @@ func (c *requestContext) requestJWTTokenIsValidAdminToken() error {
 	jwtConfig := jwt.NewConfig(c.adminCred)
 	accessToken, err := jwt.IssueAdminToken(jwtConfig.SigningAlgorithm, c.adminCred.Username, jwtConfig.Secret, jwtConfig.Timeout)
 	if nil != err {
-		return err
+		return fmt.Errorf("Failed to issue JWT: %v", err)
 	}
 
 	c.requestHeaders.Set(headerAuthorization, "Bearer "+accessToken)

@@ -43,7 +43,7 @@ func (p *Provider) Provide(version string) error {
 		chimiddleware.StripSlashes,
 		chimiddleware.DefaultCompress,
 		middleware.NewLogger().Handler,
-		middleware.NewRecovery(RecoveryHandler).Handler,
+		middleware.NewRecovery(RecoveryHandler),
 		middleware.NewOpenTracing(p.IsHTTPS()).Handler,
 		cors.New(cors.Options{
 			AllowedOrigins:   []string{"*"},
@@ -55,6 +55,9 @@ func (p *Provider) Provide(version string) error {
 
 	// create endpoints
 	r.GET("/", Home(version))
+	// health checks
+	r.GET("/status", checker.NewOverviewHandler(p.APIRepo))
+	r.GET("/status/{name}", checker.NewStatusHandler(p.APIRepo))
 
 	handlers := jwt.Handler{Config: authConfig}
 	r.POST("/login", handlers.Login())
@@ -65,7 +68,6 @@ func (p *Provider) Provide(version string) error {
 
 	p.loadAPIEndpoints(r, authMiddleware.Handler)
 	p.loadOAuthEndpoints(r, authMiddleware.Handler)
-	checker.Register(r, p.APIRepo) // register health check
 
 	go func() {
 		log.Fatal(p.listenAndServe(r))

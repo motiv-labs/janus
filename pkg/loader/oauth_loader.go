@@ -44,7 +44,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		logger.Debug("Registering authorize endpoint")
 		authorizeProxy := oauthServer.Endpoints.Authorize
 		if isValid, err := authorizeProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRoute(authorizeProxy, proxy.NewInChain(corsHandler), nil))
+			m.register.Add(proxy.NewRouteWithInOut(authorizeProxy, proxy.NewInChain(corsHandler), nil))
 		} else {
 			logger.WithError(err).Debug("No authorize endpoint")
 		}
@@ -53,7 +53,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		tokenProxy := oauthServer.Endpoints.Token
 		if isValid, err := tokenProxy.Validate(); isValid && err == nil {
 			m.register.Add(
-				proxy.NewRoute(
+				proxy.NewRouteWithInOut(
 					tokenProxy,
 					proxy.NewInChain(oauth.NewSecretMiddleware(oauthServer).Handler, corsHandler),
 					proxy.NewOutChain(oauth.NewTokenPlugin(m.storage, repo).Out),
@@ -66,7 +66,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		logger.Debug("Registering info endpoint")
 		infoProxy := oauthServer.Endpoints.Info
 		if isValid, err := infoProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRoute(infoProxy, proxy.NewInChain(corsHandler), nil))
+			m.register.Add(proxy.NewRouteWithInOut(infoProxy, proxy.NewInChain(corsHandler), nil))
 		} else {
 			logger.WithError(err).Debug("No info endpoint")
 		}
@@ -75,7 +75,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		revokeProxy := oauthServer.Endpoints.Revoke
 		if isValid, err := revokeProxy.Validate(); isValid && err == nil {
 			m.register.Add(
-				proxy.NewRoute(
+				proxy.NewRouteWithInOut(
 					revokeProxy,
 					proxy.NewInChain(corsHandler, oauth.NewRevokeMiddleware(oauthServer).Handler),
 					nil,
@@ -88,7 +88,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		logger.Debug("Registering create client endpoint")
 		createProxy := oauthServer.ClientEndpoints.Create
 		if isValid, err := createProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRoute(createProxy, proxy.NewInChain(corsHandler), nil))
+			m.register.Add(proxy.NewRouteWithInOut(createProxy, proxy.NewInChain(corsHandler), nil))
 		} else {
 			logger.WithError(err).Debug("No client create endpoint")
 		}
@@ -96,7 +96,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		logger.Debug("Registering remove client endpoint")
 		removeProxy := oauthServer.ClientEndpoints.Remove
 		if isValid, err := createProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRoute(removeProxy, proxy.NewInChain(corsHandler), nil))
+			m.register.Add(proxy.NewRouteWithInOut(removeProxy, proxy.NewInChain(corsHandler), nil))
 		} else {
 			logger.WithError(err).Debug("No client remove endpoint")
 		}

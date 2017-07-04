@@ -5,19 +5,18 @@ import (
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
-	"github.com/hellofresh/janus/pkg/router"
 	log "github.com/sirupsen/logrus"
 )
 
 // APILoader is responsible for loading all apis form a datastore and configure them in a register
 type APILoader struct {
-	register     *proxy.Register
-	pluginLoader *plugin.Loader
+	register *proxy.Register
+	params   plugin.Params
 }
 
 // NewAPILoader creates a new instance of the api manager
-func NewAPILoader(register *proxy.Register, pluginLoader *plugin.Loader) *APILoader {
-	return &APILoader{register, pluginLoader}
+func NewAPILoader(register *proxy.Register, params plugin.Params) *APILoader {
+	return &APILoader{register, params}
 }
 
 // LoadDefinitions registers all ApiDefinitions from a data source
@@ -48,21 +47,23 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 	}
 
 	if active {
-		var handlers []router.Constructor
+		route := proxy.NewRoute(referenceSpec.Proxy)
 
 		for _, pDefinition := range referenceSpec.Plugins {
 			l := logger.WithField("name", pDefinition.Name)
 			if pDefinition.Enabled {
 				l.Debug("Plugin enabled")
-				if p := m.pluginLoader.Get(pDefinition.Name); p != nil {
-					middlewares, err := p.GetMiddlewares(pDefinition.Config, referenceSpec)
-					if err != nil {
-						l.WithError(err).Error("Error loading plugin")
-					}
 
-					for _, mw := range middlewares {
-						handlers = append(handlers, mw)
-					}
+				setup, err := plugin.DirectiveAction(pDefinition.Name)
+				if err != nil {
+					l.WithError(err).Error("Error loading plugin")
+					continue
+				}
+
+				m.params.Config = pDefinition.Config
+				err = setup(route, m.params)
+				if err != nil {
+					l.WithError(err).Error("Error executing plugin")
 				}
 			} else {
 				l.Debug("Plugin not enabled")
@@ -70,10 +71,10 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 		}
 
 		if len(referenceSpec.Definition.Proxy.Hosts) > 0 {
-			handlers = append(handlers, middleware.NewHostMatcher(referenceSpec.Definition.Proxy.Hosts).Handler)
+			route.AddInbound(middleware.NewHostMatcher(referenceSpec.Definition.Proxy.Hosts).Handler)
 		}
 
-		m.register.Add(proxy.NewRoute(referenceSpec.Proxy, handlers, nil))
+		m.register.Add(route)
 		logger.Debug("API registered")
 	} else {
 		logger.WithError(err).Warn("API URI is invalid or not active, skipping...")

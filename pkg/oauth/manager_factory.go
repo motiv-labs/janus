@@ -59,14 +59,13 @@ func NewManagerFactory(storage store.Store, settings TokenStrategySettings) *Man
 
 // Build creates a manager based on the type
 func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
-	// TODO: make it nicer with BiMap - GetByType, GetByName
+	// FIXME: make it nicer with BiMap - GetByType, GetByName
 	typesMapReversed := make(map[ManagerType]string, len(typesMap))
 	for k, v := range typesMap {
 		typesMapReversed[v] = k
 	}
 
 	log.WithField("name", typesMapReversed[t]).
-		WithField("settings", f.settings).
 		Debug("Building token strategy")
 
 	switch t {

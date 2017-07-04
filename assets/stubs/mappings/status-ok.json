@@ -1,0 +1,23 @@
+{
+    "request": {
+        "method": "GET",
+        "urlPath": "/status-ok"
+    },
+    "response": {
+        "status": 200,
+        "headers": {
+            "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {
+            "status": "OK",
+            "timestamp": "2017-07-03T14:48:14.563630521Z",
+            "system": {
+                "version": "go1.8.3",
+                "goroutines_count": 15,
+                "total_alloc_bytes": 46186776,
+                "heap_objects_count": 44186,
+                "alloc_bytes": 5733552
+            }
+        }
+    }
+}

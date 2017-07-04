@@ -15,13 +15,12 @@ func TestRegister(t *testing.T) {
 	r := router.NewChiRouter()
 	repo := api.NewInMemoryRepository()
 
-	err := Register(r, repo)
-	assert.NoError(t, err)
+	r.GET("/status", NewOverviewHandler(repo))
 
 	ts := test.NewServer(r)
 	defer ts.Close()
 
-	res, err := ts.Do(http.MethodGet, "/status", make(map[string]string))
+	res, _ := ts.Do(http.MethodGet, "/status", make(map[string]string))
 	assert.Equal(t, http.StatusOK, res.StatusCode)
 	assert.Equal(t, "application/json", res.Header.Get("Content-Type"))
 }

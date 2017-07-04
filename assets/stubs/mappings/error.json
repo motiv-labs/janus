@@ -5,7 +5,7 @@
   },
   "response": {
     "status": 500,
-    "jsonBody": {"message":"An unexpected error has ocurred"},
+    "jsonBody": {"message":"An unexpected error has occurred"},
     "headers": {
         "Content-Type": "application/json"
     }

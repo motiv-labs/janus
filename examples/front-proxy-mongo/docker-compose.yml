@@ -1,0 +1,33 @@
+version: '3'
+services:
+
+  janus:
+    image: quay.io/hellofresh/janus
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      - service1
+      - janus-database
+    volumes:
+      - ./janus.toml:/etc/janus/janus.toml
+
+  janus-database:
+      image: mongo
+      ports:
+        - "27017:27017"
+  
+  # This container is just a helper to seed the database
+  mongo-seed:
+    build:
+      context: .
+      dockerfile: seed.Dockerfile
+    depends_on:
+      - janus-database
+
+  service1:
+    image: rodolpheche/wiremock
+    ports:
+      - '9089:8080'
+    volumes:
+      - ../front-proxy/stubs:/home/wiremock/mappings

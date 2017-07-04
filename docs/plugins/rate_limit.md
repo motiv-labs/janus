@@ -4,7 +4,17 @@ Rate limit how many HTTP requests a developer can make in a given period of seco
 
 ## Configuration
 
-Configuring the plugin is straightforward, you can add it on top of an API by executing the following request on your Janus server:
+The plain rate limit config:
+
+```json
+"rate_limit": {
+    "enabled": true,
+    "config": {
+        "limit": "10-S",
+        "policy": "local"
+    }
+}
+```
 
 | Configuration | Description                                                                                                                                                                                                                                                 |
 |---------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
