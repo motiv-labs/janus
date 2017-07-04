@@ -16,30 +16,35 @@ type Specification struct {
 	Debug                bool          `envconfig:"DEBUG"`
 	GraceTimeOut         int64         `envconfig:"GRACE_TIMEOUT"`
 	MaxIdleConnsPerHost  int           `envconfig:"MAX_IDLE_CONNS_PER_HOST"`
-	InsecureSkipVerify   bool          `envconfig:"INSECURE_SKIP_VERIFY"`
 	BackendFlushInterval time.Duration `envconfig:"BACKEND_FLUSH_INTERVAL"`
 	CloseIdleConnsPeriod time.Duration `envconfig:"CLOSE_IDLE_CONNS_PERIOD"`
-	CertFile             string        `envconfig:"CERT_PATH"`
-	KeyFile              string        `envconfig:"KEY_PATH"`
 	Log                  logging.LogConfig
-	Web                  Web
+	Web                  Web `envconfig:"API"`
 	Database             Database
 	Storage              Storage
 	Stats                Stats
 	Tracing              Tracing
+	TLS                  TLS
 }
 
 // Web represents the API configurations
 type Web struct {
-	Port        int    `envconfig:"API_PORT"`
-	CertFile    string `envconfig:"API_CERT_PATH"`
-	KeyFile     string `envconfig:"API_KEY_PATH"`
-	ReadOnly    bool   `envconfig:"API_READONLY"`
+	Port        int  `envconfig:"PORT"`
+	ReadOnly    bool `envconfig:"READONLY"`
 	Credentials Credentials
+	TLS         TLS
+}
+
+// TLS represents the TLS configurations
+type TLS struct {
+	Port     int    `envconfig:"PORT"`
+	CertFile string `envconfig:"CERT_PATH"`
+	KeyFile  string `envconfig:"KEY_PATH"`
+	Redirect bool   `envconfig:"REDIRECT"`
 }
 
 // IsHTTPS checks if you have https enabled
-func (s *Web) IsHTTPS() bool {
+func (s *TLS) IsHTTPS() bool {
 	return s.CertFile != "" && s.KeyFile != ""
 }
 
@@ -100,10 +105,14 @@ func (t Tracing) IsAppdashEnabled() bool {
 
 func init() {
 	viper.SetDefault("port", "8080")
+	viper.SetDefault("tls.port", "8433")
+	viper.SetDefault("tls.redirect", true)
 	viper.SetDefault("backendFlushInterval", "20ms")
 	viper.SetDefault("database.dsn", "file:///etc/janus")
 	viper.SetDefault("storage.dsn", "memory://localhost")
 	viper.SetDefault("web.port", "8081")
+	viper.SetDefault("web.tls.port", "8444")
+	viper.SetDefault("web.tls.redisrect", true)
 	viper.SetDefault("web.credentials.username", "admin")
 	viper.SetDefault("web.credentials.password", "admin")
 
