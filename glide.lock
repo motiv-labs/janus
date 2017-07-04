@@ -1,5 +1,5 @@
 hash: fe42f009038f757672caf818da9ca2cb0073e1c92e2c1b606fe27e29d359a086
-updated: 2017-07-03T11:28:41.604976505+02:00
+updated: 2017-07-03T18:50:18.273372246+02:00
 imports:
 - name: cloud.google.com/go
   version: 01b9e8cbca61bf2c704946d6f1790ec412519180
@@ -63,7 +63,7 @@ imports:
 - name: github.com/hellofresh/gcloud-opentracing
   version: 8c9c9c8a60b3d4b71ad91d6aa60cd24399f355a7
 - name: github.com/hellofresh/health-go
-  version: ddba0b2914e4f362bd52e958d0aca2617a034baf
+  version: 9f26f204c38a93ce4e4ce9dcaad39de0ca6504d3
 - name: github.com/hellofresh/logging-go
   version: fce4db1e9c89fba6bdeda7385c3fb4e326a87e87
 - name: github.com/hellofresh/stats-go

@@ -96,6 +96,9 @@ func (c *requestContext) doRequest(url, method string) error {
 
 	req.Header = c.requestHeaders
 
+	// Inform to close the connection after the transaction is complete
+	req.Header.Set("Connection", "close")
+
 	c.response, err = http.DefaultClient.Do(req)
 	if err != nil {
 		return fmt.Errorf("Failed to perform request: %v", err)
@@ -150,7 +153,7 @@ func (c *requestContext) responseJSONBodyHasPathWithValue(path, value string) er
 	}
 
 	if val.String() != value {
-		return fmt.Errorf("expected path %s in JSON response to be %s, but actual is %s", path, value, val.String())
+		return fmt.Errorf("expected path %s in JSON response to be %s, but actual is %s; response: %s", path, value, val.String(), c.responseBody)
 	}
 
 	return nil

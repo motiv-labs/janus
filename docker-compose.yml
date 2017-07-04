@@ -19,18 +19,18 @@ services:
 
    # Janus Database (if you choose a database as storage)
   janus-database:
-      image: mongo
+      image: mongo:3
       ports:
           - "27017:27017"
 
   # Janus Key Value Store (if you want to use redis instead of an in memory store)
   janus-storage:
-      image: redis
+      image: redis:3.0-alpine
       ports:
           - "6379:6379"
 
   janus-mock:
-    image: rodolpheche/wiremock
+    image: rodolpheche/wiremock:2.6.0-alpine
     ports:
       - '9089:8080'
     volumes:
