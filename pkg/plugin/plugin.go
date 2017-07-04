@@ -3,16 +3,15 @@ package plugin
 import (
 	"encoding/json"
 	"errors"
-	"sync"
-
 	"fmt"
+	"sync"
 
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/store"
-	stats "github.com/hellofresh/stats-go"
+	"github.com/hellofresh/stats-go"
 )
 
 var (
