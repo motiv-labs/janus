@@ -29,6 +29,7 @@ Now lets update our API definition:
 ```sh
 http -v PUT localhost:8081/apis/my-endpoint "Authorization:Bearer yourToken" "Content-Type: application/json" < rate_limit.json
 ```
+
 Done! Now Janus already reloaded the configuration and the rate limit is enabled on your endpoint.
 
 ## 2. Check if the plugin is working
