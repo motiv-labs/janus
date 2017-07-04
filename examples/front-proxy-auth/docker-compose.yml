@@ -8,6 +8,7 @@ services:
       - "8081:8081"
     depends_on:
       - service1
+      - auth-service
     volumes:
       - ./janus.toml:/etc/janus/janus.toml
       - ./apis:/etc/janus/apis
@@ -18,4 +19,11 @@ services:
     ports:
       - '9089:8080'
     volumes:
-      - ./stubs:/home/wiremock/mappings
+      - ./stubs/service1:/home/wiremock/mappings
+
+  auth-service:
+    image: rodolpheche/wiremock
+    ports:
+      - '9088:8080'
+    volumes:
+      - ./stubs/auth:/home/wiremock/mappings
