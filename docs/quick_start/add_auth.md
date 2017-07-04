@@ -6,7 +6,7 @@ When configuring your API you can choose between different authentication method
 * OAuth 2.0
 * JWT
 
-We tried to desing Janus in a way that the authentication provider are simple to setup 
+We tried to design Janus in a way that the authentication provider are simple to setup 
 and completely decoupled from the gateway. 
 
 Let's add an OAuth2 authentication to our endpoint.
