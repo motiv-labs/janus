@@ -85,11 +85,10 @@ func RunServer(cmd *cobra.Command, args []string) {
 	wp := web.Provider{
 		Port:     globalConfig.Web.Port,
 		Cred:     globalConfig.Web.Credentials,
-		CertFile: globalConfig.Web.CertFile,
-		KeyFile:  globalConfig.Web.KeyFile,
+		ReadOnly: globalConfig.Web.ReadOnly,
+		TLS:      globalConfig.Web.TLS,
 		APIRepo:  repo,
 		AuthRepo: oAuthServersRepo,
-		ReadOnly: globalConfig.Web.ReadOnly,
 	}
 
 	if publisher, ok := storage.(notifier.Publisher); ok {
@@ -111,24 +110,32 @@ func RunServer(cmd *cobra.Command, args []string) {
 			FlushInterval:          globalConfig.BackendFlushInterval,
 			IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
 			CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
-			InsecureSkipVerify:     globalConfig.InsecureSkipVerify,
 		},
 	})
 
-	address := fmt.Sprintf(":%v", globalConfig.Port)
-	log.WithField("address", address).Info("Listening on")
-	server = &http.Server{Addr: address, Handler: r}
-	log.Fatal(listenAndServe(server))
+	log.Fatal(listenAndServe(r))
 }
 
-func listenAndServe(server *http.Server) error {
+func listenAndServe(handler http.Handler) error {
+	address := fmt.Sprintf(":%v", globalConfig.Port)
+
 	log.Info("Janus started")
-	if globalConfig.Web.IsHTTPS() {
-		return server.ListenAndServeTLS(globalConfig.CertFile, globalConfig.KeyFile)
+
+	if globalConfig.TLS.IsHTTPS() {
+		addressTLS := fmt.Sprintf(":%v", globalConfig.TLS.Port)
+		if globalConfig.TLS.Redirect {
+			go func() {
+				log.WithField("address", address).Info("Listening HTTP")
+				log.Fatal(http.ListenAndServe(address, web.RedirectHTTPS(globalConfig.TLS.Port)))
+			}()
+		}
+
+		log.WithField("address", addressTLS).Info("Listening HTTPS")
+		return http.ListenAndServeTLS(addressTLS, globalConfig.TLS.CertFile, globalConfig.TLS.KeyFile, handler)
 	}
 
-	log.Info("Certificate and certificate key were not found, defaulting to HTTP")
-	return server.ListenAndServe()
+	log.WithField("address", address).Info("Certificate and certificate key were not found, defaulting to HTTP")
+	return http.ListenAndServe(address, handler)
 }
 
 func createRouter() router.Router {
@@ -139,7 +146,7 @@ func createRouter() router.Router {
 		middleware.NewStats(statsClient).Handler,
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(web.RecoveryHandler),
-		middleware.NewOpenTracing(globalConfig.Web.IsHTTPS()).Handler,
+		middleware.NewOpenTracing(globalConfig.TLS.IsHTTPS()).Handler,
 	)
 	return r
 }
@@ -158,7 +165,6 @@ func handleEvent(notification notifier.Notification) {
 				FlushInterval:          globalConfig.BackendFlushInterval,
 				IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
 				CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
-				InsecureSkipVerify:     globalConfig.InsecureSkipVerify,
 			},
 		})
 		server.Handler = newRouter

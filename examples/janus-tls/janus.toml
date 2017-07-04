@@ -1,0 +1,23 @@
+################################################################
+# Global configuration
+################################################################
+port = 8443
+CertFile = "/etc/janus/janus.crt"
+KeyFile = "/etc/janus/janus.key"
+logLevel = "debug"
+
+################################################################
+# API configuration backend
+################################################################
+[web]
+  port = 8444
+  CertFile = "/etc/janus/janus.crt"
+  KeyFile = "/etc/janus/janus.key"
+
+  [credentials]
+    secret = "secret key"
+    username = "admin"
+    password = "admin"
+
+[database]
+  dsn = "file:///etc/janus"
