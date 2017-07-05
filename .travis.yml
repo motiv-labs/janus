@@ -9,7 +9,7 @@ go:
 
 before_install:
   - curl https://glide.sh/get | sh
-  - docker-compose -f assets/docker-compose.yml up-d
+  - docker-compose -f assets/docker-compose.yml up -d
 
 install:
   - mkdir -p $GOPATH/bin
