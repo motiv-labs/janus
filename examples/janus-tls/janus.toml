@@ -6,6 +6,12 @@ CertFile = "/etc/janus/janus.crt"
 KeyFile = "/etc/janus/janus.key"
 logLevel = "debug"
 
+[tls]
+  port = 8433
+  redirect = true
+  CertFile = "janus.crt"
+  KeyFile = "janus.key"
+  
 ################################################################
 # API configuration backend
 ################################################################
