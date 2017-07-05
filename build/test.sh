@@ -25,9 +25,15 @@ PASS="${OK_COLOR}PASS ${NO_COLOR}"
 FAIL="${ERROR_COLOR}FAIL ${NO_COLOR}"
 
 TARGETS=$@
+RUN_INTEGRATION=false
 
-echo "${OK_COLOR}Running tests: ${NO_COLOR}"
+if [ "$RUN_INTEGRATION" = false ]; then
+echo "${OK_COLOR}Running unit tests: ${NO_COLOR}"
 go test -v -race -cpu=1,2,4 ${TARGETS}
+else
+echo "${OK_COLOR}Running unit and integration tests: ${NO_COLOR}"
+go test -v -race -cpu=1,2,4 -tags=integration ${TARGETS}
+fi
 
 echo "${OK_COLOR}Formatting: ${NO_COLOR}"
 ERRS=$(find cmd pkg -type f -name \*.go | xargs gofmt -l 2>&1 || true)

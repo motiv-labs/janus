@@ -30,6 +30,9 @@ build:
 test:
 	@/bin/sh -c "./build/test.sh $(allpackages)"
 
+test-integration:
+	@/bin/sh -c "RUN_INTEGRATION=true ./build/test.sh $(allpackages)"
+
 lint:
 	@echo "$(OK_COLOR)==> Linting... $(NO_COLOR)"
 	@golint $(allpackages)
