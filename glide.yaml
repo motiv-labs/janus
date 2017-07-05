@@ -9,7 +9,7 @@ import:
   subpackages:
   - redis
 - package: github.com/kelseyhightower/envconfig
-  version: ^1.3.0
+  version: ^v1.3.0
 - package: github.com/rs/cors
 - package: github.com/ulule/limiter
   version: master
