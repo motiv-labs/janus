@@ -73,15 +73,14 @@ func createRegisterAndRouter() (router.Router, error) {
 	r := createRouter()
 	r.Use(middleware.NewRecovery(web.RecoveryHandler))
 
-	statsClient, _ := stats.NewClient("memory://", "")
+	statsClient, _ := stats.NewClient("noop://", "")
 	register := proxy.NewRegister(r, proxy.Params{StatsClient: statsClient})
 	proxyRepo, err := api.NewFileSystemRepository("../../examples/front-proxy/apis")
 	if err != nil {
 		return nil, err
 	}
 
-	pluginLoader := plugin.NewLoader()
-	loader := NewAPILoader(register, pluginLoader)
+	loader := NewAPILoader(register, plugin.Params{StatsClient: statsClient})
 	loader.LoadDefinitions(proxyRepo)
 
 	return r, nil
