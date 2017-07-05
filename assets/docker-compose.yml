@@ -1,21 +1,6 @@
+# This file is used to run integration tests on travis
 version: '2'
 services:
-
-  # Janus
-  janus:
-    image: quay.io/hellofresh/janus
-    ports:
-      - "8080:8080"
-      - "8081:8081"
-      - "8443:8443"
-      - "8444:8444"
-    depends_on:
-      - janus-database
-      - janus-storage
-    volumes:
-      - ./janus.sample.toml:/etc/janus/janus.toml
-      - ./examples/apis:/etc/janus/apis
-      - ./examples/auth:/etc/janus/auth
 
    # Janus Database (if you choose a database as storage)
   janus-database:
@@ -25,7 +10,7 @@ services:
 
   # Janus Key Value Store (if you want to use redis instead of an in memory store)
   janus-storage:
-      image: redis:3.0-alpine
+      image: redis:3-alpine
       ports:
           - "6379:6379"
 
