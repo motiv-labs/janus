@@ -43,7 +43,6 @@ func Build(dsn string) (Store, error) {
 	if nil != err {
 		return nil, err
 	}
-	log.WithField("type", dsnURL.Scheme).Debug("Initializing storage")
 
 	switch dsnURL.Scheme {
 	case InMemory:

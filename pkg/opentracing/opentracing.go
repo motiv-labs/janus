@@ -51,7 +51,7 @@ func Build(config config.Tracing) (opentracing.Tracer, error) {
 
 		return server.GetTracer(), nil
 	} else {
-		log.Debug("Not using a tracer as tracing system")
+		log.Debug("No tracer selected")
 		return &opentracing.NoopTracer{}, nil
 	}
 }

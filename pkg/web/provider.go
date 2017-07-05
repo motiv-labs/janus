@@ -32,6 +32,8 @@ type Provider struct {
 // This is normally the entry point of the
 // provider.
 func (p *Provider) Provide(version string) error {
+	log.Info("Janus Admin API starting...")
+
 	router.DefaultOptions.NotFoundHandler = NotFound
 	r := router.NewChiRouterWithOptions(router.DefaultOptions)
 
@@ -83,7 +85,7 @@ func (p *Provider) listenAndServe(handler http.Handler) error {
 		addressTLS := fmt.Sprintf(":%v", p.TLS.Port)
 		if p.TLS.Redirect {
 			go func() {
-				log.WithField("address", address).Info("Listening HTTP")
+				log.WithField("address", address).Info("Listening HTTP redirects to HTTPS")
 				log.Fatal(http.ListenAndServe(address, RedirectHTTPS(p.TLS.Port)))
 			}()
 		}
