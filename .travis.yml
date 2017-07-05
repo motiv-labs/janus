@@ -1,14 +1,15 @@
 sudo: required
 language: go
+services:
+  - docker
 
 go:
   - 1.x
   - 1.7
 
 before_install:
-  - sudo add-apt-repository ppa:masterminds/glide -y
-  - sudo apt-get update -q
-  - sudo apt-get install glide -y
+  - curl https://glide.sh/get | sh
+  - docker-compose -f assets/docker-compose.yml up-d
 
 install:
   - mkdir -p $GOPATH/bin
@@ -17,6 +18,6 @@ install:
   - make deps
 
 script:
-- make test
+- make test-integration
 - $GOPATH/bin/overalls -project=github.com/hellofresh/janus -covermode=count
 - if [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then $GOPATH/bin/goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN; fi
