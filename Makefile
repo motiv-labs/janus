@@ -25,13 +25,13 @@ deps:
 
 build:
 	@echo "$(OK_COLOR)==> Building... $(NO_COLOR)"
-	@/bin/sh -c "PKG_SRC=$(PKG_SRC) VERSION=${VERSION} ./build/build.sh"
+	@/bin/sh -c "RUN_INTEGRATION=0 PKG_SRC=$(PKG_SRC) VERSION=${VERSION} ./build/build.sh"
 
 test:
 	@/bin/sh -c "./build/test.sh $(allpackages)"
 
 test-integration:
-	@/bin/sh -c "RUN_INTEGRATION=true ./build/test.sh $(allpackages)"
+	@/bin/sh -c "RUN_INTEGRATION=1 ./build/test.sh $(allpackages)"
 
 lint:
 	@echo "$(OK_COLOR)==> Linting... $(NO_COLOR)"
