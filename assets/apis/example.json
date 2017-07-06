@@ -4,7 +4,7 @@
     "proxy" : {
         "preserve_host" : false,
         "listen_path" : "/example/*",
-        "upstream_url" : "http://service1:8080/",
+        "upstream_url" : "http://localhost:9089/",
         "strip_path" : false,
         "append_path" : false,
         "methods" : ["GET"]
@@ -20,7 +20,7 @@
         }
     ],
     "health_check": {
-        "url": "http://service1:8080/status",
+        "url": "http://localhost:9089/status",
         "timeout": 3
     }
 }
