@@ -1,5 +1,3 @@
-// +build integration
-
 package loader
 
 import (
@@ -32,7 +30,7 @@ var tests = []struct {
 		method:      "GET",
 		url:         "/example",
 		expectedHeaders: map[string]string{
-			"Content-Type": "application/json",
+			"Content-Type": "application/json; charset=utf-8",
 		},
 		expectedCode: http.StatusOK,
 	}, {
@@ -75,7 +73,7 @@ func createRegisterAndRouter() (router.Router, error) {
 
 	statsClient, _ := stats.NewClient("noop://", "")
 	register := proxy.NewRegister(r, proxy.Params{StatsClient: statsClient})
-	proxyRepo, err := api.NewFileSystemRepository("../../examples/front-proxy/apis")
+	proxyRepo, err := api.NewFileSystemRepository("../../assets/apis")
 	if err != nil {
 		return nil, err
 	}

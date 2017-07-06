@@ -17,7 +17,7 @@ services:
     ports:
       - '9089:8080'
     volumes:
-      - ./assets/stubs:/home/wiremock
+      - ./stubs:/home/wiremock
 
   auth-service:
     image: rodolpheche/wiremock

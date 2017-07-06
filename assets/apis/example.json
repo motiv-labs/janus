@@ -4,7 +4,7 @@
     "proxy" : {
         "preserve_host" : false,
         "listen_path" : "/example/*",
-        "upstream_url" : "http://localhost:9089/",
+        "upstream_url" : "http://localhost:9089/hello-world",
         "strip_path" : false,
         "append_path" : false,
         "methods" : ["GET"]
