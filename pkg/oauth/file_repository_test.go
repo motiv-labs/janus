@@ -14,7 +14,7 @@ func TestNewFileSystemRepository(t *testing.T) {
 	assert.Contains(t, wd, "github.com/hellofresh/janus")
 
 	// .../github.com/hellofresh/janus/pkg/api/../../assets/auth
-	exampleAPIsPath := filepath.Join(wd, "..", "..", "assets", "auth")
+	exampleAPIsPath := filepath.Join(wd, "..", "..", "assets", "stubs", "auth")
 	info, err := os.Stat(exampleAPIsPath)
 	assert.NoError(t, err)
 	assert.True(t, info.IsDir())
