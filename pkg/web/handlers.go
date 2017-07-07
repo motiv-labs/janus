@@ -2,11 +2,9 @@ package web
 
 import (
 	"fmt"
-	"net/http"
-
-	"net/url"
-
 	"net"
+	"net/http"
+	"net/url"
 
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/response"
