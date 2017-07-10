@@ -32,7 +32,7 @@ var tests = []struct {
 		method:      "GET",
 		url:         "/example",
 		expectedHeaders: map[string]string{
-			"Content-Type": "application/json",
+			"Content-Type": "application/json; charset=utf-8",
 		},
 		expectedCode: http.StatusOK,
 	}, {
@@ -73,15 +73,14 @@ func createRegisterAndRouter() (router.Router, error) {
 	r := createRouter()
 	r.Use(middleware.NewRecovery(web.RecoveryHandler))
 
-	statsClient, _ := stats.NewClient("memory://", "")
+	statsClient, _ := stats.NewClient("noop://", "")
 	register := proxy.NewRegister(r, proxy.Params{StatsClient: statsClient})
-	proxyRepo, err := api.NewFileSystemRepository("../../examples/apis")
+	proxyRepo, err := api.NewFileSystemRepository("../../assets/apis")
 	if err != nil {
 		return nil, err
 	}
 
-	pluginLoader := plugin.NewLoader()
-	loader := NewAPILoader(register, pluginLoader)
+	loader := NewAPILoader(register, plugin.Params{StatsClient: statsClient})
 	loader.LoadDefinitions(proxyRepo)
 
 	return r, nil

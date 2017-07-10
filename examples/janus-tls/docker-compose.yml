@@ -1,0 +1,22 @@
+version: '3'
+services:
+
+  janus:
+    image: quay.io/hellofresh/janus
+    ports:
+      - "8443:8443"
+      - "8444:8444"
+    depends_on:
+      - service1
+    volumes:
+      - ./apis:/etc/janus/apis
+      - ./janus.toml:/etc/janus/janus.toml
+      - ./janus.crt:/etc/janus/janus.crt
+      - ./janus.key:/etc/janus/janus.key
+
+  service1:
+    image: rodolpheche/wiremock
+    ports:
+      - '9089:8080'
+    volumes:
+      - ../front-proxy/stubs:/home/wiremock/mappings

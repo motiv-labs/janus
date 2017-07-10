@@ -1,15 +1,18 @@
 ################################################################
 # Global configuration
 ################################################################
-
+#
 # port = 8080
 #
 # SSL certificate and key used
 #
 # Optional
 #
-# CertFile = "janus.crt"
-# KeyFile = "janus.key"
+# [tls]
+#   port = 8433
+#   redirect = true
+#   CertFile = "janus.crt"
+#   KeyFile = "janus.key"
 #
 # Enable debug mode
 #
@@ -30,15 +33,7 @@
 #
 # Optional
 # Default: http.DefaultMaxIdleConnsPerHost
-#
 # MaxIdleConnsPerHost = 200
-#
-# If set to true invalid SSL certificates are accepted for backends.
-# Note: This disables detection of man-in-the-middle attacks so should only be used on secure backend networks.
-# Optional
-# Default: false
-#
-# InsecureSkipVerify = false
 #
 # Flush interval for upgraded Proxy connections.
 # Optional
@@ -67,9 +62,11 @@
 # SSL certificate and key used
 #
 # Optional
-#
-# CertFile = "janus.crt"
-# KeyFile = "janus.key"
+  # [web.tls]
+  #   port = 8444
+  #   redirect = true
+  #   CertFile = "janus.crt"
+  #   KeyFile = "janus.key"
 #
 # Set REST API to read-only mode
 #
@@ -80,7 +77,7 @@
 #
 # Required
 #
-  [credentials]
+  [web.credentials]
     secret = "secret key"
     username = "admin"
     password = "admin"

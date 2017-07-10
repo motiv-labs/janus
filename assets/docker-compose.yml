@@ -1,0 +1,27 @@
+# This file is used to run integration tests on travis
+version: '2'
+services:
+
+  janus-database:
+      image: mongo:3
+      ports:
+          - "27017:27017"
+
+  janus-storage:
+      image: redis:3-alpine
+      ports:
+          - "6379:6379"
+
+  service1:
+    image: rodolpheche/wiremock:2.6.0-alpine
+    ports:
+      - '9089:8080'
+    volumes:
+      - ./stubs:/home/wiremock
+
+  auth-service:
+    image: rodolpheche/wiremock
+    ports:
+      - '9088:8080'
+    volumes:
+      - ./stubs/auth:/home/wiremock/mappings

@@ -101,10 +101,10 @@ func createRegister(r router.Router) *Register {
 
 	definitions := createProxyDefinitions()
 	for _, def := range definitions {
-		routes = append(routes, NewRoute(def, nil, nil))
+		routes = append(routes, NewRoute(def))
 	}
 
-	statsClient, _ := stats.NewClient("memory://", "")
+	statsClient, _ := stats.NewClient("noop://", "")
 	register := NewRegister(r, Params{StatsClient: statsClient})
 	register.AddMany(routes)
 

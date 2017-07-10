@@ -35,10 +35,10 @@ func init() {
 
 // initializes distributed tracing
 func init() {
-	log.Debug("initializing Open Tracing")
+	log.Debug("Initializing distributed tracing")
 	tracer, err := tracerfactory.Build(globalConfig.Tracing)
 	if err != nil {
-		log.WithError(err).Panic("Could not build a tracer for open tracing")
+		log.WithError(err).Panic("Could not build a tracer")
 	}
 
 	opentracing.SetGlobalTracer(tracer)
@@ -65,6 +65,7 @@ func init() {
 
 // initializes the storage and managers
 func init() {
+	log.WithField("dsn", globalConfig.Storage.DSN).Debug("Initializing storage")
 	s, err := store.Build(globalConfig.Storage.DSN)
 	if nil != err {
 		log.Panic(err)

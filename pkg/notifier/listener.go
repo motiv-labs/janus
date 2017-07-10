@@ -18,7 +18,7 @@ func NewNotificationListener(subscriber Subscriber) *NotificationListener {
 
 // Start starts listening for signals on the cluster
 func (n *NotificationListener) Start(fn func(v Notification)) {
-	log.Debug("Listening for changes")
+	log.Debug("Listening for change events")
 
 	go func() {
 		for {

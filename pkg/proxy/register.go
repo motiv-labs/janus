@@ -43,6 +43,7 @@ func (p *Register) Add(route *Route) error {
 	definition := route.Proxy
 
 	p.params.Outbound = route.Outbound
+	p.params.InsecureSkipVerify = definition.InsecureSkipVerify
 	handler := &httputil.ReverseProxy{
 		Director:  p.createDirector(definition),
 		Transport: NewTransportWithParams(p.params),

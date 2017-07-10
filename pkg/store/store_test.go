@@ -15,7 +15,7 @@ func TestBuildInMemoryStore(t *testing.T) {
 	assert.Implements(t, (*store.Store)(nil), storage)
 }
 
-func TestWrongInMemoryDSN(t *testing.T) {
+func TestBuildInvalidStorage(t *testing.T) {
 	_, err := store.Build("wrong://localhost")
 
 	assert.NotNil(t, err)
@@ -23,7 +23,7 @@ func TestWrongInMemoryDSN(t *testing.T) {
 }
 
 func TestBuildNotParsableURL(t *testing.T) {
-	_, err := store.Build("broken")
+	_, err := store.Build(":")
 
 	assert.Error(t, err)
 }

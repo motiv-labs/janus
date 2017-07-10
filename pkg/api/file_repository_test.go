@@ -32,11 +32,11 @@ func TestNewFileSystemRepository(t *testing.T) {
 
 	allDefinitions, err := fsRepo.FindAll()
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(allDefinitions))
+	assert.Equal(t, 1, len(allDefinitions))
 
 	healthDefinitions, err := fsRepo.FindValidAPIHealthChecks()
 	assert.NoError(t, err)
-	assert.Equal(t, 2, len(healthDefinitions))
+	assert.Equal(t, 1, len(healthDefinitions))
 
 	assertFindByName(t, fsRepo)
 	assertFindByFindByListenPath(t, fsRepo)
@@ -90,11 +90,6 @@ func assertFindByName(t *testing.T, fsRepo *FileSystemRepository) {
 	assert.Equal(t, "example", def.Name)
 	assert.Equal(t, "/example/*", def.Proxy.ListenPath)
 
-	def, err = fsRepo.FindByName("posts")
-	assert.NoError(t, err)
-	assert.Equal(t, "posts", def.Name)
-	assert.Equal(t, "/posts/*", def.Proxy.ListenPath)
-
 	_, err = fsRepo.FindByName("foo")
 	assert.Equal(t, ErrAPIDefinitionNotFound, err)
 }
@@ -105,11 +100,6 @@ func assertFindByFindByListenPath(t *testing.T, fsRepo *FileSystemRepository) {
 	assert.Equal(t, "example", def.Name)
 	assert.Equal(t, "/example/*", def.Proxy.ListenPath)
 
-	def, err = fsRepo.FindByListenPath("/posts/*")
-	assert.NoError(t, err)
-	assert.Equal(t, "posts", def.Name)
-	assert.Equal(t, "/posts/*", def.Proxy.ListenPath)
-
 	_, err = fsRepo.FindByListenPath("/foo/*")
 	assert.Equal(t, ErrAPIDefinitionNotFound, err)
 }
@@ -119,23 +109,11 @@ func assertExists(t *testing.T, fsRepo *FileSystemRepository) {
 	assert.True(t, exists)
 	assert.Equal(t, ErrAPINameExists, err)
 
-	exists, err = fsRepo.Exists(&Definition{Name: "posts"})
-	assert.True(t, exists)
-	assert.Equal(t, ErrAPINameExists, err)
-
 	exists, err = fsRepo.Exists(&Definition{Name: "example1", Proxy: &proxy.Definition{ListenPath: "/example/*"}})
 	assert.True(t, exists)
 	assert.Equal(t, ErrAPIListenPathExists, err)
 
-	exists, err = fsRepo.Exists(&Definition{Name: "posts1", Proxy: &proxy.Definition{ListenPath: "/posts/*"}})
-	assert.True(t, exists)
-	assert.Equal(t, ErrAPIListenPathExists, err)
-
 	exists, err = fsRepo.Exists(&Definition{Name: "example1", Proxy: &proxy.Definition{ListenPath: "/example1/*"}})
-	assert.False(t, exists)
-	assert.NoError(t, err)
-
-	exists, err = fsRepo.Exists(&Definition{Name: "posts1", Proxy: &proxy.Definition{ListenPath: "/posts1/*"}})
 	assert.False(t, exists)
 	assert.NoError(t, err)
 }

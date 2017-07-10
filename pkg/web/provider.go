@@ -19,20 +19,21 @@ import (
 
 // Provider is a provider.Provider implementation that provides the REST API.
 type Provider struct {
-	Port     int    `description:"Web administration port"`
-	CertFile string `description:"SSL certificate"`
-	KeyFile  string `description:"SSL certificate"`
-	ReadOnly bool   `description:"Enable read only API"`
+	Port     int  `description:"Web administration port"`
+	ReadOnly bool `description:"Enable read only API"`
 	Cred     config.Credentials
+	Notifier notifier.Notifier
+	TLS      config.TLS
 	APIRepo  api.Repository
 	AuthRepo oauth.Repository
-	Notifier notifier.Notifier
 }
 
 // Provide executes the provider functionality
 // This is normally the entry point of the
 // provider.
 func (p *Provider) Provide(version string) error {
+	log.Info("Janus Admin API starting...")
+
 	router.DefaultOptions.NotFoundHandler = NotFound
 	r := router.NewChiRouterWithOptions(router.DefaultOptions)
 
@@ -44,7 +45,7 @@ func (p *Provider) Provide(version string) error {
 		chimiddleware.DefaultCompress,
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(RecoveryHandler),
-		middleware.NewOpenTracing(p.IsHTTPS()).Handler,
+		middleware.NewOpenTracing(p.TLS.IsHTTPS()).Handler,
 		cors.New(cors.Options{
 			AllowedOrigins:   []string{"*"},
 			AllowedHeaders:   []string{"*"},
@@ -70,20 +71,30 @@ func (p *Provider) Provide(version string) error {
 	p.loadOAuthEndpoints(r, authMiddleware.Handler)
 
 	go func() {
-		log.Fatal(p.listenAndServe(r))
+		p.listenAndServe(r)
 	}()
+
 	return nil
 }
 
 func (p *Provider) listenAndServe(handler http.Handler) error {
 	address := fmt.Sprintf(":%v", p.Port)
-	log.WithField("address", address).Info("Listening on")
+
 	log.Info("Janus Admin API started")
-	if p.IsHTTPS() {
-		return http.ListenAndServeTLS(address, p.CertFile, p.KeyFile, handler)
+	if p.TLS.IsHTTPS() {
+		addressTLS := fmt.Sprintf(":%v", p.TLS.Port)
+		if p.TLS.Redirect {
+			go func() {
+				log.WithField("address", address).Info("Listening HTTP redirects to HTTPS")
+				log.Fatal(http.ListenAndServe(address, RedirectHTTPS(p.TLS.Port)))
+			}()
+		}
+
+		log.WithField("address", addressTLS).Info("Listening HTTPS")
+		return http.ListenAndServeTLS(addressTLS, p.TLS.CertFile, p.TLS.KeyFile, handler)
 	}
 
-	log.Info("Certificate and certificate key were not found, defaulting to HTTP")
+	log.WithField("address", address).Info("Certificate and certificate key were not found, defaulting to HTTP")
 	return http.ListenAndServe(address, handler)
 }
 
@@ -124,9 +135,4 @@ func (p *Provider) loadOAuthEndpoints(router router.Router, handlers ...router.C
 			oauthGroup.DELETE("/{name}", oAuthHandler.DeleteBy(), handlers...)
 		}
 	}
-}
-
-// IsHTTPS checks if you have https enabled
-func (p *Provider) IsHTTPS() bool {
-	return len(p.CertFile) > 0 && len(p.KeyFile) > 0
 }

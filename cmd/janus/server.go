@@ -40,40 +40,41 @@ func RunServer(cmd *cobra.Command, args []string) {
 	dsnURL, err := url.Parse(globalConfig.Database.DSN)
 	switch dsnURL.Scheme {
 	case "mongodb":
-		log.WithField("dsn", globalConfig.Database.DSN).Debug("Trying to connect to DB")
+		log.Debug("MongoDB configuration chosen")
+
+		log.WithField("dsn", globalConfig.Database.DSN).Debug("Trying to connect to MongoDB...")
 		session, err := mgo.Dial(globalConfig.Database.DSN)
 		if err != nil {
 			log.Panic(err)
 		}
-
 		defer session.Close()
 
-		log.Debug("Connected to mongodb")
+		log.Debug("Connected to MongoDB")
 		session.SetMode(mgo.Monotonic, true)
 
-		log.Debug("Loading API definitions from Mongo DB")
 		repo, err = api.NewMongoAppRepository(session)
 		if err != nil {
 			log.Panic(err)
 		}
 
-		// create the proxy
-		log.Debug("Loading OAuth servers definitions from Mongo DB")
 		oAuthServersRepo, err = oauth.NewMongoRepository(session)
 		if err != nil {
 			log.Panic(err)
 		}
 	case "file":
+		log.Debug("File system based configuration chosen")
 		var apiPath = dsnURL.Path + "/apis"
 		var authPath = dsnURL.Path + "/auth"
 
-		log.WithField("path", apiPath).Debug("Loading API definitions from file system")
+		log.WithFields(log.Fields{
+			"api_path":  apiPath,
+			"auth_path": authPath,
+		}).Debug("Trying to load configuration files")
 		repo, err = api.NewFileSystemRepository(apiPath)
 		if err != nil {
 			log.Panic(err)
 		}
 
-		log.WithField("path", authPath).Debug("Loading OAuth servers definitions from file system")
 		oAuthServersRepo, err = oauth.NewFileSystemRepository(authPath)
 		if err != nil {
 			log.Panic(err)
@@ -85,11 +86,10 @@ func RunServer(cmd *cobra.Command, args []string) {
 	wp := web.Provider{
 		Port:     globalConfig.Web.Port,
 		Cred:     globalConfig.Web.Credentials,
-		CertFile: globalConfig.Web.CertFile,
-		KeyFile:  globalConfig.Web.KeyFile,
+		ReadOnly: globalConfig.Web.ReadOnly,
+		TLS:      globalConfig.Web.TLS,
 		APIRepo:  repo,
 		AuthRepo: oAuthServersRepo,
-		ReadOnly: globalConfig.Web.ReadOnly,
 	}
 
 	if publisher, ok := storage.(notifier.Publisher); ok {
@@ -99,7 +99,6 @@ func RunServer(cmd *cobra.Command, args []string) {
 	wp.Provide(version)
 
 	r := createRouter()
-
 	loader.Load(loader.Params{
 		Router:      r,
 		Storage:     storage,
@@ -111,23 +110,32 @@ func RunServer(cmd *cobra.Command, args []string) {
 			FlushInterval:          globalConfig.BackendFlushInterval,
 			IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
 			CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
-			InsecureSkipVerify:     globalConfig.InsecureSkipVerify,
 		},
 	})
 
-	address := fmt.Sprintf(":%v", globalConfig.Port)
-	log.WithField("address", address).Info("Listening on")
-	server = &http.Server{Addr: address, Handler: r}
-	log.Fatal(listenAndServe(server))
+	log.Fatal(listenAndServe(r))
 }
 
-func listenAndServe(server *http.Server) error {
+func listenAndServe(handler http.Handler) error {
+	address := fmt.Sprintf(":%v", globalConfig.Port)
+	server = &http.Server{Addr: address, Handler: handler}
+
 	log.Info("Janus started")
-	if globalConfig.Web.IsHTTPS() {
-		return server.ListenAndServeTLS(globalConfig.CertFile, globalConfig.KeyFile)
+	if globalConfig.TLS.IsHTTPS() {
+		server.Addr = fmt.Sprintf(":%v", globalConfig.TLS.Port)
+
+		if globalConfig.TLS.Redirect {
+			go func() {
+				log.WithField("address", address).Info("Listening HTTP redirects to HTTPS")
+				log.Fatal(http.ListenAndServe(address, web.RedirectHTTPS(globalConfig.TLS.Port)))
+			}()
+		}
+
+		log.WithField("address", server.Addr).Info("Listening HTTPS")
+		return server.ListenAndServeTLS(globalConfig.TLS.CertFile, globalConfig.TLS.KeyFile)
 	}
 
-	log.Info("Certificate and certificate key were not found, defaulting to HTTP")
+	log.WithField("address", address).Info("Certificate and certificate key were not found, defaulting to HTTP")
 	return server.ListenAndServe()
 }
 
@@ -139,7 +147,7 @@ func createRouter() router.Router {
 		middleware.NewStats(statsClient).Handler,
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(web.RecoveryHandler),
-		middleware.NewOpenTracing(globalConfig.Web.IsHTTPS()).Handler,
+		middleware.NewOpenTracing(globalConfig.TLS.IsHTTPS()).Handler,
 	)
 	return r
 }
@@ -158,7 +166,6 @@ func handleEvent(notification notifier.Notification) {
 				FlushInterval:          globalConfig.BackendFlushInterval,
 				IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
 				CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
-				InsecureSkipVerify:     globalConfig.InsecureSkipVerify,
 			},
 		})
 		server.Handler = newRouter
