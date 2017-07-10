@@ -20,4 +20,5 @@ install:
 script:
 - make test-integration
 - $GOPATH/bin/overalls -project=github.com/hellofresh/janus -covermode=count
+- if [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then bash <(curl -s https://codecov.io/bash) -f overalls.coverprofile; fi
 - if [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then $GOPATH/bin/goveralls -coverprofile=overalls.coverprofile -service=travis-ci -repotoken $COVERALLS_TOKEN; fi
