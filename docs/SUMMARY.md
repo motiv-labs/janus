@@ -3,7 +3,7 @@
 * [Introduction](README.md)
 * [Installation](install/README.md)
     * [Docker](install/docker.md)
-* [Quick Start](quick_start/READMME.md)
+* [Quick Start](quick_start/README.md)
     * [Add an endpoint](quick_start/add_endpoint.md)
     * [Add Plugins](quick_start/add_plugins.md)
     * [Authentication](quick_start/add_auth.md)
