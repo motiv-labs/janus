@@ -19,7 +19,7 @@ type Specification struct {
 	BackendFlushInterval time.Duration `envconfig:"BACKEND_FLUSH_INTERVAL"`
 	CloseIdleConnsPeriod time.Duration `envconfig:"CLOSE_IDLE_CONNS_PERIOD"`
 	Log                  logging.LogConfig
-	Web                  Web `envconfig:"API"`
+	Web                  Web
 	Database             Database
 	Storage              Storage
 	Stats                Stats
@@ -29,8 +29,8 @@ type Specification struct {
 
 // Web represents the API configurations
 type Web struct {
-	Port        int  `envconfig:"PORT"`
-	ReadOnly    bool `envconfig:"READONLY"`
+	Port        int  `envconfig:"API_PORT"`
+	ReadOnly    bool `envconfig:"API_READONLY"`
 	Credentials Credentials
 	TLS         TLS
 }
