@@ -1,5 +1,5 @@
 hash: 3d3c01afd74d79db9dd2d59a274d1571958dd6e36775783b78228934c20eb919
-updated: 2017-07-05T11:03:10.184080762+02:00
+updated: 2017-07-13T11:04:22.294963499+02:00
 imports:
 - name: cloud.google.com/go
   version: 558b56dfa3c56acc26fef35cb07f97df0bb18b39
@@ -33,7 +33,7 @@ imports:
   - internal
   - redis
 - name: github.com/go-chi/chi
-  version: 967844826e58cf31213a7dfb82455d242ad85101
+  version: 08660a0ad10a8fa7beab3ad43afe66373d49d06a
   subpackages:
   - middleware
 - name: github.com/gogo/protobuf
@@ -67,7 +67,7 @@ imports:
 - name: github.com/hellofresh/logging-go
   version: e0dad001fe00320c380f9338e746beb0f832dca8
 - name: github.com/hellofresh/stats-go
-  version: aeae428c686577aea5e7bbcab1bcab51b4fb3b78
+  version: 83a84ddeb556c898599e404ec82b01f995599927
   subpackages:
   - bucket
   - incrementer
@@ -99,7 +99,7 @@ imports:
 - name: github.com/rs/cors
   version: 8dd4211afb5d08dbb39a533b9bb9e4b486351df6
 - name: github.com/sirupsen/logrus
-  version: 202f25545ea4cf9b191ff7f846df5d87c9382c2b
+  version: 7f976d3a76720c4c27af2ba716b85d2e0a7e38b1
   subpackages:
   - hooks/syslog
 - name: github.com/spf13/afero
@@ -123,7 +123,7 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: 570fa1c91359c1869590e9cedf3b53162a51a167
+  version: 054b33e6527139ad5b1ec2f6232c3b175bd9a30c
   subpackages:
   - context
   - context/ctxhttp
@@ -207,3 +207,4 @@ testImports:
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
   - assert
+  - require

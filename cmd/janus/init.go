@@ -6,6 +6,7 @@ import (
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/hellofresh/stats-go"
 	"github.com/hellofresh/stats-go/bucket"
+	"github.com/hellofresh/stats-go/hooks"
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 )
@@ -60,7 +61,13 @@ func init() {
 		log.WithError(err).Panic("Error initializing statsd client")
 	}
 
-	statsClient.SetHTTPMetricCallback(bucket.NewHasIDAtSecondLevelCallback(sectionsTestsMap))
+	statsClient.SetHTTPMetricCallback(bucket.NewHasIDAtSecondLevelCallback(&bucket.SecondLevelIDConfig{
+		HasIDAtSecondLevel:    sectionsTestsMap,
+		AutoDiscoverThreshold: globalConfig.Stats.AutoDiscoverThreshold,
+		AutoDiscoverWhiteList: globalConfig.Stats.AutoDiscoverWhiteList,
+	}))
+
+	log.AddHook(hooks.NewLogrusHook(statsClient, globalConfig.Stats.ErrorsSection))
 }
 
 // initializes the storage and managers
