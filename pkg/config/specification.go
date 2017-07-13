@@ -60,9 +60,12 @@ type Database struct {
 
 // Stats holds the configuration for stats
 type Stats struct {
-	DSN    string `envconfig:"STATS_DSN"`
-	Prefix string `envconfig:"STATS_PREFIX"`
-	IDs    string `envconfig:"STATS_IDS"`
+	DSN                   string   `envconfig:"STATS_DSN"`
+	Prefix                string   `envconfig:"STATS_PREFIX"`
+	IDs                   string   `envconfig:"STATS_IDS"`
+	AutoDiscoverThreshold uint     `envconfig:"STATS_AUTO_DISCOVER_THRESHOLD"`
+	AutoDiscoverWhiteList []string `envconfig:"STATS_AUTO_DISCOVER_WHITE_LIST"`
+	ErrorsSection         string   `envconfig:"STATS_ERRORS_SECTION"`
 }
 
 // Credentials represents the credentials that are going to be
@@ -115,6 +118,8 @@ func init() {
 	viper.SetDefault("web.tls.redisrect", true)
 	viper.SetDefault("web.credentials.username", "admin")
 	viper.SetDefault("web.credentials.password", "admin")
+	viper.SetDefault("stats.dsn", "log://")
+	viper.SetDefault("stats.errorsSection", "error-log")
 
 	logging.InitDefaults(viper.GetViper(), "log")
 }
