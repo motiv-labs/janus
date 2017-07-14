@@ -1,17 +1,21 @@
 package oauth
 
 import (
-	"fmt"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/session"
 	log "github.com/sirupsen/logrus"
 )
 
 // JWTManager is responsible for managing the JWT tokens
 type JWTManager struct {
-	Secret string
+	parser *jwt.Parser
+}
+
+// NewJWTManager creates a new instance of JWTManager
+func NewJWTManager(parser *jwt.Parser) *JWTManager {
+	return &JWTManager{parser}
 }
 
 // Set returns nil since when we work with JWT we don't need to store them
@@ -28,25 +32,13 @@ func (m *JWTManager) Remove(accessToken string) error {
 func (m *JWTManager) IsKeyAuthorised(accessToken string) (session.State, bool) {
 	var sessionState session.State
 
-	// Parse takes the token string and a function for looking up the key. The latter is especially
-	// useful if you use multiple keys for your application.  The standard is to use 'kid' in the
-	// head of the token to identify which key to use, but the parsed token (head and claims) is provided
-	// to the callback, providing flexibility.
-	token, err := jwt.Parse(accessToken, func(token *jwt.Token) (interface{}, error) {
-		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-			log.WithField("alg", token.Header["alg"]).Error("Unexpected signing method")
-			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
-		}
-
-		return []byte(m.Secret), nil
-	})
-
+	token, err := m.parser.Parse(accessToken)
 	if err != nil {
 		log.WithError(err).Info("Could not parse the JWT")
 		return sessionState, false
 	}
 
-	if claims, ok := token.Claims.(jwt.StandardClaims); ok && token.Valid {
+	if claims, ok := m.parser.GetStandardClaims(token); ok && token.Valid {
 		expiresAt := time.Unix(claims.ExpiresAt, 0)
 		if time.Now().After(expiresAt) {
 			return sessionState, false
