@@ -13,9 +13,14 @@ type Parser struct {
 	Config Config
 }
 
-// Parse tries to extract and validate token from request.
+// NewParser creates a new instance of Parser
+func NewParser(config Config) *Parser {
+	return &Parser{config}
+}
+
+// ParseFromRequest tries to extract and validate token from request.
 // See "Config.TokenLookup" for possible ways to pass token in request.
-func (jp *Parser) Parse(r *http.Request) (*jwt.Token, error) {
+func (jp *Parser) ParseFromRequest(r *http.Request) (*jwt.Token, error) {
 	var token string
 	var err error
 
@@ -33,6 +38,11 @@ func (jp *Parser) Parse(r *http.Request) (*jwt.Token, error) {
 		return nil, err
 	}
 
+	return jp.Parse(token)
+}
+
+// Parse a JWT token and validates it
+func (jp *Parser) Parse(token string) (*jwt.Token, error) {
 	return jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
 		if jwt.GetSigningMethod(jp.Config.SigningAlgorithm) != token.Method {
 			return nil, errors.New("invalid signing algorithm")
@@ -40,6 +50,18 @@ func (jp *Parser) Parse(r *http.Request) (*jwt.Token, error) {
 
 		return jp.Config.Secret, nil
 	})
+}
+
+// GetStandardClaims returns a structured version of Claims Section
+func (jp *Parser) GetStandardClaims(token *jwt.Token) (jwt.StandardClaims, bool) {
+	claims, ok := token.Claims.(jwt.StandardClaims)
+	return claims, ok
+}
+
+// GetMapClaims returns a map version of Claims Section
+func (jp *Parser) GetMapClaims(token *jwt.Token) (jwt.MapClaims, bool) {
+	claims, ok := token.Claims.(jwt.MapClaims)
+	return claims, ok
 }
 
 func (jp *Parser) jwtFromHeader(r *http.Request, key string) (string, error) {
