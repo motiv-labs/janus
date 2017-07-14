@@ -69,7 +69,7 @@ func (j *Handler) Login() http.HandlerFunc {
 func (j *Handler) Refresh() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		parser := Parser{j.Config}
-		token, _ := parser.Parse(r)
+		token, _ := parser.ParseFromRequest(r)
 		claims := token.Claims.(jwt.MapClaims)
 
 		origIat := int64(claims["iat"].(float64))

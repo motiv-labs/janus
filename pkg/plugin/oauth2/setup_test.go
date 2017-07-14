@@ -43,7 +43,7 @@ func TestSetupWithValidOAuthServer(t *testing.T) {
 	})
 
 	assert.NoError(t, err)
-	assert.Len(t, route.Inbound, 1)
+	assert.Len(t, route.Inbound, 2)
 }
 
 func TestSetupWithInalidOAuthServer(t *testing.T) {

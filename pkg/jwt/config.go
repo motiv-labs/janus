@@ -49,32 +49,38 @@ type Config struct {
 	MaxRefresh time.Duration
 }
 
-// NewConfig builds and returns new JWT config instance
-func NewConfig(cred config.Credentials) Config {
+// NewConfig creates a new instance of Config
+func NewConfig(secret string) Config {
 	return Config{
 		SigningAlgorithm: "HS256",
-		Secret:           []byte(cred.Secret),
+		Secret:           []byte(secret),
 		Timeout:          time.Hour,
 		MaxRefresh:       time.Hour * 24,
-		Authenticator: func(userID string, password string) (string, bool) {
-			if userID == cred.Username && password == cred.Password {
-				return userID, true
-			}
-
-			return userID, false
-		},
-		Authorizator: func(userID string, w http.ResponseWriter, r *http.Request) bool {
-			if userID == cred.Username {
-				return true
-			}
-
-			return false
-		},
-		Unauthorized: func(w http.ResponseWriter, r *http.Request, err error) {
-			response.JSON(w, http.StatusUnauthorized, response.H{
-				"message": err.Error(),
-			})
-		},
-		TokenLookup: "header:Authorization",
+		TokenLookup:      "header:Authorization",
 	}
+}
+
+// NewConfigWithHandlers creates a new instance of Config with default handlers
+func NewConfigWithHandlers(cred config.Credentials) Config {
+	config := NewConfig(cred.Secret)
+	config.Authenticator = func(userID string, password string) (string, bool) {
+		if userID == cred.Username && password == cred.Password {
+			return userID, true
+		}
+
+		return userID, false
+	}
+	config.Authorizator = func(userID string, w http.ResponseWriter, r *http.Request) bool {
+		if userID == cred.Username {
+			return true
+		}
+
+		return false
+	}
+	config.Unauthorized = func(w http.ResponseWriter, r *http.Request, err error) {
+		response.JSON(w, http.StatusUnauthorized, response.H{
+			"message": err.Error(),
+		})
+	}
+	return config
 }
