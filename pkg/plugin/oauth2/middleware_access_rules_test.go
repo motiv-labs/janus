@@ -131,3 +131,75 @@ func generateToken(secret string) (string, error) {
 
 	return token.SignedString([]byte(secret))
 }
+
+func TestEmptyAccessRules(t *testing.T) {
+	secret := "secret"
+
+	revokeRules := []*oauth.AccessRule{}
+
+	config := jwt.NewConfig(secret)
+	parser := jwt.NewParser(config)
+
+	mw := NewRevokeRulesMiddleware(parser, revokeRules)
+
+	w, err := test.Record(
+		"GET",
+		"/",
+		nil,
+		mw(http.HandlerFunc(test.Ping)),
+	)
+	require.NoError(t, err)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestWrongJWT(t *testing.T) {
+	revokeRules := []*oauth.AccessRule{
+		{Predicate: fmt.Sprintf("country == 'de' && iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
+	}
+
+	config := jwt.NewConfig("wrong_secret")
+	parser := jwt.NewParser(config)
+
+	mw := NewRevokeRulesMiddleware(parser, revokeRules)
+	token, err := generateToken("secret")
+	require.NoError(t, err)
+
+	w, err := test.Record(
+		"GET",
+		"/",
+		map[string]string{
+			"Content-Type":  "application/json",
+			"Authorization": fmt.Sprintf("Bearer %s", token),
+		},
+		mw(http.HandlerFunc(test.Ping)),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, w.Code)
+}
+
+func TestWrongRule(t *testing.T) {
+	secret := "secret"
+
+	revokeRules := []*oauth.AccessRule{
+		{Predicate: "country == 'wrong'", Action: "deny"},
+	}
+
+	config := jwt.NewConfig(secret)
+	parser := jwt.NewParser(config)
+
+	mw := NewRevokeRulesMiddleware(parser, revokeRules)
+	token, err := generateToken(secret)
+	require.NoError(t, err)
+
+	w, err := test.Record(
+		"GET",
+		"/",
+		map[string]string{
+			"Content-Type":  "application/json",
+			"Authorization": fmt.Sprintf("Bearer %s", token),
+		},
+		mw(http.HandlerFunc(test.Ping)),
+	)
+	assert.NoError(t, err)
+	assert.Equal(t, http.StatusOK, w.Code)
+}

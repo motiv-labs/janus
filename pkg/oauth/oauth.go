@@ -86,13 +86,13 @@ func (r *AccessRule) IsAllowed(claims map[string]interface{}) (bool, error) {
 	var err error
 
 	if !r.parsed {
-		ok, err := r.parse(claims)
+		matched, err := r.parse(claims)
 		if err != nil {
 			return false, err
 		}
 
-		if !ok {
-			return false, nil
+		if !matched {
+			return true, nil
 		}
 	}
 
