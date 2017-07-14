@@ -1,19 +1,19 @@
-hash: 3d3c01afd74d79db9dd2d59a274d1571958dd6e36775783b78228934c20eb919
-updated: 2017-07-13T11:04:22.294963499+02:00
+hash: ee747290d5c0e48f3b8b04d05252c129e814a65b15e48cfc79698288191990dc
+updated: 2017-07-14T11:12:04.559096223+02:00
 imports:
 - name: cloud.google.com/go
-  version: 558b56dfa3c56acc26fef35cb07f97df0bb18b39
+  version: 01b9e8cbca61bf2c704946d6f1790ec412519180
   subpackages:
   - compute/metadata
 - name: github.com/ant0ine/go-json-rest
-  version: 4127f183c172b25f51dbaaa2e035e8f262ac57fb
+  version: 4602b00d2caab423578a3094c68137dcc1eb2051
   subpackages:
   - rest
   - rest/trie
 - name: github.com/asaskevich/govalidator
   version: 7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877
 - name: github.com/bshuster-repo/logrus-logstash-hook
-  version: 41029b88e98c8b459ff27040389b69a4db2a8d07
+  version: ea59b04518367f2aafe8cf6d46a7d60605d075ce
 - name: github.com/DATA-DOG/godog
   version: 70f777599da0f5de682b8848d356611c1738b695
   subpackages:
@@ -37,12 +37,12 @@ imports:
   subpackages:
   - middleware
 - name: github.com/gogo/protobuf
-  version: dda3e8acadcc9affc16faf33fbb229db78399245
+  version: 7efa791bd276fd4db00867cbd982b552627c24cb
   subpackages:
   - io
   - proto
 - name: github.com/golang/protobuf
-  version: 6a1fa9404c0aebf36c879bc50152edcc953910d2
+  version: 2bba0603135d7d7f5cb73b2125beeda19c09f4ef
   subpackages:
   - proto
 - name: github.com/gorilla/context
@@ -50,7 +50,7 @@ imports:
 - name: github.com/gorilla/mux
   version: bcd8bc72b08df0f70df986b97f95590779502d31
 - name: github.com/hashicorp/hcl
-  version: 392dba7d905ed5d04a5794ba89f558b27e2ba1ca
+  version: 630949a3c5fa3c613328e1b8256052cbc2327c9b
   subpackages:
   - hcl/ast
   - hcl/parser
@@ -70,6 +70,7 @@ imports:
   version: 83a84ddeb556c898599e404ec82b01f995599927
   subpackages:
   - bucket
+  - hooks
   - incrementer
   - state
   - timer
@@ -77,10 +78,12 @@ imports:
   version: 76626ae9c91c4f2a10f34cad8ce83ea42c93bb75
 - name: github.com/kelseyhightower/envconfig
   version: f611eb38b3875cc3bd991ca91c51d06446afa14c
+- name: github.com/Knetic/govaluate
+  version: d216395917cc49052c7c7094cf57f09657ca08a8
 - name: github.com/magiconair/properties
   version: 51463bfca2576e06c62a8504b5c0f06d61312647
 - name: github.com/mitchellh/mapstructure
-  version: d0303fe809921458f417bcf828397a65db30a7e4
+  version: 53818660ed4955e899c0bcafa97299a388bd7c8e
 - name: github.com/opentracing/basictracer-go
   version: 1b32af207119a14b1b231d451df3ed04a72efebf
   subpackages:
@@ -92,14 +95,18 @@ imports:
   - log
 - name: github.com/patrickmn/go-cache
   version: 7ac151875ffb48b9f3ccce9ea20f020b0c1596c8
+- name: github.com/pelletier/go-buffruneio
+  version: c37440a7cf42ac63b919c752ca73a85067e05992
 - name: github.com/pelletier/go-toml
-  version: 69d355db5304c0f7f809a2edc054553e7142f016
+  version: fe206efb84b2bc8e8cfafe6b4c1826622be969e3
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/rs/cors
-  version: 8dd4211afb5d08dbb39a533b9bb9e4b486351df6
+  version: a62a804a8a009876ca59105f7899938a1349f4b3
+- name: github.com/rs/xhandler
+  version: ed27b6fd65218132ee50cd95f38474a3d8a2cd12
 - name: github.com/sirupsen/logrus
-  version: 7f976d3a76720c4c27af2ba716b85d2e0a7e38b1
+  version: a3f95b5c423586578a4e099b11a46c2479628cac
   subpackages:
   - hooks/syslog
 - name: github.com/spf13/afero
@@ -107,15 +114,15 @@ imports:
   subpackages:
   - mem
 - name: github.com/spf13/cast
-  version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
+  version: ce135a4ebeee6cfe9a26c93ee0d37825f26113c7
 - name: github.com/spf13/cobra
-  version: 8c6fa02d2225de0f9bdcb7ca912556f68d172d8c
+  version: 0a4540b161984c70bc56a12a7b796cb867d5e39d
 - name: github.com/spf13/jwalterweatherman
-  version: 0efa5202c04663c757d84f90f5219c1250baf94f
+  version: fa7ca7e836cf3a8bb4ebf799f472c12d7e903d66
 - name: github.com/spf13/pflag
-  version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
+  version: 9a906f17374922ed0f74e1b2f593d3723f2ffb00
 - name: github.com/spf13/viper
-  version: c1de95864d73a5465492829d7cb2dd422b19ac96
+  version: 84f94806c67f59dd7ae87bc5351f7a9c94a4558d
 - name: github.com/tidwall/gjson
   version: c784c417818f59d6597274642d8ac1d09efc9b01
 - name: github.com/tidwall/match
@@ -123,33 +130,33 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: 054b33e6527139ad5b1ec2f6232c3b175bd9a30c
+  version: 5f8847ae0d0e90b6a9dc8148e7ad616874625171
   subpackages:
   - context
   - context/ctxhttp
   - http2
 - name: golang.org/x/oauth2
-  version: cce311a261e6fcf29de72ca96827bdb0b7d9c9e6
+  version: a6bd8cefa1811bd24b86f8902872e4e8225f74c4
   subpackages:
   - google
   - internal
   - jws
   - jwt
 - name: golang.org/x/sync
-  version: f52d1811a62927559de87708c8913c1650ce4f26
+  version: de49d9dcd27d4f764488181bea099dfe6179bcf0
   subpackages:
   - semaphore
 - name: golang.org/x/sys
-  version: 94b76065f2d2081d0fef24a6e67c571f51a6408a
+  version: a408501be4d17ee978c04a618e7a1b22af058c0e
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: 2bf8f2a19ec09c670e931282edfe6567f6be21c9
+  version: f4b4367115ec2de254587813edaa901bc1c723a8
   subpackages:
   - transform
   - unicode/norm
 - name: google.golang.org/api
-  version: e6586c9293b9d514c7f5d5076731ec977cff1be6
+  version: 0b0f5a5147930d092abd132cf09fafa23e8c3942
   subpackages:
   - cloudtrace/v1
   - gensupport
@@ -157,7 +164,7 @@ imports:
   - googleapi/internal/uritemplates
   - support/bundler
 - name: google.golang.org/appengine
-  version: d11fc8a8dccf41ab5bd3c51a3ea52051240e325c
+  version: 170382fa85b10b94728989dfcf6cc818b335c952
   subpackages:
   - internal
   - internal/app_identity
@@ -180,7 +187,7 @@ imports:
   - internal/sasl
   - internal/scram
 - name: gopkg.in/yaml.v2
-  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
+  version: 31c299268d302dd0aa9a0dcf765a3d58971ac83f
 - name: sourcegraph.com/sourcegraph/appdash
   version: 5b9b70908c0e32b53e17215ee6e9515b02ad08b2
   subpackages:
