@@ -71,12 +71,9 @@ func NewConfigWithHandlers(cred config.Credentials) Config {
 		return userID, false
 	}
 	config.Authorizator = func(userID string, w http.ResponseWriter, r *http.Request) bool {
-		if userID == cred.Username {
-			return true
-		}
-
-		return false
+		return userID == cred.Username
 	}
+
 	config.Unauthorized = func(w http.ResponseWriter, r *http.Request, err error) {
 		response.JSON(w, http.StatusUnauthorized, response.H{
 			"message": err.Error(),

@@ -40,7 +40,7 @@ func setupOAuth2(route *proxy.Route, p plugin.Params) error {
 
 	secret, err := oauthServer.TokenStrategy.Settings.GetJWTSecret()
 	if err != nil {
-
+		return err
 	}
 
 	route.AddInbound(NewKeyExistsMiddleware(manager))

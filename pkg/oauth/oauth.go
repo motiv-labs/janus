@@ -2,6 +2,7 @@ package oauth
 
 import (
 	"errors"
+	"sync"
 
 	"github.com/Knetic/govaluate"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -76,6 +77,7 @@ type meta struct {
 
 // AccessRule represents a rule that will be applied to a JWT that could be revoked
 type AccessRule struct {
+	mu        sync.Mutex
 	Predicate string `bson:"predicate" json:"predicate"`
 	Action    string `bson:"action" json:"action"`
 	parsed    bool
@@ -110,7 +112,9 @@ func (r *AccessRule) parse(claims map[string]interface{}) (bool, error) {
 		return false, errors.New("Cannot evaluate the expression")
 	}
 
+	r.mu.Lock()
 	r.parsed = true
+	r.mu.Unlock()
 
 	return result.(bool), nil
 }
