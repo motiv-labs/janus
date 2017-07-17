@@ -38,7 +38,7 @@ func (p *Provider) Provide(version string) error {
 	r := router.NewChiRouterWithOptions(router.DefaultOptions)
 
 	// create authentication for Janus
-	authConfig := jwt.NewConfig(p.Cred)
+	authConfig := jwt.NewConfigWithHandlers(p.Cred)
 	authMiddleware := jwt.NewMiddleware(authConfig)
 	r.Use(
 		chimiddleware.StripSlashes,

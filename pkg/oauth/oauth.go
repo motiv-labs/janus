@@ -1,6 +1,10 @@
 package oauth
 
 import (
+	"errors"
+	"sync"
+
+	"github.com/Knetic/govaluate"
 	"github.com/hellofresh/janus/pkg/proxy"
 )
 
@@ -27,6 +31,7 @@ type OAuth struct {
 	Secrets                map[string]string      `bson:"secrets" json:"secrets"`
 	CorsMeta               meta                   `bson:"cors_meta" json:"cors_meta" valid:"cors_meta" mapstructure:"cors_meta"`
 	TokenStrategy          TokenStrategy          `bson:"token_strategy" json:"token_strategy" mapstructure:"token_strategy"`
+	AccessRules            []*AccessRule          `bson:"access_rules" json:"access_rules"`
 }
 
 // Endpoints defines the oauth endpoints that wil be proxied
@@ -52,10 +57,64 @@ type TokenStrategy struct {
 // TokenStrategySettings represents the settings for the token strategy
 type TokenStrategySettings map[string]string
 
+// GetJWTSecret gets the JWT secret config
+func (t TokenStrategySettings) GetJWTSecret() (string, error) {
+	value, ok := t["secret"]
+	if !ok || value == "" {
+		return "", ErrJWTSecretMissing
+	}
+
+	return value, nil
+}
+
 type meta struct {
 	Domains        []string `mapstructure:"domains" bson:"domains" json:"domains"`
 	Methods        []string `mapstructure:"methods" bson:"methods" json:"methods"`
 	RequestHeaders []string `mapstructure:"request_headers" bson:"request_headers" json:"request_headers"`
 	ExposedHeaders []string `mapstructure:"exposed_headers" bson:"exposed_headers" json:"exposed_headers"`
 	Enabled        bool     `bson:"enabled" json:"enabled"`
+}
+
+// AccessRule represents a rule that will be applied to a JWT that could be revoked
+type AccessRule struct {
+	mu        sync.Mutex
+	Predicate string `bson:"predicate" json:"predicate"`
+	Action    string `bson:"action" json:"action"`
+	parsed    bool
+}
+
+// IsAllowed checks if the rule is allowed to
+func (r *AccessRule) IsAllowed(claims map[string]interface{}) (bool, error) {
+	var err error
+
+	if !r.parsed {
+		matched, err := r.parse(claims)
+		if err != nil {
+			return false, err
+		}
+
+		if !matched {
+			return true, nil
+		}
+	}
+
+	return r.Action == "allow", err
+}
+
+func (r *AccessRule) parse(claims map[string]interface{}) (bool, error) {
+	expression, err := govaluate.NewEvaluableExpression(r.Predicate)
+	if err != nil {
+		return false, errors.New("Could not create an expression with this predicate")
+	}
+
+	result, err := expression.Evaluate(claims)
+	if err != nil {
+		return false, errors.New("Cannot evaluate the expression")
+	}
+
+	r.mu.Lock()
+	r.parsed = true
+	r.mu.Unlock()
+
+	return result.(bool), nil
 }

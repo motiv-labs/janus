@@ -1,6 +1,7 @@
 package oauth2
 
 import (
+	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -26,26 +27,33 @@ func setupOAuth2(route *proxy.Route, p plugin.Params) error {
 		return err
 	}
 
-	manager, err := getManager(p.OAuthRepo, p.Storage, config.ServerName)
+	oauthServer, err := p.OAuthRepo.FindByName(config.ServerName)
+	if nil != err {
+		return err
+	}
+
+	manager, err := getManager(oauthServer.TokenStrategy, p.Storage, config.ServerName)
 	if nil != err {
 		log.WithError(err).Error("OAuth Configuration for this API is incorrect, skipping...")
 		return err
 	}
+
+	secret, err := oauthServer.TokenStrategy.Settings.GetJWTSecret()
+	if err != nil {
+		return err
+	}
+
 	route.AddInbound(NewKeyExistsMiddleware(manager))
+	route.AddInbound(NewRevokeRulesMiddleware(jwt.NewParser(jwt.NewConfig(secret)), oauthServer.AccessRules))
 
 	return nil
 }
 
-func getManager(authRepo oauth.Repository, storage store.Store, oAuthServerName string) (oauth.Manager, error) {
-	oauthServer, err := authRepo.FindByName(oAuthServerName)
+func getManager(tokenStrategy oauth.TokenStrategy, storage store.Store, oAuthServerName string) (oauth.Manager, error) {
+	managerType, err := oauth.ParseType(tokenStrategy.Name)
 	if nil != err {
 		return nil, err
 	}
 
-	managerType, err := oauth.ParseType(oauthServer.TokenStrategy.Name)
-	if nil != err {
-		return nil, err
-	}
-
-	return oauth.NewManagerFactory(storage, oauthServer.TokenStrategy.Settings).Build(managerType)
+	return oauth.NewManagerFactory(storage, tokenStrategy.Settings).Build(managerType)
 }

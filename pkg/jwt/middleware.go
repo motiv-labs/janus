@@ -28,7 +28,7 @@ func NewMiddleware(config Config) *Middleware {
 func (m *Middleware) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		parser := Parser{m.Config}
-		token, err := parser.Parse(r)
+		token, err := parser.ParseFromRequest(r)
 
 		if err != nil {
 			m.Config.Unauthorized(w, r, err)

@@ -3,6 +3,7 @@ package oauth
 import (
 	"strings"
 
+	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/session"
 	"github.com/hellofresh/janus/pkg/store"
 	log "github.com/sirupsen/logrus"
@@ -77,7 +78,7 @@ func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 			return nil, ErrJWTSecretMissing
 		}
 
-		return &JWTManager{Secret: value}, nil
+		return NewJWTManager(jwt.NewParser(jwt.NewConfig(value))), nil
 	case Auth:
 		// TODO: Create an Auth Manager that always validated tokens against an auth provider
 	}
