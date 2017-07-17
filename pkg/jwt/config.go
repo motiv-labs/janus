@@ -47,6 +47,10 @@ type Config struct {
 	// This means that the maximum validity timespan for a token is MaxRefresh + Timeout.
 	// Optional, defaults to 0 meaning not refreshable.
 	MaxRefresh time.Duration
+
+	// Key, in the JWT token, to identify the user ID.
+	// Optional, default value is "sub", based on JWT specification.
+	UserIDKey string
 }
 
 // NewConfig creates a new instance of Config
