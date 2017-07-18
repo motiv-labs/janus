@@ -4,8 +4,6 @@ import (
 	"strings"
 
 	"github.com/hellofresh/janus/pkg/jwt"
-	"github.com/hellofresh/janus/pkg/session"
-	"github.com/hellofresh/janus/pkg/store"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,9 +20,8 @@ const (
 )
 
 var typesMap = map[string]ManagerType{
-	"storage": Storage,
-	"jwt":     JWT,
-	"auth":    Auth,
+	"jwt":  JWT,
+	"auth": Auth,
 }
 
 // ParseType takes a string type and returns the Manager type constant.
@@ -42,20 +39,17 @@ type ManagerType uint8
 
 // Manager holds the methods to handle tokens
 type Manager interface {
-	Set(accessToken string, session session.State, resetTTLTo int64) error
-	Remove(accessToken string) error
-	IsKeyAuthorised(accessToken string) (session.State, bool)
+	IsKeyAuthorized(accessToken string) bool
 }
 
 // ManagerFactory is used for creating a new manager
 type ManagerFactory struct {
-	Storage  store.Store
 	settings TokenStrategySettings
 }
 
 // NewManagerFactory creates a new instance of ManagerFactory
-func NewManagerFactory(storage store.Store, settings TokenStrategySettings) *ManagerFactory {
-	return &ManagerFactory{storage, settings}
+func NewManagerFactory(settings TokenStrategySettings) *ManagerFactory {
+	return &ManagerFactory{settings}
 }
 
 // Build creates a manager based on the type
@@ -70,8 +64,6 @@ func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 		Debug("Building token strategy")
 
 	switch t {
-	case Storage:
-		return &StorageTokenManager{Storage: f.Storage}, nil
 	case JWT:
 		value, ok := f.settings["secret"]
 		if !ok || value == "" {
@@ -80,7 +72,7 @@ func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 
 		return NewJWTManager(jwt.NewParser(jwt.NewConfig(value))), nil
 	case Auth:
-		// TODO: Create an Auth Manager that always validated tokens against an auth provider
+		return &AuthProviderManager{}, nil
 	}
 
 	return nil, ErrUnknownManager
