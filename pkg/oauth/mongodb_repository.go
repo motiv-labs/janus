@@ -13,7 +13,7 @@ const (
 	collectionName string = "oauth_servers"
 )
 
-// Repository defines the behaviour of a OAuth Server repo
+// Repository defines the behavior of a OAuth Server repo
 type Repository interface {
 	FindAll() ([]*OAuth, error)
 	FindByName(name string) (*OAuth, error)
