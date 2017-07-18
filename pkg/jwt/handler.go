@@ -50,10 +50,10 @@ func (j *Handler) Login() http.HandlerFunc {
 
 		expire := time.Now().Add(j.Config.Timeout)
 
-		tokenString, err := IssueAdminToken(j.Config.SigningAlgorithm, j.Config.SigningKey, userID, j.Config.Timeout)
+		tokenString, err := IssueAdminToken(j.Config.SigningMethod, userID, j.Config.Timeout)
 
 		if err != nil {
-			j.Config.Unauthorized(w, r, errors.New("problem signing JWT"))
+			j.Config.Unauthorized(w, r, errors.New("problem issuing JWT"))
 			return
 		}
 
@@ -80,7 +80,7 @@ func (j *Handler) Refresh() http.HandlerFunc {
 		}
 
 		// Create the token
-		newToken := jwt.New(jwt.GetSigningMethod(j.Config.SigningAlgorithm))
+		newToken := jwt.New(jwt.GetSigningMethod(j.Config.SigningMethod.Alg))
 		newClaims := newToken.Claims.(jwt.MapClaims)
 
 		for key := range claims {
@@ -92,10 +92,10 @@ func (j *Handler) Refresh() http.HandlerFunc {
 		newClaims["exp"] = expire.Unix()
 		newClaims["iat"] = origIat
 
-		tokenString, err := newToken.SignedString(j.Config.SigningKey)
-
+		// currently only HSXXX algorithms are supported for issuing admin token, so we cast key to bytes array
+		tokenString, err := newToken.SignedString([]byte(j.Config.SigningMethod.Key))
 		if err != nil {
-			j.Config.Unauthorized(w, r, errors.New("create JWT Token faild"))
+			j.Config.Unauthorized(w, r, errors.New("create JWT Token failed"))
 			return
 		}
 

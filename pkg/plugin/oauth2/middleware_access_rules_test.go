@@ -21,7 +21,10 @@ func TestBlockJWTByCountry(t *testing.T) {
 		{Predicate: "country == 'de'", Action: "deny"},
 	}
 
-	config := jwt.NewConfig("HS256", secret)
+	config := jwt.NewConfig(
+		jwt.SigningMethod{Alg: "HS256", Key: secret},
+		[]jwt.SigningMethod{{Alg: "HS256", Key: secret}},
+	)
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
@@ -48,7 +51,10 @@ func TestBlockJWTByUsername(t *testing.T) {
 		{Predicate: "username == 'test@hellofresh.com'", Action: "deny"},
 	}
 
-	config := jwt.NewConfig("HS256", secret)
+	config := jwt.NewConfig(
+		jwt.SigningMethod{Alg: "HS256", Key: secret},
+		[]jwt.SigningMethod{{Alg: "HS256", Key: secret}},
+	)
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
@@ -75,7 +81,10 @@ func TestBlockJWTByIssueDate(t *testing.T) {
 		{Predicate: fmt.Sprintf("iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
 	}
 
-	config := jwt.NewConfig("HS256", secret)
+	config := jwt.NewConfig(
+		jwt.SigningMethod{Alg: "HS256", Key: secret},
+		[]jwt.SigningMethod{{Alg: "HS256", Key: secret}},
+	)
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
@@ -102,7 +111,10 @@ func TestBlockJWTByCountryAndIssueDate(t *testing.T) {
 		{Predicate: fmt.Sprintf("country == 'de' && iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
 	}
 
-	config := jwt.NewConfig("HS256", secret)
+	config := jwt.NewConfig(
+		jwt.SigningMethod{Alg: "HS256", Key: secret},
+		[]jwt.SigningMethod{{Alg: "HS256", Key: secret}},
+	)
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
@@ -137,7 +149,10 @@ func TestEmptyAccessRules(t *testing.T) {
 
 	revokeRules := []*oauth.AccessRule{}
 
-	config := jwt.NewConfig("HS256", secret)
+	config := jwt.NewConfig(
+		jwt.SigningMethod{Alg: "HS256", Key: secret},
+		[]jwt.SigningMethod{{Alg: "HS256", Key: secret}},
+	)
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
@@ -157,7 +172,10 @@ func TestWrongJWT(t *testing.T) {
 		{Predicate: fmt.Sprintf("country == 'de' && iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
 	}
 
-	config := jwt.NewConfig("HS256", "wrong_secret")
+	config := jwt.NewConfig(
+		jwt.SigningMethod{Alg: "HS256", Key: "wrong secret"},
+		[]jwt.SigningMethod{{Alg: "HS256", Key: ""}},
+	)
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
@@ -184,7 +202,10 @@ func TestWrongRule(t *testing.T) {
 		{Predicate: "country == 'wrong'", Action: "deny"},
 	}
 
-	config := jwt.NewConfig("HS256", secret)
+	config := jwt.NewConfig(
+		jwt.SigningMethod{Alg: "HS256", Key: secret},
+		[]jwt.SigningMethod{{Alg: "HS256", Key: secret}},
+	)
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)

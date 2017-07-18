@@ -78,7 +78,11 @@ func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 			return nil, err
 		}
 
-		return NewJWTManager(jwt.NewParser(jwt.NewConfig("HS256", value))), nil
+		jwtConfig := jwt.NewConfig(
+			jwt.SigningMethod{Alg: "HS256", Key: value},
+			[]jwt.SigningMethod{{Alg: "HS256", Key: value}},
+		)
+		return NewJWTManager(jwt.NewParser(jwtConfig)), nil
 	case Auth:
 		// TODO: Create an Auth Manager that always validated tokens against an auth provider
 	}

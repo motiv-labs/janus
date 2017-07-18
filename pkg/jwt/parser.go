@@ -1,11 +1,29 @@
 package jwt
 
 import (
+	"crypto/rsa"
+	"crypto/x509"
+	"encoding/pem"
 	"errors"
 	"net/http"
 	"strings"
 
 	"github.com/dgrijalva/jwt-go"
+)
+
+var (
+	// ErrSigningMethodMismatch is the error returned when token is signed with the method other than verified
+	ErrSigningMethodMismatch = errors.New("Signing method mismatch")
+	// ErrFailedToParseToken is the error returned when token is failed to parse and validate against secret and expiration date
+	ErrFailedToParseToken = errors.New("Failed to parse token")
+	// ErrUnsupportedSigningMethod is the error returned when token is signed with unsupported by the library method
+	ErrUnsupportedSigningMethod = errors.New("Unsupported signing method")
+	// ErrInvalidPEMBlock is the error returned for keys expected to be PEM-encoded
+	ErrInvalidPEMBlock = errors.New("Invalid RSA: not PEM-encoded")
+	// ErrNotRSAPublicKey is the error returned for invalid RSA public key
+	ErrNotRSAPublicKey = errors.New("Invalid RSA: expected PUBLIC KEY block type")
+	// ErrBadPublicKey is the error returned for invalid RSA public key
+	ErrBadPublicKey = errors.New("Invalid RSA: failed to assert public key")
 )
 
 // Parser struct
@@ -42,14 +60,47 @@ func (jp *Parser) ParseFromRequest(r *http.Request) (*jwt.Token, error) {
 }
 
 // Parse a JWT token and validates it
-func (jp *Parser) Parse(token string) (*jwt.Token, error) {
-	return jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
-		if jwt.GetSigningMethod(jp.Config.SigningAlgorithm) != token.Method {
-			return nil, errors.New("invalid signing algorithm")
+func (jp *Parser) Parse(tokenString string) (*jwt.Token, error) {
+	for _, method := range jp.Config.VerifyingMethods {
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+			if token.Method.Alg() != method.Alg {
+				return nil, ErrSigningMethodMismatch
+			}
+
+			switch token.Method.(type) {
+			case *jwt.SigningMethodHMAC:
+				return []byte(method.Key), nil
+			case *jwt.SigningMethodRSA:
+				block, _ := pem.Decode([]byte(method.Key))
+				if block == nil {
+					return nil, ErrInvalidPEMBlock
+				}
+				if got, want := block.Type, "PUBLIC KEY"; got != want {
+					return nil, ErrNotRSAPublicKey
+				}
+				pub, err := x509.ParsePKIXPublicKey(block.Bytes)
+				if nil != err {
+					return nil, err
+				}
+
+				if _, ok := pub.(*rsa.PublicKey); !ok {
+					return nil, ErrBadPublicKey
+				}
+
+				return pub, nil
+			default:
+				return nil, ErrUnsupportedSigningMethod
+			}
+		})
+
+		if err != nil {
+			continue
 		}
 
-		return []byte(jp.Config.SigningKey), nil
-	})
+		return token, err
+	}
+
+	return nil, ErrFailedToParseToken
 }
 
 // GetStandardClaims returns a structured version of Claims Section

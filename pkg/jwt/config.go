@@ -8,6 +8,13 @@ import (
 	"github.com/hellofresh/janus/pkg/response"
 )
 
+// SigningMethod defines signing method algorithm and key
+type SigningMethod struct {
+	// Alg defines JWT signing algorithm. Possible values are: HS256, HS384, HS512, RS256, RS384, RS512
+	Alg string
+	Key string
+}
+
 // Config struct
 type Config struct {
 	// Callback function that should perform the authentication of the user based on userID and
@@ -26,12 +33,11 @@ type Config struct {
 	// Duration that a jwt token is valid. Optional, defaults to one hour.
 	Timeout time.Duration
 
-	// SigningAlgorithm defines token signing algorithm.
-	// Possible values are: HS256, HS384, HS512, RS256, RS384, RS512
-	SigningAlgorithm string
+	// SigningMethod defines new token signing algorithm/key pair.
+	SigningMethod SigningMethod
 
-	// SigningKey key used for signing. Required.
-	SigningKey string
+	// VerifyingMethods defines chain of token signature verification algorithm/key pairs.
+	VerifyingMethods []SigningMethod
 
 	// TokenLookup is a string in the form of "<source>:<name>" that is used
 	// to extract token from the request.
@@ -50,10 +56,10 @@ type Config struct {
 }
 
 // NewConfig creates a new instance of Config
-func NewConfig(algorithm, key string) Config {
+func NewConfig(signingMethod SigningMethod, verifyingMethods []SigningMethod) Config {
 	return Config{
-		SigningAlgorithm: algorithm,
-		SigningKey:       key,
+		SigningMethod:    signingMethod,
+		VerifyingMethods: verifyingMethods,
 		Timeout:          time.Hour,
 		MaxRefresh:       time.Hour * 24,
 		TokenLookup:      "header:Authorization",
@@ -62,7 +68,10 @@ func NewConfig(algorithm, key string) Config {
 
 // NewConfigWithHandlers creates a new instance of Config with default handlers
 func NewConfigWithHandlers(cred config.Credentials) Config {
-	jwtConfig := NewConfig(cred.Algorithm, cred.Secret)
+	jwtConfig := NewConfig(
+		SigningMethod{Alg: cred.Algorithm, Key: cred.Secret},
+		[]SigningMethod{{Alg: cred.Algorithm, Key: cred.Secret}},
+	)
 	jwtConfig.Authenticator = func(userID string, password string) (string, bool) {
 		if userID == cred.Username && password == cred.Password {
 			return userID, true
