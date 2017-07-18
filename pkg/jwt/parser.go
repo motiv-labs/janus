@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"strings"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 )
 
 // Parser struct
@@ -48,7 +48,7 @@ func (jp *Parser) Parse(token string) (*jwt.Token, error) {
 			return nil, errors.New("invalid signing algorithm")
 		}
 
-		return jp.Config.Secret, nil
+		return []byte(jp.Config.SigningKey), nil
 	})
 }
 

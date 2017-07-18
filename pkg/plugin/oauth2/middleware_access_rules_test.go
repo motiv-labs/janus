@@ -21,11 +21,11 @@ func TestBlockJWTByCountry(t *testing.T) {
 		{Predicate: "country == 'de'", Action: "deny"},
 	}
 
-	config := jwt.NewConfig(secret)
+	config := jwt.NewConfig("HS256", secret)
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken(secret)
+	token, err := generateToken("HS256", secret)
 	require.NoError(t, err)
 
 	w, err := test.Record(
@@ -48,11 +48,11 @@ func TestBlockJWTByUsername(t *testing.T) {
 		{Predicate: "username == 'test@hellofresh.com'", Action: "deny"},
 	}
 
-	config := jwt.NewConfig(secret)
+	config := jwt.NewConfig("HS256", secret)
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken(secret)
+	token, err := generateToken("HS256", secret)
 	require.NoError(t, err)
 
 	w, err := test.Record(
@@ -75,11 +75,11 @@ func TestBlockJWTByIssueDate(t *testing.T) {
 		{Predicate: fmt.Sprintf("iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
 	}
 
-	config := jwt.NewConfig(secret)
+	config := jwt.NewConfig("HS256", secret)
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken(secret)
+	token, err := generateToken("HS256", secret)
 	require.NoError(t, err)
 
 	w, err := test.Record(
@@ -102,11 +102,11 @@ func TestBlockJWTByCountryAndIssueDate(t *testing.T) {
 		{Predicate: fmt.Sprintf("country == 'de' && iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
 	}
 
-	config := jwt.NewConfig(secret)
+	config := jwt.NewConfig("HS256", secret)
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken(secret)
+	token, err := generateToken("HS256", secret)
 	require.NoError(t, err)
 
 	w, err := test.Record(
@@ -122,14 +122,14 @@ func TestBlockJWTByCountryAndIssueDate(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
 
-func generateToken(secret string) (string, error) {
-	token := basejwt.NewWithClaims(basejwt.SigningMethodHS256, basejwt.MapClaims{
+func generateToken(alg, key string) (string, error) {
+	token := basejwt.NewWithClaims(basejwt.GetSigningMethod(alg), basejwt.MapClaims{
 		"country":  "de",
 		"username": "test@hellofresh.com",
 		"iat":      time.Now().Unix(),
 	})
 
-	return token.SignedString([]byte(secret))
+	return token.SignedString([]byte(key))
 }
 
 func TestEmptyAccessRules(t *testing.T) {
@@ -137,7 +137,7 @@ func TestEmptyAccessRules(t *testing.T) {
 
 	revokeRules := []*oauth.AccessRule{}
 
-	config := jwt.NewConfig(secret)
+	config := jwt.NewConfig("HS256", secret)
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
@@ -157,11 +157,11 @@ func TestWrongJWT(t *testing.T) {
 		{Predicate: fmt.Sprintf("country == 'de' && iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
 	}
 
-	config := jwt.NewConfig("wrong_secret")
+	config := jwt.NewConfig("HS256", "wrong_secret")
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken("secret")
+	token, err := generateToken("HS256", "secret")
 	require.NoError(t, err)
 
 	w, err := test.Record(
@@ -184,11 +184,11 @@ func TestWrongRule(t *testing.T) {
 		{Predicate: "country == 'wrong'", Action: "deny"},
 	}
 
-	config := jwt.NewConfig(secret)
+	config := jwt.NewConfig("HS256", secret)
 	parser := jwt.NewParser(config)
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken(secret)
+	token, err := generateToken("HS256", secret)
 	require.NoError(t, err)
 
 	w, err := test.Record(

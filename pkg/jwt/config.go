@@ -26,12 +26,12 @@ type Config struct {
 	// Duration that a jwt token is valid. Optional, defaults to one hour.
 	Timeout time.Duration
 
-	// Secret key used for signing. Required.
-	Secret []byte
-
-	// signing algorithm - possible values are HS256, HS384, HS512
-	// Optional, default is HS256.
+	// SigningAlgorithm defines token signing algorithm.
+	// Possible values are: HS256, HS384, HS512, RS256, RS384, RS512
 	SigningAlgorithm string
+
+	// SigningKey key used for signing. Required.
+	SigningKey string
 
 	// TokenLookup is a string in the form of "<source>:<name>" that is used
 	// to extract token from the request.
@@ -50,10 +50,10 @@ type Config struct {
 }
 
 // NewConfig creates a new instance of Config
-func NewConfig(secret string) Config {
+func NewConfig(algorithm, key string) Config {
 	return Config{
-		SigningAlgorithm: "HS256",
-		Secret:           []byte(secret),
+		SigningAlgorithm: algorithm,
+		SigningKey:       key,
 		Timeout:          time.Hour,
 		MaxRefresh:       time.Hour * 24,
 		TokenLookup:      "header:Authorization",
@@ -62,22 +62,22 @@ func NewConfig(secret string) Config {
 
 // NewConfigWithHandlers creates a new instance of Config with default handlers
 func NewConfigWithHandlers(cred config.Credentials) Config {
-	config := NewConfig(cred.Secret)
-	config.Authenticator = func(userID string, password string) (string, bool) {
+	jwtConfig := NewConfig(cred.Algorithm, cred.Secret)
+	jwtConfig.Authenticator = func(userID string, password string) (string, bool) {
 		if userID == cred.Username && password == cred.Password {
 			return userID, true
 		}
 
 		return userID, false
 	}
-	config.Authorizator = func(userID string, w http.ResponseWriter, r *http.Request) bool {
+	jwtConfig.Authorizator = func(userID string, w http.ResponseWriter, r *http.Request) bool {
 		return userID == cred.Username
 	}
 
-	config.Unauthorized = func(w http.ResponseWriter, r *http.Request, err error) {
+	jwtConfig.Unauthorized = func(w http.ResponseWriter, r *http.Request, err error) {
 		response.JSON(w, http.StatusUnauthorized, response.H{
 			"message": err.Error(),
 		})
 	}
-	return config
+	return jwtConfig
 }

@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/request"
 	"github.com/hellofresh/janus/pkg/response"
 )
@@ -26,14 +26,14 @@ type Login struct {
 // Reply will be of the form {"token": "<TOKEN>"}.
 func (j *Handler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var loginVals Login
+		var loginValues Login
 
-		if request.BindJSON(r, &loginVals) != nil {
+		if request.BindJSON(r, &loginValues) != nil {
 			j.Config.Unauthorized(w, r, errors.New("missing username or password"))
 			return
 		}
 
-		userID, ok := j.Config.Authenticator(loginVals.Username, loginVals.Password)
+		userID, ok := j.Config.Authenticator(loginValues.Username, loginValues.Password)
 
 		if !ok {
 			j.Config.Unauthorized(w, r, errors.New("invalid username or password"))
@@ -41,7 +41,7 @@ func (j *Handler) Login() http.HandlerFunc {
 		}
 
 		if userID == "" {
-			userID = loginVals.Username
+			userID = loginValues.Username
 		}
 
 		if 0 == j.Config.Timeout {
@@ -50,7 +50,7 @@ func (j *Handler) Login() http.HandlerFunc {
 
 		expire := time.Now().Add(j.Config.Timeout)
 
-		tokenString, err := IssueAdminToken(j.Config.SigningAlgorithm, userID, j.Config.Secret, j.Config.Timeout)
+		tokenString, err := IssueAdminToken(j.Config.SigningAlgorithm, j.Config.SigningKey, userID, j.Config.Timeout)
 
 		if err != nil {
 			j.Config.Unauthorized(w, r, errors.New("problem signing JWT"))
@@ -92,7 +92,7 @@ func (j *Handler) Refresh() http.HandlerFunc {
 		newClaims["exp"] = expire.Unix()
 		newClaims["iat"] = origIat
 
-		tokenString, err := newToken.SignedString(j.Config.Secret)
+		tokenString, err := newToken.SignedString(j.Config.SigningKey)
 
 		if err != nil {
 			j.Config.Unauthorized(w, r, errors.New("create JWT Token faild"))

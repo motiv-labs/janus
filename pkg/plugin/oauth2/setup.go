@@ -44,7 +44,7 @@ func setupOAuth2(route *proxy.Route, p plugin.Params) error {
 	}
 
 	route.AddInbound(NewKeyExistsMiddleware(manager))
-	route.AddInbound(NewRevokeRulesMiddleware(jwt.NewParser(jwt.NewConfig(secret)), oauthServer.AccessRules))
+	route.AddInbound(NewRevokeRulesMiddleware(jwt.NewParser(jwt.NewConfig("HS256", secret)), oauthServer.AccessRules))
 
 	return nil
 }

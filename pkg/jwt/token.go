@@ -3,11 +3,11 @@ package jwt
 import (
 	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 )
 
 // IssueAdminToken issues admin JWT for API access
-func IssueAdminToken(signingAlgorithm, claimsID string, secret []byte, expireIn time.Duration) (string, error) {
+func IssueAdminToken(signingAlgorithm, signingKey, claimsID string, expireIn time.Duration) (string, error) {
 	token := jwt.New(jwt.GetSigningMethod(signingAlgorithm))
 	claims := token.Claims.(jwt.MapClaims)
 
@@ -16,5 +16,6 @@ func IssueAdminToken(signingAlgorithm, claimsID string, secret []byte, expireIn 
 	claims["exp"] = expire.Unix()
 	claims["iat"] = time.Now().Unix()
 
-	return token.SignedString(secret)
+	// currently only HSXXX algorithms are supported for issuing admin token, so we cast key to bytes array
+	return token.SignedString([]byte(signingKey))
 }

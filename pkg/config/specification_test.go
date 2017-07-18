@@ -17,6 +17,7 @@ func Test_LoadEnv(t *testing.T) {
 
 	assert.Equal(t, 8001, globalConfig.Port)
 	assert.Equal(t, 8081, globalConfig.Web.Port)
+	assert.Equal(t, "HS256", globalConfig.Web.Credentials.Algorithm)
 	assert.Equal(t, uint(0), globalConfig.Stats.AutoDiscoverThreshold)
 	assert.Equal(t, []string{"api", "foo", "bar"}, globalConfig.Stats.AutoDiscoverWhiteList)
 	assert.Equal(t, "error-log", globalConfig.Stats.ErrorsSection)
