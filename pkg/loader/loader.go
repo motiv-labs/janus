@@ -42,7 +42,7 @@ func Load(params Params) {
 	})
 	apiLoader.LoadDefinitions(params.APIRepo)
 
-	oauthLoader := NewOAuthLoader(register, params.Storage)
+	oauthLoader := NewOAuthLoader(register)
 	oauthLoader.LoadDefinitions(params.OAuthRepo)
 
 	// some routers may panic when have empty routes list, so add one dummy 404 route to avoid this

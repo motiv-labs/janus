@@ -3,7 +3,6 @@ package loader
 import (
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
-	"github.com/hellofresh/janus/pkg/store"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 )
@@ -11,12 +10,11 @@ import (
 // OAuthLoader handles the loading of the api specs
 type OAuthLoader struct {
 	register *proxy.Register
-	storage  store.Store
 }
 
 // NewOAuthLoader creates a new instance of the Loader
-func NewOAuthLoader(register *proxy.Register, storage store.Store) *OAuthLoader {
-	return &OAuthLoader{register, storage}
+func NewOAuthLoader(register *proxy.Register) *OAuthLoader {
+	return &OAuthLoader{register}
 }
 
 // LoadDefinitions loads all oauth servers from a data source
@@ -56,7 +54,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 				proxy.NewRouteWithInOut(
 					tokenProxy,
 					proxy.NewInChain(oauth.NewSecretMiddleware(oauthServer).Handler, corsHandler),
-					proxy.NewOutChain(oauth.NewTokenPlugin(m.storage, repo).Out),
+					nil,
 				),
 			)
 		} else {
@@ -74,13 +72,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		logger.Debug("Registering revoke endpoint")
 		revokeProxy := oauthServer.Endpoints.Revoke
 		if isValid, err := revokeProxy.Validate(); isValid && err == nil {
-			m.register.Add(
-				proxy.NewRouteWithInOut(
-					revokeProxy,
-					proxy.NewInChain(corsHandler, oauth.NewRevokeMiddleware(oauthServer).Handler),
-					nil,
-				),
-			)
+			m.register.Add(proxy.NewRoute(revokeProxy))
 		} else {
 			logger.WithError(err).Debug("No revoke endpoint")
 		}
@@ -135,5 +127,5 @@ func (m *OAuthLoader) getManager(oauthServer *oauth.OAuth) (oauth.Manager, error
 		return nil, err
 	}
 
-	return oauth.NewManagerFactory(m.storage, oauthServer.TokenStrategy.Settings).Build(managerType)
+	return oauth.NewManagerFactory(oauthServer.TokenStrategy.Settings).Build(managerType)
 }
