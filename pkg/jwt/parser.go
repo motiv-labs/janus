@@ -133,12 +133,6 @@ func (jp *Parser) Parse(tokenString string) (*jwt.Token, error) {
 	return nil, ErrFailedToParseToken
 }
 
-// GetStandardClaims returns a structured version of Claims Section
-func (jp *Parser) GetStandardClaims(token *jwt.Token) (jwt.StandardClaims, bool) {
-	claims, ok := token.Claims.(jwt.StandardClaims)
-	return claims, ok
-}
-
 // GetMapClaims returns a map version of Claims Section
 func (jp *Parser) GetMapClaims(token *jwt.Token) (jwt.MapClaims, bool) {
 	claims, ok := token.Claims.(jwt.MapClaims)
