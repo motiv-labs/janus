@@ -37,9 +37,9 @@ Lets create a file with the oAuth2 configuration called `auth.json`:
     },
     "token_strategy" : {
         "name" : "jwt",
-        "settings" : {
-            "secret" : "secret"
-        }
+        "settings" : [
+            {"alg": "HS256", "key" : "secret"}
+        ]
     }
 }
 ```

@@ -44,5 +44,35 @@ $ http -v GET http://localhost:8080/auth/token?grant_type=client_credentials "Au
 | allowed_authorize_types       | The allowed authorize types for this oauth server                                         |
 | auth_login_redirect           | The auth login redirect URL                                                               |
 | secrets                       | A map of client_id: client_secret that allows you to authenticate only with the client_id |
-| token_strategy.name           | The token strategy for this server. Could be `storage` or `jwt`                           |
-| token_strategy.settings.secret| If you use JWT you should set your secret or private certificate string here              |
+| token_strategy.name           | The token validation strategy for this server. Could be `storage` or `jwt`                |
+| token_strategy.settings       | Token strategy settings, see bellow by strategy                                           |
+
+## Token Strategy Settings
+
+### `jwt`
+
+JWT token validation strategy performs token validation against signature and expiration date. Currently the following
+signature methods are supported:
+ 
+* `HS256` - HMAC with SHA256 hash (symmetric key)
+* `HS384` - HMAC with SHA384 hash (symmetric key)
+* `HS512` - HMAC with SHA512 hash (symmetric key)
+* `RS256` - RSA with SHA256 hash (asymmetric key)
+* `RS384` - RSA with SHA384 hash (asymmetric key)
+* `RS512` - RSA with SHA512 hash (asymmetric key)
+
+Settings structure has the following format:
+
+```json
+[
+    {"alg": "<alg1>", "key": "<key1>"},
+    {"alg": "<alg2>", "key": "<key2>"},
+    ...
+]
+```
+
+List of signing methods allows signing method and keys rotation w/out immediate invalidation of the old one, so the
+tokens signed with ald and new methods will be valid.
+
+For backward compatibility the following settings format is also valid: `{"secret": "<key>"}` that is equal to the
+new format `[{"alg": "HS256", "key", "<key>"}]`.

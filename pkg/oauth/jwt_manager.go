@@ -1,8 +1,6 @@
 package oauth
 
 import (
-	"time"
-
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/session"
 	log "github.com/sirupsen/logrus"
