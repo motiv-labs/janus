@@ -26,18 +26,48 @@ var (
 	ErrBadPublicKey = errors.New("Invalid RSA: failed to assert public key")
 )
 
+// SigningMethod defines signing method algorithm and key
+type SigningMethod struct {
+	// Alg defines JWT signing algorithm. Possible values are: HS256, HS384, HS512, RS256, RS384, RS512
+	Alg string `json:"alg"`
+	Key string `json:"key"`
+}
+
+// ParserConfig configures the way JWT Parser gets and validates token
+type ParserConfig struct {
+	// SigningMethods defines chain of token signature verification algorithm/key pairs.
+	SigningMethods []SigningMethod
+
+	// TokenLookup is a string in the form of "<source>:<name>" that is used
+	// to extract token from the request.
+	// Optional. Default value "header:Authorization".
+	// Possible values:
+	// - "header:<name>"
+	// - "query:<name>"
+	// - "cookie:<name>"
+	TokenLookup string
+}
+
+// NewParserConfig creates a new instance of ParserConfig
+func NewParserConfig(signingMethod ...SigningMethod) ParserConfig {
+	return ParserConfig{
+		SigningMethods: signingMethod,
+		TokenLookup:    "header:Authorization",
+	}
+}
+
 // Parser struct
 type Parser struct {
-	Config Config
+	Config ParserConfig
 }
 
 // NewParser creates a new instance of Parser
-func NewParser(config Config) *Parser {
+func NewParser(config ParserConfig) *Parser {
 	return &Parser{config}
 }
 
 // ParseFromRequest tries to extract and validate token from request.
-// See "Config.TokenLookup" for possible ways to pass token in request.
+// See "Guard.TokenLookup" for possible ways to pass token in request.
 func (jp *Parser) ParseFromRequest(r *http.Request) (*jwt.Token, error) {
 	var token string
 	var err error
@@ -61,7 +91,7 @@ func (jp *Parser) ParseFromRequest(r *http.Request) (*jwt.Token, error) {
 
 // Parse a JWT token and validates it
 func (jp *Parser) Parse(tokenString string) (*jwt.Token, error) {
-	for _, method := range jp.Config.VerifyingMethods {
+	for _, method := range jp.Config.SigningMethods {
 		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if token.Method.Alg() != method.Alg {
 				return nil, ErrSigningMethodMismatch

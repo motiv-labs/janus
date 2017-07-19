@@ -12,7 +12,7 @@ import (
 
 // Handler struct
 type Handler struct {
-	Config Config
+	Guard Guard
 }
 
 // Login form structure.
@@ -29,14 +29,14 @@ func (j *Handler) Login() http.HandlerFunc {
 		var loginValues Login
 
 		if request.BindJSON(r, &loginValues) != nil {
-			j.Config.Unauthorized(w, r, errors.New("missing username or password"))
+			j.Guard.Unauthorized(w, r, errors.New("missing username or password"))
 			return
 		}
 
-		userID, ok := j.Config.Authenticator(loginValues.Username, loginValues.Password)
+		userID, ok := j.Guard.Authenticator(loginValues.Username, loginValues.Password)
 
 		if !ok {
-			j.Config.Unauthorized(w, r, errors.New("invalid username or password"))
+			j.Guard.Unauthorized(w, r, errors.New("invalid username or password"))
 			return
 		}
 
@@ -44,16 +44,16 @@ func (j *Handler) Login() http.HandlerFunc {
 			userID = loginValues.Username
 		}
 
-		if 0 == j.Config.Timeout {
-			j.Config.Timeout = time.Hour
+		if 0 == j.Guard.Timeout {
+			j.Guard.Timeout = time.Hour
 		}
 
-		expire := time.Now().Add(j.Config.Timeout)
+		expire := time.Now().Add(j.Guard.Timeout)
 
-		tokenString, err := IssueAdminToken(j.Config.SigningMethod, userID, j.Config.Timeout)
+		tokenString, err := IssueAdminToken(j.Guard.SigningMethod, userID, j.Guard.Timeout)
 
 		if err != nil {
-			j.Config.Unauthorized(w, r, errors.New("problem issuing JWT"))
+			j.Guard.Unauthorized(w, r, errors.New("problem issuing JWT"))
 			return
 		}
 
@@ -68,34 +68,34 @@ func (j *Handler) Login() http.HandlerFunc {
 // Reply will be of the form {"token": "<TOKEN>", "expire": "<DateTime in RFC-3339 format>"}.
 func (j *Handler) Refresh() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		parser := Parser{j.Config}
+		parser := Parser{j.Guard.ParserConfig}
 		token, _ := parser.ParseFromRequest(r)
 		claims := token.Claims.(jwt.MapClaims)
 
 		origIat := int64(claims["iat"].(float64))
 
-		if origIat < time.Now().Add(-j.Config.MaxRefresh).Unix() {
-			j.Config.Unauthorized(w, r, errors.New("token is expired"))
+		if origIat < time.Now().Add(-j.Guard.MaxRefresh).Unix() {
+			j.Guard.Unauthorized(w, r, errors.New("token is expired"))
 			return
 		}
 
 		// Create the token
-		newToken := jwt.New(jwt.GetSigningMethod(j.Config.SigningMethod.Alg))
+		newToken := jwt.New(jwt.GetSigningMethod(j.Guard.SigningMethod.Alg))
 		newClaims := newToken.Claims.(jwt.MapClaims)
 
 		for key := range claims {
 			newClaims[key] = claims[key]
 		}
 
-		expire := time.Now().Add(j.Config.Timeout)
+		expire := time.Now().Add(j.Guard.Timeout)
 		newClaims["id"] = claims["id"]
 		newClaims["exp"] = expire.Unix()
 		newClaims["iat"] = origIat
 
 		// currently only HSXXX algorithms are supported for issuing admin token, so we cast key to bytes array
-		tokenString, err := newToken.SignedString([]byte(j.Config.SigningMethod.Key))
+		tokenString, err := newToken.SignedString([]byte(j.Guard.SigningMethod.Key))
 		if err != nil {
-			j.Config.Unauthorized(w, r, errors.New("create JWT Token failed"))
+			j.Guard.Unauthorized(w, r, errors.New("create JWT Token failed"))
 			return
 		}
 

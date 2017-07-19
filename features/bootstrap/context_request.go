@@ -198,7 +198,7 @@ func (c *requestContext) requestJWTTokenIsNotSet() error {
 }
 
 func (c *requestContext) requestJWTTokenIsValidAdminToken() error {
-	jwtConfig := jwt.NewConfigWithHandlers(c.adminCred)
+	jwtConfig := jwt.NewGuard(c.adminCred)
 	accessToken, err := jwt.IssueAdminToken(jwtConfig.SigningMethod, c.adminCred.Username, jwtConfig.Timeout)
 	if nil != err {
 		return fmt.Errorf("Failed to issue JWT: %v", err)

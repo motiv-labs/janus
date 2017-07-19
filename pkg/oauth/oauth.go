@@ -1,10 +1,12 @@
 package oauth
 
 import (
+	"encoding/json"
 	"errors"
 	"sync"
 
 	"github.com/Knetic/govaluate"
+	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/proxy"
 )
 
@@ -55,16 +57,30 @@ type TokenStrategy struct {
 }
 
 // TokenStrategySettings represents the settings for the token strategy
-type TokenStrategySettings map[string]string
+type TokenStrategySettings json.RawMessage
 
-// GetJWTSecret gets the JWT secret config
-func (t TokenStrategySettings) GetJWTSecret() (string, error) {
-	value, ok := t["secret"]
-	if !ok || value == "" {
-		return "", ErrJWTSecretMissing
+// GetJWTSigningMethods parses and returns chain of JWT signing methods for token signature validation.
+// Supports fallback to legacy format with {"secret": "key"} as single signing method with HS256 alg.
+func (t TokenStrategySettings) GetJWTSigningMethods() ([]jwt.SigningMethod, error) {
+	var methods []jwt.SigningMethod
+	err := json.Unmarshal(t, &methods)
+	if err != nil {
+		// fallback to old structure with secret string for HS256 signing method
+		var legacy map[string]string
+		err = json.Unmarshal(t, &legacy)
+		if err != nil {
+			return methods, err
+		}
+
+		value, ok := legacy["secret"]
+		if !ok || value == "" {
+			return methods, ErrJWTSecretMissing
+		}
+
+		return []jwt.SigningMethod{{Alg: "HS256", Key: value}}, nil
 	}
 
-	return value, nil
+	return methods, nil
 }
 
 type meta struct {

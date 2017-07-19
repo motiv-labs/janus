@@ -14,6 +14,8 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+const signingAlg = "HS256"
+
 func TestBlockJWTByCountry(t *testing.T) {
 	secret := "secret"
 
@@ -21,14 +23,10 @@ func TestBlockJWTByCountry(t *testing.T) {
 		{Predicate: "country == 'de'", Action: "deny"},
 	}
 
-	config := jwt.NewConfig(
-		jwt.SigningMethod{Alg: "HS256", Key: secret},
-		[]jwt.SigningMethod{{Alg: "HS256", Key: secret}},
-	)
-	parser := jwt.NewParser(config)
+	parser := jwt.NewParser(jwt.NewParserConfig(jwt.SigningMethod{Alg: signingAlg, Key: secret}))
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken("HS256", secret)
+	token, err := generateToken(signingAlg, secret)
 	require.NoError(t, err)
 
 	w, err := test.Record(
@@ -51,14 +49,10 @@ func TestBlockJWTByUsername(t *testing.T) {
 		{Predicate: "username == 'test@hellofresh.com'", Action: "deny"},
 	}
 
-	config := jwt.NewConfig(
-		jwt.SigningMethod{Alg: "HS256", Key: secret},
-		[]jwt.SigningMethod{{Alg: "HS256", Key: secret}},
-	)
-	parser := jwt.NewParser(config)
+	parser := jwt.NewParser(jwt.NewParserConfig(jwt.SigningMethod{Alg: signingAlg, Key: secret}))
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken("HS256", secret)
+	token, err := generateToken(signingAlg, secret)
 	require.NoError(t, err)
 
 	w, err := test.Record(
@@ -81,14 +75,10 @@ func TestBlockJWTByIssueDate(t *testing.T) {
 		{Predicate: fmt.Sprintf("iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
 	}
 
-	config := jwt.NewConfig(
-		jwt.SigningMethod{Alg: "HS256", Key: secret},
-		[]jwt.SigningMethod{{Alg: "HS256", Key: secret}},
-	)
-	parser := jwt.NewParser(config)
+	parser := jwt.NewParser(jwt.NewParserConfig(jwt.SigningMethod{Alg: signingAlg, Key: secret}))
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken("HS256", secret)
+	token, err := generateToken(signingAlg, secret)
 	require.NoError(t, err)
 
 	w, err := test.Record(
@@ -111,14 +101,10 @@ func TestBlockJWTByCountryAndIssueDate(t *testing.T) {
 		{Predicate: fmt.Sprintf("country == 'de' && iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
 	}
 
-	config := jwt.NewConfig(
-		jwt.SigningMethod{Alg: "HS256", Key: secret},
-		[]jwt.SigningMethod{{Alg: "HS256", Key: secret}},
-	)
-	parser := jwt.NewParser(config)
+	parser := jwt.NewParser(jwt.NewParserConfig(jwt.SigningMethod{Alg: signingAlg, Key: secret}))
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken("HS256", secret)
+	token, err := generateToken(signingAlg, secret)
 	require.NoError(t, err)
 
 	w, err := test.Record(
@@ -149,11 +135,7 @@ func TestEmptyAccessRules(t *testing.T) {
 
 	revokeRules := []*oauth.AccessRule{}
 
-	config := jwt.NewConfig(
-		jwt.SigningMethod{Alg: "HS256", Key: secret},
-		[]jwt.SigningMethod{{Alg: "HS256", Key: secret}},
-	)
-	parser := jwt.NewParser(config)
+	parser := jwt.NewParser(jwt.NewParserConfig(jwt.SigningMethod{Alg: signingAlg, Key: secret}))
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
 
@@ -172,14 +154,10 @@ func TestWrongJWT(t *testing.T) {
 		{Predicate: fmt.Sprintf("country == 'de' && iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
 	}
 
-	config := jwt.NewConfig(
-		jwt.SigningMethod{Alg: "HS256", Key: "wrong secret"},
-		[]jwt.SigningMethod{{Alg: "HS256", Key: ""}},
-	)
-	parser := jwt.NewParser(config)
+	parser := jwt.NewParser(jwt.NewParserConfig(jwt.SigningMethod{Alg: signingAlg, Key: "wrong secret"}))
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken("HS256", "secret")
+	token, err := generateToken(signingAlg, "secret")
 	require.NoError(t, err)
 
 	w, err := test.Record(
@@ -202,14 +180,10 @@ func TestWrongRule(t *testing.T) {
 		{Predicate: "country == 'wrong'", Action: "deny"},
 	}
 
-	config := jwt.NewConfig(
-		jwt.SigningMethod{Alg: "HS256", Key: secret},
-		[]jwt.SigningMethod{{Alg: "HS256", Key: secret}},
-	)
-	parser := jwt.NewParser(config)
+	parser := jwt.NewParser(jwt.NewParserConfig(jwt.SigningMethod{Alg: signingAlg, Key: secret}))
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken("HS256", secret)
+	token, err := generateToken(signingAlg, secret)
 	require.NoError(t, err)
 
 	w, err := test.Record(

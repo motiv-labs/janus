@@ -1,6 +1,7 @@
 package oauth2
 
 import (
+	"encoding/json"
 	"testing"
 
 	"github.com/hellofresh/janus/pkg/oauth"
@@ -8,6 +9,7 @@ import (
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestOAuth2Config(t *testing.T) {
@@ -17,7 +19,7 @@ func TestOAuth2Config(t *testing.T) {
 	}
 
 	err := plugin.Decode(rawConfig, &config)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Equal(t, "test", config.ServerName)
 }
 
@@ -25,13 +27,14 @@ func TestSetupWithValidOAuthServer(t *testing.T) {
 	rawConfig := map[string]interface{}{
 		"server_name": "test",
 	}
+	tokenStrategyRaw, _ := json.Marshal(map[string]string{"secret": "1234"})
 
 	repo := oauth.NewInMemoryRepository()
 	repo.Add(&oauth.OAuth{
 		Name: "test",
 		TokenStrategy: oauth.TokenStrategy{
 			Name:     "jwt",
-			Settings: oauth.TokenStrategySettings{"secret": "1234"},
+			Settings: oauth.TokenStrategySettings(tokenStrategyRaw),
 		},
 	})
 
@@ -42,21 +45,22 @@ func TestSetupWithValidOAuthServer(t *testing.T) {
 		OAuthRepo: repo,
 	})
 
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	assert.Len(t, route.Inbound, 2)
 }
 
-func TestSetupWithInalidOAuthServer(t *testing.T) {
+func TestSetupWithInvalidOAuthServer(t *testing.T) {
 	rawConfig := map[string]interface{}{
 		"server_name": "test",
 	}
+	tokenStrategyRaw, _ := json.Marshal(map[string]string{"secret": "1234"})
 
 	repo := oauth.NewInMemoryRepository()
 	repo.Add(&oauth.OAuth{
 		Name: "test1",
 		TokenStrategy: oauth.TokenStrategy{
 			Name:     "jwt",
-			Settings: oauth.TokenStrategySettings{"secret": "1234"},
+			Settings: oauth.TokenStrategySettings(tokenStrategyRaw),
 		},
 	})
 	route := proxy.NewRoute(&proxy.Definition{})
@@ -69,17 +73,18 @@ func TestSetupWithInalidOAuthServer(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestSetupnWithWrongStrategy(t *testing.T) {
+func TestSetupWithWrongStrategy(t *testing.T) {
 	rawConfig := map[string]interface{}{
 		"server_name": "test",
 	}
+	tokenStrategyRaw, _ := json.Marshal(map[string]string{"secret": "1234"})
 
 	repo := oauth.NewInMemoryRepository()
 	repo.Add(&oauth.OAuth{
 		Name: "test1",
 		TokenStrategy: oauth.TokenStrategy{
 			Name:     "wrong",
-			Settings: oauth.TokenStrategySettings{"secret": "1234"},
+			Settings: oauth.TokenStrategySettings(tokenStrategyRaw),
 		},
 	})
 	route := proxy.NewRoute(&proxy.Definition{})
