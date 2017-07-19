@@ -73,12 +73,12 @@ func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 	case Storage:
 		return &StorageTokenManager{Storage: f.Storage}, nil
 	case JWT:
-		value, ok := f.settings["secret"]
-		if !ok || value == "" {
-			return nil, ErrJWTSecretMissing
+		signingMethods, err := f.settings.GetJWTSigningMethods()
+		if nil != err {
+			return nil, err
 		}
 
-		return NewJWTManager(jwt.NewParser(jwt.NewConfig(value))), nil
+		return NewJWTManager(jwt.NewParser(jwt.NewParserConfig(signingMethods...))), nil
 	case Auth:
 		// TODO: Create an Auth Manager that always validated tokens against an auth provider
 	}

@@ -78,6 +78,7 @@
 # Required
 #
   [web.credentials]
+    algorithm = "HS256"
     secret = "secret key"
     username = "admin"
     password = "admin"

@@ -38,8 +38,8 @@ func (p *Provider) Provide(version string) error {
 	r := router.NewChiRouterWithOptions(router.DefaultOptions)
 
 	// create authentication for Janus
-	authConfig := jwt.NewConfigWithHandlers(p.Cred)
-	authMiddleware := jwt.NewMiddleware(authConfig)
+	guard := jwt.NewGuard(p.Cred)
+	authMiddleware := jwt.NewMiddleware(guard)
 	r.Use(
 		chimiddleware.StripSlashes,
 		chimiddleware.DefaultCompress,
@@ -60,7 +60,7 @@ func (p *Provider) Provide(version string) error {
 	r.GET("/status", checker.NewOverviewHandler(p.APIRepo))
 	r.GET("/status/{name}", checker.NewStatusHandler(p.APIRepo))
 
-	handlers := jwt.Handler{Config: authConfig}
+	handlers := jwt.Handler{Guard: guard}
 	r.POST("/login", handlers.Login())
 	authGroup := r.Group("/auth")
 	{

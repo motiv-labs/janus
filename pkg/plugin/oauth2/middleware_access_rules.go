@@ -12,10 +12,10 @@ import (
 func NewRevokeRulesMiddleware(parser *jwt.Parser, accessRules []*oauth.AccessRule) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			log.Debug("Starting revoke rules middleware")
+			log.WithField("rules", len(accessRules)).Debug("Starting revoke rules middleware")
 
 			// If no rules are set then lets not parse the token to avoid performance issues
-			if len(accessRules) <= 0 {
+			if len(accessRules) < 1 {
 				handler.ServeHTTP(w, r)
 				return
 			}

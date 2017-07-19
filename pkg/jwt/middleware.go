@@ -16,22 +16,22 @@ type UserID struct{}
 
 // Middleware struct contains data and logic required for middleware functionality
 type Middleware struct {
-	Config Config
+	Guard Guard
 }
 
 // NewMiddleware builds and returns new JWT middleware instance
-func NewMiddleware(config Config) *Middleware {
+func NewMiddleware(config Guard) *Middleware {
 	return &Middleware{config}
 }
 
 // Handler implementation
 func (m *Middleware) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		parser := Parser{m.Config}
+		parser := Parser{m.Guard.ParserConfig}
 		token, err := parser.ParseFromRequest(r)
 
 		if err != nil {
-			m.Config.Unauthorized(w, r, err)
+			m.Guard.Unauthorized(w, r, err)
 			return
 		}
 
@@ -41,8 +41,8 @@ func (m *Middleware) Handler(handler http.Handler) http.Handler {
 		context.WithValue(r.Context(), Payload{}, claims)
 		context.WithValue(r.Context(), UserID{}, id)
 
-		if !m.Config.Authorizator(id, w, r) {
-			m.Config.Unauthorized(w, r, errors.New("you don't have permission to access"))
+		if !m.Guard.Authorizator(id, w, r) {
+			m.Guard.Unauthorized(w, r, errors.New("you don't have permission to access"))
 			return
 		}
 

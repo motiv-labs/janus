@@ -1,8 +1,6 @@
 package oauth
 
 import (
-	"time"
-
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/session"
 	log "github.com/sirupsen/logrus"
@@ -34,17 +32,14 @@ func (m *JWTManager) IsKeyAuthorised(accessToken string) (session.State, bool) {
 
 	token, err := m.parser.Parse(accessToken)
 	if err != nil {
-		log.WithError(err).Info("Could not parse the JWT")
+		log.WithError(err).Info("Failed to parse and validate the JWT")
 		return sessionState, false
 	}
 
-	if claims, ok := m.parser.GetStandardClaims(token); ok && token.Valid {
-		expiresAt := time.Unix(claims.ExpiresAt, 0)
-		if time.Now().After(expiresAt) {
-			return sessionState, false
-		}
+	// as parser.Parse() does validation we are sure that token is valid at this point
+	if claims, ok := m.parser.GetMapClaims(token); ok {
 		sessionState.AccessToken = accessToken
-		sessionState.ExpiresIn = claims.ExpiresAt
+		sessionState.ExpiresIn = claims["exp"].(int64)
 	}
 
 	return sessionState, true
