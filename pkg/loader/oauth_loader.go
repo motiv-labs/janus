@@ -1,10 +1,13 @@
 package loader
 
 import (
+	"net/http"
+
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
+	"github.com/ulule/limiter"
 )
 
 // OAuthLoader handles the loading of the api specs
@@ -28,72 +31,44 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 	log.Debug("Loading OAuth servers configurations")
 
 	for _, oauthServer := range oauthServers {
+		var corsHandler func(h http.Handler) http.Handler
+		var rateLimitHandler func(h http.Handler) http.Handler
+
 		logger := log.WithField("name", oauthServer.Name)
 		logger.Debug("Registering OAuth server")
 
-		corsHandler := cors.New(cors.Options{
+		// if oauthServer.CorsMeta.Enabled {
+		corsHandler = cors.New(cors.Options{
 			AllowedOrigins:   oauthServer.CorsMeta.Domains,
 			AllowedMethods:   oauthServer.CorsMeta.Methods,
 			AllowedHeaders:   oauthServer.CorsMeta.RequestHeaders,
 			ExposedHeaders:   oauthServer.CorsMeta.ExposedHeaders,
 			AllowCredentials: true,
 		}).Handler
+		// }
 
-		logger.Debug("Registering authorize endpoint")
-		authorizeProxy := oauthServer.Endpoints.Authorize
-		if isValid, err := authorizeProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRouteWithInOut(authorizeProxy, proxy.NewInChain(corsHandler), nil))
-		} else {
-			logger.WithError(err).Debug("No authorize endpoint")
+		// if oauthServer.RateLimit.Enabled {
+		rate, err := limiter.NewRateFromFormatted(oauthServer.RateLimit.Limit)
+		if err != nil {
+			logger.WithError(err).Error("Not able to create rate limit")
 		}
 
-		logger.Debug("Registering token endpoint")
-		tokenProxy := oauthServer.Endpoints.Token
-		if isValid, err := tokenProxy.Validate(); isValid && err == nil {
-			m.register.Add(
-				proxy.NewRouteWithInOut(
-					tokenProxy,
-					proxy.NewInChain(oauth.NewSecretMiddleware(oauthServer).Handler, corsHandler),
-					nil,
-				),
-			)
-		} else {
-			logger.WithError(err).Debug("No token endpoint")
+		limiterStore := limiter.NewMemoryStore()
+		limiterInstance := limiter.NewLimiter(limiterStore, rate)
+		rateLimitHandler = limiter.NewHTTPMiddleware(limiterInstance).Handler
+		// }
+
+		endpoints := map[*proxy.Definition]proxy.InChain{
+			oauthServer.Endpoints.Authorize:    proxy.NewInChain(corsHandler, rateLimitHandler),
+			oauthServer.Endpoints.Token:        proxy.NewInChain(oauth.NewSecretMiddleware(oauthServer).Handler, corsHandler, rateLimitHandler),
+			oauthServer.Endpoints.Info:         proxy.NewInChain(corsHandler, rateLimitHandler),
+			oauthServer.Endpoints.Revoke:       proxy.NewInChain(corsHandler, rateLimitHandler),
+			oauthServer.ClientEndpoints.Create: proxy.NewInChain(corsHandler, rateLimitHandler),
+			oauthServer.ClientEndpoints.Remove: proxy.NewInChain(corsHandler, rateLimitHandler),
 		}
 
-		logger.Debug("Registering info endpoint")
-		infoProxy := oauthServer.Endpoints.Info
-		if isValid, err := infoProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRouteWithInOut(infoProxy, proxy.NewInChain(corsHandler), nil))
-		} else {
-			logger.WithError(err).Debug("No info endpoint")
-		}
-
-		logger.Debug("Registering revoke endpoint")
-		revokeProxy := oauthServer.Endpoints.Revoke
-		if isValid, err := revokeProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRoute(revokeProxy))
-		} else {
-			logger.WithError(err).Debug("No revoke endpoint")
-		}
-
-		logger.Debug("Registering create client endpoint")
-		createProxy := oauthServer.ClientEndpoints.Create
-		if isValid, err := createProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRouteWithInOut(createProxy, proxy.NewInChain(corsHandler), nil))
-		} else {
-			logger.WithError(err).Debug("No client create endpoint")
-		}
-
-		logger.Debug("Registering remove client endpoint")
-		removeProxy := oauthServer.ClientEndpoints.Remove
-		if isValid, err := createProxy.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRouteWithInOut(removeProxy, proxy.NewInChain(corsHandler), nil))
-		} else {
-			logger.WithError(err).Debug("No client remove endpoint")
-		}
-
-		logger.Debug("Oauth server registered")
+		m.registerRoutes(endpoints)
+		logger.Debug("OAuth server registered")
 	}
 
 	log.Debug("Done loading OAuth servers configurations")
@@ -128,4 +103,22 @@ func (m *OAuthLoader) getManager(oauthServer *oauth.OAuth) (oauth.Manager, error
 	}
 
 	return oauth.NewManagerFactory(oauthServer.TokenStrategy.Settings).Build(managerType)
+}
+
+func (m *OAuthLoader) registerRoutes(endpoints map[*proxy.Definition]proxy.InChain) {
+	for endpoint, middleware := range endpoints {
+		if endpoint == nil {
+			log.Debug("Endpoint not registered")
+			continue
+		}
+
+		l := log.WithField("listen_path", endpoint.ListenPath)
+		l.Debug("Registering OAuth endpoint")
+		if isValid, err := endpoint.Validate(); isValid && err == nil {
+			m.register.Add(proxy.NewRouteWithInOut(endpoint, middleware, nil))
+			l.Debug("Endpoint registered")
+		} else {
+			l.WithError(err).Error("Error when registering endpoint")
+		}
+	}
 }
