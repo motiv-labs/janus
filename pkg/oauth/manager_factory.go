@@ -4,27 +4,21 @@ import (
 	"strings"
 
 	"github.com/hellofresh/janus/pkg/jwt"
-	"github.com/hellofresh/janus/pkg/session"
-	"github.com/hellofresh/janus/pkg/store"
 	log "github.com/sirupsen/logrus"
 )
 
 const (
-	// Storage enables you to store the tokens in a cache (This way you don't need to validate the token against
-	// the auth provider on every request)
-	Storage ManagerType = iota
 	// JWT provides a way to check the `exp` field on the JWT and make sure the token is still valid. This is
 	// probably the most versatile way to check for tokens, since it doesn't require any storage or extra calls in
 	// each request.
-	JWT
-	// Auth strategy makes sure to validate the provided token on every request against the athentication provider.
-	Auth
+	JWT ManagerType = iota
+	// Introspection strategy makes sure to validate the provided token on every request against the authentication provider.
+	Introspection
 )
 
 var typesMap = map[string]ManagerType{
-	"storage": Storage,
-	"jwt":     JWT,
-	"auth":    Auth,
+	"jwt":           JWT,
+	"introspection": Introspection,
 }
 
 // ParseType takes a string type and returns the Manager type constant.
@@ -42,20 +36,17 @@ type ManagerType uint8
 
 // Manager holds the methods to handle tokens
 type Manager interface {
-	Set(accessToken string, session session.State, resetTTLTo int64) error
-	Remove(accessToken string) error
-	IsKeyAuthorised(accessToken string) (session.State, bool)
+	IsKeyAuthorized(accessToken string) bool
 }
 
 // ManagerFactory is used for creating a new manager
 type ManagerFactory struct {
-	Storage  store.Store
-	strategy TokenStrategy
+	oAuthServer *OAuth
 }
 
 // NewManagerFactory creates a new instance of ManagerFactory
-func NewManagerFactory(storage store.Store, strategy TokenStrategy) *ManagerFactory {
-	return &ManagerFactory{storage, strategy}
+func NewManagerFactory(oAuthServer *OAuth) *ManagerFactory {
+	return &ManagerFactory{oAuthServer}
 }
 
 // Build creates a manager based on the type
@@ -70,17 +61,20 @@ func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 		Debug("Building token strategy")
 
 	switch t {
-	case Storage:
-		return &StorageTokenManager{Storage: f.Storage}, nil
 	case JWT:
-		signingMethods, err := f.strategy.GetJWTSigningMethods()
+		signingMethods, err := f.oAuthServer.TokenStrategy.GetJWTSigningMethods()
 		if nil != err {
 			return nil, err
 		}
 
 		return NewJWTManager(jwt.NewParser(jwt.NewParserConfig(signingMethods...))), nil
-	case Auth:
-		// TODO: Create an Auth Manager that always validated tokens against an auth provider
+	case Introspection:
+		manager, err := NewIntrospectionManager(f.oAuthServer.Endpoints.Introspect.UpstreamURL)
+		if err != nil {
+			return nil, err
+		}
+
+		return manager, nil
 	}
 
 	return nil, ErrUnknownManager

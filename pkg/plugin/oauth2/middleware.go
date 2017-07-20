@@ -14,7 +14,6 @@ import (
 // Enums for keys to be stored in a session context - this is how gorilla expects
 // these to be implemented and is lifted pretty much from docs
 var (
-	SessionData     = request.ContextKey("session_data")
 	AuthHeaderValue = request.ContextKey("auth_header")
 )
 
@@ -42,7 +41,7 @@ func NewKeyExistsMiddleware(manager oauth.Manager) func(http.Handler) http.Handl
 			}
 
 			accessToken := parts[1]
-			thisSessionState, keyExists := manager.IsKeyAuthorised(accessToken)
+			keyExists := manager.IsKeyAuthorized(accessToken)
 
 			if !keyExists {
 				log.WithFields(log.Fields{
@@ -53,9 +52,7 @@ func NewKeyExistsMiddleware(manager oauth.Manager) func(http.Handler) http.Handl
 				panic(errors.ErrAccessTokenNotAuthorized)
 			}
 
-			ctx := context.WithValue(r.Context(), SessionData, thisSessionState)
-			ctx = context.WithValue(ctx, AuthHeaderValue, accessToken)
-
+			ctx := context.WithValue(r.Context(), AuthHeaderValue, accessToken)
 			handler.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

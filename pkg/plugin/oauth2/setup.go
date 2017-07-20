@@ -5,7 +5,6 @@ import (
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
-	"github.com/hellofresh/janus/pkg/store"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -32,7 +31,7 @@ func setupOAuth2(route *proxy.Route, p plugin.Params) error {
 		return err
 	}
 
-	manager, err := getManager(oauthServer.TokenStrategy, p.Storage, config.ServerName)
+	manager, err := getManager(oauthServer, config.ServerName)
 	if nil != err {
 		log.WithError(err).Error("OAuth Configuration for this API is incorrect, skipping...")
 		return err
@@ -49,11 +48,11 @@ func setupOAuth2(route *proxy.Route, p plugin.Params) error {
 	return nil
 }
 
-func getManager(tokenStrategy oauth.TokenStrategy, storage store.Store, oAuthServerName string) (oauth.Manager, error) {
-	managerType, err := oauth.ParseType(tokenStrategy.Name)
+func getManager(oauthServer *oauth.OAuth, oAuthServerName string) (oauth.Manager, error) {
+	managerType, err := oauth.ParseType(oauthServer.TokenStrategy.Name)
 	if nil != err {
 		return nil, err
 	}
 
-	return oauth.NewManagerFactory(storage, tokenStrategy).Build(managerType)
+	return oauth.NewManagerFactory(oauthServer).Build(managerType)
 }

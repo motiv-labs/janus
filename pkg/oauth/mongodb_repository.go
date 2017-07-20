@@ -13,7 +13,7 @@ const (
 	collectionName string = "oauth_servers"
 )
 
-// Repository defines the behaviour of a OAuth Server repo
+// Repository defines the behavior of a OAuth Server repo
 type Repository interface {
 	FindAll() ([]*OAuth, error)
 	FindByName(name string) (*OAuth, error)
@@ -53,6 +53,12 @@ func (r *MongoRepository) FindByName(name string) (*OAuth, error) {
 	defer session.Close()
 
 	err := coll.Find(bson.M{"name": name}).One(&result)
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return nil, ErrOauthServerNotFound
+		}
+		return nil, err
+	}
 
 	return result, err
 }

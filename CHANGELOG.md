@@ -1,8 +1,12 @@
 # Unrealeased
 
-## Changed
-
+## Added
 - Added support for JWT signature validation chain for `jwt` token strategy
+- Added support for OAuth2 `introspection` token strategy
+- Added rate limit configurations for all endpoints of an OAuth2 server
+
+## Removed
+- Dropped support for `storage` token strategy
 
 # 3.1.0
 

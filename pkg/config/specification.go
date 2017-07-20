@@ -3,7 +3,6 @@ package config
 import (
 	"time"
 
-	"github.com/fsnotify/fsnotify"
 	"github.com/hellofresh/logging-go"
 	"github.com/kelseyhightower/envconfig"
 	log "github.com/sirupsen/logrus"
@@ -137,11 +136,6 @@ func Load(configFile string) (*Specification, error) {
 		viper.AddConfigPath("/etc/janus")
 		viper.AddConfigPath(".")
 	}
-
-	viper.WatchConfig()
-	viper.OnConfigChange(func(e fsnotify.Event) {
-		log.Debug("Configuration changed")
-	})
 
 	if err := viper.ReadInConfig(); err != nil {
 		log.WithError(err).Warn("No config file found")
