@@ -118,7 +118,7 @@ func createMiddlewareWithSession(session session.State) (func(http.Handler) http
 	storage := store.NewInMemoryStore()
 	storage.Set(session.AccessToken, string(sessionJSON), 0)
 
-	manager, err := oauth.NewManagerFactory(storage, oauth.TokenStrategySettings{}).Build(oauth.Storage)
+	manager, err := oauth.NewManagerFactory(storage, oauth.TokenStrategy{}).Build(oauth.Storage)
 	if err != nil {
 		return nil, err
 	}

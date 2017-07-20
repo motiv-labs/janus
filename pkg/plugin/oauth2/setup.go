@@ -38,7 +38,7 @@ func setupOAuth2(route *proxy.Route, p plugin.Params) error {
 		return err
 	}
 
-	signingMethods, err := oauthServer.TokenStrategy.Settings.GetJWTSigningMethods()
+	signingMethods, err := oauthServer.TokenStrategy.GetJWTSigningMethods()
 	if err != nil {
 		return err
 	}
@@ -55,5 +55,5 @@ func getManager(tokenStrategy oauth.TokenStrategy, storage store.Store, oAuthSer
 		return nil, err
 	}
 
-	return oauth.NewManagerFactory(storage, tokenStrategy.Settings).Build(managerType)
+	return oauth.NewManagerFactory(storage, tokenStrategy).Build(managerType)
 }

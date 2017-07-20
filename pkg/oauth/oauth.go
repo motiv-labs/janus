@@ -1,13 +1,13 @@
 package oauth
 
 import (
-	"encoding/json"
 	"errors"
 	"sync"
 
 	"github.com/Knetic/govaluate"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/proxy"
+	"github.com/mitchellh/mapstructure"
 )
 
 // AccessRequestType is the type for OAuth param `grant_type`
@@ -52,35 +52,30 @@ type ClientEndpoints struct {
 
 // TokenStrategy defines the token strategy fields
 type TokenStrategy struct {
-	Name     string                `bson:"name" json:"name"`
-	Settings TokenStrategySettings `bson:"settings" json:"settings"`
+	Name     string      `bson:"name" json:"name"`
+	Settings interface{} `bson:"settings" json:"settings"`
 }
-
-// TokenStrategySettings represents the settings for the token strategy
-type TokenStrategySettings json.RawMessage
 
 // GetJWTSigningMethods parses and returns chain of JWT signing methods for token signature validation.
 // Supports fallback to legacy format with {"secret": "key"} as single signing method with HS256 alg.
-func (t TokenStrategySettings) GetJWTSigningMethods() ([]jwt.SigningMethod, error) {
+func (t TokenStrategy) GetJWTSigningMethods() ([]jwt.SigningMethod, error) {
 	var methods []jwt.SigningMethod
-	err := json.Unmarshal(t, &methods)
+	err := mapstructure.Decode(t.Settings, &methods)
 	if err != nil {
-		// fallback to old structure with secret string for HS256 signing method
-		var legacy map[string]string
-		err = json.Unmarshal(t, &legacy)
-		if err != nil {
+		var legacy struct {
+			Secret string `json:"secret"`
+		}
+		err = mapstructure.Decode(t.Settings, &legacy)
+		if nil != err {
 			return methods, err
 		}
-
-		value, ok := legacy["secret"]
-		if !ok || value == "" {
-			return methods, ErrJWTSecretMissing
+		if legacy.Secret == "" {
+			return nil, ErrJWTSecretMissing
 		}
 
-		return []jwt.SigningMethod{{Alg: "HS256", Key: value}}, nil
+		return []jwt.SigningMethod{{Alg: "HS256", Key: legacy.Secret}}, nil
 	}
-
-	return methods, nil
+	return methods, err
 }
 
 type meta struct {

@@ -135,5 +135,5 @@ func (m *OAuthLoader) getManager(oauthServer *oauth.OAuth) (oauth.Manager, error
 		return nil, err
 	}
 
-	return oauth.NewManagerFactory(m.storage, oauthServer.TokenStrategy.Settings).Build(managerType)
+	return oauth.NewManagerFactory(m.storage, oauthServer.TokenStrategy).Build(managerType)
 }

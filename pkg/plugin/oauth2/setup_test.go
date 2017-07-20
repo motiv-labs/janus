@@ -1,9 +1,10 @@
 package oauth2
 
 import (
-	"encoding/json"
+	"net/http"
 	"testing"
 
+	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -27,14 +28,13 @@ func TestSetupWithValidOAuthServer(t *testing.T) {
 	rawConfig := map[string]interface{}{
 		"server_name": "test",
 	}
-	tokenStrategyRaw, _ := json.Marshal(map[string]string{"secret": "1234"})
 
 	repo := oauth.NewInMemoryRepository()
 	repo.Add(&oauth.OAuth{
 		Name: "test",
 		TokenStrategy: oauth.TokenStrategy{
 			Name:     "jwt",
-			Settings: oauth.TokenStrategySettings(tokenStrategyRaw),
+			Settings: map[string]interface{}{"secret": "1234"},
 		},
 	})
 
@@ -53,14 +53,13 @@ func TestSetupWithInvalidOAuthServer(t *testing.T) {
 	rawConfig := map[string]interface{}{
 		"server_name": "test",
 	}
-	tokenStrategyRaw, _ := json.Marshal(map[string]string{"secret": "1234"})
 
 	repo := oauth.NewInMemoryRepository()
 	repo.Add(&oauth.OAuth{
 		Name: "test1",
 		TokenStrategy: oauth.TokenStrategy{
 			Name:     "jwt",
-			Settings: oauth.TokenStrategySettings(tokenStrategyRaw),
+			Settings: []interface{}{},
 		},
 	})
 	route := proxy.NewRoute(&proxy.Definition{})
@@ -70,21 +69,22 @@ func TestSetupWithInvalidOAuthServer(t *testing.T) {
 		OAuthRepo: repo,
 	})
 
-	assert.Error(t, err)
+	require.Error(t, err)
+	require.IsType(t, &errors.Error{}, err)
+	assert.Equal(t, http.StatusNotFound, err.(*errors.Error).Code)
 }
 
 func TestSetupWithWrongStrategy(t *testing.T) {
 	rawConfig := map[string]interface{}{
 		"server_name": "test",
 	}
-	tokenStrategyRaw, _ := json.Marshal(map[string]string{"secret": "1234"})
 
 	repo := oauth.NewInMemoryRepository()
 	repo.Add(&oauth.OAuth{
-		Name: "test1",
+		Name: "test",
 		TokenStrategy: oauth.TokenStrategy{
 			Name:     "wrong",
-			Settings: oauth.TokenStrategySettings(tokenStrategyRaw),
+			Settings: []interface{}{},
 		},
 	})
 	route := proxy.NewRoute(&proxy.Definition{})
@@ -94,5 +94,7 @@ func TestSetupWithWrongStrategy(t *testing.T) {
 		OAuthRepo: repo,
 	})
 
-	assert.Error(t, err)
+	require.Error(t, err)
+	require.IsType(t, &errors.Error{}, err)
+	assert.Equal(t, http.StatusBadRequest, err.(*errors.Error).Code)
 }
