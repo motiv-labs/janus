@@ -62,12 +62,12 @@ func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 
 	switch t {
 	case JWT:
-		value, ok := f.oAuthServer.TokenStrategy.Settings["secret"]
-		if !ok || value == "" {
-			return nil, ErrJWTSecretMissing
+		signingMethods, err := f.strategy.GetJWTSigningMethods()
+		if nil != err {
+			return nil, err
 		}
 
-		return NewJWTManager(jwt.NewParser(jwt.NewConfig(value))), nil
+		return NewJWTManager(jwt.NewParser(jwt.NewParserConfig(signingMethods...))), nil
 	case Introspection:
 		manager, err := NewIntrospectionManager(f.oAuthServer.Endpoints.Introspect.UpstreamURL)
 		if err != nil {

@@ -96,3 +96,23 @@ func TestMissingKeyStorage(t *testing.T) {
 	assert.Equal(t, http.StatusUnauthorized, w.Code)
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 }
+<<<<<<< HEAD
+=======
+
+func createMiddlewareWithSession(session session.State) (func(http.Handler) http.Handler, error) {
+	sessionJSON, err := json.Marshal(session)
+	if err != nil {
+		return nil, err
+	}
+
+	storage := store.NewInMemoryStore()
+	storage.Set(session.AccessToken, string(sessionJSON), 0)
+
+	manager, err := oauth.NewManagerFactory(storage, oauth.TokenStrategy{}).Build(oauth.Storage)
+	if err != nil {
+		return nil, err
+	}
+
+	return NewKeyExistsMiddleware(manager), nil
+}
+>>>>>>> master

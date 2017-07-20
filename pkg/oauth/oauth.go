@@ -5,7 +5,9 @@ import (
 	"sync"
 
 	"github.com/Knetic/govaluate"
+	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/proxy"
+	"github.com/mitchellh/mapstructure"
 )
 
 // AccessRequestType is the type for OAuth param `grant_type`
@@ -49,12 +51,6 @@ type ClientEndpoints struct {
 	Remove *proxy.Definition `bson:"remove" json:"remove"`
 }
 
-// TokenStrategy defines the token strategy fields
-type TokenStrategy struct {
-	Name     string                `bson:"name" json:"name"`
-	Settings TokenStrategySettings `bson:"settings" json:"settings"`
-}
-
 type rateLimitMeta struct {
 	Limit   string `bson:"limit" json:"limit"`
 	Enabled bool   `bson:"enabled" json:"enabled"`
@@ -68,17 +64,32 @@ type corsMeta struct {
 	Enabled        bool     `bson:"enabled" json:"enabled"`
 }
 
-// TokenStrategySettings represents the settings for the token strategy
-type TokenStrategySettings map[string]string
+// TokenStrategy defines the token strategy fields
+type TokenStrategy struct {
+	Name     string      `bson:"name" json:"name"`
+	Settings interface{} `bson:"settings" json:"settings"`
+}
 
-// GetJWTSecret gets the JWT secret config
-func (t TokenStrategySettings) GetJWTSecret() (string, error) {
-	value, ok := t["secret"]
-	if !ok || value == "" {
-		return "", ErrJWTSecretMissing
+// GetJWTSigningMethods parses and returns chain of JWT signing methods for token signature validation.
+// Supports fallback to legacy format with {"secret": "key"} as single signing method with HS256 alg.
+func (t TokenStrategy) GetJWTSigningMethods() ([]jwt.SigningMethod, error) {
+	var methods []jwt.SigningMethod
+	err := mapstructure.Decode(t.Settings, &methods)
+	if err != nil {
+		var legacy struct {
+			Secret string `json:"secret"`
+		}
+		err = mapstructure.Decode(t.Settings, &legacy)
+		if nil != err {
+			return methods, err
+		}
+		if legacy.Secret == "" {
+			return nil, ErrJWTSecretMissing
+		}
+
+		return []jwt.SigningMethod{{Alg: "HS256", Key: legacy.Secret}}, nil
 	}
-
-	return value, nil
+	return methods, err
 }
 
 // AccessRule represents a rule that will be applied to a JWT that could be revoked

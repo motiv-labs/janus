@@ -21,7 +21,7 @@ func NewJWTManager(parser *jwt.Parser) *JWTManager {
 func (m *JWTManager) IsKeyAuthorized(accessToken string) bool {
 	token, err := m.parser.Parse(accessToken)
 	if err != nil {
-		log.WithError(err).Info("Could not parse the JWT")
+		log.WithError(err).Info("Failed to parse and validate the JWT")
 		return false
 	}
 

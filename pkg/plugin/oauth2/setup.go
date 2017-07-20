@@ -37,13 +37,13 @@ func setupOAuth2(route *proxy.Route, p plugin.Params) error {
 		return err
 	}
 
-	secret, err := oauthServer.TokenStrategy.Settings.GetJWTSecret()
+	signingMethods, err := oauthServer.TokenStrategy.GetJWTSigningMethods()
 	if err != nil {
 		return err
 	}
 
 	route.AddInbound(NewKeyExistsMiddleware(manager))
-	route.AddInbound(NewRevokeRulesMiddleware(jwt.NewParser(jwt.NewConfig(secret)), oauthServer.AccessRules))
+	route.AddInbound(NewRevokeRulesMiddleware(jwt.NewParser(jwt.NewParserConfig(signingMethods...)), oauthServer.AccessRules))
 
 	return nil
 }
@@ -54,5 +54,9 @@ func getManager(oauthServer *oauth.OAuth, oAuthServerName string) (oauth.Manager
 		return nil, err
 	}
 
+<<<<<<< HEAD
 	return oauth.NewManagerFactory(oauthServer).Build(managerType)
+=======
+	return oauth.NewManagerFactory(storage, tokenStrategy).Build(managerType)
+>>>>>>> master
 }

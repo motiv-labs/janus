@@ -68,11 +68,14 @@ type Stats struct {
 }
 
 // Credentials represents the credentials that are going to be
-// used by JWT configuration
+// used by admin JWT configuration
 type Credentials struct {
-	Secret   string `envconfig:"SECRET"`
-	Username string `envconfig:"ADMIN_USERNAME"`
-	Password string `envconfig:"ADMIN_PASSWORD"`
+	// Algorithm defines admin JWT signing algorithm.
+	// Currently the following algorithms are supported: HS256, HS384, HS512.
+	Algorithm string `envconfig:"ALGORITHM"`
+	Secret    string `envconfig:"SECRET"`
+	Username  string `envconfig:"ADMIN_USERNAME"`
+	Password  string `envconfig:"ADMIN_PASSWORD"`
 }
 
 // GoogleCloudTracing holds the Google Application Default Credentials
@@ -115,6 +118,7 @@ func init() {
 	viper.SetDefault("web.port", "8081")
 	viper.SetDefault("web.tls.port", "8444")
 	viper.SetDefault("web.tls.redisrect", true)
+	viper.SetDefault("web.credentials.algorithm", "HS256")
 	viper.SetDefault("web.credentials.username", "admin")
 	viper.SetDefault("web.credentials.password", "admin")
 	viper.SetDefault("stats.dsn", "log://")
