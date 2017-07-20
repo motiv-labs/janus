@@ -45,11 +45,11 @@ func (c *Controller) GetBy() http.HandlerFunc {
 		data, err := c.repo.FindByName(name)
 		span.Finish()
 
-		if data.Name == "" {
-			panic(ErrOauthServerNotFound)
-		}
-
 		if err != nil {
+			if err == ErrOauthServerNotFound {
+				panic(err)
+			}
+
 			panic(errors.New(http.StatusInternalServerError, err.Error()))
 		}
 
