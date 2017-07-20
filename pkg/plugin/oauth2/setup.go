@@ -54,9 +54,5 @@ func getManager(oauthServer *oauth.OAuth, oAuthServerName string) (oauth.Manager
 		return nil, err
 	}
 
-<<<<<<< HEAD
 	return oauth.NewManagerFactory(oauthServer).Build(managerType)
-=======
-	return oauth.NewManagerFactory(storage, tokenStrategy).Build(managerType)
->>>>>>> master
 }

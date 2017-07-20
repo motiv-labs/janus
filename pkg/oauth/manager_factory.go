@@ -62,7 +62,7 @@ func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 
 	switch t {
 	case JWT:
-		signingMethods, err := f.strategy.GetJWTSigningMethods()
+		signingMethods, err := f.oAuthServer.TokenStrategy.GetJWTSigningMethods()
 		if nil != err {
 			return nil, err
 		}

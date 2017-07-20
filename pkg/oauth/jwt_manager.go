@@ -1,8 +1,6 @@
 package oauth
 
 import (
-	"time"
-
 	"github.com/hellofresh/janus/pkg/jwt"
 	log "github.com/sirupsen/logrus"
 )
@@ -19,17 +17,10 @@ func NewJWTManager(parser *jwt.Parser) *JWTManager {
 
 // IsKeyAuthorized checks if the access token is valid
 func (m *JWTManager) IsKeyAuthorized(accessToken string) bool {
-	token, err := m.parser.Parse(accessToken)
+	_, err := m.parser.Parse(accessToken)
 	if err != nil {
 		log.WithError(err).Info("Failed to parse and validate the JWT")
 		return false
-	}
-
-	if claims, ok := m.parser.GetStandardClaims(token); ok && token.Valid {
-		expiresAt := time.Unix(claims.ExpiresAt, 0)
-		if time.Now().After(expiresAt) {
-			return false
-		}
 	}
 
 	return true
