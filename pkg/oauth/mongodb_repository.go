@@ -53,6 +53,12 @@ func (r *MongoRepository) FindByName(name string) (*OAuth, error) {
 	defer session.Close()
 
 	err := coll.Find(bson.M{"name": name}).One(&result)
+	if err != nil {
+		if err == mgo.ErrNotFound {
+			return nil, ErrOauthServerNotFound
+		}
+		return nil, err
+	}
 
 	return result, err
 }
