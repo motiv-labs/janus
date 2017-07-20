@@ -24,4 +24,7 @@ var (
 
 	// ErrUnknownStrategy is used when a token strategy is not known
 	ErrUnknownStrategy = errors.New(http.StatusBadRequest, "Unknown token strategy type provided")
+
+	// ErrInvalidIntrospectionURL is used when an introspection URL is invalid
+	ErrInvalidIntrospectionURL = errors.New(http.StatusBadRequest, "The provided introspection URL is invalid")
 )

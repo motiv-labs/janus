@@ -8,20 +8,17 @@ import (
 )
 
 const (
-	// Storage enables you to store the tokens in a cache (This way you don't need to validate the token against
-	// the auth provider on every request)
-	Storage ManagerType = iota
 	// JWT provides a way to check the `exp` field on the JWT and make sure the token is still valid. This is
 	// probably the most versatile way to check for tokens, since it doesn't require any storage or extra calls in
 	// each request.
-	JWT
-	// Auth strategy makes sure to validate the provided token on every request against the athentication provider.
-	Auth
+	JWT ManagerType = iota
+	// Introspection strategy makes sure to validate the provided token on every request against the authentication provider.
+	Introspection
 )
 
 var typesMap = map[string]ManagerType{
-	"jwt":  JWT,
-	"auth": Auth,
+	"jwt":           JWT,
+	"introspection": Introspection,
 }
 
 // ParseType takes a string type and returns the Manager type constant.
@@ -44,12 +41,12 @@ type Manager interface {
 
 // ManagerFactory is used for creating a new manager
 type ManagerFactory struct {
-	settings TokenStrategySettings
+	oAuthServer *OAuth
 }
 
 // NewManagerFactory creates a new instance of ManagerFactory
-func NewManagerFactory(settings TokenStrategySettings) *ManagerFactory {
-	return &ManagerFactory{settings}
+func NewManagerFactory(oAuthServer *OAuth) *ManagerFactory {
+	return &ManagerFactory{oAuthServer}
 }
 
 // Build creates a manager based on the type
@@ -65,14 +62,19 @@ func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 
 	switch t {
 	case JWT:
-		value, ok := f.settings["secret"]
+		value, ok := f.oAuthServer.TokenStrategy.Settings["secret"]
 		if !ok || value == "" {
 			return nil, ErrJWTSecretMissing
 		}
 
 		return NewJWTManager(jwt.NewParser(jwt.NewConfig(value))), nil
-	case Auth:
-		return &AuthProviderManager{}, nil
+	case Introspection:
+		manager, err := NewIntrospectionManager(f.oAuthServer.Endpoints.Introspect.UpstreamURL)
+		if err != nil {
+			return nil, err
+		}
+
+		return manager, nil
 	}
 
 	return nil, ErrUnknownManager

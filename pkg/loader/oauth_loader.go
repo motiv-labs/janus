@@ -61,7 +61,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		endpoints := map[*proxy.Definition]proxy.InChain{
 			oauthServer.Endpoints.Authorize:    proxy.NewInChain(corsHandler, rateLimitHandler),
 			oauthServer.Endpoints.Token:        proxy.NewInChain(oauth.NewSecretMiddleware(oauthServer).Handler, corsHandler, rateLimitHandler),
-			oauthServer.Endpoints.Info:         proxy.NewInChain(corsHandler, rateLimitHandler),
+			oauthServer.Endpoints.Introspect:   proxy.NewInChain(corsHandler, rateLimitHandler),
 			oauthServer.Endpoints.Revoke:       proxy.NewInChain(corsHandler, rateLimitHandler),
 			oauthServer.ClientEndpoints.Create: proxy.NewInChain(corsHandler, rateLimitHandler),
 			oauthServer.ClientEndpoints.Remove: proxy.NewInChain(corsHandler, rateLimitHandler),
@@ -102,7 +102,7 @@ func (m *OAuthLoader) getManager(oauthServer *oauth.OAuth) (oauth.Manager, error
 		return nil, err
 	}
 
-	return oauth.NewManagerFactory(oauthServer.TokenStrategy.Settings).Build(managerType)
+	return oauth.NewManagerFactory(oauthServer).Build(managerType)
 }
 
 func (m *OAuthLoader) registerRoutes(endpoints map[*proxy.Definition]proxy.InChain) {
