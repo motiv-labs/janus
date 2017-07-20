@@ -37,7 +37,6 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		logger := log.WithField("name", oauthServer.Name)
 		logger.Debug("Registering OAuth server")
 
-		// if oauthServer.CorsMeta.Enabled {
 		corsHandler = cors.New(cors.Options{
 			AllowedOrigins:   oauthServer.CorsMeta.Domains,
 			AllowedMethods:   oauthServer.CorsMeta.Methods,
@@ -45,9 +44,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 			ExposedHeaders:   oauthServer.CorsMeta.ExposedHeaders,
 			AllowCredentials: true,
 		}).Handler
-		// }
 
-		// if oauthServer.RateLimit.Enabled {
 		rate, err := limiter.NewRateFromFormatted(oauthServer.RateLimit.Limit)
 		if err != nil {
 			logger.WithError(err).Error("Not able to create rate limit")
@@ -56,7 +53,6 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 		limiterStore := limiter.NewMemoryStore()
 		limiterInstance := limiter.NewLimiter(limiterStore, rate)
 		rateLimitHandler = limiter.NewHTTPMiddleware(limiterInstance).Handler
-		// }
 
 		endpoints := map[*proxy.Definition]proxy.InChain{
 			oauthServer.Endpoints.Authorize:    proxy.NewInChain(corsHandler, rateLimitHandler),
