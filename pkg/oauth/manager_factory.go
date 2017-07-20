@@ -50,12 +50,12 @@ type Manager interface {
 // ManagerFactory is used for creating a new manager
 type ManagerFactory struct {
 	Storage  store.Store
-	settings TokenStrategySettings
+	strategy TokenStrategy
 }
 
 // NewManagerFactory creates a new instance of ManagerFactory
-func NewManagerFactory(storage store.Store, settings TokenStrategySettings) *ManagerFactory {
-	return &ManagerFactory{storage, settings}
+func NewManagerFactory(storage store.Store, strategy TokenStrategy) *ManagerFactory {
+	return &ManagerFactory{storage, strategy}
 }
 
 // Build creates a manager based on the type
@@ -73,7 +73,7 @@ func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 	case Storage:
 		return &StorageTokenManager{Storage: f.Storage}, nil
 	case JWT:
-		signingMethods, err := f.settings.GetJWTSigningMethods()
+		signingMethods, err := f.strategy.GetJWTSigningMethods()
 		if nil != err {
 			return nil, err
 		}

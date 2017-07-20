@@ -73,7 +73,7 @@ func (t *TokenPlugin) getManager(url url.URL) (Manager, *OAuth, error) {
 		return nil, nil, err
 	}
 
-	manager, err := NewManagerFactory(t.storage, oauthServer.TokenStrategy.Settings).Build(managerType)
+	manager, err := NewManagerFactory(t.storage, oauthServer.TokenStrategy).Build(managerType)
 
 	return manager, oauthServer, err
 }
