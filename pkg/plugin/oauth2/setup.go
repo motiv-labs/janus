@@ -31,7 +31,7 @@ func setupOAuth2(route *proxy.Route, p plugin.Params) error {
 		return err
 	}
 
-	manager, err := getManager(oauthServer.TokenStrategy, config.ServerName)
+	manager, err := getManager(oauthServer, config.ServerName)
 	if nil != err {
 		log.WithError(err).Error("OAuth Configuration for this API is incorrect, skipping...")
 		return err
@@ -48,11 +48,11 @@ func setupOAuth2(route *proxy.Route, p plugin.Params) error {
 	return nil
 }
 
-func getManager(tokenStrategy oauth.TokenStrategy, oAuthServerName string) (oauth.Manager, error) {
-	managerType, err := oauth.ParseType(tokenStrategy.Name)
+func getManager(oauthServer *oauth.OAuth, oAuthServerName string) (oauth.Manager, error) {
+	managerType, err := oauth.ParseType(oauthServer.TokenStrategy.Name)
 	if nil != err {
 		return nil, err
 	}
 
-	return oauth.NewManagerFactory(tokenStrategy.Settings).Build(managerType)
+	return oauth.NewManagerFactory(oauthServer).Build(managerType)
 }
