@@ -36,7 +36,7 @@ $ http -v GET http://localhost:8080/auth/token?grant_type=client_credentials "Au
 | name                          | The unique name of your OAuth Server                                                      |
 | oauth_endpoints.authorize     | Defines the [proxy configuration](/docs/config/proxy.md) for the `authorize` endpoint     |
 | oauth_endpoints.token         | Defines the [proxy configuration](/docs/config/proxy.md) for the `token` endpoint         |
-| oauth_endpoints.info          | Defines the [proxy configuration](/docs/config/proxy.md) for the `info` endpoint          |
+| oauth_endpoints.introspection | Defines the [proxy configuration](/docs/config/proxy.md) for the `introspection` endpoint |
 | oauth_endpoints.revoke        | Defines the [proxy configuration](/docs/config/proxy.md) for the `revoke` endpoint        |
 | oauth_client_endpoints.create | Defines the [proxy configuration](/docs/config/proxy.md) for the `create` client endpoint |
 | oauth_client_endpoints.remove | Defines the [proxy configuration](/docs/config/proxy.md) for the `remove` client endpoint |
@@ -44,5 +44,5 @@ $ http -v GET http://localhost:8080/auth/token?grant_type=client_credentials "Au
 | allowed_authorize_types       | The allowed authorize types for this oauth server                                         |
 | auth_login_redirect           | The auth login redirect URL                                                               |
 | secrets                       | A map of client_id: client_secret that allows you to authenticate only with the client_id |
-| token_strategy.name           | The token strategy for this server. Could be `storage` or `jwt`                           |
+| token_strategy.name           | The token strategy for this server. Could be `introspection` or `jwt`                           |
 | token_strategy.settings.secret| If you use JWT you should set your secret or private certificate string here              |
