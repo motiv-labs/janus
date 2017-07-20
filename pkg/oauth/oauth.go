@@ -29,7 +29,8 @@ type OAuth struct {
 	AllowedAuthorizeTypes  []AuthorizeRequestType `bson:"allowed_authorize_types" json:"allowed_authorize_types" mapstructure:"allowed_authorize_types"`
 	AuthorizeLoginRedirect string                 `bson:"auth_login_redirect" json:"auth_login_redirect" mapstructure:"auth_login_redirect"`
 	Secrets                map[string]string      `bson:"secrets" json:"secrets"`
-	CorsMeta               meta                   `bson:"cors_meta" json:"cors_meta" valid:"cors_meta" mapstructure:"cors_meta"`
+	CorsMeta               corsMeta               `bson:"cors_meta" json:"cors_meta" mapstructure:"cors_meta"`
+	RateLimit              rateLimitMeta          `bson:"rate_limit" json:"rate_limit"`
 	TokenStrategy          TokenStrategy          `bson:"token_strategy" json:"token_strategy" mapstructure:"token_strategy"`
 	AccessRules            []*AccessRule          `bson:"access_rules" json:"access_rules"`
 }
@@ -54,6 +55,19 @@ type TokenStrategy struct {
 	Settings TokenStrategySettings `bson:"settings" json:"settings"`
 }
 
+type rateLimitMeta struct {
+	Limit   string `bson:"limit" json:"limit"`
+	Enabled bool   `bson:"enabled" json:"enabled"`
+}
+
+type corsMeta struct {
+	Domains        []string `mapstructure:"domains" bson:"domains" json:"domains"`
+	Methods        []string `mapstructure:"methods" bson:"methods" json:"methods"`
+	RequestHeaders []string `mapstructure:"request_headers" bson:"request_headers" json:"request_headers"`
+	ExposedHeaders []string `mapstructure:"exposed_headers" bson:"exposed_headers" json:"exposed_headers"`
+	Enabled        bool     `bson:"enabled" json:"enabled"`
+}
+
 // TokenStrategySettings represents the settings for the token strategy
 type TokenStrategySettings map[string]string
 
@@ -65,14 +79,6 @@ func (t TokenStrategySettings) GetJWTSecret() (string, error) {
 	}
 
 	return value, nil
-}
-
-type meta struct {
-	Domains        []string `mapstructure:"domains" bson:"domains" json:"domains"`
-	Methods        []string `mapstructure:"methods" bson:"methods" json:"methods"`
-	RequestHeaders []string `mapstructure:"request_headers" bson:"request_headers" json:"request_headers"`
-	ExposedHeaders []string `mapstructure:"exposed_headers" bson:"exposed_headers" json:"exposed_headers"`
-	Enabled        bool     `bson:"enabled" json:"enabled"`
 }
 
 // AccessRule represents a rule that will be applied to a JWT that could be revoked
