@@ -45,6 +45,7 @@ $ http -v GET http://localhost:8080/auth/token?grant_type=client_credentials "Au
 | auth_login_redirect           | The auth login redirect URL                                                               |
 | secrets                       | A map of client_id: client_secret that allows you to authenticate only with the client_id |
 | token_strategy.name           | The token strategy for this server. Could be `introspection` or `jwt`                           |
+| token_strategy.settings       | Token strategy settings, see bellow by strategy              |
 
 ## Token Strategy Settings
 
