@@ -21,10 +21,12 @@
     * [Routing priorities](proxy/routing_priorities.md)
     * [Conclusion](proxy/conclusion.md)
 * Plugins
+    * [Compression](plugins/compression.md)
     * [OAuth](plugins/oauth.md)
     * [Rate Limit](plugins/rate_limit.md)
     * [CORS](plugins/cors.md)
     * [Request Transformer](plugins/request_transformer.md)
+    * [Body Limit](plugins/body_limit.md)
 * Auth
     * [OAuth 2.0](auth/oauth.md)
 * Misc
