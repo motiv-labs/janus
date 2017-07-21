@@ -1,10 +1,12 @@
-hash: 195c84540e72fa72f5321ce7467af2c8a5e7819de5c861ff0ec6e2af8acf62da
-updated: 2017-07-18T17:39:47.149472745+02:00
+hash: 9097efc78cb1bd05d4c05d2d9c2b73577f1f524ac8841d1130973bafe090dcda
+updated: 2017-07-21T15:54:10.867818657+02:00
 imports:
 - name: cloud.google.com/go
   version: 558b56dfa3c56acc26fef35cb07f97df0bb18b39
   subpackages:
   - compute/metadata
+- name: code.cloudfoundry.org/bytefmt
+  version: f4415fafc5619dd75599a54a7c91fb3948ad58bd
 - name: github.com/ant0ine/go-json-rest
   version: 4127f183c172b25f51dbaaa2e035e8f262ac57fb
   subpackages:
@@ -126,7 +128,7 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: b3756b4b77d7b13260a0a2ec658753cf48922eac
+  version: ab5485076ff3407ad2d02db054635913f017b0ed
   subpackages:
   - context
   - context/ctxhttp
@@ -205,7 +207,7 @@ testImports:
   subpackages:
   - difflib
 - name: github.com/rafaeljusto/redigomock
-  version: ca49a8af34fc0c903a37409317576da14b3f1cbd
+  version: 7ae0511314e9946bb0c87d6d485169ab2467a290
 - name: github.com/stretchr/testify
   version: 69483b4bd14f5845b5a1e55bca19e954e827f1d0
   subpackages:
