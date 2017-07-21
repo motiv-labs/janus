@@ -4,6 +4,7 @@
 - Added support for JWT signature validation chain for `jwt` token strategy
 - Added support for OAuth2 `introspection` token strategy
 - Added rate limit configurations for all endpoints of an OAuth2 server
+- Added request body limit plugin
 
 ## Removed
 - Dropped support for `storage` token strategy
