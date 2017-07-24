@@ -1,4 +1,7 @@
-# Unrealeased
+# Unreleased
+
+
+# 3.2.0
 
 ## Added
 - Added support for JWT signature validation chain for `jwt` token strategy
