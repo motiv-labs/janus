@@ -1,5 +1,11 @@
 package: github.com/hellofresh/janus
 import:
+- package: github.com/hellofresh/stats-go
+  version: ^0.1.2
+- package: github.com/hellofresh/health-go
+  version: ^1.0.0
+- package: github.com/hellofresh/logging-go
+  version: ^0.1.0
 - package: github.com/asaskevich/govalidator
   version: ^5.0.0
 - package: github.com/dgrijalva/jwt-go
@@ -27,21 +33,15 @@ import:
 - package: sourcegraph.com/sourcegraph/appdash
 - package: github.com/gorilla/mux
   version: ^1.3.0
-- package: github.com/hellofresh/stats-go
-  version: ^0.1.2
 - package: github.com/spf13/viper
 - package: github.com/spf13/cobra
 - package: github.com/go-chi/chi
   version: ^3.0.0
-- package: github.com/DATA-DOG/godog
-  version: ^0.7.2
-- package: github.com/tidwall/gjson
-- package: github.com/hellofresh/health-go
-  version: ^1.0.0
-- package: github.com/hellofresh/logging-go
-  version: ^0.1.0
 - package: github.com/Knetic/govaluate
   version: ^3.0.0
+- package: code.cloudfoundry.org/bytefmt
+- package: github.com/DATA-DOG/godog
+  version: ^0.7.2
 - package: github.com/pkg/errors
   version: ^0.8.0
 testImport:
@@ -51,3 +51,4 @@ testImport:
   - assert
 - package: github.com/rafaeljusto/redigomock
   version: ^2.0.0
+- package: github.com/tidwall/gjson

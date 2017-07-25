@@ -11,6 +11,7 @@ import (
 	stats "github.com/hellofresh/stats-go"
 
 	// this is needed to call the init function on each plugin
+	_ "github.com/hellofresh/janus/pkg/plugin/bodylmt"
 	_ "github.com/hellofresh/janus/pkg/plugin/compression"
 	_ "github.com/hellofresh/janus/pkg/plugin/cors"
 	_ "github.com/hellofresh/janus/pkg/plugin/oauth2"

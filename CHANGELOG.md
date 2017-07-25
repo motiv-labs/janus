@@ -1,5 +1,7 @@
 # Unreleased
 
+# Added
+- Added request body limit plugin
 
 # 3.2.0
 
