@@ -1,6 +1,6 @@
 package api
 
-// Repository defines the behaviour of a proxy specs repository
+// Repository defines the behavior of a proxy specs repository
 type Repository interface {
 	FindAll() ([]*Definition, error)
 	FindByName(name string) (*Definition, error)

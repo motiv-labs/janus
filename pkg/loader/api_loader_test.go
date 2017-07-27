@@ -8,12 +8,12 @@ import (
 	"testing"
 
 	"github.com/hellofresh/janus/pkg/api"
+	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/test"
-	"github.com/hellofresh/janus/pkg/web"
 	"github.com/hellofresh/stats-go"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
@@ -71,7 +71,7 @@ func TestSuccessfulLoader(t *testing.T) {
 
 func createRegisterAndRouter() (router.Router, error) {
 	r := createRouter()
-	r.Use(middleware.NewRecovery(web.RecoveryHandler))
+	r.Use(middleware.NewRecovery(errors.RecoveryHandler))
 
 	statsClient, _ := stats.NewClient("noop://", "")
 	register := proxy.NewRegister(r, proxy.Params{StatsClient: statsClient})
@@ -87,6 +87,6 @@ func createRegisterAndRouter() (router.Router, error) {
 }
 
 func createRouter() router.Router {
-	router.DefaultOptions.NotFoundHandler = web.NotFound
+	router.DefaultOptions.NotFoundHandler = errors.NotFound
 	return router.NewChiRouterWithOptions(router.DefaultOptions)
 }

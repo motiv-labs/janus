@@ -6,13 +6,14 @@ import (
 	"os"
 	"testing"
 
+	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/test"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
 var (
-	recovery = NewRecovery(test.RecoveryHandler)
+	recovery = NewRecovery(errors.RecoveryHandler)
 )
 
 func TestMain(m *testing.M) {

@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/hellofresh/janus/pkg/config"
-	"github.com/hellofresh/janus/pkg/response"
+	"github.com/hellofresh/janus/pkg/errors"
 )
 
 // Guard struct
@@ -59,9 +59,7 @@ func NewGuard(cred config.Credentials) Guard {
 			return userID == cred.Username
 		},
 		Unauthorized: func(w http.ResponseWriter, r *http.Request, err error) {
-			response.JSON(w, http.StatusUnauthorized, response.H{
-				"message": err.Error(),
-			})
+			errors.Handler(w, errors.New(http.StatusUnauthorized, err.Error()))
 		},
 	}
 }

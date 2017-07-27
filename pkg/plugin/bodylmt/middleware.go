@@ -4,8 +4,13 @@ import (
 	"net/http"
 
 	"code.cloudfoundry.org/bytefmt"
-
+	"github.com/hellofresh/janus/pkg/errors"
 	log "github.com/sirupsen/logrus"
+)
+
+var (
+	// ErrRequestEntityTooLarge is thrown when a body size is bigger then the limit specified
+	ErrRequestEntityTooLarge = errors.New(http.StatusRequestEntityTooLarge, http.StatusText(http.StatusRequestEntityTooLarge))
 )
 
 // NewBodyLimitMiddleware creates a new body limit middleware
@@ -20,7 +25,7 @@ func NewBodyLimitMiddleware(limit string) func(http.Handler) http.Handler {
 
 			// Based on content length
 			if r.ContentLength > int64(limit) {
-				w.WriteHeader(http.StatusRequestEntityTooLarge)
+				errors.Handler(w, ErrRequestEntityTooLarge)
 				return
 			}
 

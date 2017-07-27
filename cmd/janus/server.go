@@ -141,12 +141,12 @@ func listenAndServe(handler http.Handler) error {
 
 func createRouter() router.Router {
 	// create router with a custom not found handler
-	router.DefaultOptions.NotFoundHandler = web.NotFound
+	router.DefaultOptions.NotFoundHandler = errors.NotFound
 	r := router.NewChiRouterWithOptions(router.DefaultOptions)
 	r.Use(
 		middleware.NewStats(statsClient).Handler,
 		middleware.NewLogger().Handler,
-		middleware.NewRecovery(web.RecoveryHandler),
+		middleware.NewRecovery(errors.RecoveryHandler),
 		middleware.NewOpenTracing(globalConfig.TLS.IsHTTPS()).Handler,
 	)
 	return r

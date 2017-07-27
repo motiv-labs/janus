@@ -2,12 +2,12 @@ package loader
 
 import (
 	"github.com/hellofresh/janus/pkg/api"
+	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/store"
-	"github.com/hellofresh/janus/pkg/web"
 	stats "github.com/hellofresh/stats-go"
 
 	// this is needed to call the init function on each plugin
@@ -48,6 +48,6 @@ func Load(params Params) {
 
 	// some routers may panic when have empty routes list, so add one dummy 404 route to avoid this
 	if params.Router.RoutesCount() < 1 {
-		params.Router.Any("/", web.NotFound)
+		params.Router.Any("/", errors.NotFound)
 	}
 }

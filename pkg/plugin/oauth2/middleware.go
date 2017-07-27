@@ -7,15 +7,28 @@ import (
 
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/oauth"
-	"github.com/hellofresh/janus/pkg/request"
 	log "github.com/sirupsen/logrus"
 )
 
 // Enums for keys to be stored in a session context - this is how gorilla expects
 // these to be implemented and is lifted pretty much from docs
 var (
-	AuthHeaderValue = request.ContextKey("auth_header")
+	AuthHeaderValue = ContextKey("auth_header")
+
+	// ErrAuthorizationFieldNotFound is used when the http Authorization header is missing from the request
+	ErrAuthorizationFieldNotFound = errors.New(http.StatusBadRequest, "authorization field missing")
+	// ErrBearerMalformed is used when the Bearer string in the Authorization header is not found or is malformed
+	ErrBearerMalformed = errors.New(http.StatusBadRequest, "bearer token malformed")
+	// ErrAccessTokenNotAuthorized is used when the access token is not found on the storage
+	ErrAccessTokenNotAuthorized = errors.New(http.StatusUnauthorized, "access token not authorized")
 )
+
+// ContextKey is used to create context keys that are concurrent safe
+type ContextKey string
+
+func (c ContextKey) String() string {
+	return "janus." + string(c)
+}
 
 // NewKeyExistsMiddleware creates a new instance of KeyExistsMiddleware
 func NewKeyExistsMiddleware(manager oauth.Manager) func(http.Handler) http.Handler {
@@ -32,12 +45,14 @@ func NewKeyExistsMiddleware(manager oauth.Manager) func(http.Handler) http.Handl
 			parts := strings.Split(authHeaderValue, " ")
 			if len(parts) < 2 {
 				logger.Warn("Attempted access with malformed header, no auth header found.")
-				panic(errors.ErrAuthorizationFieldNotFound)
+				errors.Handler(w, ErrAuthorizationFieldNotFound)
+				return
 			}
 
 			if strings.ToLower(parts[0]) != "bearer" {
 				logger.Warn("Bearer token malformed")
-				panic(errors.ErrBearerMalformed)
+				errors.Handler(w, ErrBearerMalformed)
+				return
 			}
 
 			accessToken := parts[1]
@@ -49,7 +64,8 @@ func NewKeyExistsMiddleware(manager oauth.Manager) func(http.Handler) http.Handl
 					"origin": r.RemoteAddr,
 					"key":    accessToken,
 				}).Debug("Attempted access with invalid key.")
-				panic(errors.ErrAccessTokenNotAuthorized)
+				errors.Handler(w, ErrAccessTokenNotAuthorized)
+				return
 			}
 
 			ctx := context.WithValue(r.Context(), AuthHeaderValue, accessToken)

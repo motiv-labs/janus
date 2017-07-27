@@ -8,6 +8,7 @@ import (
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/checker"
 	"github.com/hellofresh/janus/pkg/config"
+	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/notifier"
@@ -34,7 +35,7 @@ type Provider struct {
 func (p *Provider) Provide(version string) error {
 	log.Info("Janus Admin API starting...")
 
-	router.DefaultOptions.NotFoundHandler = NotFound
+	router.DefaultOptions.NotFoundHandler = errors.NotFound
 	r := router.NewChiRouterWithOptions(router.DefaultOptions)
 
 	// create authentication for Janus
@@ -44,7 +45,7 @@ func (p *Provider) Provide(version string) error {
 		chimiddleware.StripSlashes,
 		chimiddleware.DefaultCompress,
 		middleware.NewLogger().Handler,
-		middleware.NewRecovery(RecoveryHandler),
+		middleware.NewRecovery(errors.RecoveryHandler),
 		middleware.NewOpenTracing(p.TLS.IsHTTPS()).Handler,
 		cors.New(cors.Options{
 			AllowedOrigins:   []string{"*"},

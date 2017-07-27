@@ -1,4 +1,4 @@
-package middleware
+package middleware_test
 
 import (
 	"testing"
@@ -6,12 +6,13 @@ import (
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/errors"
+	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSuccessfulRecovery(t *testing.T) {
-	mw := NewRecovery(test.RecoveryHandler)
+	mw := middleware.NewRecovery(errors.RecoveryHandler)
 	w, err := test.Record(
 		"GET",
 		"/",
