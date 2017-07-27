@@ -57,7 +57,7 @@ func Handler(w http.ResponseWriter, err interface{}) {
 	case *Error:
 		log.WithFields(log.Fields{"code": internalErr.Code, "error": internalErr.Error()}).
 			Info("Internal error handled")
-		render.JSON(w, internalErr.Code, internalErr.Error())
+		render.JSON(w, internalErr.Code, internalErr)
 	default:
 		log.WithField("error", err).Error("Internal server error handled")
 		render.JSON(w, http.StatusInternalServerError, err)
