@@ -88,7 +88,7 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		existingPathDefinition, err := c.repo.FindByListenPath(definition.Proxy.ListenPath)
 		span.Finish()
 
-		if err != nil {
+		if err != nil && err != ErrAPIDefinitionNotFound {
 			errors.Handler(w, err)
 			return
 		}
