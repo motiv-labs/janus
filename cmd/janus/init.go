@@ -1,6 +1,9 @@
 package main
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/hellofresh/janus/pkg/config"
 	tracerfactory "github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/store"
@@ -45,6 +48,7 @@ func init() {
 	opentracing.SetGlobalTracer(tracer)
 }
 
+// initializes stats client
 func init() {
 	sectionsTestsMap, err := bucket.ParseSectionsTestsMap(globalConfig.Stats.IDs)
 	if err != nil {
@@ -66,6 +70,14 @@ func init() {
 		AutoDiscoverThreshold: globalConfig.Stats.AutoDiscoverThreshold,
 		AutoDiscoverWhiteList: globalConfig.Stats.AutoDiscoverWhiteList,
 	}))
+
+	host, err := os.Hostname()
+	if nil != err {
+		host = "-unknown-"
+	}
+
+	_, appFile := filepath.Split(os.Args[0])
+	statsClient.TrackMetric("app", bucket.MetricOperation{"init", host, appFile})
 
 	log.AddHook(hooks.NewLogrusHook(statsClient, globalConfig.Stats.ErrorsSection))
 }

@@ -29,7 +29,7 @@ import:
 - package: github.com/opentracing/opentracing-go
   version: ^1.0.1
 - package: github.com/hellofresh/gcloud-opentracing
-  version: master
+  version: ^1.0.1
 - package: sourcegraph.com/sourcegraph/appdash
 - package: github.com/gorilla/mux
   version: ^1.3.0
