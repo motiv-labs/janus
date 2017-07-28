@@ -1,14 +1,14 @@
-hash: 9097efc78cb1bd05d4c05d2d9c2b73577f1f524ac8841d1130973bafe090dcda
-updated: 2017-07-21T15:54:10.867818657+02:00
+hash: 7f2089993019a4653fbdbaa6c81e17098c9ce6b085a9f32dc76bda5640985313
+updated: 2017-07-28T11:31:28.972342832+02:00
 imports:
 - name: cloud.google.com/go
-  version: 558b56dfa3c56acc26fef35cb07f97df0bb18b39
+  version: 7a4ba9f439fbc50061834a4063b57cf7222ba83f
   subpackages:
   - compute/metadata
 - name: code.cloudfoundry.org/bytefmt
   version: f4415fafc5619dd75599a54a7c91fb3948ad58bd
 - name: github.com/ant0ine/go-json-rest
-  version: 4127f183c172b25f51dbaaa2e035e8f262ac57fb
+  version: 731ccde05312e2c1f5578a504ea8e77d38020340
   subpackages:
   - rest
   - rest/trie
@@ -35,16 +35,16 @@ imports:
   - internal
   - redis
 - name: github.com/go-chi/chi
-  version: 08660a0ad10a8fa7beab3ad43afe66373d49d06a
+  version: b8567b6442e27704bfeb725095091581cbe82a00
   subpackages:
   - middleware
 - name: github.com/gogo/protobuf
-  version: dda3e8acadcc9affc16faf33fbb229db78399245
+  version: 7b6c6391c4ff245962047fc1e2c6e08b1cdfa0e8
   subpackages:
   - io
   - proto
 - name: github.com/golang/protobuf
-  version: 6a1fa9404c0aebf36c879bc50152edcc953910d2
+  version: 748d386b5c1ea99658fd69fe9f03991ce86a90c1
   subpackages:
   - proto
 - name: github.com/gorilla/context
@@ -63,13 +63,13 @@ imports:
   - json/scanner
   - json/token
 - name: github.com/hellofresh/gcloud-opentracing
-  version: 8c9c9c8a60b3d4b71ad91d6aa60cd24399f355a7
+  version: e2d92e40aa5e2f406dd67ef999673e73272e8c68
 - name: github.com/hellofresh/health-go
   version: 9f26f204c38a93ce4e4ce9dcaad39de0ca6504d3
 - name: github.com/hellofresh/logging-go
   version: e0dad001fe00320c380f9338e746beb0f832dca8
 - name: github.com/hellofresh/stats-go
-  version: 83a84ddeb556c898599e404ec82b01f995599927
+  version: ad3be7bcd71cf8e57b0eb608eb5f1b7cde676fd8
   subpackages:
   - bucket
   - hooks
@@ -83,7 +83,7 @@ imports:
 - name: github.com/Knetic/govaluate
   version: d216395917cc49052c7c7094cf57f09657ca08a8
 - name: github.com/magiconair/properties
-  version: 51463bfca2576e06c62a8504b5c0f06d61312647
+  version: be5ece7dd465ab0765a9682137865547526d1dfb
 - name: github.com/mitchellh/mapstructure
   version: d0303fe809921458f417bcf828397a65db30a7e4
 - name: github.com/opentracing/basictracer-go
@@ -96,13 +96,13 @@ imports:
   - ext
   - log
 - name: github.com/patrickmn/go-cache
-  version: 7ac151875ffb48b9f3ccce9ea20f020b0c1596c8
+  version: a3647f8e31d79543b2d0f0ae2fe5c379d72cedc0
 - name: github.com/pelletier/go-toml
   version: 69d355db5304c0f7f809a2edc054553e7142f016
 - name: github.com/pkg/errors
   version: 645ef00459ed84a119197bfb8d8205042c6df63d
 - name: github.com/rs/cors
-  version: 8dd4211afb5d08dbb39a533b9bb9e4b486351df6
+  version: 7af7a1e09ba336d2ea14b1ce73bf693c6837dbf6
 - name: github.com/sirupsen/logrus
   version: a3f95b5c423586578a4e099b11a46c2479628cac
   subpackages:
@@ -114,13 +114,13 @@ imports:
 - name: github.com/spf13/cast
   version: acbeb36b902d72a7a4c18e8f3241075e7ab763e4
 - name: github.com/spf13/cobra
-  version: 8c6fa02d2225de0f9bdcb7ca912556f68d172d8c
+  version: 34594c771f2c18301dc152640ad40ece28795373
 - name: github.com/spf13/jwalterweatherman
   version: 0efa5202c04663c757d84f90f5219c1250baf94f
 - name: github.com/spf13/pflag
   version: e57e3eeb33f795204c1ca35f56c44f83227c6e66
 - name: github.com/spf13/viper
-  version: c1de95864d73a5465492829d7cb2dd422b19ac96
+  version: 25b30aa063fc18e48662b86996252eabdcf2f0c7
 - name: github.com/tidwall/gjson
   version: c784c417818f59d6597274642d8ac1d09efc9b01
 - name: github.com/tidwall/match
@@ -128,13 +128,13 @@ imports:
 - name: github.com/ulule/limiter
   version: c242da0b4c9524723c5a2dc8e7d49c228d1bb33c
 - name: golang.org/x/net
-  version: ab5485076ff3407ad2d02db054635913f017b0ed
+  version: f5079bd7f6f74e23c4d65efa0f4ce14cbd6a3c0f
   subpackages:
   - context
   - context/ctxhttp
   - http2
 - name: golang.org/x/oauth2
-  version: cce311a261e6fcf29de72ca96827bdb0b7d9c9e6
+  version: b53b38ad8a6435bd399ea76d0fa74f23149cca4e
   subpackages:
   - google
   - internal
@@ -145,16 +145,16 @@ imports:
   subpackages:
   - semaphore
 - name: golang.org/x/sys
-  version: 94b76065f2d2081d0fef24a6e67c571f51a6408a
+  version: 35ef4487ce0a1ea5d4b616ffe71e34febe723695
   subpackages:
   - unix
 - name: golang.org/x/text
-  version: 2bf8f2a19ec09c670e931282edfe6567f6be21c9
+  version: 836efe42bb4aa16aaa17b9c155d8813d336ed720
   subpackages:
   - transform
   - unicode/norm
 - name: google.golang.org/api
-  version: e6586c9293b9d514c7f5d5076731ec977cff1be6
+  version: 66dba45b06824cbfe030e696b156d562994531e1
   subpackages:
   - cloudtrace/v1
   - gensupport
@@ -162,7 +162,7 @@ imports:
   - googleapi/internal/uritemplates
   - support/bundler
 - name: google.golang.org/appengine
-  version: d11fc8a8dccf41ab5bd3c51a3ea52051240e325c
+  version: ad2570cd3913654e00c5f0183b39d2f998e54046
   subpackages:
   - internal
   - internal/app_identity
@@ -185,7 +185,7 @@ imports:
   - internal/sasl
   - internal/scram
 - name: gopkg.in/yaml.v2
-  version: cd8b52f8269e0feb286dfeef29f8fe4d5b397e0b
+  version: 25c4ec802a7d637f88d584ab26798e94ad14c13b
 - name: sourcegraph.com/sourcegraph/appdash
   version: 5b9b70908c0e32b53e17215ee6e9515b02ad08b2
   subpackages:
