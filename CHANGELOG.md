@@ -2,6 +2,11 @@
 
 # Added
 - Added request body limit plugin
+- Track application start/restart with stats metrics `<prefix>.app.init.<host>.<app-file>`
+
+## Fixed
+- Concurrent map writes in [stats-go](https://github.com/hellofresh/stats-go/pull/15)
+- Non sampled spans recording in [gcloud-opentracing](https://github.com/hellofresh/gcloud-opentracing/pull/1)
 
 # 3.2.0
 
