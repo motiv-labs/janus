@@ -32,3 +32,11 @@ func TestRespondExpectedBody(t *testing.T) {
 
 	assert.Equal(t, expectedWriter.Body, w.Body)
 }
+
+func TestWrongJson(t *testing.T) {
+	w := httptest.NewRecorder()
+
+	render.JSON(w, http.StatusOK, make(chan int))
+
+	assert.Equal(t, http.StatusInternalServerError, w.Code)
+}

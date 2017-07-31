@@ -1,6 +1,7 @@
 package render
 
 import (
+	"bytes"
 	"encoding/json"
 	"net/http"
 )
@@ -11,12 +12,15 @@ type M map[string]interface{}
 // JSON marshals 'v' to JSON, automatically escaping HTML and setting the
 // Content-Type as application/json.
 func JSON(w http.ResponseWriter, code int, v interface{}) {
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(code)
-
-	err := json.NewEncoder(w).Encode(v)
-	if err != nil {
+	buf := &bytes.Buffer{}
+	enc := json.NewEncoder(buf)
+	enc.SetEscapeHTML(true)
+	if err := enc.Encode(v); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	w.Write(buf.Bytes())
 }

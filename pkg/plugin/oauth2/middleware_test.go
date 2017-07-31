@@ -17,6 +17,11 @@ func (m *mockManager) IsKeyAuthorized(accessToken string) bool {
 	return m.authorized
 }
 
+func TestContextKey(t *testing.T) {
+	key := ContextKey("test")
+	assert.Equal(t, "janus.test", key.String())
+}
+
 func TestValidKeyStorage(t *testing.T) {
 	manager := &mockManager{true}
 	mw := NewKeyExistsMiddleware(manager)

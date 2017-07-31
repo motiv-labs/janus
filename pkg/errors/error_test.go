@@ -25,3 +25,21 @@ func TestErrorWithDefaultError(t *testing.T) {
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
+
+func TestErrorNotFound(t *testing.T) {
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/", nil)
+	NotFound(w, r)
+
+	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
+	assert.Equal(t, http.StatusNotFound, w.Code)
+}
+
+func TestRecovery(t *testing.T) {
+	w := httptest.NewRecorder()
+	r := httptest.NewRequest("GET", "/", nil)
+	RecoveryHandler(w, r, ErrInvalidScheme)
+
+	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
