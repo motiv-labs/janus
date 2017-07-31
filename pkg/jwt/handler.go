@@ -1,13 +1,13 @@
 package jwt
 
 import (
+	"encoding/json"
 	"errors"
 	"net/http"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
-	"github.com/hellofresh/janus/pkg/request"
-	"github.com/hellofresh/janus/pkg/response"
+	"github.com/hellofresh/janus/pkg/render"
 )
 
 // Handler struct
@@ -28,7 +28,7 @@ func (j *Handler) Login() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var loginValues Login
 
-		if request.BindJSON(r, &loginValues) != nil {
+		if json.NewDecoder(r.Body).Decode(&loginValues) != nil {
 			j.Guard.Unauthorized(w, r, errors.New("missing username or password"))
 			return
 		}
@@ -57,7 +57,7 @@ func (j *Handler) Login() http.HandlerFunc {
 			return
 		}
 
-		response.JSON(w, http.StatusOK, response.H{
+		render.JSON(w, http.StatusOK, render.M{
 			"token":  tokenString,
 			"expire": expire.Format(time.RFC3339),
 		})
@@ -99,7 +99,7 @@ func (j *Handler) Refresh() http.HandlerFunc {
 			return
 		}
 
-		response.JSON(w, http.StatusOK, response.H{
+		render.JSON(w, http.StatusOK, render.M{
 			"token":  tokenString,
 			"expire": expire.Format(time.RFC3339),
 		})

@@ -27,6 +27,7 @@ func NewHostMatcher(hosts []string) *HostMatcher {
 // Handler is the middleware function
 func (h *HostMatcher) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.WithField("path", r.URL.Path).Debug("Starting host matcher middleware")
 		host := r.Host
 
 		if _, ok := h.plainHosts[host]; ok {
@@ -45,7 +46,7 @@ func (h *HostMatcher) Handler(handler http.Handler) http.Handler {
 
 		err := errors.ErrRouteNotFound
 		log.WithError(err).Error("The host didn't match any of the provided hosts")
-		panic(err)
+		errors.Handler(w, err)
 	})
 }
 

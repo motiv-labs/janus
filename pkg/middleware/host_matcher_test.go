@@ -11,10 +11,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var (
-	recovery = NewRecovery(test.RecoveryHandler)
-)
-
 func TestMain(m *testing.M) {
 	log.SetOutput(ioutil.Discard)
 	os.Exit(m.Run())
@@ -29,7 +25,7 @@ func TestMatchSimpleHeader(t *testing.T) {
 			"Content-Type": "application/json",
 			"Host":         "hellofresh.com",
 		},
-		recovery(mw.Handler(http.HandlerFunc(test.Ping))),
+		mw.Handler(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 
@@ -46,7 +42,7 @@ func TestNotMatchSimpleHeader(t *testing.T) {
 			"Content-Type": "application/json",
 			"Host":         "hellofresh.de",
 		},
-		recovery(mw.Handler(http.HandlerFunc(test.Ping))),
+		mw.Handler(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 
@@ -63,7 +59,7 @@ func TestMatchRegexHeader(t *testing.T) {
 			"Content-Type": "application/json",
 			"Host":         "hellofresh.com",
 		},
-		recovery(mw.Handler(http.HandlerFunc(test.Ping))),
+		mw.Handler(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 
@@ -80,7 +76,7 @@ func TestNotMatchRegexHeader(t *testing.T) {
 			"Content-Type": "application/json",
 			"Host":         "api.hellofresh.com",
 		},
-		recovery(mw.Handler(http.HandlerFunc(test.Ping))),
+		mw.Handler(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 

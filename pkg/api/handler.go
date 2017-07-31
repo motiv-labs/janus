@@ -1,14 +1,14 @@
 package api
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/hellofresh/janus/pkg/opentracing"
-	"github.com/hellofresh/janus/pkg/request"
-	"github.com/hellofresh/janus/pkg/response"
+	"github.com/hellofresh/janus/pkg/render"
 	"github.com/hellofresh/janus/pkg/router"
 )
 
@@ -31,10 +31,11 @@ func (c *Controller) Get() http.HandlerFunc {
 		span.Finish()
 
 		if err != nil {
-			panic(err.Error())
+			errors.Handler(w, err)
+			return
 		}
 
-		response.JSON(w, http.StatusOK, data)
+		render.JSON(w, http.StatusOK, data)
 	}
 }
 
@@ -47,13 +48,11 @@ func (c *Controller) GetBy() http.HandlerFunc {
 		span.Finish()
 
 		if err != nil {
-			if err == ErrAPIDefinitionNotFound {
-				panic(err)
-			}
-			panic(errors.New(http.StatusInternalServerError, err.Error()))
+			errors.Handler(w, err)
+			return
 		}
 
-		response.JSON(w, http.StatusOK, data)
+		render.JSON(w, http.StatusOK, data)
 	}
 }
 
@@ -68,16 +67,19 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		span.Finish()
 
 		if definition == nil {
-			panic(ErrAPIDefinitionNotFound)
+			errors.Handler(w, ErrAPIDefinitionNotFound)
+			return
 		}
 
 		if err != nil {
-			panic(errors.New(http.StatusInternalServerError, err.Error()))
+			errors.Handler(w, err)
+			return
 		}
 
-		err = request.BindJSON(r, definition)
-		if nil != err {
-			panic(errors.New(http.StatusInternalServerError, err.Error()))
+		err = json.NewDecoder(r.Body).Decode(definition)
+		if err != nil {
+			errors.Handler(w, err)
+			return
 		}
 
 		// avoid situation when trying to update existing definition with new path
@@ -87,23 +89,26 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		span.Finish()
 
 		if err != nil && err != ErrAPIDefinitionNotFound {
-			panic(errors.New(http.StatusInternalServerError, err.Error()))
+			errors.Handler(w, err)
+			return
 		}
 
 		if nil != existingPathDefinition && existingPathDefinition.Name != definition.Name {
-			panic(ErrAPIListenPathExists)
+			errors.Handler(w, ErrAPIListenPathExists)
+			return
 		}
 
 		span = opentracing.FromContext(r.Context(), "datastore.Add")
 		err = c.repo.Add(definition)
-		c.dispatch(notifier.NoticeAPIUpdated)
 		span.Finish()
 
-		if nil != err {
-			panic(errors.New(http.StatusBadRequest, err.Error()))
+		if err != nil {
+			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
+			return
 		}
 
-		response.JSON(w, http.StatusOK, nil)
+		c.dispatch(notifier.NoticeAPIUpdated)
+		w.WriteHeader(http.StatusOK)
 	}
 }
 
@@ -112,21 +117,19 @@ func (c *Controller) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		definition := NewDefinition()
 
-		err := request.BindJSON(r, definition)
+		err := json.NewDecoder(r.Body).Decode(definition)
 		if nil != err {
-			panic(errors.New(http.StatusInternalServerError, err.Error()))
+			errors.Handler(w, err)
+			return
 		}
 
 		span := opentracing.FromContext(r.Context(), "datastore.Exists")
 		exists, err := c.repo.Exists(definition)
 		span.Finish()
 
-		if exists {
-			panic(err)
-		}
-
-		if nil != err {
-			panic(errors.New(http.StatusInternalServerError, err.Error()))
+		if err != nil || exists {
+			errors.Handler(w, err)
+			return
 		}
 
 		span = opentracing.FromContext(r.Context(), "datastore.Add")
@@ -134,12 +137,13 @@ func (c *Controller) Post() http.HandlerFunc {
 		c.dispatch(notifier.NoticeAPIAdded)
 		span.Finish()
 
-		if nil != err {
-			panic(errors.New(http.StatusBadRequest, err.Error()))
+		if err != nil {
+			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
+			return
 		}
 
 		w.Header().Add("Location", fmt.Sprintf("/apis/%s", definition.Name))
-		response.JSON(w, http.StatusCreated, nil)
+		w.WriteHeader(http.StatusCreated)
 	}
 }
 
@@ -153,14 +157,12 @@ func (c *Controller) DeleteBy() http.HandlerFunc {
 		span.Finish()
 
 		if err != nil {
-			if err == ErrAPIDefinitionNotFound {
-				panic(err)
-			}
-			panic(errors.New(http.StatusInternalServerError, err.Error()))
+			errors.Handler(w, err)
+			return
 		}
 
 		c.dispatch(notifier.NoticeAPIRemoved)
-		response.JSON(w, http.StatusNoContent, nil)
+		w.WriteHeader(http.StatusNoContent)
 	}
 }
 

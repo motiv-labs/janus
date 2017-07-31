@@ -5,13 +5,8 @@ import (
 	"net/http"
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/test"
 	"github.com/stretchr/testify/assert"
-)
-
-var (
-	recovery = middleware.NewRecovery(test.RecoveryHandler)
 )
 
 type mockManager struct {
@@ -20,6 +15,11 @@ type mockManager struct {
 
 func (m *mockManager) IsKeyAuthorized(accessToken string) bool {
 	return m.authorized
+}
+
+func TestContextKey(t *testing.T) {
+	key := ContextKey("test")
+	assert.Equal(t, "janus.test", key.String())
 }
 
 func TestValidKeyStorage(t *testing.T) {
@@ -52,7 +52,7 @@ func TestWrongAuthHeader(t *testing.T) {
 			"Content-Type":  "application/json",
 			"Authorization": fmt.Sprintf("Wrong %s", "123"),
 		},
-		recovery(mw(http.HandlerFunc(test.Ping))),
+		mw(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 
@@ -70,7 +70,7 @@ func TestMissingAuthHeader(t *testing.T) {
 		map[string]string{
 			"Content-Type": "application/json",
 		},
-		recovery(mw(http.HandlerFunc(test.Ping))),
+		mw(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 
@@ -89,7 +89,7 @@ func TestMissingKeyStorage(t *testing.T) {
 			"Content-Type":  "application/json",
 			"Authorization": fmt.Sprintf("Bearer %s", "1234"),
 		},
-		recovery(mw(http.HandlerFunc(test.Ping))),
+		mw(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 

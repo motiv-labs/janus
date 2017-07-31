@@ -1,11 +1,20 @@
 package rate
 
 import (
+	"net/http"
+
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/ulule/limiter"
+)
+
+var (
+	// ErrInvalidPolicy is used when an invalid policy was provided
+	ErrInvalidPolicy = errors.New(http.StatusBadRequest, "policy is not supported")
+	// ErrInvalidStorage is used when an invalid storage was provided
+	ErrInvalidStorage = errors.New(http.StatusBadRequest, "the storage that you are using is not supported for this feature")
 )
 
 const (
@@ -58,7 +67,7 @@ func getLimiterStore(storage store.Store, policy string, prefix string) (limiter
 	case "redis":
 		redisStorage, ok := storage.(*store.RedisStore)
 		if !ok {
-			return nil, errors.ErrInvalidStorage
+			return nil, ErrInvalidStorage
 		}
 
 		return limiter.NewRedisStoreWithOptions(redisStorage.Pool, limiter.StoreOptions{
@@ -68,6 +77,6 @@ func getLimiterStore(storage store.Store, policy string, prefix string) (limiter
 	case "local":
 		return limiter.NewMemoryStore(), nil
 	default:
-		return nil, errors.ErrInvalidPolicy
+		return nil, ErrInvalidPolicy
 	}
 }
