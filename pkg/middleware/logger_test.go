@@ -17,7 +17,7 @@ func TestSuccessfulLog(t *testing.T) {
 		map[string]string{
 			"Content-Type": "application/json",
 		},
-		recovery(mw.Handler(http.HandlerFunc(test.Ping))),
+		mw.Handler(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 

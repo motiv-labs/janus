@@ -6,14 +6,9 @@ import (
 	"os"
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/test"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
-)
-
-var (
-	recovery = NewRecovery(errors.RecoveryHandler)
 )
 
 func TestMain(m *testing.M) {
@@ -30,7 +25,7 @@ func TestMatchSimpleHeader(t *testing.T) {
 			"Content-Type": "application/json",
 			"Host":         "hellofresh.com",
 		},
-		recovery(mw.Handler(http.HandlerFunc(test.Ping))),
+		mw.Handler(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 
@@ -47,7 +42,7 @@ func TestNotMatchSimpleHeader(t *testing.T) {
 			"Content-Type": "application/json",
 			"Host":         "hellofresh.de",
 		},
-		recovery(mw.Handler(http.HandlerFunc(test.Ping))),
+		mw.Handler(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 
@@ -64,7 +59,7 @@ func TestMatchRegexHeader(t *testing.T) {
 			"Content-Type": "application/json",
 			"Host":         "hellofresh.com",
 		},
-		recovery(mw.Handler(http.HandlerFunc(test.Ping))),
+		mw.Handler(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 
@@ -81,7 +76,7 @@ func TestNotMatchRegexHeader(t *testing.T) {
 			"Content-Type": "application/json",
 			"Host":         "api.hellofresh.com",
 		},
-		recovery(mw.Handler(http.HandlerFunc(test.Ping))),
+		mw.Handler(http.HandlerFunc(test.Ping)),
 	)
 	assert.NoError(t, err)
 
