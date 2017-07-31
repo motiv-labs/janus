@@ -20,7 +20,7 @@ var (
 	storage      store.Store
 )
 
-func init() {
+func initConfig() {
 	c, err := config.Load(configFile)
 	if nil != err {
 		log.WithError(err).Panic("Could not parse the environment configurations")
@@ -30,7 +30,7 @@ func init() {
 }
 
 // initializes the basic configuration for the log wrapper
-func init() {
+func initLog() {
 	err := globalConfig.Log.Apply()
 	if nil != err {
 		log.WithError(err).Panic("Could not apply logging configurations")
@@ -38,7 +38,7 @@ func init() {
 }
 
 // initializes distributed tracing
-func init() {
+func initDistributedTracing() {
 	log.Debug("Initializing distributed tracing")
 	tracer, err := tracerfactory.Build(globalConfig.Tracing)
 	if err != nil {
@@ -48,8 +48,7 @@ func init() {
 	opentracing.SetGlobalTracer(tracer)
 }
 
-// initializes stats client
-func init() {
+func initStatsd() {
 	sectionsTestsMap, err := bucket.ParseSectionsTestsMap(globalConfig.Stats.IDs)
 	if err != nil {
 		log.WithError(err).WithField("config", globalConfig.Stats.IDs).
@@ -83,7 +82,7 @@ func init() {
 }
 
 // initializes the storage and managers
-func init() {
+func initStorage() {
 	log.WithField("dsn", globalConfig.Storage.DSN).Debug("Initializing storage")
 	s, err := store.Build(globalConfig.Storage.DSN)
 	if nil != err {
