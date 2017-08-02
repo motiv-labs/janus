@@ -29,6 +29,12 @@ var (
 func RunServer(cmd *cobra.Command, args []string) {
 	log.WithField("version", version).Info("Janus starting...")
 
+	initConfig()
+	initLog()
+	initDistributedTracing()
+	initStatsd()
+	initStorage()
+
 	defer statsClient.Close()
 	defer globalConfig.Log.Flush()
 

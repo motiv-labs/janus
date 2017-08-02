@@ -1,5 +1,9 @@
 # Unreleased
 
+## Fixed
+
+- Fixed problems when using -c flag to specify a configuration file
+
 # 3.2.1
 
 ## Added
