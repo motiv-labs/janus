@@ -17,6 +17,7 @@ import (
 	_ "github.com/hellofresh/janus/pkg/plugin/oauth2"
 	_ "github.com/hellofresh/janus/pkg/plugin/rate"
 	_ "github.com/hellofresh/janus/pkg/plugin/requesttransformer"
+	_ "github.com/hellofresh/janus/pkg/plugin/responsetransformer"
 )
 
 // Params initialization options.
