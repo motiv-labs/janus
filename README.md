@@ -47,6 +47,9 @@ This API Gateway offers powerful, yet lightweight features that allows fine gain
 
 ## Installation
 
+> Note: All examples here and in the documentation will be using [HTTPie](https://httpie.org/) for simplicity.
+But all requests can easily be converted to `curl` if needed.
+
 ### Docker
 
 The simplest way of installing Janus is to run the docker image for it. You can check our [examples](/examples) folder and you can find some good examples. All you got to do is:
