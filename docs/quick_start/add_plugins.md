@@ -26,9 +26,11 @@ Let's create a file called `rate_limit.json` with our new additions to the API d
 
 Now lets update our API definition:
 
-```sh
+{% codetabs name="HTTPie", type="bash" -%}
 http -v PUT localhost:8081/apis/my-endpoint "Authorization:Bearer yourToken" "Content-Type: application/json" < rate_limit.json
-```
+{%- language name="CURL", type="bash" -%}
+curl -X "PUT" localhost:8081/apis/my-endpoint -H "Authorization:Bearer yourToken" -H "Content-Type: application/json" -d @rate_limit.json
+{%- endcodetabs %}
 
 Done! Now Janus already reloaded the configuration and the rate limit is enabled on your endpoint.
 
@@ -36,9 +38,11 @@ Done! Now Janus already reloaded the configuration and the rate limit is enabled
 
 Lets make a few requests to our endpoint and see if the rate limit is working.
 
-```bash
-$ http -v GET http://localhost:8080/example
-```
+{% codetabs name="HTTPie", type="bash" -%}
+http -v GET http://localhost:8080/example
+{%- language name="CURL", type="bash" -%}
+curl -X "GET" http://localhost:8080/example
+{%- endcodetabs %}
 
 You should see a few extra headers on the response of this request:
 

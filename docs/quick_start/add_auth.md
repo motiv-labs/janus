@@ -55,9 +55,11 @@ If you want to check all available configurations for OAuth2 please visit [this]
 
 Now lets add this configuration to Janus:
 
-```sh
+{% codetabs name="HTTPie", type="bash" -%}
 http -v POST localhost:8081/oauth/servers "Authorization:Bearer yourToken" "Content-Type: application/json" < auth.json
-```
+{%- language name="CURL", type="bash" -%}
+curl -X "POST" localhost:8081/oauth/servers -H "Authorization:Bearer yourToken" -H "Content-Type: application/json" -d @auth.json
+{%- endcodetabs %}
 
 ## 2. Add a plugin for your endpoint
 
@@ -77,9 +79,12 @@ Now that we have an oauth2 available to use, lets add it to our endpoint, just c
 }
 ```
 
-```sh
+{% codetabs name="HTTPie", type="bash" -%}
 http -v PUT localhost:8081/apis/my-endpoint "Authorization:Bearer yourToken" "Content-Type: application/json" < auth_plugin.json
-```
+{%- language name="CURL", type="bash" -%}
+curl -X "PUT" localhost:8081/apis/my-endpoint -H "Authorization:Bearer yourToken" -H "Content-Type: application/json" -d @auth_plugin.json
+{%- endcodetabs %}
+
 
 ## Testing the endpoint
 

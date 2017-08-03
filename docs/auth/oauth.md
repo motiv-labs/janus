@@ -6,17 +6,21 @@
 The main feature of the API Gateway is to proxy the requests to a different service, so let's do this.
 Now that you are authenticated, you can send a request to `/oauth/servers` to create a proxy.
 
-```
+{% codetabs name="HTTPie", type="bash" -%}
 http -v POST localhost:8081/oauth/servers "Authorization:Bearer yourToken" "Content-Type: application/json" < examples/front-proxy-auth/auth/auth.json
-```
+{%- language name="CURL", type="bash" -%}
+curl -X "POST" localhost:8081/oauth/servers -H "Authorization:Bearer yourToken" -H "Content-Type: application/json" -d  @examples/front-proxy-auth/auth/auth.json
+{%- endcodetabs %}
 
 ## 2. Verify that your API has been added
 
 You can use the REST API to query all available APIs and Auth Providers. Simply make a request to `/oauth/servers`.
 
-```bash
+{% codetabs name="HTTPie", type="bash" -%}
 http -v GET localhost:8081/oauth/servers "Authorization:Bearer yourToken" "Content-Type: application/json"
-```
+{%- language name="CURL", type="bash" -%}
+curl -X "GET" localhost:8081/oauth/servers -H "Authorization:Bearer yourToken" -H "Content-Type: application/json"
+{%- endcodetabs %}
 
 ## 3. Forward your requests through Janus
 
@@ -25,9 +29,11 @@ requests to your OAuth Server.
 
 This request is an example of a simple `client_credentials` flow of [OAuth 2.0](), you can try any flow that you like.
 
-```bash
-$ http -v GET http://localhost:8080/auth/token?grant_type=client_credentials "Authorization: Basic YourBasicToken"
-```
+{% codetabs name="HTTPie", type="bash" -%}
+http -v GET http://localhost:8080/auth/token?grant_type=client_credentials "Authorization: Basic YourBasicToken"
+{%- language name="CURL", type="bash" -%}
+curl -X "GET" http://localhost:8080/auth/token?grant_type=client_credentials -H "Authorization: Basic YourBasicToken"
+{%- endcodetabs %}
 
 # Reference
 

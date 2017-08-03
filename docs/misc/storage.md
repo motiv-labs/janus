@@ -11,10 +11,12 @@ Some Janus functionality requires key/value storage. These functionalities are:
 Storage can be configured with either `STORAGE_DSN` environment variable or config file value, depending on
 config file format. E.g. for `toml` config file format storage configuration looks like:
 
-```toml
+{% codetabs name="TOML", type="toml" -%}
 [storage]
   dsn = "<storage dsn>"
-```
+{%- language name="ENV. Vars", type="bash" -%}
+export STORAGE_DSN=""
+{%- endcodetabs %}
 
 ## Storage types
 

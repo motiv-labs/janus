@@ -11,9 +11,11 @@ using the `Authorization` header.
 
 To get a token you must execute:
 
-```sh
+{% codetabs name="HTTPie", type="bash" -%}
 http -v --json POST localhost:8081/login username=admin password=admin
-```
+{%- language name="CURL", type="bash" -%}
+http -X "POST" localhost:8081/login -d '{"username": "admin", "password": "admin"}'
+{%- endcodetabs %}
 
 The username and password are defined by the configuration called `web.credentials.username` and `web.credentials.password`. It defaults to *admin*/*admin*.
 
@@ -46,9 +48,11 @@ Just create an `example.json` file containing this:
 
 And now lets add it to Janus:
 
-```sh
+{% codetabs name="HTTPie", type="bash" -%}
 http -v POST localhost:8081/apis "Authorization:Bearer yourToken" "Content-Type: application/json" < example.json
-```
+{%- language name="CURL", type="bash" -%}
+curl -X "POST" localhost:8081/apis -H "Authorization:Bearer yourToken" -H "Content-Type: application/json" -d @example.json
+{%- endcodetabs %}
 
 This will create a proxy to `http://www.mocky.io/v2/595625d22900008702cd71e8` (which is a fake api) when you hit the api gateway on `GET /example`.
 
@@ -62,6 +66,12 @@ to `/apis`.
 http -v GET localhost:8081/apis "Authorization:Bearer yourToken" "Content-Type: application/json"
 ```
 
+{% codetabs name="HTTPie", type="bash" -%}
+http -v GET localhost:8081/apis "Authorization:Bearer yourToken" "Content-Type: application/json"
+{%- language name="CURL", type="bash" -%}
+curl -X "GET" localhost:8081/apis -H "Authorization:Bearer yourToken" -H "Content-Type: application/json"
+{%- endcodetabs %}
+
 ## 3. Forward your requests through Janus
 
 Issue the following cURL request to verify that Janus is properly forwarding
@@ -71,6 +81,11 @@ requests on port `:8080`:
 ```bash
 $ http -v GET http://localhost:8080/example
 ```
+{% codetabs name="HTTPie", type="bash" -%}
+http -v GET http://localhost:8080/example
+{%- language name="CURL", type="bash" -%}
+curl -vX "GET" http://localhost:8080/example
+{%- endcodetabs %}
 
 A successful response means Janus is now forwarding requests made to `http://localhost:8000` to the `upstream_url` we configured in step #1, and is forwarding the response back to us.
 

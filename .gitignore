@@ -28,6 +28,7 @@ gin-bin
 
 _book
 /vendor
+node_modules/
 
 # HF config files
 /dist
