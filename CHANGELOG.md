@@ -1,5 +1,9 @@
 # Unreleased
 
+## Added
+
+- Added response transformer plugin
+
 ## Fixed
 
 - Fixed problems when using -c flag to specify a configuration file
