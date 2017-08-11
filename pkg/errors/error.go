@@ -11,6 +11,7 @@ import (
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/render"
+	baseErrors "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -19,8 +20,6 @@ var (
 	ErrRouteNotFound = New(http.StatusNotFound, "no API found with those values")
 	// ErrInvalidID represents an invalid identifier
 	ErrInvalidID = New(http.StatusBadRequest, "please provide a valid ID")
-	// ErrInvalidScheme is used when the access token is not found on the storage
-	ErrInvalidScheme = New(http.StatusBadRequest, "scheme is not supported")
 )
 
 // Error is a custom error that implements the `error` interface.
@@ -62,4 +61,11 @@ func Handler(w http.ResponseWriter, err interface{}) {
 		log.WithField("error", err).Error("Internal server error handled")
 		render.JSON(w, http.StatusInternalServerError, err)
 	}
+}
+
+// Wrap returns an error annotating err with a stack trace
+// at the point Wrap is called, and the supplied message.
+// If err is nil, Wrap returns nil.
+func Wrap(err error, message string) error {
+	return baseErrors.Wrap(err, message)
 }
