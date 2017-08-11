@@ -5,8 +5,8 @@ import (
 
 	mgo "gopkg.in/mgo.v2"
 
-	"github.com/containous/traefik/log"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 // Repository defines the behavior of a proxy specs repository
