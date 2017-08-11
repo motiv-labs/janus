@@ -11,7 +11,6 @@ import (
 	"github.com/hellofresh/janus/features/bootstrap"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
-	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/stretchr/testify/assert"
 	"gopkg.in/mgo.v2"
 )
@@ -55,7 +54,7 @@ func FeatureContext(s *godog.Suite) {
 			panic(err)
 		}
 	default:
-		panic(errors.ErrInvalidScheme)
+		panic("invalid database")
 	}
 
 	portSecondary, err := strconv.Atoi(os.Getenv("PORT_SECONDARY"))
