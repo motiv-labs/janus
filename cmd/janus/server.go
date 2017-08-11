@@ -3,30 +3,28 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"net/url"
 
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/errors"
-	"github.com/hellofresh/janus/pkg/loader"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/notifier"
-	"github.com/hellofresh/janus/pkg/oauth"
+	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/web"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/mgo.v2"
 )
 
 var (
-	repo             api.Repository
-	oAuthServersRepo oauth.Repository
-	server           *http.Server
+	repo   api.Repository
+	server *http.Server
 )
 
 // RunServer is the run command to start Janus
 func RunServer(cmd *cobra.Command, args []string) {
+	var ntf notifier.Notifier
+
 	log.WithField("version", version).Info("Janus starting...")
 
 	initConfig()
@@ -34,90 +32,37 @@ func RunServer(cmd *cobra.Command, args []string) {
 	initDistributedTracing()
 	initStatsd()
 	initStorage()
+	initDatabase()
 
 	defer statsClient.Close()
 	defer globalConfig.Log.Flush()
+	defer session.Close()
 
 	if subscriber, ok := storage.(notifier.Subscriber); ok {
 		listener := notifier.NewNotificationListener(subscriber)
 		listener.Start(handleEvent)
 	}
 
-	dsnURL, err := url.Parse(globalConfig.Database.DSN)
-	switch dsnURL.Scheme {
-	case "mongodb":
-		log.Debug("MongoDB configuration chosen")
-
-		log.WithField("dsn", globalConfig.Database.DSN).Debug("Trying to connect to MongoDB...")
-		session, err := mgo.Dial(globalConfig.Database.DSN)
-		if err != nil {
-			log.Panic(err)
-		}
-		defer session.Close()
-
-		log.Debug("Connected to MongoDB")
-		session.SetMode(mgo.Monotonic, true)
-
-		repo, err = api.NewMongoAppRepository(session)
-		if err != nil {
-			log.Panic(err)
-		}
-
-		oAuthServersRepo, err = oauth.NewMongoRepository(session)
-		if err != nil {
-			log.Panic(err)
-		}
-	case "file":
-		log.Debug("File system based configuration chosen")
-		var apiPath = dsnURL.Path + "/apis"
-		var authPath = dsnURL.Path + "/auth"
-
-		log.WithFields(log.Fields{
-			"api_path":  apiPath,
-			"auth_path": authPath,
-		}).Debug("Trying to load configuration files")
-		repo, err = api.NewFileSystemRepository(apiPath)
-		if err != nil {
-			log.Panic(err)
-		}
-
-		oAuthServersRepo, err = oauth.NewFileSystemRepository(authPath)
-		if err != nil {
-			log.Panic(err)
-		}
-	default:
-		log.WithError(errors.ErrInvalidScheme).Error("No Database selected")
-	}
-
-	wp := web.Provider{
-		Port:     globalConfig.Web.Port,
-		Cred:     globalConfig.Web.Credentials,
-		ReadOnly: globalConfig.Web.ReadOnly,
-		TLS:      globalConfig.Web.TLS,
-		APIRepo:  repo,
-		AuthRepo: oAuthServersRepo,
-	}
-
 	if publisher, ok := storage.(notifier.Publisher); ok {
-		wp.Notifier = notifier.NewPublisherNotifier(publisher, "")
+		ntf = notifier.NewPublisherNotifier(publisher, "")
 	}
-
-	wp.Provide(version)
 
 	r := createRouter()
-	loader.Load(loader.Params{
-		Router:      r,
-		Storage:     storage,
-		APIRepo:     repo,
-		OAuthRepo:   oAuthServersRepo,
-		StatsClient: statsClient,
-		ProxyParams: proxy.Params{
-			StatsClient:            statsClient,
-			FlushInterval:          globalConfig.BackendFlushInterval,
-			IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
-			CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
-		},
+	register := proxy.NewRegister(r, proxy.Params{
+		StatsClient:            statsClient,
+		FlushInterval:          globalConfig.BackendFlushInterval,
+		IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
+		CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
 	})
+
+	event := plugin.OnStartup{
+		Notifier:     ntf,
+		MongoSession: session,
+		StatsClient:  statsClient,
+		Register:     register,
+		Config:       globalConfig,
+	}
+	plugin.EmitEvent(plugin.StartupEvent, event)
 
 	log.Fatal(listenAndServe(r))
 }
@@ -161,19 +106,15 @@ func createRouter() router.Router {
 func handleEvent(notification notifier.Notification) {
 	if notifier.RequireReload(notification.Command) {
 		newRouter := createRouter()
-		loader.Load(loader.Params{
-			Router:      newRouter,
-			Storage:     storage,
-			APIRepo:     repo,
-			OAuthRepo:   oAuthServersRepo,
-			StatsClient: statsClient,
-			ProxyParams: proxy.Params{
-				StatsClient:            statsClient,
-				FlushInterval:          globalConfig.BackendFlushInterval,
-				IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
-				CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
-			},
+		register := proxy.NewRegister(newRouter, proxy.Params{
+			StatsClient:            statsClient,
+			FlushInterval:          globalConfig.BackendFlushInterval,
+			IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
+			CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
 		})
+
+		plugin.EmitEvent(plugin.ReloadEvent, plugin.OnReload{Register: register})
+
 		server.Handler = newRouter
 	}
 }
