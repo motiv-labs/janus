@@ -1,4 +1,4 @@
-package oauth
+package oauth2
 
 import (
 	"github.com/hellofresh/janus/pkg/jwt"
