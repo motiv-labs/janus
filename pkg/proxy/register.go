@@ -17,7 +17,7 @@ const (
 // Register handles the register of proxies into the chosen router.
 // It also handles the conversion from a proxy to an http.HandlerFunc
 type Register struct {
-	router router.Router
+	Router router.Router
 	params Params
 }
 
@@ -108,9 +108,9 @@ func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, metho
 
 	for _, method := range methods {
 		if strings.ToUpper(method) == methodAll {
-			p.router.Any(listenPath, handler, handlers...)
+			p.Router.Any(listenPath, handler, handlers...)
 		} else {
-			p.router.Handle(strings.ToUpper(method), listenPath, handler, handlers...)
+			p.Router.Handle(strings.ToUpper(method), listenPath, handler, handlers...)
 		}
 	}
 }
