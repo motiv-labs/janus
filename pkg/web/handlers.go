@@ -11,9 +11,9 @@ import (
 )
 
 // Home handler is just a nice home page message
-func Home(version string) http.HandlerFunc {
+func Home() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		render.JSON(w, http.StatusOK, "Welcome to Janus v"+version)
+		render.JSON(w, http.StatusOK, "Welcome to Janus")
 	}
 }
 
