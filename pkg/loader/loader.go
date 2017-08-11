@@ -2,15 +2,13 @@ package loader
 
 import (
 	"github.com/hellofresh/janus/pkg/api"
-	"github.com/hellofresh/janus/pkg/errors"
-	"github.com/hellofresh/janus/pkg/oauth"
+	httpErrors "github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
-	"github.com/hellofresh/janus/pkg/router"
-	"github.com/hellofresh/janus/pkg/store"
-	stats "github.com/hellofresh/stats-go"
+	"github.com/pkg/errors"
 
 	// this is needed to call the init function on each plugin
+	_ "github.com/hellofresh/janus/pkg/plugin/basic"
 	_ "github.com/hellofresh/janus/pkg/plugin/bodylmt"
 	_ "github.com/hellofresh/janus/pkg/plugin/compression"
 	_ "github.com/hellofresh/janus/pkg/plugin/cors"
@@ -18,37 +16,53 @@ import (
 	_ "github.com/hellofresh/janus/pkg/plugin/rate"
 	_ "github.com/hellofresh/janus/pkg/plugin/requesttransformer"
 	_ "github.com/hellofresh/janus/pkg/plugin/responsetransformer"
+
+	// internal plugins
+	_ "github.com/hellofresh/janus/pkg/web"
 )
 
-// Params initialization options.
-type Params struct {
-	Router      router.Router
-	Storage     store.Store
-	APIRepo     api.Repository
-	OAuthRepo   oauth.Repository
-	StatsClient stats.Client
-	ProxyParams proxy.Params
+var (
+	repo api.Repository
+)
+
+func init() {
+	plugin.RegisterEventHook(plugin.StartupEvent, onStartup)
+	plugin.RegisterEventHook(plugin.ReloadEvent, onReload)
+}
+
+func onStartup(event interface{}) error {
+	e, ok := event.(plugin.OnStartup)
+	if !ok {
+		return errors.New("Could not convert event to startup type")
+	}
+
+	repo, err := api.BuildRepository(e.Config.Database.DSN, e.MongoSession)
+	if err != nil {
+		return err
+	}
+
+	Load(e.Register, repo)
+	return nil
+}
+
+func onReload(event interface{}) error {
+	e, ok := event.(plugin.OnReload)
+	if !ok {
+		return errors.New("Could not convert event to reload type")
+	}
+
+	Load(e.Register, repo)
+
+	return nil
 }
 
 // Load loads all the basic components and definitions into a router
-func Load(params Params) {
-	// create proxy register
-	register := proxy.NewRegister(params.Router, params.ProxyParams)
-
-	apiLoader := NewAPILoader(register, plugin.Params{
-		Router:      params.Router,
-		Storage:     params.Storage,
-		APIRepo:     params.APIRepo,
-		OAuthRepo:   params.OAuthRepo,
-		StatsClient: params.StatsClient,
-	})
-	apiLoader.LoadDefinitions(params.APIRepo)
-
-	oauthLoader := NewOAuthLoader(register)
-	oauthLoader.LoadDefinitions(params.OAuthRepo)
+func Load(register *proxy.Register, repo api.Repository) {
+	apiLoader := NewAPILoader(register)
+	apiLoader.LoadDefinitions(repo)
 
 	// some routers may panic when have empty routes list, so add one dummy 404 route to avoid this
-	if params.Router.RoutesCount() < 1 {
-		params.Router.Any("/", errors.NotFound)
+	if register.Router.RoutesCount() < 1 {
+		register.Router.Any("/", httpErrors.NotFound)
 	}
 }

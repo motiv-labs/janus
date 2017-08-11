@@ -10,7 +10,6 @@ import (
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/middleware"
-	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/test"
@@ -80,7 +79,7 @@ func createRegisterAndRouter() (router.Router, error) {
 		return nil, err
 	}
 
-	loader := NewAPILoader(register, plugin.Params{StatsClient: statsClient})
+	loader := NewAPILoader(register)
 	loader.LoadDefinitions(proxyRepo)
 
 	return r, nil

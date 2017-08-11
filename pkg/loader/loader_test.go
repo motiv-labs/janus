@@ -6,17 +6,14 @@ import (
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/api"
-	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
-	"github.com/hellofresh/janus/pkg/store"
-	stats "github.com/hellofresh/stats-go"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestLoadAPIsWithParams(t *testing.T) {
 	r := router.NewChiRouter()
-	Load(loadParamsForTest(r, api.NewInMemoryRepository()))
+	Load(proxy.NewRegister(r, proxy.Params{}), api.NewInMemoryRepository())
 
 	assert.Equal(t, 1, r.RoutesCount())
 }
@@ -59,7 +56,7 @@ func TestLoadValidAPIDefinitions(t *testing.T) {
 		},
 	})
 
-	Load(loadParamsForTest(r, apiRepo))
+	Load(proxy.NewRegister(r, proxy.Params{}), apiRepo)
 
 	assert.Equal(t, 2, r.RoutesCount())
 }
@@ -81,7 +78,7 @@ func TestLoadInvalidAPIDefinitions(t *testing.T) {
 	assert.NoError(t, err)
 
 	definition.Name = ""
-	Load(loadParamsForTest(r, apiRepo))
+	Load(proxy.NewRegister(r, proxy.Params{}), apiRepo)
 
 	assert.Equal(t, 1, r.RoutesCount())
 }
@@ -99,7 +96,7 @@ func TestLoadAPIDefinitionsMissingHTTPMethods(t *testing.T) {
 		},
 	})
 
-	Load(loadParamsForTest(r, apiRepo))
+	Load(proxy.NewRegister(r, proxy.Params{}), apiRepo)
 
 	assert.Equal(t, 1, r.RoutesCount())
 }
@@ -117,19 +114,7 @@ func TestLoadInactiveAPIDefinitions(t *testing.T) {
 		},
 	})
 
-	Load(loadParamsForTest(r, apiRepo))
+	Load(proxy.NewRegister(r, proxy.Params{}), apiRepo)
 
 	assert.Equal(t, 1, r.RoutesCount())
-}
-
-func loadParamsForTest(r router.Router, apiRepo api.Repository) Params {
-	statsClient, _ := stats.NewClient("memory://", "")
-	return Params{
-		Storage:     store.NewInMemoryStore(),
-		APIRepo:     apiRepo,
-		OAuthRepo:   oauth.NewInMemoryRepository(),
-		Router:      r,
-		ProxyParams: proxy.Params{StatsClient: statsClient},
-	}
-
 }
