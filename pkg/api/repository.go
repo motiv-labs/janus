@@ -1,5 +1,14 @@
 package api
 
+import (
+	"net/url"
+
+	mgo "gopkg.in/mgo.v2"
+
+	"github.com/containous/traefik/log"
+	"github.com/pkg/errors"
+)
+
 // Repository defines the behavior of a proxy specs repository
 type Repository interface {
 	FindAll() ([]*Definition, error)
@@ -27,4 +36,30 @@ func exists(r Repository, def *Definition) (bool, error) {
 	}
 
 	return false, nil
+}
+
+// BuildRepository creates a repository instance that will depend on your given DSN
+func BuildRepository(dsn string, session *mgo.Session) (Repository, error) {
+	var repo Repository
+	dsnURL, err := url.Parse(dsn)
+	switch dsnURL.Scheme {
+	case "mongodb":
+		repo, err = NewMongoAppRepository(session)
+		if err != nil {
+			return nil, errors.Wrap(err, "Could not create a mongodb repository for api definitions")
+		}
+	case "file":
+		log.Debug("File system based configuration chosen")
+		var apiPath = dsnURL.Path + "/apis"
+
+		log.WithField("api_path", apiPath).Debug("Trying to load configuration files")
+		repo, err = NewFileSystemRepository(apiPath)
+		if err != nil {
+			return nil, errors.Wrap(err, "could not create a file system repository")
+		}
+	default:
+		return nil, errors.New("The selected scheme is not supported to load API definitions")
+	}
+
+	return repo, nil
 }
