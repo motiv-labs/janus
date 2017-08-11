@@ -2,14 +2,12 @@ package api
 
 import (
 	"github.com/asaskevich/govalidator"
-	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
 )
 
 // Spec Holds an api definition and basic options
 type Spec struct {
 	*Definition
-	Manager oauth.Manager
 }
 
 // Plugin represents the plugins for an API
