@@ -1,8 +1,11 @@
 package main
 
 import (
+	"net/url"
 	"os"
 	"path/filepath"
+
+	mgo "gopkg.in/mgo.v2"
 
 	"github.com/hellofresh/janus/pkg/config"
 	tracerfactory "github.com/hellofresh/janus/pkg/opentracing"
@@ -18,6 +21,7 @@ var (
 	globalConfig *config.Specification
 	statsClient  stats.Client
 	storage      store.Store
+	session      *mgo.Session
 )
 
 func initConfig() {
@@ -90,4 +94,24 @@ func initStorage() {
 	}
 
 	storage = s
+}
+
+// initializes the storage and managers
+func initDatabase() {
+	dsnURL, err := url.Parse(globalConfig.Database.DSN)
+	switch dsnURL.Scheme {
+	case "mongodb":
+		log.Debug("MongoDB configuration chosen")
+
+		log.WithField("dsn", globalConfig.Database.DSN).Debug("Trying to connect to MongoDB...")
+		session, err = mgo.Dial(globalConfig.Database.DSN)
+		if err != nil {
+			log.Panic(err)
+		}
+
+		log.Debug("Connected to MongoDB")
+		session.SetMode(mgo.Monotonic, true)
+	default:
+		log.Error("No Database selected")
+	}
 }
