@@ -12,7 +12,7 @@ func init() {
 	})
 }
 
-func setupCompression(route *proxy.Route, p plugin.Params) error {
+func setupCompression(route *proxy.Route, rawConfig plugin.Config) error {
 	route.AddInbound(middleware.DefaultCompress)
 	return nil
 }

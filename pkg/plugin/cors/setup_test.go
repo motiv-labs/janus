@@ -51,7 +51,7 @@ func TestSetup(t *testing.T) {
 		"exposed_headers": []string{"Test"},
 	}
 	route := proxy.NewRoute(&proxy.Definition{})
-	err := setupCors(route, plugin.Params{Config: rawConfig})
+	err := setupCors(route, rawConfig)
 
 	assert.NoError(t, err)
 	assert.Len(t, route.Inbound, 1)

@@ -44,7 +44,7 @@ func TestRequestTransformerPlugin(t *testing.T) {
 	}
 
 	route := proxy.NewRoute(&proxy.Definition{})
-	err := setupRequestTransformer(route, plugin.Params{Config: rawConfig})
+	err := setupRequestTransformer(route, rawConfig)
 	assert.NoError(t, err)
 
 	assert.Len(t, route.Inbound, 1)
