@@ -69,7 +69,7 @@ func onStartup(event interface{}) error {
 		authGroup.GET("/refresh_token", handlers.Refresh())
 	}
 
-	loadAPIEndpoints(r, repo, e.Notifier)
+	loadAPIEndpoints(r, repo, e.Notifier, guard)
 	plugin.EmitEvent(plugin.AdminAPIStartupEvent, plugin.OnAdminAPIStartup{Router: r})
 
 	go func() {
@@ -101,12 +101,13 @@ func listenAndServe(config config.Web, handler http.Handler) error {
 }
 
 //loadAPIEndpoints register api endpoints
-func loadAPIEndpoints(router router.Router, repo api.Repository, ntf notifier.Notifier) {
+func loadAPIEndpoints(router router.Router, repo api.Repository, ntf notifier.Notifier, guard jwt.Guard) {
 	log.Debug("Loading API Endpoints")
 
 	// Apis endpoints
 	handler := api.NewController(repo, ntf)
 	group := router.Group("/apis")
+	group.Use(jwt.NewMiddleware(guard).Handler)
 	{
 		group.GET("/", handler.Get())
 		group.GET("/{name}", handler.GetBy())

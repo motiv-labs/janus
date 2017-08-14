@@ -62,14 +62,14 @@ func onStartup(event interface{}) error {
 		return err
 	}
 
-	handlers := NewController(repo)
+	handlers := NewHandler(repo)
 	group := adminRouter.Group("/credentials/basic_auth")
 	{
-		group.GET("/", handlers.Get())
-		group.POST("/", handlers.Post())
-		group.GET("/{username}", handlers.GetBy())
-		group.PUT("/{username}", handlers.PutBy())
-		group.DELETE("/{username}", handlers.DeleteBy())
+		group.GET("/", handlers.Index())
+		group.POST("/", handlers.Create())
+		group.GET("/{username}", handlers.Show())
+		group.PUT("/{username}", handlers.Update())
+		group.DELETE("/{username}", handlers.Delete())
 	}
 
 	return nil

@@ -64,6 +64,8 @@ type EventHook func(event interface{}) error
 // and they must have a name.
 func RegisterEventHook(name string, hook EventHook) error {
 	log.WithField("event_name", name).Debug("Event registered")
+	lock.Lock()
+	defer lock.Unlock()
 
 	if name == "" {
 		return errors.New("event hook must have a name")
@@ -83,6 +85,8 @@ func RegisterEventHook(name string, hook EventHook) error {
 // use 'go' keyword if they don't want to block Caddy.
 func EmitEvent(name string, event interface{}) error {
 	log.WithField("event_name", name).Debug("Event triggered")
+	lock.Lock()
+	defer lock.Unlock()
 
 	hooks, found := eventHooks[name]
 	if !found {

@@ -1,12 +1,18 @@
 package api
 
 import (
+	"fmt"
 	"net/url"
 
 	mgo "gopkg.in/mgo.v2"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+)
+
+const (
+	mongodb = "mongodb"
+	file    = "file"
 )
 
 // Repository defines the behavior of a proxy specs repository
@@ -43,14 +49,14 @@ func BuildRepository(dsn string, session *mgo.Session) (Repository, error) {
 	var repo Repository
 	dsnURL, err := url.Parse(dsn)
 	switch dsnURL.Scheme {
-	case "mongodb":
+	case mongodb:
 		repo, err = NewMongoAppRepository(session)
 		if err != nil {
 			return nil, errors.Wrap(err, "Could not create a mongodb repository for api definitions")
 		}
-	case "file":
+	case file:
 		log.Debug("File system based configuration chosen")
-		var apiPath = dsnURL.Path + "/apis"
+		apiPath := fmt.Sprintf("%s/apis", dsnURL.Path)
 
 		log.WithField("api_path", apiPath).Debug("Trying to load configuration files")
 		repo, err = NewFileSystemRepository(apiPath)

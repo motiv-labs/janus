@@ -1,6 +1,7 @@
 package oauth2
 
 import (
+	"fmt"
 	"net/url"
 
 	"github.com/hellofresh/janus/pkg/config"
@@ -11,6 +12,11 @@ import (
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+)
+
+const (
+	mongodb = "mongodb"
+	file    = "file"
 )
 
 var (
@@ -69,13 +75,13 @@ func onStartup(event interface{}) error {
 	}
 
 	switch dsnURL.Scheme {
-	case "mongodb":
+	case mongodb:
 		repo, err = NewMongoRepository(e.MongoSession)
 		if err != nil {
 			return errors.Wrap(err, "Could not create a mongodb repository for oauth servers")
 		}
-	case "file":
-		var authPath = dsnURL.Path + "/auth"
+	case file:
+		authPath := fmt.Sprintf("%s/auth", dsnURL.Path)
 		log.WithField("auth_path", authPath).Debug("Trying to load configuration files")
 
 		repo, err = NewFileSystemRepository(authPath)
@@ -135,7 +141,7 @@ func getManager(oauthServer *OAuth, oAuthServerName string) (Manager, error) {
 	return NewManagerFactory(oauthServer).Build(managerType)
 }
 
-//loadOAuthEndpoints register api endpoints
+// loadOAuthEndpoints register api endpoints
 func loadOAuthEndpoints(router router.Router, repo Repository, ntf notifier.Notifier, cred config.Credentials) {
 	log.Debug("Loading OAuth Endpoints")
 

@@ -12,18 +12,18 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// Controller is the api rest controller
-type Controller struct {
+// Handler is the api rest handlers
+type Handler struct {
 	repo Repository
 }
 
-// NewController creates a new instance of Controller
-func NewController(repo Repository) *Controller {
-	return &Controller{repo}
+// NewHandler creates a new instance of Handler
+func NewHandler(repo Repository) *Handler {
+	return &Handler{repo}
 }
 
-// Get is the find all handler
-func (c *Controller) Get() http.HandlerFunc {
+// Index is the find all handler
+func (c *Handler) Index() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		span := opentracing.FromContext(r.Context(), "datastore.user.FindAll")
 		data, err := c.repo.FindAll()
@@ -38,8 +38,8 @@ func (c *Controller) Get() http.HandlerFunc {
 	}
 }
 
-// GetBy is the find by handler
-func (c *Controller) GetBy() http.HandlerFunc {
+// Show is the find by handler
+func (c *Handler) Show() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		username := router.URLParam(r, "username")
 		span := opentracing.FromContext(r.Context(), "datastore.user.FindByUsername")
@@ -55,8 +55,8 @@ func (c *Controller) GetBy() http.HandlerFunc {
 	}
 }
 
-// PutBy is the update handler
-func (c *Controller) PutBy() http.HandlerFunc {
+// Update is the update handler
+func (c *Handler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
@@ -94,8 +94,8 @@ func (c *Controller) PutBy() http.HandlerFunc {
 	}
 }
 
-// Post is the create handler
-func (c *Controller) Post() http.HandlerFunc {
+// Create is the create handler
+func (c *Handler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		user := &User{}
 
@@ -129,8 +129,8 @@ func (c *Controller) Post() http.HandlerFunc {
 	}
 }
 
-// DeleteBy is the delete handler
-func (c *Controller) DeleteBy() http.HandlerFunc {
+// Delete is the delete handler
+func (c *Handler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		username := router.URLParam(r, "username")
 

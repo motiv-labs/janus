@@ -18,7 +18,7 @@ func NewBasicAuth(repo Repository) func(http.Handler) http.Handler {
 			})
 
 			username, password, authOK := r.BasicAuth()
-			if authOK == false {
+			if !authOK {
 				errors.Handler(w, ErrNotAuthorized)
 				return
 			}
