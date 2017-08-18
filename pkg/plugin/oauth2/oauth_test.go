@@ -8,6 +8,45 @@ import (
 	"gopkg.in/mgo.v2/bson"
 )
 
+func TestAccessRulesWithWrongPredicate(t *testing.T) {
+	rules := AccessRule{
+		Action:    "wrong",
+		Predicate: "wrong.predicate",
+	}
+	_, err := rules.IsAllowed(make(map[string]interface{}))
+	require.Error(t, err)
+}
+
+func TestAccessRulesWithEmptyPredicate(t *testing.T) {
+	rules := AccessRule{
+		Action:    "wrong",
+		Predicate: "",
+	}
+	_, err := rules.IsAllowed(map[string]interface{}{"test": true})
+	require.Error(t, err)
+}
+
+func TestAccessRulesWithPredicateThatDoesntMatch(t *testing.T) {
+	rules := AccessRule{
+		Action:    "wrong",
+		Predicate: "test = false",
+	}
+	_, err := rules.IsAllowed(map[string]interface{}{"test": true})
+	require.Error(t, err)
+}
+
+func TestTokenStrategyWithInvalidSettings(t *testing.T) {
+	settingsLegacy := TokenStrategy{Settings: make(chan int)}
+	_, err := settingsLegacy.GetJWTSigningMethods()
+	require.Error(t, err)
+}
+
+func TestTokenStrategyWithEmptySecret(t *testing.T) {
+	settingsLegacy := TokenStrategy{Settings: bson.M{"secret": ""}}
+	_, err := settingsLegacy.GetJWTSigningMethods()
+	require.Error(t, err)
+}
+
 func TestTokenStrategy_GetJWTSigningMethods_mongo(t *testing.T) {
 	settingsLegacy := TokenStrategy{Settings: bson.M{"secret": "foo-bar"}}
 	methodsLegacy, err := settingsLegacy.GetJWTSigningMethods()
