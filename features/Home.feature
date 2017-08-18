@@ -6,4 +6,4 @@ Feature: Retrieve welcome line of the service.
         When I request "/" API path with "GET" method
         Then I should receive 200 response code
         And header "Content-Type" should be "application/json"
-        And the response should contain "Welcome to Janus v"
+        And the response should contain "Welcome to Janus"
