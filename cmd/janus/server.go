@@ -14,6 +14,20 @@ import (
 	"github.com/hellofresh/janus/pkg/web"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+
+	// this is needed to call the init function on each plugin
+	_ "github.com/hellofresh/janus/pkg/plugin/basic"
+	_ "github.com/hellofresh/janus/pkg/plugin/bodylmt"
+	_ "github.com/hellofresh/janus/pkg/plugin/compression"
+	_ "github.com/hellofresh/janus/pkg/plugin/cors"
+	_ "github.com/hellofresh/janus/pkg/plugin/oauth2"
+	_ "github.com/hellofresh/janus/pkg/plugin/rate"
+	_ "github.com/hellofresh/janus/pkg/plugin/requesttransformer"
+	_ "github.com/hellofresh/janus/pkg/plugin/responsetransformer"
+
+	// internal plugins
+	_ "github.com/hellofresh/janus/pkg/loader"
+	_ "github.com/hellofresh/janus/pkg/web"
 )
 
 var (
