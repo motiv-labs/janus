@@ -6,19 +6,6 @@ import (
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/pkg/errors"
-
-	// this is needed to call the init function on each plugin
-	_ "github.com/hellofresh/janus/pkg/plugin/basic"
-	_ "github.com/hellofresh/janus/pkg/plugin/bodylmt"
-	_ "github.com/hellofresh/janus/pkg/plugin/compression"
-	_ "github.com/hellofresh/janus/pkg/plugin/cors"
-	_ "github.com/hellofresh/janus/pkg/plugin/oauth2"
-	_ "github.com/hellofresh/janus/pkg/plugin/rate"
-	_ "github.com/hellofresh/janus/pkg/plugin/requesttransformer"
-	_ "github.com/hellofresh/janus/pkg/plugin/responsetransformer"
-
-	// internal plugins
-	_ "github.com/hellofresh/janus/pkg/web"
 )
 
 var (
@@ -31,12 +18,14 @@ func init() {
 }
 
 func onStartup(event interface{}) error {
+	var err error
+
 	e, ok := event.(plugin.OnStartup)
 	if !ok {
 		return errors.New("Could not convert event to startup type")
 	}
 
-	repo, err := api.BuildRepository(e.Config.Database.DSN, e.MongoSession)
+	repo, err = api.BuildRepository(e.Config.Database.DSN, e.MongoSession)
 	if err != nil {
 		return err
 	}
@@ -52,7 +41,6 @@ func onReload(event interface{}) error {
 	}
 
 	Load(e.Register, repo)
-
 	return nil
 }
 

@@ -27,7 +27,7 @@ func NewBasicAuth(repo Repository) func(http.Handler) http.Handler {
 			users, err := repo.FindAll()
 			if err != nil {
 				log.WithError(err).Error("Error when getting all users")
-				errors.Handler(w, errors.New(http.StatusInternalServerError, "there was an error when lookin for users"))
+				errors.Handler(w, errors.New(http.StatusInternalServerError, "there was an error when looking for users"))
 				return
 			}
 

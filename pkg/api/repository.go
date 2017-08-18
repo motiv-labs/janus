@@ -46,26 +46,29 @@ func exists(r Repository, def *Definition) (bool, error) {
 
 // BuildRepository creates a repository instance that will depend on your given DSN
 func BuildRepository(dsn string, session *mgo.Session) (Repository, error) {
-	var repo Repository
 	dsnURL, err := url.Parse(dsn)
+	if err != nil {
+		return nil, errors.Wrap(err, "Error parsing the DSN")
+	}
+
 	switch dsnURL.Scheme {
 	case mongodb:
-		repo, err = NewMongoAppRepository(session)
+		repo, err := NewMongoAppRepository(session)
 		if err != nil {
 			return nil, errors.Wrap(err, "Could not create a mongodb repository for api definitions")
 		}
+		return repo, nil
 	case file:
 		log.Debug("File system based configuration chosen")
 		apiPath := fmt.Sprintf("%s/apis", dsnURL.Path)
 
 		log.WithField("api_path", apiPath).Debug("Trying to load configuration files")
-		repo, err = NewFileSystemRepository(apiPath)
+		repo, err := NewFileSystemRepository(apiPath)
 		if err != nil {
 			return nil, errors.Wrap(err, "could not create a file system repository")
 		}
+		return repo, nil
 	default:
 		return nil, errors.New("The selected scheme is not supported to load API definitions")
 	}
-
-	return repo, nil
 }
