@@ -4,12 +4,11 @@ import (
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/jwt"
-	"github.com/hellofresh/janus/pkg/oauth"
 	log "github.com/sirupsen/logrus"
 )
 
 // NewRevokeRulesMiddleware creates a new revoke rules middleware
-func NewRevokeRulesMiddleware(parser *jwt.Parser, accessRules []*oauth.AccessRule) func(http.Handler) http.Handler {
+func NewRevokeRulesMiddleware(parser *jwt.Parser, accessRules []*AccessRule) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.WithField("rules", len(accessRules)).Debug("Starting revoke rules middleware")

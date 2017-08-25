@@ -8,7 +8,6 @@ import (
 
 	basejwt "github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/jwt"
-	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/test"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -19,7 +18,7 @@ const signingAlg = "HS256"
 func TestBlockJWTByCountry(t *testing.T) {
 	secret := "secret"
 
-	revokeRules := []*oauth.AccessRule{
+	revokeRules := []*AccessRule{
 		{Predicate: "country == 'de'", Action: "deny"},
 	}
 
@@ -45,7 +44,7 @@ func TestBlockJWTByCountry(t *testing.T) {
 func TestBlockJWTByUsername(t *testing.T) {
 	secret := "secret"
 
-	revokeRules := []*oauth.AccessRule{
+	revokeRules := []*AccessRule{
 		{Predicate: "username == 'test@hellofresh.com'", Action: "deny"},
 	}
 
@@ -71,7 +70,7 @@ func TestBlockJWTByUsername(t *testing.T) {
 func TestBlockJWTByIssueDate(t *testing.T) {
 	secret := "secret"
 
-	revokeRules := []*oauth.AccessRule{
+	revokeRules := []*AccessRule{
 		{Predicate: fmt.Sprintf("iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
 	}
 
@@ -97,7 +96,7 @@ func TestBlockJWTByIssueDate(t *testing.T) {
 func TestBlockJWTByCountryAndIssueDate(t *testing.T) {
 	secret := "secret"
 
-	revokeRules := []*oauth.AccessRule{
+	revokeRules := []*AccessRule{
 		{Predicate: fmt.Sprintf("country == 'de' && iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
 	}
 
@@ -133,7 +132,7 @@ func generateToken(alg, key string) (string, error) {
 func TestEmptyAccessRules(t *testing.T) {
 	secret := "secret"
 
-	revokeRules := []*oauth.AccessRule{}
+	revokeRules := []*AccessRule{}
 
 	parser := jwt.NewParser(jwt.NewParserConfig(jwt.SigningMethod{Alg: signingAlg, Key: secret}))
 
@@ -150,7 +149,7 @@ func TestEmptyAccessRules(t *testing.T) {
 }
 
 func TestWrongJWT(t *testing.T) {
-	revokeRules := []*oauth.AccessRule{
+	revokeRules := []*AccessRule{
 		{Predicate: fmt.Sprintf("country == 'de' && iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
 	}
 
@@ -176,7 +175,7 @@ func TestWrongJWT(t *testing.T) {
 func TestWrongRule(t *testing.T) {
 	secret := "secret"
 
-	revokeRules := []*oauth.AccessRule{
+	revokeRules := []*AccessRule{
 		{Predicate: "country == 'wrong'", Action: "deny"},
 	}
 

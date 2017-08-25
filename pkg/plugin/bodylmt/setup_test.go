@@ -10,7 +10,7 @@ import (
 
 func TestSetup(t *testing.T) {
 	route := proxy.NewRoute(&proxy.Definition{})
-	err := setupBodyLimit(route, plugin.Params{})
+	err := setupBodyLimit(route, make(plugin.Config))
 	assert.NoError(t, err)
 
 	assert.Len(t, route.Inbound, 1)

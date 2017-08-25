@@ -2,16 +2,12 @@ package plugin
 
 import (
 	"encoding/json"
-	"errors"
 	"fmt"
 	"sync"
 
-	"github.com/hellofresh/janus/pkg/api"
-	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
-	"github.com/hellofresh/janus/pkg/router"
-	"github.com/hellofresh/janus/pkg/store"
-	"github.com/hellofresh/stats-go"
+	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -19,22 +15,19 @@ var (
 
 	// plugins is a map of plugin name to Plugin.
 	plugins = make(map[string]Plugin)
+
+	// eventHooks is a map of hook name to Hook. All hooks plugins
+	// must have a name.
+	eventHooks = make(map[string][]EventHook)
 )
 
 // SetupFunc is used to set up a plugin, or in other words,
 // execute a directive. It will be called once per key for
 // each server block it appears in.
-type SetupFunc func(route *proxy.Route, p Params) error
+type SetupFunc func(route *proxy.Route, rawConfig Config) error
 
-// Params initialization options.
-type Params struct {
-	Router      router.Router
-	Storage     store.Store
-	APIRepo     api.Repository
-	OAuthRepo   oauth.Repository
-	StatsClient stats.Client
-	Config      map[string]interface{}
-}
+// Config initialization options.
+type Config map[string]interface{}
 
 // Plugin defines basic methods for plugins
 type Plugin struct {
@@ -61,6 +54,50 @@ func RegisterPlugin(name string, plugin Plugin) error {
 		return fmt.Errorf("plugin named %s  already registered", name)
 	}
 	plugins[name] = plugin
+	return nil
+}
+
+// EventHook is a type which holds information about a startup hook plugin.
+type EventHook func(event interface{}) error
+
+// RegisterEventHook plugs in hook. All the hooks should register themselves
+// and they must have a name.
+func RegisterEventHook(name string, hook EventHook) error {
+	log.WithField("event_name", name).Debug("Event registered")
+	lock.Lock()
+	defer lock.Unlock()
+
+	if name == "" {
+		return errors.New("event hook must have a name")
+	}
+
+	if hooks, dup := eventHooks[name]; dup {
+		eventHooks[name] = append(hooks, hook)
+	} else {
+		eventHooks[name] = append([]EventHook{}, hook)
+	}
+
+	return nil
+}
+
+// EmitEvent executes the different hooks passing the EventType as an
+// argument. This is a blocking function. Hook developers should
+// use 'go' keyword if they don't want to block Caddy.
+func EmitEvent(name string, event interface{}) error {
+	log.WithField("event_name", name).Debug("Event triggered")
+
+	hooks, found := eventHooks[name]
+	if !found {
+		return errors.New("Plugin not found")
+	}
+
+	for _, hook := range hooks {
+		err := hook(event)
+		if err != nil {
+			log.WithError(err).WithField("event_name", name).Warn("an error ocurred when an event was triggered")
+		}
+	}
+
 	return nil
 }
 

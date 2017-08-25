@@ -1,9 +1,8 @@
-package loader
+package oauth2
 
 import (
 	"net/http"
 
-	"github.com/hellofresh/janus/pkg/oauth"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
@@ -21,13 +20,13 @@ func NewOAuthLoader(register *proxy.Register) *OAuthLoader {
 }
 
 // LoadDefinitions loads all oauth servers from a data source
-func (m *OAuthLoader) LoadDefinitions(repo oauth.Repository) {
+func (m *OAuthLoader) LoadDefinitions(repo Repository) {
 	oAuthServers := m.getOAuthServers(repo)
 	m.RegisterOAuthServers(oAuthServers, repo)
 }
 
 // RegisterOAuthServers register many oauth servers
-func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oauth.Repository) {
+func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*Spec, repo Repository) {
 	log.Debug("Loading OAuth servers configurations")
 
 	for _, oauthServer := range oauthServers {
@@ -56,7 +55,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 
 		endpoints := map[*proxy.Definition]proxy.InChain{
 			oauthServer.Endpoints.Authorize:    proxy.NewInChain(corsHandler, rateLimitHandler),
-			oauthServer.Endpoints.Token:        proxy.NewInChain(oauth.NewSecretMiddleware(oauthServer).Handler, corsHandler, rateLimitHandler),
+			oauthServer.Endpoints.Token:        proxy.NewInChain(NewSecretMiddleware(oauthServer).Handler, corsHandler, rateLimitHandler),
 			oauthServer.Endpoints.Introspect:   proxy.NewInChain(corsHandler, rateLimitHandler),
 			oauthServer.Endpoints.Revoke:       proxy.NewInChain(corsHandler, rateLimitHandler),
 			oauthServer.ClientEndpoints.Create: proxy.NewInChain(corsHandler, rateLimitHandler),
@@ -70,15 +69,15 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*oauth.Spec, repo oaut
 	log.Debug("Done loading OAuth servers configurations")
 }
 
-func (m *OAuthLoader) getOAuthServers(repo oauth.Repository) []*oauth.Spec {
+func (m *OAuthLoader) getOAuthServers(repo Repository) []*Spec {
 	oauthServers, err := repo.FindAll()
 	if err != nil {
 		log.Panic(err)
 	}
 
-	var specs []*oauth.Spec
+	var specs []*Spec
 	for _, oauthServer := range oauthServers {
-		spec := new(oauth.Spec)
+		spec := new(Spec)
 		spec.OAuth = oauthServer
 		manager, err := m.getManager(oauthServer)
 		if nil != err {
@@ -92,13 +91,13 @@ func (m *OAuthLoader) getOAuthServers(repo oauth.Repository) []*oauth.Spec {
 	return specs
 }
 
-func (m *OAuthLoader) getManager(oauthServer *oauth.OAuth) (oauth.Manager, error) {
-	managerType, err := oauth.ParseType(oauthServer.TokenStrategy.Name)
+func (m *OAuthLoader) getManager(oauthServer *OAuth) (Manager, error) {
+	managerType, err := ParseType(oauthServer.TokenStrategy.Name)
 	if nil != err {
 		return nil, err
 	}
 
-	return oauth.NewManagerFactory(oauthServer).Build(managerType)
+	return NewManagerFactory(oauthServer).Build(managerType)
 }
 
 func (m *OAuthLoader) registerRoutes(endpoints map[*proxy.Definition]proxy.InChain) {

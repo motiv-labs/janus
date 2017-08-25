@@ -38,7 +38,7 @@ func TestErrorNotFound(t *testing.T) {
 func TestRecovery(t *testing.T) {
 	w := httptest.NewRecorder()
 	r := httptest.NewRequest("GET", "/", nil)
-	RecoveryHandler(w, r, ErrInvalidScheme)
+	RecoveryHandler(w, r, ErrInvalidID)
 
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 	assert.Equal(t, http.StatusBadRequest, w.Code)

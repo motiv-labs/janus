@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/hellofresh/janus/pkg/errors"
-	"github.com/hellofresh/janus/pkg/oauth"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -31,7 +30,7 @@ func (c ContextKey) String() string {
 }
 
 // NewKeyExistsMiddleware creates a new instance of KeyExistsMiddleware
-func NewKeyExistsMiddleware(manager oauth.Manager) func(http.Handler) http.Handler {
+func NewKeyExistsMiddleware(manager Manager) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Debug("Starting Oauth2KeyExists middleware")

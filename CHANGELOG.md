@@ -3,6 +3,7 @@
 ## Added
 
 - Added response transformer plugin
+- Added basic auth plugin
 
 ## Fixed
 

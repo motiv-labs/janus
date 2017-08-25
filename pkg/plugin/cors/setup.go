@@ -20,10 +20,10 @@ func init() {
 	})
 }
 
-func setupCors(route *proxy.Route, p plugin.Params) error {
+func setupCors(route *proxy.Route, rawConfig plugin.Config) error {
 	var config Config
 
-	err := plugin.Decode(p.Config, &config)
+	err := plugin.Decode(rawConfig, &config)
 	if err != nil {
 		return err
 	}

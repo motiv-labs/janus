@@ -11,12 +11,11 @@ import (
 // APILoader is responsible for loading all apis form a datastore and configure them in a register
 type APILoader struct {
 	register *proxy.Register
-	params   plugin.Params
 }
 
 // NewAPILoader creates a new instance of the api manager
-func NewAPILoader(register *proxy.Register, params plugin.Params) *APILoader {
-	return &APILoader{register, params}
+func NewAPILoader(register *proxy.Register) *APILoader {
+	return &APILoader{register}
 }
 
 // LoadDefinitions registers all ApiDefinitions from a data source
@@ -60,8 +59,7 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 					continue
 				}
 
-				m.params.Config = pDefinition.Config
-				err = setup(route, m.params)
+				err = setup(route, pDefinition.Config)
 				if err != nil {
 					l.WithError(err).Error("Error executing plugin")
 				}
