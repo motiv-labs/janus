@@ -148,8 +148,9 @@ func init() {
 	viper.SetDefault("web.tls.port", "8444")
 	viper.SetDefault("web.tls.redisrect", true)
 	viper.SetDefault("web.credentials.algorithm", "HS256")
-	viper.SetDefault("web.credentials.username", "admin")
-	viper.SetDefault("web.credentials.password", "admin")
+	viper.SetDefault("web.credentials.basic.users", []map[string]string{
+		{"username": "admin", "password": "admin"},
+	})
 	viper.SetDefault("stats.dsn", "log://")
 	viper.SetDefault("stats.errorsSection", "error-log")
 
