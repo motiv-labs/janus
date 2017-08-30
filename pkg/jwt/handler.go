@@ -1,16 +1,13 @@
 package jwt
 
 import (
-	"context"
 	"net/http"
-	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt/provider"
 	"github.com/hellofresh/janus/pkg/render"
-	"golang.org/x/oauth2"
 )
 
 // Handler struct
@@ -29,31 +26,12 @@ type Login struct {
 // Reply will be of the form {"token": "<TOKEN>"}.
 func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// We're using OAuth, start checking for access keys
-		authHeaderValue := r.Header.Get("Authorization")
-		parts := strings.Split(authHeaderValue, " ")
-		if len(parts) < 2 {
-			render.JSON(w, http.StatusBadRequest, "attempted access with malformed header, no auth header found.")
-			return
-		}
-
-		if strings.ToLower(parts[0]) != "bearer" {
-			render.JSON(w, http.StatusBadRequest, "bearer token malformed")
-			return
-		}
-
 		factory := provider.Factory{}
 		p := factory.Build(r.URL.Query().Get("provider"), config)
 
-		ctx := context.Background()
-		ts := oauth2.StaticTokenSource(
-			&oauth2.Token{AccessToken: parts[1]},
-		)
-		httpClient := oauth2.NewClient(ctx, ts)
-
-		verified, err := p.Verify(r, httpClient)
+		verified, err := p.Verify(r)
 		if err != nil {
-			render.JSON(w, http.StatusInternalServerError, "failed to verify token")
+			render.JSON(w, http.StatusInternalServerError, err.Error())
 			return
 		}
 

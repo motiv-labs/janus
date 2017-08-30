@@ -30,11 +30,10 @@ func NewPasswordVerifier(users []*User) *PasswordVerifier {
 }
 
 // Verify makes a check and return a boolean if the check was successful or not
-func (v *PasswordVerifier) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
-	var currentUser *User
-	err := json.NewDecoder(r.Body).Decode(&currentUser)
+func (v *PasswordVerifier) Verify(r *http.Request) (bool, error) {
+	currentUser, err := v.getUserFromRequest(r)
 	if err != nil {
-		return false, errors.Wrap(err, "could not parse the json body")
+		log.Debug("Could not get user from request")
 	}
 
 	for _, user := range v.users {
@@ -49,4 +48,34 @@ func (v *PasswordVerifier) Verify(r *http.Request, httpClient *http.Client) (boo
 	}).Debug("not in the user list")
 
 	return false, nil
+}
+
+func (v *PasswordVerifier) getUserFromRequest(r *http.Request) (*User, error) {
+	var user *User
+
+	//checks basic auth
+	username, password, ok := r.BasicAuth()
+	if ok {
+		user = &User{
+			Username: username,
+			Password: password,
+		}
+	}
+
+	// checks if the content is json otherwise just get from the form params
+	if r.Header.Get("Content-Type") == "application/json" {
+		err := json.NewDecoder(r.Body).Decode(&user)
+		if err != nil {
+			return user, errors.Wrap(err, "could not parse the json body")
+		}
+	} else {
+		r.ParseForm()
+
+		user = &User{
+			Username: r.Form.Get("username"),
+			Password: r.Form.Get("password"),
+		}
+	}
+
+	return user, nil
 }

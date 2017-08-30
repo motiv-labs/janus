@@ -28,8 +28,13 @@ func NewTeamVerifier(teams []Team, gitHubClient Client) *TeamVerifier {
 }
 
 // Verify makes a check and return a boolean if the check was successful or not
-func (verifier TeamVerifier) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
-	usersOrgTeams, err := verifier.gitHubClient.Teams(httpClient)
+func (verifier TeamVerifier) Verify(r *http.Request) (bool, error) {
+	accessToken, err := extractAccessToken(r)
+	if err != nil {
+		return false, errors.Wrap(err, "failed to extract access token")
+	}
+
+	usersOrgTeams, err := verifier.gitHubClient.Teams(getClient(accessToken))
 	if err != nil {
 		return false, errors.Wrap(err, "failed to get teams")
 	}

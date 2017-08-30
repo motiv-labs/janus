@@ -8,7 +8,7 @@ import (
 
 // Verifier contains the methods for verification of providers
 type Verifier interface {
-	Verify(r *http.Request, httpClient *http.Client) (bool, error)
+	Verify(r *http.Request) (bool, error)
 }
 
 // VerifierBasket acts as a collection of verifier
@@ -22,13 +22,13 @@ func NewVerifierBasket(verifiers ...Verifier) VerifierBasket {
 }
 
 // Verify checks is the provider is valid
-func (vb VerifierBasket) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
+func (vb VerifierBasket) Verify(r *http.Request) (bool, error) {
 	var wrappedErrors error
 
 	for _, verifier := range vb.verifiers {
 		var verified bool
 
-		verified, err := verifier.Verify(r, httpClient)
+		verified, err := verifier.Verify(r)
 		if err != nil {
 			wrappedErrors = errors.Wrap(err, "verification failed")
 			continue
