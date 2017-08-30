@@ -34,6 +34,7 @@ func (v *PasswordVerifier) Verify(r *http.Request) (bool, error) {
 	currentUser, err := v.getUserFromRequest(r)
 	if err != nil {
 		log.Debug("Could not get user from request")
+		return false, errors.Wrap(err, "could not get user from request")
 	}
 
 	for _, user := range v.users {
