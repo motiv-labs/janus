@@ -26,6 +26,7 @@ import (
 	_ "github.com/hellofresh/janus/pkg/plugin/responsetransformer"
 
 	// dynamically registered auth providers
+	_ "github.com/hellofresh/janus/pkg/jwt/basic"
 	_ "github.com/hellofresh/janus/pkg/jwt/github"
 
 	// internal plugins
