@@ -1,13 +1,17 @@
 package jwt
 
 import (
-	"encoding/json"
-	"errors"
+	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
+	"github.com/hellofresh/janus/pkg/config"
+	"github.com/hellofresh/janus/pkg/jwt/provider"
 	"github.com/hellofresh/janus/pkg/render"
+	"github.com/pkg/errors"
+	"golang.org/x/oauth2"
 )
 
 // Handler struct
@@ -24,24 +28,39 @@ type Login struct {
 // Login can be used by clients to get a jwt token.
 // Payload needs to be json in the form of {"username": "<USERNAME>", "password": "<PASSWORD>"}.
 // Reply will be of the form {"token": "<TOKEN>"}.
-func (j *Handler) Login() http.HandlerFunc {
+func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var loginValues Login
-
-		if json.NewDecoder(r.Body).Decode(&loginValues) != nil {
-			j.Guard.Unauthorized(w, r, errors.New("missing username or password"))
+		// We're using OAuth, start checking for access keys
+		authHeaderValue := r.Header.Get("Authorization")
+		parts := strings.Split(authHeaderValue, " ")
+		if len(parts) < 2 {
+			render.JSON(w, http.StatusBadRequest, "Attempted access with malformed header, no auth header found.")
 			return
 		}
 
-		userID, ok := j.Guard.Authenticator(loginValues.Username, loginValues.Password)
-
-		if !ok {
-			j.Guard.Unauthorized(w, r, errors.New("invalid username or password"))
+		if strings.ToLower(parts[0]) != "bearer" {
+			render.JSON(w, http.StatusBadRequest, "Bearer token malformed")
 			return
 		}
 
-		if userID == "" {
-			userID = loginValues.Username
+		factory := provider.Factory{}
+		p := factory.Build(config)
+
+		ctx := context.Background()
+		ts := oauth2.StaticTokenSource(
+			&oauth2.Token{AccessToken: parts[1]},
+		)
+		httpClient := oauth2.NewClient(ctx, ts)
+
+		verified, err := p.Verify(httpClient)
+		if err != nil {
+			http.Error(w, "failed to verify token", http.StatusInternalServerError)
+			return
+		}
+
+		if !verified {
+			j.Guard.Unauthorized(w, r, errors.Wrap(err, "verification failed"))
+			return
 		}
 
 		if 0 == j.Guard.Timeout {
@@ -49,9 +68,7 @@ func (j *Handler) Login() http.HandlerFunc {
 		}
 
 		expire := time.Now().Add(j.Guard.Timeout)
-
-		tokenString, err := IssueAdminToken(j.Guard.SigningMethod, userID, j.Guard.Timeout)
-
+		tokenString, err := IssueAdminToken(j.Guard.SigningMethod, map[string]interface{}{}, j.Guard.Timeout)
 		if err != nil {
 			j.Guard.Unauthorized(w, r, errors.New("problem issuing JWT"))
 			return
