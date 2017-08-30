@@ -75,6 +75,18 @@ type Credentials struct {
 	Algorithm string `envconfig:"ALGORITHM"`
 	Secret    string `envconfig:"SECRET"`
 	Github    Github
+	Basic     Basic
+}
+
+// Basic holds the basic users configurations
+type Basic struct {
+	Users []BasicUsersConfig `envconfig:"BASIC_ORGANIZATIONS"`
+}
+
+// BasicUsersConfig represents an user configuration
+type BasicUsersConfig struct {
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
 }
 
 // Github holds the github configurations
