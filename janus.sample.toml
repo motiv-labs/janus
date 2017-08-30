@@ -81,11 +81,16 @@
     algorithm = "HS256"
     secret = "secret key"
 
-    [web.credentials.github]
-    organizations = ["yourOrganization"]
-    teams = [
-      {organizationName = "yourOrganization", TeamName = "devs"}
-    ]
+    # [web.credentials.github]
+    # organizations = ["yourOrganization"]
+    # teams = [
+    #   {organizationName = "yourOrganization", TeamName = "devs"}
+    # ]
+
+    # [web.credentials.basic]
+    # users = [
+    #   {username = "admin", password = "admin"}
+    # ]
 
 ################################################################
 # Metrics
