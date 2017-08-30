@@ -63,7 +63,7 @@ func onStartup(event interface{}) error {
 	r.GET("/status/{name}", checker.NewStatusHandler(repo))
 
 	handlers := jwt.Handler{Guard: guard}
-	r.POST("/login", handlers.Login())
+	r.POST("/login", handlers.Login(config.Credentials))
 	authGroup := r.Group("/auth")
 	{
 		authGroup.GET("/refresh_token", handlers.Refresh())
