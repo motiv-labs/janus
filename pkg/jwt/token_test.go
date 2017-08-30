@@ -13,7 +13,7 @@ func TestIssueAdminToken(t *testing.T) {
 	key := time.Now().Format(time.RFC3339Nano)
 	claimsID := time.Now().Format(time.RFC3339Nano)
 
-	tokenString, err := IssueAdminToken(SigningMethod{alg, key}, claimsID, time.Hour)
+	tokenString, err := IssueAdminToken(SigningMethod{alg, key}, map[string]interface{}{"id": claimsID}, time.Hour)
 	require.NoError(t, err)
 
 	config := NewParserConfig(SigningMethod{Alg: alg, Key: key})
