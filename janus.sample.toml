@@ -80,12 +80,8 @@
   [web.credentials]
     algorithm = "HS256"
     secret = "secret key"
-    redirectURL = "http://localhost:8081/auth/github/callback"
-    scopes = ["read:org"]
-    
+
     [web.credentials.github]
-    clientID = ""
-    clientSecret = ""
     organizations = ["yourOrganization"]
     teams = [
       {organizationName = "yourOrganization", TeamName = "devs"}
