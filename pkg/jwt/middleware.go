@@ -2,6 +2,9 @@ package jwt
 
 import (
 	"net/http"
+
+	"github.com/hellofresh/janus/pkg/render"
+	log "github.com/sirupsen/logrus"
 )
 
 // Payload Represents the context key
@@ -29,7 +32,8 @@ func (m *Middleware) Handler(handler http.Handler) http.Handler {
 		parser := Parser{m.Guard.ParserConfig}
 		_, err := parser.ParseFromRequest(r)
 		if err != nil {
-			m.Guard.Unauthorized(w, r, err)
+			log.WithError(err).Debug("failed to parse the token")
+			render.JSON(w, http.StatusUnauthorized, "failed to parse the token")
 			return
 		}
 

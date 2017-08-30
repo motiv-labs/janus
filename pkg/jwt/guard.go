@@ -1,7 +1,6 @@
 package jwt
 
 import (
-	"net/http"
 	"time"
 
 	"github.com/hellofresh/janus/pkg/config"
@@ -10,9 +9,6 @@ import (
 // Guard struct
 type Guard struct {
 	ParserConfig
-
-	// User can define own Unauthorized func.
-	Unauthorized func(w http.ResponseWriter, r *http.Request, err error)
 
 	// Duration that a jwt token is valid. Optional, defaults to one hour.
 	Timeout time.Duration

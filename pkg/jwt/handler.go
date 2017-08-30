@@ -10,7 +10,6 @@ import (
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt/provider"
 	"github.com/hellofresh/janus/pkg/render"
-	"github.com/pkg/errors"
 	"golang.org/x/oauth2"
 )
 
@@ -34,12 +33,12 @@ func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 		authHeaderValue := r.Header.Get("Authorization")
 		parts := strings.Split(authHeaderValue, " ")
 		if len(parts) < 2 {
-			render.JSON(w, http.StatusBadRequest, "Attempted access with malformed header, no auth header found.")
+			render.JSON(w, http.StatusBadRequest, "attempted access with malformed header, no auth header found.")
 			return
 		}
 
 		if strings.ToLower(parts[0]) != "bearer" {
-			render.JSON(w, http.StatusBadRequest, "Bearer token malformed")
+			render.JSON(w, http.StatusBadRequest, "bearer token malformed")
 			return
 		}
 
@@ -54,12 +53,12 @@ func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 
 		verified, err := p.Verify(httpClient)
 		if err != nil {
-			http.Error(w, "failed to verify token", http.StatusInternalServerError)
+			render.JSON(w, http.StatusInternalServerError, "failed to verify token")
 			return
 		}
 
 		if !verified {
-			j.Guard.Unauthorized(w, r, errors.Wrap(err, "verification failed"))
+			render.JSON(w, http.StatusUnauthorized, "verification failed")
 			return
 		}
 
@@ -70,7 +69,7 @@ func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 		expire := time.Now().Add(j.Guard.Timeout)
 		tokenString, err := IssueAdminToken(j.Guard.SigningMethod, map[string]interface{}{}, j.Guard.Timeout)
 		if err != nil {
-			j.Guard.Unauthorized(w, r, errors.New("problem issuing JWT"))
+			render.JSON(w, http.StatusUnauthorized, "problem issuing JWT")
 			return
 		}
 
@@ -92,7 +91,7 @@ func (j *Handler) Refresh() http.HandlerFunc {
 		origIat := int64(claims["iat"].(float64))
 
 		if origIat < time.Now().Add(-j.Guard.MaxRefresh).Unix() {
-			j.Guard.Unauthorized(w, r, errors.New("token is expired"))
+			render.JSON(w, http.StatusUnauthorized, "token is expired")
 			return
 		}
 
@@ -112,7 +111,7 @@ func (j *Handler) Refresh() http.HandlerFunc {
 		// currently only HSXXX algorithms are supported for issuing admin token, so we cast key to bytes array
 		tokenString, err := newToken.SignedString([]byte(j.Guard.SigningMethod.Key))
 		if err != nil {
-			j.Guard.Unauthorized(w, r, errors.New("create JWT Token failed"))
+			render.JSON(w, http.StatusUnauthorized, "create JWT Token failed")
 			return
 		}
 
