@@ -74,8 +74,25 @@ type Credentials struct {
 	// Currently the following algorithms are supported: HS256, HS384, HS512.
 	Algorithm string `envconfig:"ALGORITHM"`
 	Secret    string `envconfig:"SECRET"`
-	Username  string `envconfig:"ADMIN_USERNAME"`
-	Password  string `envconfig:"ADMIN_PASSWORD"`
+	Github    Github
+}
+
+// Github holds the github configurations
+type Github struct {
+	Organizations []string           `envconfig:"GITHUB_ORGANIZATIONS"`
+	Teams         []GitHubTeamConfig `envconfig:"GITHUB_TEAMS"`
+}
+
+// GitHubTeamConfig represents a team configuration
+type GitHubTeamConfig struct {
+	OrganizationName string `json:"organization_name,omitempty"`
+	TeamName         string `json:"team_name,omitempty"`
+}
+
+// IsConfigured checks if github is enabled
+func (auth *Github) IsConfigured() bool {
+	return len(auth.Organizations) > 0 ||
+		len(auth.Teams) > 0
 }
 
 // GoogleCloudTracing holds the Google Application Default Credentials
