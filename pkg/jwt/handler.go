@@ -43,7 +43,7 @@ func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 		}
 
 		factory := provider.Factory{}
-		p := factory.Build(config)
+		p := factory.Build(r.URL.Query().Get("provider"), config)
 
 		ctx := context.Background()
 		ts := oauth2.StaticTokenSource(
@@ -51,7 +51,7 @@ func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 		)
 		httpClient := oauth2.NewClient(ctx, ts)
 
-		verified, err := p.Verify(httpClient)
+		verified, err := p.Verify(r, httpClient)
 		if err != nil {
 			render.JSON(w, http.StatusInternalServerError, "failed to verify token")
 			return

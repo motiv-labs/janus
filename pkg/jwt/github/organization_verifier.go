@@ -22,7 +22,7 @@ func NewOrganizationVerifier(organizations []string, gitHubClient Client) *Organ
 }
 
 // Verify makes a check and return a boolean if the check was successful or not
-func (verifier OrganizationVerifier) Verify(httpClient *http.Client) (bool, error) {
+func (verifier OrganizationVerifier) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
 	orgs, err := verifier.gitHubClient.Organizations(httpClient)
 	if err != nil {
 		return false, errors.Wrap(err, "failed to get organizations")

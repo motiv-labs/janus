@@ -15,10 +15,10 @@ type Provider struct {
 }
 
 // Build acts like the constructor for a provider
-func (gp GithubProvider) Build(config config.Credentials) provider.Provider {
+func (gp Provider) Build(config config.Credentials) provider.Provider {
 	client := NewClient()
 
-	return &GithubProvider{
+	return &Provider{
 		Verifier: provider.NewVerifierBasket(
 			NewTeamVerifier(teamConfigsToTeam(config.Github.Teams), client),
 			NewOrganizationVerifier(config.Github.Organizations, client),

@@ -30,10 +30,10 @@ func GetProviders() map[string]Provider {
 type Factory struct{}
 
 // Build builds one provider based on the auth configuration
-func (f *Factory) Build(config config.Credentials) Provider {
-	if config.Github.IsConfigured() {
-		return providers["github"].Build(config)
+func (f *Factory) Build(providerName string, config config.Credentials) Provider {
+	provider, ok := providers[providerName]
+	if !ok {
+		provider = providers["basic"]
 	}
-
-	return nil
+	return provider.Build(config)
 }

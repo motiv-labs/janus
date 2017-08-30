@@ -28,7 +28,7 @@ func NewTeamVerifier(teams []Team, gitHubClient Client) *TeamVerifier {
 }
 
 // Verify makes a check and return a boolean if the check was successful or not
-func (verifier TeamVerifier) Verify(httpClient *http.Client) (bool, error) {
+func (verifier TeamVerifier) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
 	usersOrgTeams, err := verifier.gitHubClient.Teams(httpClient)
 	if err != nil {
 		return false, errors.Wrap(err, "failed to get teams")
