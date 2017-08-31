@@ -7,7 +7,6 @@ go:
   - 1.x
 
 before_install:
-  - curl https://glide.sh/get | sh
   - docker-compose -f assets/docker-compose.yml up -d
 
 install:
