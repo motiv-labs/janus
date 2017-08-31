@@ -22,19 +22,19 @@ func NewOrganizationVerifier(organizations []string, gitHubClient Client) *Organ
 }
 
 // Verify makes a check and return a boolean if the check was successful or not
-func (verifier OrganizationVerifier) Verify(r *http.Request) (bool, error) {
+func (v *OrganizationVerifier) Verify(r *http.Request) (bool, error) {
 	accessToken, err := extractAccessToken(r)
 	if err != nil {
 		return false, errors.Wrap(err, "failed to extract access token")
 	}
 
-	orgs, err := verifier.gitHubClient.Organizations(getClient(accessToken))
+	orgs, err := v.gitHubClient.Organizations(getClient(accessToken))
 	if err != nil {
 		return false, errors.Wrap(err, "failed to get organizations")
 	}
 
 	for _, name := range orgs {
-		for _, authorizedOrg := range verifier.organizations {
+		for _, authorizedOrg := range v.organizations {
 			if name == authorizedOrg {
 				return true, nil
 			}
@@ -43,7 +43,7 @@ func (verifier OrganizationVerifier) Verify(r *http.Request) (bool, error) {
 
 	log.WithFields(log.Fields{
 		"have": orgs,
-		"want": verifier.organizations,
+		"want": v.organizations,
 	}).Debug("not in the organizations")
 
 	return false, nil
