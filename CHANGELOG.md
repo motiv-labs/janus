@@ -4,6 +4,7 @@
 
 - Added response transformer plugin
 - Added basic auth plugin
+- Added github login for the Admin API
 
 ## Fixed
 

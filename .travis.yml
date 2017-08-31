@@ -5,7 +5,6 @@ services:
 
 go:
   - 1.x
-  - 1.7
 
 before_install:
   - curl https://glide.sh/get | sh

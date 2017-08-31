@@ -6,18 +6,56 @@ The main feature of the API Gateway is to proxy the requests to different servic
 
 ## Authenticating
 
-To start using the Janus adminstration API you need to get a [JSON Web Token](https://jwt.io) and provide it in every single request
-using the `Authorization` header.
+To start using the Janus adminstration API you need to get a [JSON Web Token](https://jwt.io) and provide it in every single request using the `Authorization` header.
 
-To get a token you must execute:
+You can choose between login with `github` or `basic` providers.
+
+### Github
+
+To login with github you need to send a valid github access token in the Authorization header. This token will be exchanged by a JWT token that you can use to make requests to the admin gateway API.
+
+You can choose to either go through the [oAuth2](https://developer.github.com/v3/guides/basics-of-authentication/) flows to authorize an user on github or generate a [Personal Access Token](https://github.com/settings/tokens)
+
+You can also configure which organizations/teams will be allowed to login on the Admin API. For this you just need to configure:
+
+```toml
+  [web.credentials]
+    secret = "secret"
+
+    [web.credentials.github]
+    organizations = ["hellofresh"]
+    teams = [
+      {organizationName = "hellofresh", TeamName = "Devs"}
+    ]
+```
+
+{% codetabs name="HTTPie", type="bash" -%}
+http -v --json POST localhost:8081/login?provider=github "Authorization:Bearer githubToken"
+{%- language name="CURL", type="bash" -%}
+curl -X "POST" localhost:8081/login?provider=github -H 'Authorization:Bearer githubToken'
+{%- endcodetabs %}
+
+### Basic
+
+With the basic auth provider you can easily login to janus admin API with `Basic` Authentication, sending a JSON with the credentials or Form parameters.
+
+```toml
+  [web.credentials]
+    secret = "secret"
+
+    [web.credentials.basic]
+    users = [
+      {username = "admin", password = "admin"}
+    ]
+```
 
 {% codetabs name="HTTPie", type="bash" -%}
 http -v --json POST localhost:8081/login username=admin password=admin
 {%- language name="CURL", type="bash" -%}
-http -X "POST" localhost:8081/login -d '{"username": "admin", "password": "admin"}'
+curl -X "POST" localhost:8081/login -d '{"username": "admin", "password": "admin"}'
 {%- endcodetabs %}
 
-The username and password are defined by the configuration called `web.credentials.username` and `web.credentials.password`. It defaults to *admin*/*admin*.
+The username and password defaults to *admin*/*admin*.
 
 <p align="center">
   <a href="http://g.recordit.co/dDjkyDKobL.gif">

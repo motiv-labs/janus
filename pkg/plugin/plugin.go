@@ -82,7 +82,7 @@ func RegisterEventHook(name string, hook EventHook) error {
 
 // EmitEvent executes the different hooks passing the EventType as an
 // argument. This is a blocking function. Hook developers should
-// use 'go' keyword if they don't want to block Caddy.
+// use 'go' keyword if they don't want to block Janus.
 func EmitEvent(name string, event interface{}) error {
 	log.WithField("event_name", name).Debug("Event triggered")
 

@@ -74,8 +74,37 @@ type Credentials struct {
 	// Currently the following algorithms are supported: HS256, HS384, HS512.
 	Algorithm string `envconfig:"ALGORITHM"`
 	Secret    string `envconfig:"SECRET"`
-	Username  string `envconfig:"ADMIN_USERNAME"`
-	Password  string `envconfig:"ADMIN_PASSWORD"`
+	Github    Github
+	Basic     Basic
+}
+
+// Basic holds the basic users configurations
+type Basic struct {
+	Users []BasicUsersConfig `envconfig:"BASIC_ORGANIZATIONS"`
+}
+
+// BasicUsersConfig represents an user configuration
+type BasicUsersConfig struct {
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+}
+
+// Github holds the github configurations
+type Github struct {
+	Organizations []string           `envconfig:"GITHUB_ORGANIZATIONS"`
+	Teams         []GitHubTeamConfig `envconfig:"GITHUB_TEAMS"`
+}
+
+// GitHubTeamConfig represents a team configuration
+type GitHubTeamConfig struct {
+	OrganizationName string `json:"organization_name,omitempty"`
+	TeamName         string `json:"team_name,omitempty"`
+}
+
+// IsConfigured checks if github is enabled
+func (auth *Github) IsConfigured() bool {
+	return len(auth.Organizations) > 0 ||
+		len(auth.Teams) > 0
 }
 
 // GoogleCloudTracing holds the Google Application Default Credentials
@@ -119,8 +148,9 @@ func init() {
 	viper.SetDefault("web.tls.port", "8444")
 	viper.SetDefault("web.tls.redisrect", true)
 	viper.SetDefault("web.credentials.algorithm", "HS256")
-	viper.SetDefault("web.credentials.username", "admin")
-	viper.SetDefault("web.credentials.password", "admin")
+	viper.SetDefault("web.credentials.basic.users", []map[string]string{
+		{"username": "admin", "password": "admin"},
+	})
 	viper.SetDefault("stats.dsn", "log://")
 	viper.SetDefault("stats.errorsSection", "error-log")
 
