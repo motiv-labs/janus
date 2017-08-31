@@ -32,7 +32,7 @@ You can also configure which organizations/teams will be allowed to login on the
 {% codetabs name="HTTPie", type="bash" -%}
 http -v --json POST localhost:8081/login?provider=github "Authorization:Bearer githubToken"
 {%- language name="CURL", type="bash" -%}
-http -X "POST" localhost:8081/login?provider=github -H 'Authorization:Bearer githubToken'
+curl -X "POST" localhost:8081/login?provider=github -H 'Authorization:Bearer githubToken'
 {%- endcodetabs %}
 
 ### Basic
@@ -52,7 +52,7 @@ With the basic auth provider you can easily login to janus admin API with `Basic
 {% codetabs name="HTTPie", type="bash" -%}
 http -v --json POST localhost:8081/login username=admin password=admin
 {%- language name="CURL", type="bash" -%}
-http -X "POST" localhost:8081/login -d '{"username": "admin", "password": "admin"}'
+curl -X "POST" localhost:8081/login -d '{"username": "admin", "password": "admin"}'
 {%- endcodetabs %}
 
 The username and password defaults to *admin*/*admin*.
