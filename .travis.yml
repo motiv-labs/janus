@@ -4,8 +4,7 @@ services:
   - docker
 
 go:
-  - 1.x
-  - 1.7
+  - 1.9
 
 before_install:
   - curl https://glide.sh/get | sh
