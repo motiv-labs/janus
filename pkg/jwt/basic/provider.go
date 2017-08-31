@@ -23,10 +23,10 @@ func (gp Provider) Build(config config.Credentials) provider.Provider {
 	}
 }
 
-func userConfigToTeam(configUser []config.BasicUsersConfig) []*User {
-	users := []*User{}
+func userConfigToTeam(configUser []config.BasicUsersConfig) []*user {
+	users := []*user{}
 	for _, u := range configUser {
-		users = append(users, &User{
+		users = append(users, &user{
 			Username: u.Username,
 			Password: u.Password,
 		})
