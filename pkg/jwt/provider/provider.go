@@ -6,8 +6,11 @@ import (
 	"github.com/hellofresh/janus/pkg/config"
 )
 
-var providers map[string]Provider
-var mutex sync.Mutex
+var providers *sync.Map
+
+func init() {
+	providers = new(sync.Map)
+}
 
 // Provider represents an auth provider
 type Provider interface {
@@ -15,20 +18,13 @@ type Provider interface {
 	Build(config config.Credentials) Provider
 }
 
-func init() {
-	providers = make(map[string]Provider)
-}
-
 // Register registers a new provider
 func Register(providerName string, providerConstructor Provider) {
-	mutex.Lock()
-	defer mutex.Unlock()
-
-	providers[providerName] = providerConstructor
+	providers.Store(providerName, providerConstructor)
 }
 
 // GetProviders returns the list of registered providers
-func GetProviders() map[string]Provider {
+func GetProviders() *sync.Map {
 	return providers
 }
 
@@ -37,9 +33,11 @@ type Factory struct{}
 
 // Build builds one provider based on the auth configuration
 func (f *Factory) Build(providerName string, config config.Credentials) Provider {
-	provider, ok := providers[providerName]
+	provider, ok := providers.Load(providerName)
 	if !ok {
-		provider = providers["basic"]
+		provider, _ = providers.Load("basic")
 	}
-	return provider.Build(config)
+
+	p := provider.(Provider)
+	return p.Build(config)
 }

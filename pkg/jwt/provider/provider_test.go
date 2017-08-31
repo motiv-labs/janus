@@ -49,7 +49,6 @@ func TestProviders(t *testing.T) {
 
 			f := &Factory{}
 			test.function(t, f)
-			providers = make(map[string]Provider)
 		})
 	}
 }
