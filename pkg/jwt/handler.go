@@ -31,7 +31,7 @@ func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 
 		verified, err := p.Verify(r)
 		if err != nil {
-			render.JSON(w, http.StatusInternalServerError, err.Error())
+			render.JSON(w, http.StatusBadRequest, err.Error())
 			return
 		}
 
