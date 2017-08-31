@@ -17,12 +17,12 @@ type VerifierBasket struct {
 }
 
 //NewVerifierBasket creates a new instace of VerifierBasket
-func NewVerifierBasket(verifiers ...Verifier) VerifierBasket {
-	return VerifierBasket{verifiers: verifiers}
+func NewVerifierBasket(verifiers ...Verifier) *VerifierBasket {
+	return &VerifierBasket{verifiers: verifiers}
 }
 
 // Verify checks is the provider is valid
-func (vb VerifierBasket) Verify(r *http.Request) (bool, error) {
+func (vb *VerifierBasket) Verify(r *http.Request) (bool, error) {
 	var wrappedErrors error
 
 	for _, verifier := range vb.verifiers {
