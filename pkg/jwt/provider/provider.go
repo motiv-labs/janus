@@ -1,10 +1,13 @@
 package provider
 
 import (
+	"sync"
+
 	"github.com/hellofresh/janus/pkg/config"
 )
 
 var providers map[string]Provider
+var mutex sync.Mutex
 
 // Provider represents an auth provider
 type Provider interface {
@@ -18,6 +21,9 @@ func init() {
 
 // Register registers a new provider
 func Register(providerName string, providerConstructor Provider) {
+	mutex.Lock()
+	defer mutex.Unlock()
+
 	providers[providerName] = providerConstructor
 }
 
