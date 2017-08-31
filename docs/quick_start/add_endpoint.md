@@ -12,9 +12,9 @@ You can choose between login with `github` or `basic` providers.
 
 ### Github
 
-To login with github you need to send a valid github access token in the Authorization header. This token will be exchanged by a JWT token that you can use to make requests to the gateway gateway API.
+To login with github you need to send a valid github access token in the Authorization header. This token will be exchanged by a JWT token that you can use to make requests to the admin gateway API.
 
-You can choose to either go through the [oAuth2](https://developer.github.com/v3/guides/basics-of-authentication/) flows to authorize an user on github or generate a [Personal Access Toke](https://github.com/settings/tokens)
+You can choose to either go through the [oAuth2](https://developer.github.com/v3/guides/basics-of-authentication/) flows to authorize an user on github or generate a [Personal Access Token](https://github.com/settings/tokens)
 
 You can also configure which organizations/teams will be allowed to login on the Admin API. For this you just need to configure:
 
