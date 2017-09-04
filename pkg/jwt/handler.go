@@ -1,13 +1,17 @@
 package jwt
 
 import (
+	"context"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt/provider"
 	"github.com/hellofresh/janus/pkg/render"
+	"github.com/pkg/errors"
+	"golang.org/x/oauth2"
 )
 
 // Handler struct
@@ -15,21 +19,22 @@ type Handler struct {
 	Guard Guard
 }
 
-// Login form structure.
-type Login struct {
-	Username string `form:"username" json:"username" binding:"required"`
-	Password string `form:"password" json:"password" binding:"required"`
-}
-
 // Login can be used by clients to get a jwt token.
 // Payload needs to be json in the form of {"username": "<USERNAME>", "password": "<PASSWORD>"}.
 // Reply will be of the form {"token": "<TOKEN>"}.
 func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		accessToken, err := extractAccessToken(r)
+		if err != nil {
+			render.JSON(w, http.StatusBadRequest, "failed to extract access token")
+			return
+		}
+
+		httpClient := getClient(accessToken)
 		factory := provider.Factory{}
 		p := factory.Build(r.URL.Query().Get("provider"), config)
 
-		verified, err := p.Verify(r)
+		verified, err := p.Verify(r, httpClient)
 		if err != nil {
 			render.JSON(w, http.StatusBadRequest, err.Error())
 			return
@@ -44,17 +49,19 @@ func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 			j.Guard.Timeout = time.Hour
 		}
 
-		expire := time.Now().Add(j.Guard.Timeout)
-		tokenString, err := IssueAdminToken(j.Guard.SigningMethod, map[string]interface{}{}, j.Guard.Timeout)
+		claims, err := p.GetClaims(httpClient)
+		if err != nil {
+			render.JSON(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		token, err := IssueAdminToken(j.Guard.SigningMethod, claims, j.Guard.Timeout)
 		if err != nil {
 			render.JSON(w, http.StatusUnauthorized, "problem issuing JWT")
 			return
 		}
 
-		render.JSON(w, http.StatusOK, render.M{
-			"token":  tokenString,
-			"expire": expire.Format(time.RFC3339),
-		})
+		render.JSON(w, http.StatusOK, token)
 	}
 }
 
@@ -82,7 +89,7 @@ func (j *Handler) Refresh() http.HandlerFunc {
 		}
 
 		expire := time.Now().Add(j.Guard.Timeout)
-		newClaims["id"] = claims["id"]
+		newClaims["sub"] = claims["sub"]
 		newClaims["exp"] = expire.Unix()
 		newClaims["iat"] = origIat
 
@@ -95,7 +102,31 @@ func (j *Handler) Refresh() http.HandlerFunc {
 
 		render.JSON(w, http.StatusOK, render.M{
 			"token":  tokenString,
+			"type":   "Bearer",
 			"expire": expire.Format(time.RFC3339),
 		})
 	}
+}
+
+func extractAccessToken(r *http.Request) (string, error) {
+	// We're using OAuth, start checking for access keys
+	authHeaderValue := r.Header.Get("Authorization")
+	parts := strings.Split(authHeaderValue, " ")
+	if len(parts) < 2 {
+		return "", errors.New("attempted access with malformed header, no auth header found")
+	}
+
+	if strings.ToLower(parts[0]) != "bearer" {
+		return "", errors.New("bearer token malformed")
+	}
+
+	return parts[1], nil
+}
+
+func getClient(token string) *http.Client {
+	ctx := context.Background()
+	ts := oauth2.StaticTokenSource(
+		&oauth2.Token{AccessToken: token},
+	)
+	return oauth2.NewClient(ctx, ts)
 }

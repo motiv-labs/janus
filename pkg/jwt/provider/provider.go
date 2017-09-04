@@ -1,8 +1,10 @@
 package provider
 
 import (
+	"net/http"
 	"sync"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/config"
 )
 
@@ -16,6 +18,7 @@ func init() {
 type Provider interface {
 	Verifier
 	Build(config config.Credentials) Provider
+	GetClaims(httpClient *http.Client) (jwt.MapClaims, error)
 }
 
 // Register registers a new provider

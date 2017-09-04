@@ -1,12 +1,15 @@
 package basic
 
 import (
+	"net/http"
+
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt/provider"
 )
 
 func init() {
-	provider.Register("basic", Provider{})
+	provider.Register("basic", &Provider{})
 }
 
 // Provider abstracts the authentication for github
@@ -15,7 +18,7 @@ type Provider struct {
 }
 
 // Build acts like the constructor for a provider
-func (gp Provider) Build(config config.Credentials) provider.Provider {
+func (gp *Provider) Build(config config.Credentials) provider.Provider {
 	return &Provider{
 		Verifier: provider.NewVerifierBasket(
 			NewPasswordVerifier(userConfigToTeam(config.Basic.Users)),
@@ -23,12 +26,17 @@ func (gp Provider) Build(config config.Credentials) provider.Provider {
 	}
 }
 
-func userConfigToTeam(configUser []config.BasicUsersConfig) []*user {
+// GetClaims returns a JWT Map Claim
+func (gp *Provider) GetClaims(httpClient *http.Client) (jwt.MapClaims, error) {
+	return jwt.MapClaims{}, nil
+}
+
+func userConfigToTeam(configUser map[string]string) []*user {
 	users := []*user{}
-	for _, u := range configUser {
+	for u, p := range configUser {
 		users = append(users, &user{
-			Username: u.Username,
-			Password: u.Password,
+			Username: u,
+			Password: p,
 		})
 	}
 	return users
