@@ -6,6 +6,10 @@
 - Added basic auth plugin
 - Added github login for the Admin API
 
+## Updated
+
+- Changed our dependency management tool from glide to Dep
+
 ## Fixed
 
 - Fixed problems when using -c flag to specify a configuration file
