@@ -83,14 +83,10 @@
 
     # [web.credentials.github]
     # organizations = ["yourOrganization"]
-    # teams = [
-    #   {organizationName = "yourOrganization", TeamName = "devs"}
-    # ]
+    # teams = {yourOrganization = "devs"}
 
     # [web.credentials.basic]
-    # users = [
-    #   {username = "admin", password = "admin"}
-    # ]
+    # users = {admin = "admin"}
 
 ################################################################
 # Metrics
