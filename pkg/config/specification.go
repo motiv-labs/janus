@@ -80,25 +80,13 @@ type Credentials struct {
 
 // Basic holds the basic users configurations
 type Basic struct {
-	Users []BasicUsersConfig `envconfig:"BASIC_ORGANIZATIONS"`
-}
-
-// BasicUsersConfig represents an user configuration
-type BasicUsersConfig struct {
-	Username string `json:"username,omitempty"`
-	Password string `json:"password,omitempty"`
+	Users map[string]string `envconfig:"BASIC_USERS"`
 }
 
 // Github holds the github configurations
 type Github struct {
-	Organizations []string           `envconfig:"GITHUB_ORGANIZATIONS"`
-	Teams         []GitHubTeamConfig `envconfig:"GITHUB_TEAMS"`
-}
-
-// GitHubTeamConfig represents a team configuration
-type GitHubTeamConfig struct {
-	OrganizationName string `json:"organization_name,omitempty"`
-	TeamName         string `json:"team_name,omitempty"`
+	Organizations []string          `envconfig:"GITHUB_ORGANIZATIONS"`
+	Teams         map[string]string `envconfig:"GITHUB_TEAMS"`
 }
 
 // IsConfigured checks if github is enabled
