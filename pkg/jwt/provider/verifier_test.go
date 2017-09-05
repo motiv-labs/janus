@@ -10,7 +10,8 @@ import (
 )
 
 var (
-	r *http.Request
+	r          *http.Request
+	httpClient *http.Client
 )
 
 type mockVerifier struct {
@@ -18,7 +19,7 @@ type mockVerifier struct {
 	result2 error
 }
 
-func (v *mockVerifier) Verify(r *http.Request) (bool, error) {
+func (v *mockVerifier) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
 	return v.result1, v.result2
 }
 
@@ -69,7 +70,7 @@ func TestVerifiersScenarios(t *testing.T) {
 func testAllVerifiersFailed(t *testing.T, fakeVerifier1 *mockVerifier, fakeVerifier2 *mockVerifier, verifierBasket *VerifierBasket) {
 	fakeVerifier1.VerifyReturns(false, nil)
 	fakeVerifier2.VerifyReturns(false, nil)
-	result, err := verifierBasket.Verify(r)
+	result, err := verifierBasket.Verify(r, httpClient)
 
 	require.NoError(t, err)
 	assert.False(t, result)
@@ -78,7 +79,7 @@ func testAllVerifiersFailed(t *testing.T, fakeVerifier1 *mockVerifier, fakeVerif
 func testOneVerifierFailed(t *testing.T, fakeVerifier1 *mockVerifier, fakeVerifier2 *mockVerifier, verifierBasket *VerifierBasket) {
 	fakeVerifier1.VerifyReturns(false, nil)
 	fakeVerifier2.VerifyReturns(true, nil)
-	result, err := verifierBasket.Verify(r)
+	result, err := verifierBasket.Verify(r, httpClient)
 
 	require.NoError(t, err)
 	assert.True(t, result)
@@ -87,7 +88,7 @@ func testOneVerifierFailed(t *testing.T, fakeVerifier1 *mockVerifier, fakeVerifi
 func testAllVerifiersError(t *testing.T, fakeVerifier1 *mockVerifier, fakeVerifier2 *mockVerifier, verifierBasket *VerifierBasket) {
 	fakeVerifier1.VerifyReturns(false, errors.New("first error"))
 	fakeVerifier2.VerifyReturns(false, errors.New("second error"))
-	result, err := verifierBasket.Verify(r)
+	result, err := verifierBasket.Verify(r, httpClient)
 
 	require.Error(t, err)
 	assert.False(t, result)
@@ -96,7 +97,7 @@ func testAllVerifiersError(t *testing.T, fakeVerifier1 *mockVerifier, fakeVerifi
 func testOneVerifierError(t *testing.T, fakeVerifier1 *mockVerifier, fakeVerifier2 *mockVerifier, verifierBasket *VerifierBasket) {
 	fakeVerifier1.VerifyReturns(false, errors.New("first error"))
 	fakeVerifier2.VerifyReturns(false, nil)
-	result, err := verifierBasket.Verify(r)
+	result, err := verifierBasket.Verify(r, httpClient)
 
 	require.Error(t, err)
 	assert.False(t, result)
@@ -105,7 +106,7 @@ func testOneVerifierError(t *testing.T, fakeVerifier1 *mockVerifier, fakeVerifie
 func testOneVerifierReturnsTrueAndDoesNotError(t *testing.T, fakeVerifier1 *mockVerifier, fakeVerifier2 *mockVerifier, verifierBasket *VerifierBasket) {
 	fakeVerifier1.VerifyReturns(false, errors.New("first error"))
 	fakeVerifier2.VerifyReturns(true, nil)
-	result, err := verifierBasket.Verify(r)
+	result, err := verifierBasket.Verify(r, httpClient)
 
 	require.NoError(t, err)
 	assert.True(t, result)

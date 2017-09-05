@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/DATA-DOG/godog"
+	jwtgo "github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/tidwall/gjson"
@@ -199,12 +200,12 @@ func (c *requestContext) requestJWTTokenIsNotSet() error {
 
 func (c *requestContext) requestJWTTokenIsValidAdminToken() error {
 	jwtConfig := jwt.NewGuard(c.adminCred)
-	accessToken, err := jwt.IssueAdminToken(jwtConfig.SigningMethod, make(map[string]interface{}), jwtConfig.Timeout)
+	accessToken, err := jwt.IssueAdminToken(jwtConfig.SigningMethod, jwtgo.MapClaims{}, jwtConfig.Timeout)
 	if nil != err {
 		return fmt.Errorf("Failed to issue JWT: %v", err)
 	}
 
-	c.requestHeaders.Set(headerAuthorization, "Bearer "+accessToken)
+	c.requestHeaders.Set(headerAuthorization, "Bearer "+accessToken.Token)
 
 	return nil
 }

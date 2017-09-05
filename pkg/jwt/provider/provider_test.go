@@ -4,6 +4,7 @@ import (
 	"net/http"
 	"testing"
 
+	jwt "github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/stretchr/testify/assert"
 )
@@ -13,8 +14,11 @@ type mockProvider struct{}
 func (p *mockProvider) Build(config config.Credentials) Provider {
 	return &mockProvider{}
 }
-func (p *mockProvider) Verify(r *http.Request) (bool, error) {
+func (p *mockProvider) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
 	return true, nil
+}
+func (p *mockProvider) GetClaims(httpClient *http.Client) (jwt.MapClaims, error) {
+	return jwt.MapClaims{}, nil
 }
 
 type defaultProvider struct{}
@@ -22,10 +26,12 @@ type defaultProvider struct{}
 func (p *defaultProvider) Build(config config.Credentials) Provider {
 	return &defaultProvider{}
 }
-func (p *defaultProvider) Verify(r *http.Request) (bool, error) {
+func (p *defaultProvider) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
 	return true, nil
 }
-
+func (p *defaultProvider) GetClaims(httpClient *http.Client) (jwt.MapClaims, error) {
+	return jwt.MapClaims{}, nil
+}
 func TestProviders(t *testing.T) {
 	tests := []struct {
 		scenario string
