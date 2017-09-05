@@ -28,6 +28,7 @@ Complete documentation is available at https://hellofresh.gitbooks.io/janus`,
 	checkCmd = &cobra.Command{
 		Use:   "check [config-file]",
 		Short: "Check the validity of a given Janus configuration file. (default /etc/janus/janus.toml)",
+		Args:  cobra.MinimumNArgs(1),
 		Run:   RunCheck,
 	}
 

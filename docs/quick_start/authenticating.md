@@ -26,9 +26,7 @@ You can also configure which organizations/teams will be allowed to log into the
 
     [web.credentials.github]
     organizations = ["hellofresh"]
-    teams = [
-      {organizationName = "hellofresh", TeamName = "Devs"}
-    ]
+    teams = {hellofresh = "devs"}
 ```
 
 ### Basic
@@ -49,6 +47,6 @@ The username and password default to *admin*/*admin*, and **should be changed** 
 
     [web.credentials.basic]
     users = [
-      {username = "admin", password = "admin"}
+      {admin = "admin"}
     ]
 ```
