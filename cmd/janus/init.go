@@ -25,12 +25,16 @@ var (
 )
 
 func initConfig() {
-	c, err := config.Load(configFile)
+	var err error
+	globalConfig, err = config.Load(configFile)
 	if nil != err {
-		log.WithError(err).Panic("Could not parse the environment configurations")
-	}
+		log.WithError(err).Panic("Could not load configurations from file")
 
-	globalConfig = c
+		globalConfig, err = config.LoadEnv()
+		if nil != err {
+			log.WithError(err).Panic("Could not load configurations from environment")
+		}
+	}
 }
 
 // initializes the basic configuration for the log wrapper

@@ -5,7 +5,7 @@ import (
 
 	"github.com/hellofresh/logging-go"
 	"github.com/kelseyhightower/envconfig"
-	log "github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
@@ -136,8 +136,8 @@ func init() {
 	viper.SetDefault("web.tls.port", "8444")
 	viper.SetDefault("web.tls.redisrect", true)
 	viper.SetDefault("web.credentials.algorithm", "HS256")
-	viper.SetDefault("web.credentials.basic.users", []map[string]string{
-		{"username": "admin", "password": "admin"},
+	viper.SetDefault("web.credentials.basic.users", map[string]string{
+		"admin": "admin",
 	})
 	viper.SetDefault("stats.dsn", "log://")
 	viper.SetDefault("stats.errorsSection", "error-log")
@@ -156,8 +156,7 @@ func Load(configFile string) (*Specification, error) {
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.WithError(err).Warn("No config file found")
-		return LoadEnv()
+		return nil, errors.Wrap(err, "No config file found")
 	}
 
 	var config Specification
@@ -172,6 +171,7 @@ func Load(configFile string) (*Specification, error) {
 func LoadEnv() (*Specification, error) {
 	var config Specification
 
+	// ensure the defaults are loaded
 	if err := viper.Unmarshal(&config); err != nil {
 		return nil, err
 	}
