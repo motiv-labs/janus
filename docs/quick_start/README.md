@@ -11,7 +11,7 @@ You can get Janus for nearly any OS and architecture. You can get the latest Jan
 
 ## Install and run
 
-We highly recommend you to use one of your examples to start. Let's see the [front-proxy](/examples/front-proxy) example:
+We highly recommend you to use one of our examples to start. Let's see the [front-proxy](/examples/front-proxy) example:
 
 Make sure you have docker up and running on your platform and then run.
 
