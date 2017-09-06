@@ -6,7 +6,7 @@
 [![codecov](https://codecov.io/gh/hellofresh/janus/branch/master/graph/badge.svg)](https://codecov.io/gh/hellofresh/janus)
 [![GoDoc](https://godoc.org/github.com/hellofresh/janus?status.svg)](https://godoc.org/github.com/hellofresh/janus)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hellofresh/janus)](https://goreportcard.com/report/github.com/hellofresh/janus)
-
+[![Join us on slack](https://janus-slack.herokuapp.com/badge.svg)](https://janus-slack.herokuapp.com/)
 
 > An API Gateway written in Go
 
