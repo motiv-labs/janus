@@ -69,7 +69,12 @@ func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 
 		return NewJWTManager(jwt.NewParser(jwt.NewParserConfig(signingMethods...))), nil
 	case Introspection:
-		manager, err := NewIntrospectionManager(f.oAuthServer.Endpoints.Introspect.UpstreamURL)
+		settings, err := f.oAuthServer.TokenStrategy.GetIntrospectionSettings()
+		if nil != err {
+			return nil, err
+		}
+
+		manager, err := NewIntrospectionManager(f.oAuthServer.Endpoints.Introspect.UpstreamURL, settings)
 		if err != nil {
 			return nil, err
 		}

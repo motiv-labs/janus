@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -14,21 +15,22 @@ type oAuthResponse struct {
 // IntrospectionManager is responsible for using OAuth2 Introspection definition to
 // validate tokens from an authentication provider
 type IntrospectionManager struct {
-	URL string
+	URL      string
+	settings *IntrospectionSettings
 }
 
 // NewIntrospectionManager creates a new instance of Introspection
-func NewIntrospectionManager(url string) (*IntrospectionManager, error) {
+func NewIntrospectionManager(url string, settings *IntrospectionSettings) (*IntrospectionManager, error) {
 	if url == "" {
 		return nil, ErrInvalidIntrospectionURL
 	}
 
-	return &IntrospectionManager{url}, nil
+	return &IntrospectionManager{url, settings}, nil
 }
 
 // IsKeyAuthorized checks if the access token is valid
 func (o *IntrospectionManager) IsKeyAuthorized(accessToken string) bool {
-	resp, err := doStatusRequest(o.URL)
+	resp, err := o.doStatusRequest(accessToken)
 	defer resp.Body.Close()
 
 	if err != nil {
@@ -52,11 +54,19 @@ func (o *IntrospectionManager) IsKeyAuthorized(accessToken string) bool {
 	return oauthResp.Active
 }
 
-func doStatusRequest(url string) (*http.Response, error) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
+func (o *IntrospectionManager) doStatusRequest(accessToken string) (*http.Response, error) {
+	req, err := http.NewRequest(http.MethodGet, o.URL, nil)
 	if err != nil {
 		log.WithError(err).Error("Creating the request for the health check failed")
 		return nil, err
+	}
+
+	if o.settings.UseAuthHeader {
+		req.Header.Add("Authorization", fmt.Sprintf("%s %s", o.settings.AuthHeaderType, accessToken))
+	} else if o.settings.UseCustomHeader {
+		req.Header.Add(o.settings.HeaderName, accessToken)
+	} else {
+		req.Form.Add(o.settings.ParamName, accessToken)
 	}
 
 	// Inform to close the connection after the transaction is complete
