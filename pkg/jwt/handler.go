@@ -14,6 +14,10 @@ import (
 	"golang.org/x/oauth2"
 )
 
+const (
+	bearer = "bearer"
+)
+
 // Handler struct
 type Handler struct {
 	Guard Guard
@@ -116,7 +120,7 @@ func extractAccessToken(r *http.Request) (string, error) {
 		return "", errors.New("attempted access with malformed header, no auth header found")
 	}
 
-	if strings.ToLower(parts[0]) != "bearer" {
+	if strings.ToLower(parts[0]) != bearer {
 		return "", errors.New("bearer token malformed")
 	}
 
