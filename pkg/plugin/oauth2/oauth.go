@@ -1,13 +1,13 @@
 package oauth2
 
 import (
-	"errors"
 	"sync"
 
 	"github.com/Knetic/govaluate"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/mitchellh/mapstructure"
+	"github.com/pkg/errors"
 )
 
 // AccessRequestType is the type for OAuth param `grant_type`
@@ -64,10 +64,30 @@ type corsMeta struct {
 	Enabled        bool     `bson:"enabled" json:"enabled"`
 }
 
+// IntrospectionSettings represents the settings for introspection
+type IntrospectionSettings struct {
+	UseCustomHeader bool   `bson:"use_custom_header" json:"use_custom_header"`
+	HeaderName      string `bson:"header_name" json:"header_name"`
+	UseAuthHeader   bool   `bson:"use_auth_header" json:"use_auth_header"`
+	AuthHeaderType  string `bson:"auth_header_type" json:"auth_header_type"`
+	UseBody         bool   `bson:"use_body" json:"use_body"`
+	ParamName       string `bson:"param_name" json:"param_name"`
+}
+
 // TokenStrategy defines the token strategy fields
 type TokenStrategy struct {
 	Name     string      `bson:"name" json:"name"`
 	Settings interface{} `bson:"settings" json:"settings"`
+}
+
+// GetIntrospectionSettings returns the settings for introspection
+func (t TokenStrategy) GetIntrospectionSettings() (*IntrospectionSettings, error) {
+	var settings *IntrospectionSettings
+	err := mapstructure.Decode(t.Settings, &settings)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not decode introspection settings")
+	}
+	return settings, nil
 }
 
 // GetJWTSigningMethods parses and returns chain of JWT signing methods for token signature validation.
