@@ -34,7 +34,7 @@ func NewPasswordVerifier(users []*user) *PasswordVerifier {
 }
 
 // Verify makes a check and return a boolean if the check was successful or not
-func (v *PasswordVerifier) Verify(r *http.Request) (bool, error) {
+func (v *PasswordVerifier) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
 	currentUser, err := v.getUserFromRequest(r)
 	if err != nil {
 		log.Debug("Could not get user from request")

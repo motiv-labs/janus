@@ -28,13 +28,8 @@ func NewTeamVerifier(teams []Team, gitHubClient Client) *TeamVerifier {
 }
 
 // Verify makes a check and return a boolean if the check was successful or not
-func (v *TeamVerifier) Verify(r *http.Request) (bool, error) {
-	accessToken, err := extractAccessToken(r)
-	if err != nil {
-		return false, errors.Wrap(err, "failed to extract access token")
-	}
-
-	usersOrgTeams, err := v.gitHubClient.Teams(getClient(accessToken))
+func (v *TeamVerifier) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
+	usersOrgTeams, err := v.gitHubClient.Teams(httpClient)
 	if err != nil {
 		return false, errors.Wrap(err, "failed to get teams")
 	}
@@ -54,5 +49,5 @@ func (v *TeamVerifier) Verify(r *http.Request) (bool, error) {
 		"want": v.teams,
 	}).Debug("not in teams")
 
-	return false, nil
+	return false, errors.New("you are not part of the allowed teams")
 }

@@ -5,7 +5,7 @@ import (
 
 	"github.com/hellofresh/logging-go"
 	"github.com/kelseyhightower/envconfig"
-	log "github.com/sirupsen/logrus"
+	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
@@ -80,25 +80,13 @@ type Credentials struct {
 
 // Basic holds the basic users configurations
 type Basic struct {
-	Users []BasicUsersConfig `envconfig:"BASIC_ORGANIZATIONS"`
-}
-
-// BasicUsersConfig represents an user configuration
-type BasicUsersConfig struct {
-	Username string `json:"username,omitempty"`
-	Password string `json:"password,omitempty"`
+	Users map[string]string `envconfig:"BASIC_USERS"`
 }
 
 // Github holds the github configurations
 type Github struct {
-	Organizations []string           `envconfig:"GITHUB_ORGANIZATIONS"`
-	Teams         []GitHubTeamConfig `envconfig:"GITHUB_TEAMS"`
-}
-
-// GitHubTeamConfig represents a team configuration
-type GitHubTeamConfig struct {
-	OrganizationName string `json:"organization_name,omitempty"`
-	TeamName         string `json:"team_name,omitempty"`
+	Organizations []string          `envconfig:"GITHUB_ORGANIZATIONS"`
+	Teams         map[string]string `envconfig:"GITHUB_TEAMS"`
 }
 
 // IsConfigured checks if github is enabled
@@ -148,8 +136,8 @@ func init() {
 	viper.SetDefault("web.tls.port", "8444")
 	viper.SetDefault("web.tls.redisrect", true)
 	viper.SetDefault("web.credentials.algorithm", "HS256")
-	viper.SetDefault("web.credentials.basic.users", []map[string]string{
-		{"username": "admin", "password": "admin"},
+	viper.SetDefault("web.credentials.basic.users", map[string]string{
+		"admin": "admin",
 	})
 	viper.SetDefault("stats.dsn", "log://")
 	viper.SetDefault("stats.errorsSection", "error-log")
@@ -168,8 +156,7 @@ func Load(configFile string) (*Specification, error) {
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.WithError(err).Warn("No config file found")
-		return LoadEnv()
+		return nil, errors.Wrap(err, "No config file found")
 	}
 
 	var config Specification
@@ -184,6 +171,7 @@ func Load(configFile string) (*Specification, error) {
 func LoadEnv() (*Specification, error) {
 	var config Specification
 
+	// ensure the defaults are loaded
 	if err := viper.Unmarshal(&config); err != nil {
 		return nil, err
 	}

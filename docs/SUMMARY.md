@@ -4,6 +4,7 @@
 * [Installation](install/README.md)
     * [Docker](install/docker.md)
 * [Quick Start](quick_start/README.md)
+    * [Authenticating](quick_start/authenticating.md)
     * [Add an endpoint](quick_start/add_endpoint.md)
     * [Add Plugins](quick_start/add_plugins.md)
     * [Authentication](quick_start/add_auth.md)

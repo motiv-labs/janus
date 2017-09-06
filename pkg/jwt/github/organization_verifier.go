@@ -22,13 +22,8 @@ func NewOrganizationVerifier(organizations []string, gitHubClient Client) *Organ
 }
 
 // Verify makes a check and return a boolean if the check was successful or not
-func (v *OrganizationVerifier) Verify(r *http.Request) (bool, error) {
-	accessToken, err := extractAccessToken(r)
-	if err != nil {
-		return false, errors.Wrap(err, "failed to extract access token")
-	}
-
-	orgs, err := v.gitHubClient.Organizations(getClient(accessToken))
+func (v *OrganizationVerifier) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
+	orgs, err := v.gitHubClient.Organizations(httpClient)
 	if err != nil {
 		return false, errors.Wrap(err, "failed to get organizations")
 	}
@@ -46,5 +41,5 @@ func (v *OrganizationVerifier) Verify(r *http.Request) (bool, error) {
 		"want": v.organizations,
 	}).Debug("not in the organizations")
 
-	return false, nil
+	return false, errors.New("you are not part of the allowed organizations")
 }

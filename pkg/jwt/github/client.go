@@ -9,7 +9,7 @@ import (
 
 // Client contains the methods that abstract an API
 type Client interface {
-	CurrentUser(*http.Client) (string, error)
+	CurrentUser(*http.Client) (*github.User, error)
 	Organizations(*http.Client) ([]string, error)
 	Teams(*http.Client) (OrganizationTeams, error)
 }
@@ -27,15 +27,15 @@ func NewClient() Client {
 type OrganizationTeams map[string][]string
 
 // CurrentUser retrieves the current authenticated user for an http client
-func (c *client) CurrentUser(httpClient *http.Client) (string, error) {
+func (c *client) CurrentUser(httpClient *http.Client) (*github.User, error) {
 	client := github.NewClient(httpClient)
 
 	currentUser, _, err := client.Users.Get(context.TODO(), "")
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
-	return *currentUser.Login, nil
+	return currentUser, nil
 }
 
 // Teams retrieves the teams that the authenticated user belongs

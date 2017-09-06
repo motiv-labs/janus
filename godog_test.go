@@ -25,7 +25,7 @@ func init() {
 }
 
 func FeatureContext(s *godog.Suite) {
-	c, err := config.Load("")
+	c, err := config.LoadEnv()
 	if nil != err {
 		panic(err)
 	}
