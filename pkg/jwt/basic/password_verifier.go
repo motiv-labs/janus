@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -37,7 +36,6 @@ func NewPasswordVerifier(users []*user) *PasswordVerifier {
 func (v *PasswordVerifier) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
 	currentUser, err := v.getUserFromRequest(r)
 	if err != nil {
-		log.Debug("Could not get user from request")
 		return false, errors.Wrap(err, "could not get user from request")
 	}
 
@@ -47,12 +45,7 @@ func (v *PasswordVerifier) Verify(r *http.Request, httpClient *http.Client) (boo
 		}
 	}
 
-	log.WithFields(log.Fields{
-		"have": currentUser,
-		"want": v.users,
-	}).Debug("not in the user list")
-
-	return false, nil
+	return false, errors.New("incorrect username or password")
 }
 
 func (v *PasswordVerifier) getUserFromRequest(r *http.Request) (*user, error) {

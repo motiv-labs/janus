@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // OrganizationVerifier checks if the current user belongs any of the defined organizations
@@ -35,11 +34,6 @@ func (v *OrganizationVerifier) Verify(r *http.Request, httpClient *http.Client) 
 			}
 		}
 	}
-
-	log.WithFields(log.Fields{
-		"have": orgs,
-		"want": v.organizations,
-	}).Debug("not in the organizations")
 
 	return false, errors.New("you are not part of the allowed organizations")
 }

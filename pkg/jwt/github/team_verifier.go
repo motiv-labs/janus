@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 // Team represents a github team within the organization
@@ -43,11 +42,6 @@ func (v *TeamVerifier) Verify(r *http.Request, httpClient *http.Client) (bool, e
 			}
 		}
 	}
-
-	log.WithFields(log.Fields{
-		"have": usersOrgTeams,
-		"want": v.teams,
-	}).Debug("not in teams")
 
 	return false, errors.New("you are not part of the allowed teams")
 }

@@ -26,8 +26,6 @@ func (vb *VerifierBasket) Verify(r *http.Request, httpClient *http.Client) (bool
 	var wrappedErrors error
 
 	for _, verifier := range vb.verifiers {
-		var verified bool
-
 		verified, err := verifier.Verify(r, httpClient)
 		if err != nil {
 			wrappedErrors = errors.Wrap(err, "verification failed")

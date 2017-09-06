@@ -39,13 +39,9 @@ func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 		p := factory.Build(r.URL.Query().Get("provider"), config)
 
 		verified, err := p.Verify(r, httpClient)
-		if err != nil {
-			render.JSON(w, http.StatusBadRequest, err.Error())
-			return
-		}
-
-		if !verified {
-			render.JSON(w, http.StatusUnauthorized, "verification failed")
+		if err != nil || !verified {
+			log.WithError(err).Debug(err.Error())
+			render.JSON(w, http.StatusUnauthorized, err.Error())
 			return
 		}
 
