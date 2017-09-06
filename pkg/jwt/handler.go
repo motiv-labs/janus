@@ -11,6 +11,7 @@ import (
 	"github.com/hellofresh/janus/pkg/jwt/provider"
 	"github.com/hellofresh/janus/pkg/render"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"golang.org/x/oauth2"
 )
 
@@ -30,8 +31,7 @@ func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		accessToken, err := extractAccessToken(r)
 		if err != nil {
-			render.JSON(w, http.StatusBadRequest, "failed to extract access token")
-			return
+			log.WithError(err).Debug("failed to extract access token")
 		}
 
 		httpClient := getClient(accessToken)
