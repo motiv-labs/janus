@@ -61,12 +61,14 @@ func (v *PasswordVerifier) getUserFromRequest(r *http.Request) (*user, error) {
 	}
 
 	// checks if the content is json otherwise just get from the form params
-	if r.Header.Get("Content-Type") == contentTypeJSON {
+	contentType := filterFlags(r.Header.Get("Content-Type"))
+	switch contentType {
+	case contentTypeJSON:
 		err := json.NewDecoder(r.Body).Decode(&u)
 		if err != nil {
 			return u, errors.Wrap(err, "could not parse the json body")
 		}
-	} else {
+	default:
 		r.ParseForm()
 
 		u = &user{
@@ -76,4 +78,13 @@ func (v *PasswordVerifier) getUserFromRequest(r *http.Request) (*user, error) {
 	}
 
 	return u, nil
+}
+
+func filterFlags(content string) string {
+	for i, char := range content {
+		if char == ' ' || char == ';' {
+			return content[:i]
+		}
+	}
+	return content
 }

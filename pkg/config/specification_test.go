@@ -11,9 +11,9 @@ import (
 func Test_LoadEnv(t *testing.T) {
 	os.Setenv("PORT", "8001")
 	os.Setenv("STATS_AUTO_DISCOVER_WHITE_LIST", "api,foo,bar")
-	os.Setenv("BASIC_USERS", "admin:admin, test:test")
-	os.Setenv("GITHUB_ORGANIZATIONS", "hellofresh, tests")
-	os.Setenv("GITHUB_TEAMS", "hellofresh:tests, hellofresh:devs")
+	os.Setenv("BASIC_USERS", "admin:admin,test:test")
+	os.Setenv("GITHUB_ORGANIZATIONS", "hellofresh,tests")
+	os.Setenv("GITHUB_TEAMS", "hellofresh:tests,tests:devs")
 
 	globalConfig, err := LoadEnv()
 	require.NoError(t, err)
@@ -27,11 +27,8 @@ func Test_LoadEnv(t *testing.T) {
 	assert.False(t, globalConfig.TLS.IsHTTPS())
 	assert.False(t, globalConfig.Tracing.IsGoogleCloudEnabled())
 	assert.False(t, globalConfig.Tracing.IsAppdashEnabled())
-	assert.IsType(t, map[string]string{}, globalConfig.Web.Credentials.Basic.Users)
-	assert.Len(t, globalConfig.Web.Credentials.Basic.Users, 2)
-	assert.IsType(t, map[string]string{}, globalConfig.Web.Credentials.Github.Teams)
-	assert.Len(t, globalConfig.Web.Credentials.Github.Teams, 2)
-	assert.IsType(t, []string{}, globalConfig.Web.Credentials.Github.Organizations)
-	assert.Len(t, globalConfig.Web.Credentials.Github.Organizations, 2)
+	assert.Equal(t, map[string]string{"admin": "admin", "test": "test"}, globalConfig.Web.Credentials.Basic.Users)
+	assert.Equal(t, map[string]string{"hellofresh": "tests", "tests": "devs"}, globalConfig.Web.Credentials.Github.Teams)
+	assert.Equal(t, []string{"hellofresh", "tests"}, globalConfig.Web.Credentials.Github.Organizations)
 	assert.True(t, globalConfig.Web.Credentials.Github.IsConfigured())
 }
