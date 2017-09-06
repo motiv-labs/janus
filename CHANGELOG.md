@@ -13,6 +13,7 @@
 ## Fixed
 
 - Fixed problems when using -c flag to specify a configuration file
+- Fixed oAuth2 introspection token strategy when configuring an oauth server
 
 # 3.2.1
 
