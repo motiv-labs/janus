@@ -65,7 +65,7 @@ Now you should be able to get a response from the gateway.
 Try the following command:
 
 ```sh
-http http://localhost:8081/
+http http://localhost:8081
 ```
 
 ### Manual
