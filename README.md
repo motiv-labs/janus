@@ -88,7 +88,7 @@ To start contributing, please check [CONTRIBUTING](CONTRIBUTING.md).
 * Go lang: https://golang.org/
 
 ##
-<p align="center">  
+<p align="center">
     <a href="https://hellofresh.com" style="text-decoration:none; margin-right:2rem;">
     <img height="110" src="https://www.hellofresh.de/images/hellofresh/press/HelloFresh_Logo.png">
   </a>
