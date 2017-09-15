@@ -65,7 +65,7 @@ Now you should be able to get a response from the gateway.
 Try the following command:
 
 ```sh
-http http://localhost:8081/
+http http://localhost:8081
 ```
 
 ### Manual
@@ -88,7 +88,7 @@ To start contributing, please check [CONTRIBUTING](CONTRIBUTING.md).
 * Go lang: https://golang.org/
 
 ##
-<p align="center">  
+<p align="center">
     <a href="https://hellofresh.com" style="text-decoration:none; margin-right:2rem;">
     <img height="110" src="https://www.hellofresh.de/images/hellofresh/press/HelloFresh_Logo.png">
   </a>
