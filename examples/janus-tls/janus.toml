@@ -20,10 +20,11 @@ logLevel = "debug"
   CertFile = "/etc/janus/janus.crt"
   KeyFile = "/etc/janus/janus.key"
 
-  [credentials]
-    secret = "secret key"
-    username = "admin"
-    password = "admin"
+  [web.credentials]
+    secret = "secret"
+
+    [web.credentials.basic]
+    users = {admin = "admin"}
 
 [database]
   dsn = "file:///etc/janus"

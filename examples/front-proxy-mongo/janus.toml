@@ -10,10 +10,11 @@ logLevel = "debug"
 [web]
   port = 8081
 
-  [credentials]
-    secret = "secret key"
-    username = "admin"
-    password = "admin"
+  [web.credentials]
+    secret = "secret"
+
+    [web.credentials.basic]
+    users = {admin = "admin"}
 
 [database]
    dsn = "mongodb://janus-database:27017/janus"
