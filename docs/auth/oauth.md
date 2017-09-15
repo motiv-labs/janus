@@ -32,7 +32,7 @@ This request is an example of a simple `client_credentials` flow of [OAuth 2.0](
 {% codetabs name="HTTPie", type="bash" -%}
 http -v GET http://localhost:8080/auth/token?grant_type=client_credentials "Authorization: Basic YourBasicToken"
 {%- language name="CURL", type="bash" -%}
-curl -X "GET" http://localhost:8080/auth/token?grant_type=client_credentials -H "Authorization: Basic YourBasicToken"
+curl -X "GET" http://localhost:8080/auth/token?grant_type=client_credentials -H "Authorization: Basic YourBasicToken" -H "Content-Type: application/json"
 {%- endcodetabs %}
 
 # Reference

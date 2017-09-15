@@ -36,7 +36,7 @@ Alternatively, you can authenticate against the admin API using HTTP `Basic` Aut
 {% codetabs name="HTTPie", type="bash" -%}
 http -v --json POST localhost:8081/login username=admin password=admin
 {%- language name="CURL", type="bash" -%}
-curl -X "POST" localhost:8081/login -d '{"username": "admin", "password": "admin"}'
+curl -X "POST" localhost:8081/login -d '{"username": "admin", "password": "admin"}' -H "Content-Type: application/json"
 {%- endcodetabs %}
 
 The username and password default to *admin*/*admin*, and **should be changed** using the following [configuration](../install/configuration.md):
