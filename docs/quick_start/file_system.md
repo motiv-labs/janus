@@ -1,62 +1,50 @@
 # Adding your API - File System
 
-By choosing a File System based configuration we have a static way of configure the gateway (similar to nginx).
+By choosing a File System based configuration we have a static way of configure Janus (similar to nginx).
 
-## 1. Preparing the folder structure
+## 1. Boot it up
 
-By default all apis configurations are splited in separeted files (one for each API) and they live in
-`/etc/janus`. Of course you can configure that route by simply defining the configuration `database.dsn`, for instance,
-you can define the value to `file:///usr/local/janus`.
+We highly recommend you to use one of our examples to start. Let's see the [front-proxy](/examples/front-proxy) example:
 
-Let's use the default directory and create it `/etc/janus`. We need two main folders `apis` and `auth` each one of them
-holds a set of configurations for our proxies. Just run:
+Make sure you have docker up and running on your platform and then run.
 
-```bash
-mkdir -p /etc/janus/apis
-mkdir -p /etc/janus/auth
+```sh
+docker-compose up -d
 ```
 
-## 2. Add your API
+This will spin up a janus server and will have a small proxy configuration that is going to a mock server that we spun up.
 
-The main feature of the API Gateway is to proxy the requests to a different service, so let's do this.
-
-Just place [this example](../../examples/front-proxy/apis/example.json) in your `apis` directory.
-This will create a proxy to `https://jsonplaceholder.typicode.com/posts` when you hit Janus on `GET /posts`.
-
-Now restart Janus to apply the changes.
-
-```bash
-sudo sv restart janus
-```
-
-## 3. Verify that your API has been added
-
-You can use the REST API to query all available APIs and Auth Providers. Simply make a request 
-to `/apis`.
-
-```bash
-http -v GET localhost:8081/apis "Authorization:Bearer yourToken" "Content-Type: application/json"
-```
-
-## 4. Forward your requests through Janus
+## 2. Verify that Janus is working
 
 Issue the following cURL request to verify that Janus is properly forwarding
 requests to your API. Note that [by default][proxy-port] Janus handles proxy
 requests on port `:8080`:
 
-```bash
-$ http -v GET http://localhost:8080/posts/1
+If you access `http://localhost:8080/example` you should something like:
+
+```json
+{
+    "message": "Hello World!"
+}
 ```
 
-<p align="center">
-  <a href="http://g.recordit.co/vufeMjwEfg.gif">
-    <img src="http://g.recordit.co/vufeMjwEfg.gif">
-  </a>
-</p>
-
-
 A successful response means Janus is now forwarding requests made to
-`http://localhost:8000` to the `upstream_url` we configured in step #1,
+`http://localhost:8080` to the `upstream_url` we configured in step #1,
 and is forwarding the response back to us.
 
-Do you want to protect your API? Check it out [here](proxy_auth_methods.md) how to do it.
+## Understanding the directory structure
+
+By default all apis configurations are splitted in separated files (one for each API) and they are stored in `/etc/janus`. You can change that path by simply defining the configuration `database.dsn`, for instance, you can define the value to `file:///usr/local/janus`.
+
+There are two required folder that needs to be there:
+
+- `/etc/janus/apis` - Holds all API definitions
+- `/etc/janus/auth` - Holds all your Auth servers configurations
+
+## 4. Adding a new endpoint and authentication
+
+To add a new endpoint or authentication you can see the [Add Endpoint tutorial](add_endpoint.md) but instead of using the admin API you'll add your configuration to a file and reload the docker instance:
+
+```sh
+docker-compose reload janus
+```

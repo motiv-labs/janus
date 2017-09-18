@@ -1,7 +1,5 @@
 # Add an endpoint
 
-> Note: If you are using the file-based configuration you will not be able to use the write administration API to add new endpoints. Please check this [tutorial](./file_system.md) if you'd like to add a new endpoint using the file-based configuration.
-
 The main feature of the API Gateway is to proxy the requests to different services, so let's do this.
 
 ## Adding a new endpoint
