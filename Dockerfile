@@ -1,17 +1,18 @@
-FROM golang AS builder
-ENV JANUS_BUILD_ONLY_DEFAULT=1
-ENV JANUS_SRC="/go/src/github.com/hellofresh/janus"
+FROM alpine AS builder
 
-ADD . ${JANUS_SRC}
+ARG JANUS_VERSION
 
-RUN cd ${JANUS_SRC} && \
-    make
+RUN apk update \
+    && apk add --virtual .build-deps wget tar ca-certificates \
+	&& apk add libgcc openssl \
+    && wget -O janus.tar.gz https://github.com/hellofresh/janus/releases/download/${JANUS_VERSION}/janus_linux-amd64.tar.gz \
+    && tar -xzf janus.tar.gz -C /tmp
 
 # ---
 FROM alpine
 
 ADD assets/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /go/src/github.com/hellofresh/janus/dist/janus /
+COPY --from=builder /tmp/janus_linux-amd64 /
 
 RUN mkdir -p /etc/janus/apis && \
     mkdir -p /etc/janus/auth
@@ -22,4 +23,4 @@ RUN apk add --update curl && \
 HEALTHCHECK --interval=5s --timeout=5s --retries=3 CMD curl -f http://localhost:8081/status || exit 1
 
 EXPOSE 8080 8081 8443 8444
-ENTRYPOINT ["/janus"]
+ENTRYPOINT ["/janus_linux-amd64"]
