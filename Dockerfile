@@ -2,8 +2,6 @@ FROM alpine AS builder
 
 ARG JANUS_VERSION
 
-RUN echo $JANUS_VERSION
-
 RUN apk update \
     && apk add --virtual .build-deps wget tar ca-certificates \
 	&& apk add libgcc openssl \
