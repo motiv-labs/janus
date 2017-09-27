@@ -38,7 +38,8 @@
 [[projects]]
   name = "github.com/bshuster-repo/logrus-logstash-hook"
   packages = ["."]
-  revision = "41029b88e98c8b459ff27040389b69a4db2a8d07"
+  revision = "dbc1e22735aa6ed7bd9579a407c17bc7c4a4e046"
+  version = "v0.4.1"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -122,14 +123,14 @@
 [[projects]]
   name = "github.com/hellofresh/health-go"
   packages = ["."]
-  revision = "9f26f204c38a93ce4e4ce9dcaad39de0ca6504d3"
-  version = "v1.1.0"
+  revision = "d22affbbf2b693a3fcb67f55d242f910e0a8944a"
+  version = "v1.2.2"
 
 [[projects]]
   name = "github.com/hellofresh/logging-go"
   packages = ["."]
-  revision = "65bfc842bdc30b48d6cf9a6e28c474993398d420"
-  version = "v0.1.4"
+  revision = "35bfe83a93eda5dae5d5dee7c3e102a599f2f327"
+  version = "v0.1.6"
 
 [[projects]]
   name = "github.com/hellofresh/stats-go"
@@ -249,7 +250,8 @@
 [[projects]]
   name = "github.com/spf13/viper"
   packages = ["."]
-  revision = "c1de95864d73a5465492829d7cb2dd422b19ac96"
+  revision = "25b30aa063fc18e48662b86996252eabdcf2f0c7"
+  version = "v1.0.0"
 
 [[projects]]
   name = "github.com/stretchr/testify"
