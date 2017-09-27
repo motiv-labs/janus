@@ -10,6 +10,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+const notFoundPath = "/-not-found-"
+
 // Stats represents the stats middleware
 type Stats struct {
 	statsClient stats.Client
@@ -24,8 +26,8 @@ func NewStats(statsClient stats.Client) *Stats {
 func (m *Stats) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var (
-			lock    sync.Mutex
-			success bool
+			lock         sync.Mutex
+			responseCode int
 		)
 
 		log.WithField("path", r.URL.Path).Debug("Starting Stats middleware")
@@ -36,9 +38,7 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 					next(code)
 					lock.Lock()
 					defer lock.Unlock()
-					if code < http.StatusBadRequest {
-						success = true
-					}
+					responseCode = code
 				}
 			},
 		}
@@ -52,8 +52,16 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 
 		handler.ServeHTTP(response.Wrap(w, hooks), r)
 
-		log.WithFields(log.Fields{"original_path": originalURL.Path, "request_url": r.URL.Path}).Debug("Track request stats")
+		log.WithFields(log.Fields{
+			"original_path": originalURL.Path,
+			"request_url":   r.URL.Path,
+		}).Debug("Track request stats")
 
+		success := responseCode < http.StatusBadRequest
+		if responseCode == http.StatusNotFound {
+			log.WithField("path", originalURL.Path).Warn("Unknown endpoint requested")
+			originalURL.Path = notFoundPath
+		}
 		m.statsClient.TrackRequest(originalRequest, timing, success)
 	})
 }
