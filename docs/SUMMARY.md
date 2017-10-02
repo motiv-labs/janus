@@ -8,6 +8,7 @@
     * [Add an endpoint](quick_start/add_endpoint.md)
     * [Add Plugins](quick_start/add_plugins.md)
     * [Authentication](quick_start/add_auth.md)
+    * [Adding your API - File System](quick_start/file_system.md)
 * [Proxy Reference](proxy/README.md)
     * [Terminology](proxy/terminology.md)
     * [Overview](proxy/overview.md)
