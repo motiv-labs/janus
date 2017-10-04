@@ -5,6 +5,7 @@ import (
 
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewInstanceOfDefinition(t *testing.T) {
@@ -17,9 +18,11 @@ func TestNewInstanceOfDefinition(t *testing.T) {
 func TestSuccessfulValidation(t *testing.T) {
 	instance := api.NewDefinition()
 	instance.Name = "Test"
-	isValid, err := instance.Validate()
+	instance.Proxy.ListenPath = "/"
+	instance.Proxy.UpstreamURL = "http://example.com"
 
-	assert.NoError(t, err)
+	isValid, err := instance.Validate()
+	require.NoError(t, err)
 	assert.True(t, isValid)
 }
 

@@ -5,8 +5,6 @@ import (
 	"os"
 	"path/filepath"
 
-	mgo "gopkg.in/mgo.v2"
-
 	"github.com/hellofresh/janus/pkg/config"
 	tracerfactory "github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/store"
@@ -15,6 +13,7 @@ import (
 	"github.com/hellofresh/stats-go/hooks"
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/mgo.v2"
 )
 
 var (

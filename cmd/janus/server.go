@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/notifier"
@@ -35,7 +34,6 @@ import (
 )
 
 var (
-	repo   api.Repository
 	server *http.Server
 )
 
