@@ -1,6 +1,8 @@
 # Unreleased
 
-- TODO
+## Added
+
+- Added Proxy Listen Path validation to prevent `chi` from panicking in case of invalid listen path
 
 # 3.3.0
 
