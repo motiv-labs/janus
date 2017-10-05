@@ -21,7 +21,7 @@ type Plugin struct {
 type Definition struct {
 	Name        string            `bson:"name" json:"name" valid:"required"`
 	Active      bool              `bson:"active" json:"active"`
-	Proxy       *proxy.Definition `bson:"proxy" json:"proxy"`
+	Proxy       *proxy.Definition `bson:"proxy" json:"proxy" valid:"required"`
 	Plugins     []Plugin          `bson:"plugins" json:"plugins"`
 	HealthCheck HealthCheck       `bson:"health_check" json:"health_check"`
 }

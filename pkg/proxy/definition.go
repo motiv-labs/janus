@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"encoding/json"
+	"strings"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/router"
@@ -10,7 +11,7 @@ import (
 // Definition defines proxy rules for a route
 type Definition struct {
 	PreserveHost        bool     `bson:"preserve_host" json:"preserve_host" mapstructure:"preserve_host"`
-	ListenPath          string   `bson:"listen_path" json:"listen_path" mapstructure:"listen_path" valid:"required"`
+	ListenPath          string   `bson:"listen_path" json:"listen_path" mapstructure:"listen_path" valid:"required,urlpath"`
 	UpstreamURL         string   `bson:"upstream_url" json:"upstream_url" mapstructure:"upstream_url" valid:"url,required"`
 	InsecureSkipVerify  bool     `bson:"insecure_skip_verify" json:"insecure_skip_verify" mapstructure:"insecure_skip_verify"`
 	StripPath           bool     `bson:"strip_path" json:"strip_path" mapstructure:"strip_path"`
@@ -80,4 +81,16 @@ func JSONUnmarshalRoute(rawRoute []byte) (*Route, error) {
 		return nil, err
 	}
 	return NewRoute(proxyRoute.Proxy), nil
+}
+
+func init() {
+	// initializes custom validators
+	govalidator.CustomTypeTagMap.Set("urlpath", func(i interface{}, o interface{}) bool {
+		s, ok := i.(string)
+		if !ok {
+			return false
+		}
+
+		return strings.Index(s, "/") == 0
+	})
 }

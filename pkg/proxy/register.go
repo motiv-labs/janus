@@ -106,11 +106,16 @@ func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, metho
 		"listen_path": listenPath,
 	}).Debug("Registering a route")
 
-	for _, method := range methods {
-		if strings.ToUpper(method) == methodAll {
-			p.Router.Any(listenPath, handler, handlers...)
-		} else {
-			p.Router.Handle(strings.ToUpper(method), listenPath, handler, handlers...)
+	if strings.Index(listenPath, "/") != 0 {
+		log.WithField("listen_path", listenPath).
+			Error("Route listen path must begin with '/'.Skipping invalid route.")
+	} else {
+		for _, method := range methods {
+			if strings.ToUpper(method) == methodAll {
+				p.Router.Any(listenPath, handler, handlers...)
+			} else {
+				p.Router.Handle(strings.ToUpper(method), listenPath, handler, handlers...)
+			}
 		}
 	}
 }
@@ -134,13 +139,13 @@ func singleJoiningSlash(a, b string) string {
 	a = cleanSlashes(a)
 	b = cleanSlashes(b)
 
-	aslash := strings.HasSuffix(a, "/")
-	bslash := strings.HasPrefix(b, "/")
+	aSlash := strings.HasSuffix(a, "/")
+	bSlash := strings.HasPrefix(b, "/")
 
 	switch {
-	case aslash && bslash:
+	case aSlash && bSlash:
 		return a + b[1:]
-	case !aslash && !bslash:
+	case !aSlash && !bSlash:
 		if len(b) > 0 {
 			return a + "/" + b
 		}
