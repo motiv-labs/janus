@@ -2,13 +2,12 @@ FROM alpine AS builder
 
 ARG JANUS_VERSION
 
-RUN apk update \
-    && apk add --virtual .build-deps wget tar ca-certificates \
-	&& apk add libgcc openssl \
+RUN apk add --no-cache openssl tar \
     && wget -O janus.tar.gz https://github.com/hellofresh/janus/releases/download/${JANUS_VERSION}/janus_linux-amd64.tar.gz \
     && tar -xzf janus.tar.gz -C /tmp
 
 # ---
+
 FROM alpine
 
 ADD assets/ca-certificates.crt /etc/ssl/certs/
