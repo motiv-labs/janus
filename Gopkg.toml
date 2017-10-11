@@ -104,7 +104,7 @@
   name = "github.com/tidwall/gjson"
 
 [[constraint]]
-  branch = "master"
+  branch = "1.0.0"
   name = "github.com/ulule/limiter"
 
 [[constraint]]
