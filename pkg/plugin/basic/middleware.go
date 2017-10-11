@@ -1,6 +1,7 @@
 package basic
 
 import (
+	"crypto/subtle"
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/errors"
@@ -32,7 +33,7 @@ func NewBasicAuth(repo Repository) func(http.Handler) http.Handler {
 			}
 
 			for _, u := range users {
-				if username == u.Username && password == u.Password {
+				if username == u.Username && (subtle.ConstantTimeCompare([]byte(password), []byte(u.Password)) == 1) {
 					found = true
 					break
 				}
