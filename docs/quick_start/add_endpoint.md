@@ -14,7 +14,12 @@ Create an `example.json` file containing your endpoint configuration:
     "active" : true,
     "proxy" : {
         "listen_path" : "/example/*",
-        "upstream_url" : "http://www.mocky.io/v2/595625d22900008702cd71e8",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://www.mocky.io/v2/595625d22900008702cd71e8"}
+            ]
+        },
         "methods" : ["GET"]
     }
 }
@@ -54,6 +59,6 @@ http -v GET http://localhost:8080/example
 curl -vX "GET" http://localhost:8080/example
 {%- endcodetabs %}
 
-A successful response means Janus is now forwarding requests made to `http://localhost:8000` to the `upstream_url` we configured in step #1, and is forwarding the response back to us.
+A successful response means Janus is now forwarding requests made to `http://localhost:8000` to the elected upstream target (chosen by the load balancer) wex configured in step #1, and is forwarding the response back to us.
 
 [Next](add_plugins.md) we'll learn how to add plugins to our endpoint.

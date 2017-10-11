@@ -40,6 +40,9 @@ func NewDefinition() *Definition {
 	return &Definition{
 		Methods: make([]string, 0),
 		Hosts:   make([]string, 0),
+		Upstreams: &Upstreams{
+			Targets: make([]*Target, 0),
+		},
 	}
 }
 

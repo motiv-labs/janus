@@ -13,7 +13,12 @@ Let's go through a few examples. Consider an API configured like this:
     "hosts": ["example.com", "service.com"],
     "proxy": {
         "listen_path": "/foo/*",
-        "upstream_url": "http://my-api.com",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://my-api.com"}
+            ]
+        },
         "methods": ["GET"]
     }
 }
@@ -67,7 +72,12 @@ Now that we understand how the hosts, uris, and methods properties work together
     "hosts": ["example.com", "service.com"],
     "proxy": {
         "listen_path": "/foo/*",
-        "upstream_url": "http://my-api.com",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://my-api.com"}
+            ]
+        },
         "insecure_skip_verify": true,
         "methods": ["GET"]
     }

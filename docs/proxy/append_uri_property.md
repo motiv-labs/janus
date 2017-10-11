@@ -1,6 +1,6 @@
 ##### The `append_path` property
 
-You might also want to always append the `listen_path` to the upstream `upstream_url`. 
+You might also want to always append the `listen_path` to the elected upstream target. 
 To do so, use the `append_path` boolean property by configuring an API like this:
 
 ```json
@@ -9,7 +9,12 @@ To do so, use the `append_path` boolean property by configuring an API like this
     "proxy": {
         "append_path" : true,
         "listen_path": "/service/*",
-        "upstream_url": "http://my-api.com/example",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://my-api.com/example"}
+            ]
+        },
     }
 }
 ```
