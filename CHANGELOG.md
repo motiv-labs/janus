@@ -3,6 +3,15 @@
 ## Added
 
 - Added Proxy Listen Path validation to prevent `chi` from panicking in case of invalid listen path
+- Added load balancing for upstream targets. Now you can add multiple upstream targets and Janus will balance the requests.
+
+## Fixed
+
+- Add constant time compare to basic auth password. Reported on #194
+
+## Deprecated
+
+- `upstream_url` is now deprecated in favor of using the `upstreams` object. This will allow Janus to balance requests if you have more than one upstream target.
 
 # 3.3.0
 
