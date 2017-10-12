@@ -7,6 +7,8 @@ import (
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 	"github.com/ulule/limiter"
+	"github.com/ulule/limiter/drivers/middleware/stdlib"
+	smemory "github.com/ulule/limiter/drivers/store/memory"
 )
 
 // OAuthLoader handles the loading of the api specs
@@ -49,9 +51,9 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*Spec, repo Repository
 			logger.WithError(err).Error("Not able to create rate limit")
 		}
 
-		limiterStore := limiter.NewMemoryStore()
-		limiterInstance := limiter.NewLimiter(limiterStore, rate)
-		rateLimitHandler = limiter.NewHTTPMiddleware(limiterInstance).Handler
+		limiterStore := smemory.NewStore()
+		limiterInstance := limiter.New(limiterStore, rate)
+		rateLimitHandler = stdlib.NewMiddleware(limiterInstance).Handler
 
 		endpoints := map[*proxy.Definition]proxy.InChain{
 			oauthServer.Endpoints.Authorize:    proxy.NewInChain(corsHandler, rateLimitHandler),

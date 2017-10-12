@@ -25,11 +25,6 @@
   version = "v3.0.0"
 
 [[projects]]
-  name = "github.com/ant0ine/go-json-rest"
-  packages = ["rest","rest/trie"]
-  revision = "4127f183c172b25f51dbaaa2e035e8f262ac57fb"
-
-[[projects]]
   name = "github.com/asaskevich/govalidator"
   packages = ["."]
   revision = "7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877"
@@ -75,6 +70,12 @@
   packages = [".","middleware"]
   revision = "ba73ba0623af32e4e5f09880177e73bd78d98852"
   version = "v3.2.0"
+
+[[projects]]
+  name = "github.com/go-redis/redis"
+  packages = [".","internal","internal/consistenthash","internal/hashtag","internal/pool","internal/proto"]
+  revision = "35248155a505a84811be81a2aab1c423317447be"
+  version = "v6.7.2"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -174,11 +175,6 @@
   version = "v1.0.2"
 
 [[projects]]
-  name = "github.com/patrickmn/go-cache"
-  packages = ["."]
-  revision = "7ac151875ffb48b9f3ccce9ea20f020b0c1596c8"
-
-[[projects]]
   name = "github.com/pelletier/go-toml"
   packages = ["."]
   revision = "69d355db5304c0f7f809a2edc054553e7142f016"
@@ -272,9 +268,9 @@
 
 [[projects]]
   name = "github.com/ulule/limiter"
-  packages = ["."]
-  revision = "619f3ae8cc00f54934d27591e7010c8f6216c5ca"
-  version = "v1.0.0"
+  packages = [".","drivers/middleware/stdlib","drivers/store/common","drivers/store/memory","drivers/store/redis"]
+  revision = "fe4c2975cbe8dfd005b4450464817499ec10d1dd"
+  version = "v2.0.0"
 
 [[projects]]
   name = "golang.org/x/crypto"
@@ -362,6 +358,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "b487d5d84dc477e6c2c57e3f5cce80a59814a8333b3e7e96f3df9c2c9e447611"
+  inputs-digest = "31ddf58544e06f292bd3a97fb2ddb8b5e672d076ede7aa4bc835c2eabcefc1ea"
   solver-name = "gps-cdcl"
   solver-version = 1
