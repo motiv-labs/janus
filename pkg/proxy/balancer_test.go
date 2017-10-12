@@ -3,78 +3,73 @@ package proxy
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/suite"
 )
 
-var (
-	hosts = []*Target{
+type BalancerTestSuite struct {
+	suite.Suite
+	hosts []*Target
+}
+
+func (suite *BalancerTestSuite) SetupTest() {
+	suite.hosts = []*Target{
 		&Target{Target: "127.0.0.1", Weight: 5},
 		&Target{Target: "http://test.com", Weight: 10},
 		&Target{Target: "http://example.com", Weight: 8},
 	}
-)
-
-func TestRoundRobinBalancer(t *testing.T) {
-	balancer := NewRoundrobinBalancer()
-
-	electedHost, err := balancer.Elect(hosts)
-	assert.NoError(t, err)
-	assert.Equal(t, hosts[0], electedHost)
-
-	electedHost, err = balancer.Elect(hosts)
-	assert.NoError(t, err)
-	assert.Equal(t, hosts[1], electedHost)
-
-	electedHost, err = balancer.Elect(hosts)
-	assert.NoError(t, err)
-	assert.Equal(t, hosts[2], electedHost)
-
-	electedHost, err = balancer.Elect(hosts)
-	assert.NoError(t, err)
-	assert.Equal(t, hosts[0], electedHost)
 }
 
-func TestRoundRobinBalancerEmptyList(t *testing.T) {
+func (suite *BalancerTestSuite) TestRoundRobinBalancerSuccessfulBalance() {
+	balancer := NewRoundrobinBalancer()
+
+	electedHost, err := balancer.Elect(suite.hosts)
+	suite.NoError(err)
+	suite.Equal(suite.hosts[0], electedHost)
+
+	electedHost, err = balancer.Elect(suite.hosts)
+	suite.NoError(err)
+	suite.Equal(suite.hosts[1], electedHost)
+
+	electedHost, err = balancer.Elect(suite.hosts)
+	suite.NoError(err)
+	suite.Equal(suite.hosts[2], electedHost)
+
+	electedHost, err = balancer.Elect(suite.hosts)
+	suite.NoError(err)
+	suite.Equal(suite.hosts[0], electedHost)
+}
+
+func (suite *BalancerTestSuite) TestRoundRobinBalancerEmptyList() {
 	balancer := NewRoundrobinBalancer()
 
 	_, err := balancer.Elect([]*Target{})
-	assert.Error(t, err)
+	suite.Error(err)
 }
 
-func TestWeightBalancer(t *testing.T) {
+func (suite *BalancerTestSuite) TestWeightBalancer() {
 	balancer := NewWeightBalancer()
 
-	electedHost, err := balancer.Elect(hosts)
-	assert.NoError(t, err)
-	assert.Equal(t, hosts[1], electedHost)
-
-	electedHost, err = balancer.Elect(hosts)
-	assert.NoError(t, err)
-	assert.Equal(t, hosts[2], electedHost)
-
-	electedHost, err = balancer.Elect(hosts)
-	assert.NoError(t, err)
-	assert.Equal(t, hosts[2], electedHost)
-
-	electedHost, err = balancer.Elect(hosts)
-	assert.NoError(t, err)
-	assert.Equal(t, hosts[0], electedHost)
-
-	electedHost, err = balancer.Elect(hosts)
-	assert.NoError(t, err)
-	assert.Equal(t, hosts[1], electedHost)
+	electedHost, err := balancer.Elect(suite.hosts)
+	suite.NoError(err)
+	suite.NotNil(electedHost)
 }
 
-func TestWeightBalancerEmptyList(t *testing.T) {
+func (suite *BalancerTestSuite) TestWeightBalancerEmptyList() {
 	balancer := NewWeightBalancer()
 
 	_, err := balancer.Elect([]*Target{})
-	assert.Error(t, err)
+	suite.Error(err)
 }
 
-func TestWeightBalancerZeroWeight(t *testing.T) {
+func (suite *BalancerTestSuite) TestWeightBalancerZeroWeight() {
 	balancer := NewWeightBalancer()
 
 	_, err := balancer.Elect([]*Target{&Target{Target: "", Weight: 0}})
-	assert.Error(t, err)
+	suite.Error(err)
+}
+
+// In order for 'go test' to run this suite, we need to create
+// a normal test function and pass our suite to suite.Run
+func TestBalancerTestSuite(t *testing.T) {
+	suite.Run(t, new(BalancerTestSuite))
 }
