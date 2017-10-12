@@ -104,8 +104,8 @@
   name = "github.com/tidwall/gjson"
 
 [[constraint]]
-  branch = "master"
   name = "github.com/ulule/limiter"
+  version = "1.0.0"
 
 [[constraint]]
   name = "gopkg.in/mgo.v2"
