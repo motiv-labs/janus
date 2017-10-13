@@ -4,7 +4,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/garyburd/redigo/redis"
+	"github.com/go-redis/redis"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -48,15 +48,16 @@ func Build(dsn string) (Store, error) {
 	case InMemory:
 		return NewInMemoryStore(), nil
 	case Redis:
-		// Create a Redis pool.
-		pool := &redis.Pool{
-			MaxIdle:     3,
-			IdleTimeout: 240 * time.Second,
-			Dial:        func() (redis.Conn, error) { return redis.DialURL(dsn) },
+		option, err := redis.ParseURL(dsn)
+		if err != nil {
+			return nil, err
 		}
+		option.PoolSize = 3
+		option.IdleTimeout = 240 * time.Second
+		client := redis.NewClient(option)
 
 		log.WithField("dsn", dsn).Debug("Trying to connect to redis pool")
-		return NewRedisStore(pool, dsnURL.Query().Get("prefix"))
+		return NewRedisStore(client, dsnURL.Query().Get("prefix"))
 	}
 
 	return nil, ErrUnknownStorage
