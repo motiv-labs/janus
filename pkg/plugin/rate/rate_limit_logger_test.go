@@ -8,13 +8,14 @@ import (
 	"github.com/hellofresh/stats-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/ulule/limiter"
+	smemory "github.com/ulule/limiter/drivers/store/memory"
 )
 
 func TestSuccessfulRateLimitLog(t *testing.T) {
 	statsClient, _ := stats.NewClient("noop://", "")
-	limiterStore := limiter.NewMemoryStore()
+	limiterStore := smemory.NewStore()
 	rate, _ := limiter.NewRateFromFormatted("100-M")
-	limiterInstance := limiter.NewLimiter(limiterStore, rate)
+	limiterInstance := limiter.New(limiterStore, rate)
 
 	mw := NewRateLimitLogger(limiterInstance, statsClient)
 	w, err := test.Record(
