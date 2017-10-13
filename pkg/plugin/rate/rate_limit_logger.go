@@ -1,6 +1,7 @@
 package rate
 
 import (
+	"context"
 	"net"
 	"net/http"
 	"sync"
@@ -57,7 +58,7 @@ func NewRateLimitLogger(lmt *limiter.Limiter, statsClient stats.Client) func(han
 }
 
 func trackLimitState(lmt *limiter.Limiter, statsClient stats.Client, limiterIP net.IP, r *http.Request) {
-	context, err := lmt.Peek(limiterIP.String())
+	context, err := lmt.Peek(context.Background(), limiterIP.String())
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{
 			"ip_address":  limiterIP.String(),

@@ -105,10 +105,14 @@
 
 [[constraint]]
   name = "github.com/ulule/limiter"
-  version = "1.0.0"
+  version = "2.0.0"
 
 [[constraint]]
   name = "gopkg.in/mgo.v2"
 
 [[constraint]]
   name = "sourcegraph.com/sourcegraph/appdash"
+
+[[constraint]]
+  name = "github.com/go-redis/redis"
+  version = "6.7.2"
