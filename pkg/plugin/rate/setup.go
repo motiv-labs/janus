@@ -4,12 +4,15 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/garyburd/redigo/redis"
+	redis "github.com/go-redis/redis"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	stats "github.com/hellofresh/stats-go"
 	"github.com/ulule/limiter"
+	"github.com/ulule/limiter/drivers/middleware/stdlib"
+	smemory "github.com/ulule/limiter/drivers/store/memory"
+	sredis "github.com/ulule/limiter/drivers/store/redis"
 )
 
 var (
@@ -71,9 +74,9 @@ func setupRateLimit(route *proxy.Route, rawConfig plugin.Config) error {
 		return err
 	}
 
-	limiterInstance := limiter.NewLimiter(limiterStore, rate)
+	limiterInstance := limiter.New(limiterStore, rate)
 	route.AddInbound(NewRateLimitLogger(limiterInstance, statsClient))
-	route.AddInbound(limiter.NewHTTPMiddleware(limiterInstance).Handler)
+	route.AddInbound(stdlib.NewMiddleware(limiterInstance).Handler)
 
 	return nil
 }
@@ -81,22 +84,24 @@ func setupRateLimit(route *proxy.Route, rawConfig plugin.Config) error {
 func getLimiterStore(policy string, config redisConfig) (limiter.Store, error) {
 	switch policy {
 	case "redis":
-		pool := &redis.Pool{
-			MaxIdle:     3,
-			IdleTimeout: 240 * time.Second,
-			Dial:        func() (redis.Conn, error) { return redis.DialURL(config.DSN) },
+		option, err := redis.ParseURL(config.DSN)
+		if err != nil {
+			return nil, err
 		}
+		option.PoolSize = 3
+		option.IdleTimeout = 240 * time.Second
+		client := redis.NewClient(option)
 
 		if config.Prefix == "" {
 			config.Prefix = DefaultPrefix
 		}
 
-		return limiter.NewRedisStoreWithOptions(pool, limiter.StoreOptions{
+		return sredis.NewStoreWithOptions(client, limiter.StoreOptions{
 			Prefix:   config.Prefix,
 			MaxRetry: limiter.DefaultMaxRetry,
 		})
 	case "local":
-		return limiter.NewMemoryStore(), nil
+		return smemory.NewStore(), nil
 	default:
 		return nil, ErrInvalidPolicy
 	}
