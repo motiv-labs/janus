@@ -4,7 +4,7 @@ Feature: Proxy requests to upstream.
         Given request JWT token is valid admin token
 
     Scenario: Proxy request to existing mock service
-        Given request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:9089/hello-world"}]}"strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
+        Given request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:9089/hello-world"}]},"strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
         When I request "/apis" API path with "POST" method
         Then I should receive 201 response code
         And header "Location" should be "/apis/example"
