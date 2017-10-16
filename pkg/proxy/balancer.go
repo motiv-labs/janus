@@ -3,6 +3,7 @@ package proxy
 import (
 	"errors"
 	"math/rand"
+	"sync"
 )
 
 var (
@@ -23,9 +24,10 @@ type (
 	// RoundrobinBalancer balancer
 	RoundrobinBalancer struct {
 		current int // current backend position
+		mu      sync.RWMutex
 	}
 
-	//WeightBalancer balancer
+	// WeightBalancer balancer
 	WeightBalancer struct{}
 )
 
@@ -45,6 +47,9 @@ func (b *RoundrobinBalancer) Elect(hosts []*Target) (*Target, error) {
 	}
 
 	host := hosts[b.current]
+
+	b.mu.Lock()
+	defer b.mu.Unlock()
 	b.current++
 
 	return host, nil

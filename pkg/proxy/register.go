@@ -61,6 +61,8 @@ func (p *Register) Add(route *Route) error {
 func (p *Register) createDirector(proxyDefinition *Definition) func(req *http.Request) {
 	return func(req *http.Request) {
 		var target *url.URL
+		var err error
+
 		if len(proxyDefinition.Upstreams.Targets) > 0 {
 			log.WithField("balancing_alg", proxyDefinition.Upstreams.Balancing).Debug("Using a load balancing algorithm")
 			balancer, err := NewBalancer(proxyDefinition.Upstreams.Balancing)
@@ -76,10 +78,18 @@ func (p *Register) createDirector(proxyDefinition *Definition) func(req *http.Re
 			}
 
 			log.WithField("target", upstream.Target).Debug("Elected Target")
-			target, _ = url.Parse(upstream.Target)
+			target, err = url.Parse(upstream.Target)
+			if err != nil {
+				log.WithError(err).Error("Could not parse the target URL")
+				return
+			}
 		} else {
 			log.Warn("The upstream URL is deprecated. Use Upstreams instead")
-			target, _ = url.Parse(proxyDefinition.UpstreamURL)
+			target, err = url.Parse(proxyDefinition.UpstreamURL)
+			if err != nil {
+				log.WithError(err).Error("Could not parse the target URL")
+				return
+			}
 		}
 
 		targetQuery := target.RawQuery

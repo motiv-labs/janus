@@ -16,7 +16,7 @@ func init() {
 	typeRegistry["weight"] = reflect.TypeOf(WeightBalancer{})
 }
 
-//NewBalancer creates a new Balancer based on balancing strategy
+// NewBalancer creates a new Balancer based on balancing strategy
 func NewBalancer(balance string) (Balancer, error) {
 	alg, ok := typeRegistry[balance]
 	if !ok {
