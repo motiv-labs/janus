@@ -41,10 +41,6 @@
   version = "3.0.0"
 
 [[constraint]]
-  name = "github.com/garyburd/redigo"
-  version = "1.0.0"
-
-[[constraint]]
   name = "github.com/go-chi/chi"
   version = "3.0.0"
 
@@ -116,3 +112,7 @@
 [[constraint]]
   name = "github.com/go-redis/redis"
   version = "6.7.2"
+
+[[constraint]]
+  name = "github.com/alicebob/miniredis"
+  version = "2.2.1"
