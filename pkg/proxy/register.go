@@ -63,7 +63,10 @@ func (p *Register) createDirector(proxyDefinition *Definition) func(req *http.Re
 		var target *url.URL
 		var err error
 
-		if len(proxyDefinition.Upstreams.Targets) > 0 {
+		// TODO: find better solution
+		// maybe create "proxyDefinition.Upstreams.Targets every time",
+		// but currently we have several points of definition creation
+		if proxyDefinition.Upstreams != nil && proxyDefinition.Upstreams.Targets != nil && len(proxyDefinition.Upstreams.Targets) > 0 {
 			log.WithField("balancing_alg", proxyDefinition.Upstreams.Balancing).Debug("Using a load balancing algorithm")
 			balancer, err := NewBalancer(proxyDefinition.Upstreams.Balancing)
 			if err != nil {
@@ -115,7 +118,7 @@ func (p *Register) createDirector(proxyDefinition *Definition) func(req *http.Re
 			}
 		}
 
-		log.Debugf("Upstream Path is: %s", path)
+		log.WithField("path", path).Debug("Upstream Path")
 		req.URL.Path = path
 
 		// This is very important to avoid problems with ssl verification for the HOST header
