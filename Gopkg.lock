@@ -136,8 +136,8 @@
 [[projects]]
   name = "github.com/hellofresh/stats-go"
   packages = [".","bucket","hooks","incrementer","state","timer"]
-  revision = "34768e3f50deb23eea2a4bb60cfd9294484f9b85"
-  version = "v0.4.2"
+  revision = "e0b358f02d1929073e932ffd82a9bfe144be9f0e"
+  version = "v0.4.3"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -251,7 +251,7 @@
 
 [[projects]]
   name = "github.com/stretchr/testify"
-  packages = ["assert","require"]
+  packages = ["assert","require","suite"]
   revision = "69483b4bd14f5845b5a1e55bca19e954e827f1d0"
   version = "v1.1.4"
 
@@ -358,6 +358,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "977dd918aaee8445c42180c2285e34fd2bdbb21691c7e796263c038e3b656c6b"
+  inputs-digest = "c15e19e7bc1268a25eaec2da5481f9bd3ac514e6a72339ec4dad8c08a8b0f639"
   solver-name = "gps-cdcl"
   solver-version = 1
