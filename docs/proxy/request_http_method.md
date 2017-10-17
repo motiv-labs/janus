@@ -14,7 +14,12 @@ routing via `GET` and `HEAD` HTTP methods:
     "proxy": {
         "strip_path" : true,
         "listen_path": "/hello/*",
-        "upstream_url": "http://my-api.com",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://my-api.com"}
+            ]
+        },
         "methods": ["GET", "HEAD"]
     }
 }

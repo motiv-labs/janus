@@ -20,7 +20,7 @@ Feature: Manage proxies wit API.
         Then I should receive 200 response code
         And response JSON body is an array of length 0
 
-        Given request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstream_url":"http://localhost:9089/hello-world","strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
+        Given request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:9089/hello-world"}]},"strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
         When I request "/apis" API path with "POST" method
         Then I should receive 201 response code
         And header "Location" should be "/apis/example"
@@ -31,7 +31,7 @@ Feature: Manage proxies wit API.
         And response JSON body has "0.name" path with value 'example'
         And response JSON body has "0.active" path with value 'true'
 
-        Given request JSON payload '{"name":"posts","active":true,"proxy":{"preserve_host":false,"listen_path":"/posts/*","upstream_url":"http://localhost:9089/posts","strip_path":true,"append_path":false,"enable_load_balancing":false,"methods":["ALL"],"hosts":["hellofresh.*"]},"plugins":[{"name":"cors","enabled":true,"config":{"domains":["*"],"methods":["GET","POST","PUT","PATCH","DELETE"],"request_headers":["Origin","Authorization","Content-Type"],"exposed_headers":["X-Debug-Token","X-Debug-Token-Link"]}},{"name":"rate_limit","enabled":true,"config":{"limit":"10-S","policy":"local"}},{"name":"oauth2","enabled":true,"config":{"server_name":"local"}},{"name":"compression","enabled":true}]}'
+        Given request JSON payload '{"name":"posts","active":true,"proxy":{"preserve_host":false,"listen_path":"/posts/*","upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:9089/posts"}]},"strip_path":true,"append_path":false,"enable_load_balancing":false,"methods":["ALL"],"hosts":["hellofresh.*"]},"plugins":[{"name":"cors","enabled":true,"config":{"domains":["*"],"methods":["GET","POST","PUT","PATCH","DELETE"],"request_headers":["Origin","Authorization","Content-Type"],"exposed_headers":["X-Debug-Token","X-Debug-Token-Link"]}},{"name":"rate_limit","enabled":true,"config":{"limit":"10-S","policy":"local"}},{"name":"oauth2","enabled":true,"config":{"server_name":"local"}},{"name":"compression","enabled":true}]}'
         When I request "/apis" API path with "POST" method
         Then I should receive 201 response code
         And header "Location" should be "/apis/posts"
@@ -42,17 +42,17 @@ Feature: Manage proxies wit API.
 
     Scenario: API fails to create routes with the same name
         Given request JWT token is valid admin token
-        And request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstream_url":"http://localhost:9089/hello-world","strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
+        And request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:9089/hello-world"}]},"strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
         When I request "/apis" API path with "POST" method
         Then I should receive 201 response code
         And header "Location" should be "/apis/example"
 
-        Given request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstream_url":"http://localhost:9089/hello-world","strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
+        Given request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:9089/hello-world"}]},"strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
         When I request "/apis" API path with "POST" method
         Then I should receive 409 response code
         And the response should contain "api name is already registered"
 
-        Given request JSON payload '{"name":"example1","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstream_url":"http://localhost:9089/hello-world","strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
+        Given request JSON payload '{"name":"example1","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:9089/hello-world"}]},"strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
         When I request "/apis" API path with "POST" method
         Then I should receive 409 response code
         And the response should contain "api listen path is already registered"
@@ -62,7 +62,7 @@ Feature: Manage proxies wit API.
         When I request "/apis/example" API path with "GET" method
         Then I should receive 404 response code
 
-        Given request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstream_url":"http://localhost:9089/hello-world","strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
+        Given request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:9089/hello-world"}]},"strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
         When I request "/apis" API path with "POST" method
         Then I should receive 201 response code
 
@@ -72,7 +72,7 @@ Feature: Manage proxies wit API.
 
     Scenario: API must update existing routes with new path value
         Given request JWT token is valid admin token
-        And request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstream_url":"http://localhost:9089/hello-world","strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
+        And request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:9089/hello-world"}]},"strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
         When I request "/apis" API path with "POST" method
         Then I should receive 201 response code
         And header "Location" should be "/apis/example"
@@ -82,7 +82,7 @@ Feature: Manage proxies wit API.
         And response JSON body has "name" path with value 'example'
         And response JSON body has "proxy.listen_path" path with value '/example/*'
 
-        Given request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example1/*","upstream_url":"http://localhost:9089/hello-world","strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
+        Given request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example1/*","upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:9089/hello-world"}]},"strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
         When I request "/apis/example" API path with "PUT" method
         Then I should receive 200 response code
 
@@ -96,12 +96,12 @@ Feature: Manage proxies wit API.
 
     Scenario: API must delete existing routes
         Given request JWT token is valid admin token
-        And request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstream_url":"http://localhost:9089/hello-world","strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
+        And request JSON payload '{"name":"example","active":true,"proxy":{"preserve_host":false,"listen_path":"/example/*","upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:9089/hello-world"}]},"strip_path":false,"append_path":false,"enable_load_balancing":false,"methods":["GET"]},"health_check":{"url":"https://example.com/status"}}'
         When I request "/apis" API path with "POST" method
         Then I should receive 201 response code
         And header "Location" should be "/apis/example"
 
-        Given request JSON payload '{"name":"posts","active":true,"proxy":{"preserve_host":false,"listen_path":"/posts/*","upstream_url":"http://localhost:9089/posts","strip_path":true,"append_path":false,"enable_load_balancing":false,"methods":["ALL"],"hosts":["hellofresh.*"]},"plugins":[{"name":"cors","enabled":true,"config":{"domains":["*"],"methods":["GET","POST","PUT","PATCH","DELETE"],"request_headers":["Origin","Authorization","Content-Type"],"exposed_headers":["X-Debug-Token","X-Debug-Token-Link"]}},{"name":"rate_limit","enabled":true,"config":{"limit":"10-S","policy":"local"}},{"name":"oauth2","enabled":true,"config":{"server_name":"local"}},{"name":"compression","enabled":true}]}'
+        Given request JSON payload '{"name":"posts","active":true,"proxy":{"preserve_host":false,"listen_path":"/posts/*","upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:9089/posts"}]},"strip_path":true,"append_path":false,"enable_load_balancing":false,"methods":["ALL"],"hosts":["hellofresh.*"]},"plugins":[{"name":"cors","enabled":true,"config":{"domains":["*"],"methods":["GET","POST","PUT","PATCH","DELETE"],"request_headers":["Origin","Authorization","Content-Type"],"exposed_headers":["X-Debug-Token","X-Debug-Token-Link"]}},{"name":"rate_limit","enabled":true,"config":{"limit":"10-S","policy":"local"}},{"name":"oauth2","enabled":true,"config":{"server_name":"local"}},{"name":"compression","enabled":true}]}'
         When I request "/apis" API path with "POST" method
         Then I should receive 201 response code
         And header "Location" should be "/apis/posts"

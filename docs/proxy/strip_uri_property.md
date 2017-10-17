@@ -10,7 +10,12 @@ property by configuring an API like this:
     "proxy": {
         "strip_path" : true,
         "listen_path": "/service/*",
-        "upstream_url": "http://my-api.com",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://my-api.com"}
+            ]
+        },
         "methods": ["GET"]
     }
 }

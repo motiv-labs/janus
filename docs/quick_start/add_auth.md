@@ -29,7 +29,13 @@ Lets create a file with the oAuth2 configuration called `auth.json`:
     "oauth_endpoints" : {
         "token" : {
             "listen_path" : "/auth/token",
-            "upstream_url" : "http://auth-service:8080/token",
+            "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://auth-service1:8080/token"},
+                {"target": "http://auth-service2:8080/token"},
+            ]
+        },
             "strip_path" : true,
             "append_path" : false,
             "methods" : ["POST"]

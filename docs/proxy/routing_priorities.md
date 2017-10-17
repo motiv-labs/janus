@@ -16,7 +16,12 @@ For example, two APIs are configured like this:
     "name": "API 1",
     "proxy": {
         "listen_path": "/",
-        "upstream_url": "http://my-api.com",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://my-api.com"}
+            ]
+        },
         "hosts": ["example.com"]
     }
 },
@@ -24,7 +29,12 @@ For example, two APIs are configured like this:
     "name": "API 2",
     "proxy": {
         "listen_path": "/",
-        "upstream_url": "http://my-api.com",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://my-api.com"}
+            ]
+        },
         "hosts": ["example.com"],
         "methods": ["POST"]
     }

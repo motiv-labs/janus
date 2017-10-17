@@ -42,16 +42,13 @@ func TestInvalidTargetURLValidation(t *testing.T) {
 }
 
 func TestRouteToJSON(t *testing.T) {
-	definition := Definition{
-		Methods: make([]string, 0),
-		Hosts:   make([]string, 0),
-	}
-	route := NewRoute(&definition)
+	definition := NewDefinition()
+	route := NewRoute(definition)
 	json, err := route.JSONMarshal()
 	assert.NoError(t, err)
 	assert.JSONEq(
 		t,
-		`{"proxy": {"insecure_skip_verify": false, "append_path":false, "enable_load_balancing":false, "methods":[], "hosts":[], "preserve_host":false, "listen_path":"", "upstream_url":"", "strip_path":false}}`,
+		`{"proxy": {"insecure_skip_verify": false, "append_path":false, "enable_load_balancing":false, "methods":[], "hosts":[], "preserve_host":false, "listen_path":"", "upstream_url":"", "strip_path":false, "upstreams": {"balancing": "", "targets": [] }}}`,
 		string(json),
 	)
 }

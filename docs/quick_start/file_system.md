@@ -29,7 +29,7 @@ If you access `http://localhost:8080/example` you should something like:
 ```
 
 A successful response means Janus is now forwarding requests made to
-`http://localhost:8080` to the `upstream_url` we configured in step #1,
+`http://localhost:8080` to the elected upstream target (chosen by the load balancer) we configured in step #1,
 and is forwarding the response back to us.
 
 ## Understanding the directory structure
