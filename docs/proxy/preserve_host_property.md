@@ -1,6 +1,6 @@
 #### The `preserve_host` property
 
-When proxying, Janus's default behavior is to set the upstream request's Host header to the hostname of the API's `upstream_url` property. The `preserve_host` field accepts a boolean flag instructing Janus not to do so.
+When proxying, Janus's default behavior is to set the upstream request's Host header to the hostname of the API's elected upstream from the`upstreams.targets` property. The `preserve_host` field accepts a boolean flag instructing Janus not to do so.
 
 For example, when the `preserve_host` property is not changed and an API is configured like this:
 
@@ -10,7 +10,12 @@ For example, when the `preserve_host` property is not changed and an API is conf
     "hosts": ["service.com"],
     "proxy": {
         "listen_path": "/foo/*",
-        "upstream_url": "http://my-api.com",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://my-api.com"}
+            ]
+        },
         "methods": ["GET"]
     }
 }
@@ -23,7 +28,7 @@ GET / HTTP/1.1
 Host: service.com
 ```
 
-Janus would extract the Host header value from the the hostname of the API's `upstream_url` field, and would send the following request to your upstream service:
+Janus would extract the Host header value from the the hostname of the API's elected upstream from the `upstreams.target` field, and would send the following request to your upstream service:
 
 ```http
 GET / HTTP/1.1
@@ -38,7 +43,12 @@ However, by explicitly configuring your API with `preserve_host=true`:
     "hosts": ["example.com", "service.com"],
     "proxy": {
         "listen_path": "/foo/*",
-        "upstream_url": "http://my-api.com",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://my-api.com"}
+            ]
+        },
         "methods": ["GET"],
         "preserve_host": true
     }

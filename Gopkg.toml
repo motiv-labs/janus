@@ -41,10 +41,6 @@
   version = "3.0.0"
 
 [[constraint]]
-  name = "github.com/garyburd/redigo"
-  version = "1.0.0"
-
-[[constraint]]
   name = "github.com/go-chi/chi"
   version = "3.0.0"
 
@@ -65,7 +61,7 @@
 
 [[constraint]]
   name = "github.com/hellofresh/stats-go"
-  version = "0.4.1"
+  version = "0.4.2"
 
 [[constraint]]
   name = "github.com/kelseyhightower/envconfig"
@@ -105,10 +101,18 @@
 
 [[constraint]]
   name = "github.com/ulule/limiter"
-  version = "1.0.0"
+  version = "2.0.0"
 
 [[constraint]]
   name = "gopkg.in/mgo.v2"
 
 [[constraint]]
   name = "sourcegraph.com/sourcegraph/appdash"
+
+[[constraint]]
+  name = "github.com/go-redis/redis"
+  version = "6.7.2"
+
+[[constraint]]
+  name = "github.com/alicebob/miniredis"
+  version = "2.2.1"

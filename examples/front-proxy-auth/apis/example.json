@@ -4,7 +4,12 @@
     "proxy" : {
         "preserve_host" : false,
         "listen_path" : "/example/*",
-        "upstream_url" : "http://service1:8080/",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://service1:8080/"}
+            ]
+        },
         "strip_path" : false,
         "append_path" : false,
         "methods" : ["GET"]

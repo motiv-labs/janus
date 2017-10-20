@@ -71,20 +71,27 @@ func TestSuccessfulProxy(t *testing.T) {
 func createProxyDefinitions() []*Definition {
 	return []*Definition{
 		{
-			ListenPath:  "/example/*",
-			UpstreamURL: "http://www.mocky.io/v2/58c6c60710000040151b7cad",
-			Methods:     []string{"ALL"},
+			ListenPath: "/example/*",
+			Upstreams: &Upstreams{
+				Balancing: "roundrobin",
+				Targets:   []*Target{&Target{Target: "http://www.mocky.io/v2/58c6c60710000040151b7cad"}},
+			},
+			Methods: []string{"ALL"},
 		},
 		{
-			ListenPath:  "/posts/*",
-			UpstreamURL: "https://jsonplaceholder.typicode.com/posts",
-			StripPath:   true,
-			Methods:     []string{"ALL"},
+			ListenPath: "/posts/*",
+			StripPath:  true,
+			Upstreams: &Upstreams{
+				Balancing: "roundrobin",
+				Targets:   []*Target{&Target{Target: "https://jsonplaceholder.typicode.com/posts"}},
+			},
+			Methods: []string{"ALL"},
 		},
 		{
 			ListenPath:  "/append/*",
 			UpstreamURL: "http://www.mocky.io/v2/58c6c60710000040151b7cad",
 			AppendPath:  true,
+			Upstreams:   &Upstreams{},
 			Methods:     []string{"GET"},
 		},
 	}

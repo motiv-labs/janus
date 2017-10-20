@@ -12,7 +12,12 @@ For example, in an API configured like this:
     "name": "My API",
     "proxy": {
         "listen_path": "/hello/*",
-        "upstream_url": "http://my-api.com",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://my-api.com"}
+            ]
+        },
         "methods": ["GET"],
     }
 }
