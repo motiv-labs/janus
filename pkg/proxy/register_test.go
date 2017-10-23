@@ -63,7 +63,7 @@ func TestSuccessfulProxy(t *testing.T) {
 			defer res.Body.Close()
 		}
 
-		assert.Equal(t, tc.expectedContentType, res.Header.Get("Content-Type"))
+		assert.Equal(t, tc.expectedContentType, res.Header.Get("Content-Type"), tc.description)
 		assert.Equal(t, tc.expectedCode, res.StatusCode, tc.description)
 	}
 }
@@ -74,7 +74,7 @@ func createProxyDefinitions() []*Definition {
 			ListenPath: "/example/*",
 			Upstreams: &Upstreams{
 				Balancing: "roundrobin",
-				Targets:   []*Target{&Target{Target: "http://www.mocky.io/v2/58c6c60710000040151b7cad"}},
+				Targets:   []*Target{&Target{Target: "http://localhost:9089/hello-world"}},
 			},
 			Methods: []string{"ALL"},
 		},
@@ -83,13 +83,13 @@ func createProxyDefinitions() []*Definition {
 			StripPath:  true,
 			Upstreams: &Upstreams{
 				Balancing: "roundrobin",
-				Targets:   []*Target{&Target{Target: "https://jsonplaceholder.typicode.com/posts"}},
+				Targets:   []*Target{&Target{Target: "https://localhost:9089/posts"}},
 			},
 			Methods: []string{"ALL"},
 		},
 		{
 			ListenPath:  "/append/*",
-			UpstreamURL: "http://www.mocky.io/v2/58c6c60710000040151b7cad",
+			UpstreamURL: "http://localhost:9089/hello-world",
 			AppendPath:  true,
 			Upstreams:   &Upstreams{},
 			Methods:     []string{"GET"},
