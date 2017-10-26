@@ -1,7 +1,7 @@
 {
     "request": {
         "method": "ANY",
-        "urlPath": "/posts"
+        "urlPathPattern": "/posts(/[0-9]+)?"
     },
     "response": {
         "status": 200,
