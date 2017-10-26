@@ -1,7 +1,7 @@
 {
     "request": {
         "method": "GET",
-        "urlPath": "/hello-world"
+        "urlPathPattern": "/hello-world(/.+)?"
     },
     "response": {
         "status": 200,
