@@ -83,7 +83,7 @@ func createProxyDefinitions() []*Definition {
 			StripPath:  true,
 			Upstreams: &Upstreams{
 				Balancing: "roundrobin",
-				Targets:   []*Target{&Target{Target: "https://localhost:9089/posts"}},
+				Targets:   []*Target{&Target{Target: "http://localhost:9089/posts"}},
 			},
 			Methods: []string{"ALL"},
 		},
