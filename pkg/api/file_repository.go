@@ -16,6 +16,11 @@ type FileSystemRepository struct {
 	sync.RWMutex
 }
 
+// Type used for  JSON.Unmarshaller
+type definitionList struct {
+	defs []Definition
+}
+
 // NewFileSystemRepository creates a mongo country repo
 func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 	repo := &FileSystemRepository{InMemoryRepository: NewInMemoryRepository()}
@@ -36,9 +41,11 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 			}
 
 			definition := repo.parseDefinition(appConfigBody)
-			if err = repo.Add(definition); err != nil {
-				log.WithError(err).Error("Can't add the definition to the repository")
-				return nil, err
+			for _, v := range definition.defs {
+				if err = repo.Add(&v); err != nil {
+					log.WithError(err).Error("Can't add the definition to the repository")
+					return nil, err
+				}
 			}
 		}
 	}
@@ -46,11 +53,28 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 	return repo, nil
 }
 
-func (r *FileSystemRepository) parseDefinition(apiDef []byte) *Definition {
-	appConfig := NewDefinition()
-	if err := json.Unmarshal(apiDef, appConfig); err != nil {
+//Unmarshal a single Definition
+func unmarshalDefinition(b []byte, d *Definition) error {
+	if err := json.Unmarshal(b, d); err != nil {
 		log.WithError(err).Error("[RPC] --> Couldn't unmarshal api configuration")
+		return err
+	}
+	return nil
+}
+
+func (r *FileSystemRepository) parseDefinition(apiDef []byte) definitionList {
+	appConfigs := definitionList{}
+
+	//Try unmarshalling as if json is an unnamed Array of multiple definitions
+	if err := json.Unmarshal(apiDef, &appConfigs); err != nil {
+		//Try unmarshalling as if json is a single Definition
+		appConfigs.defs = append(appConfigs.defs, *NewDefinition())
+		unmarshalDefinition(apiDef, &appConfigs.defs[0])
 	}
 
-	return appConfig
+	return appConfigs
+}
+
+func (d *definitionList) UnmarshalJSON(b []byte) error {
+	return json.Unmarshal(b, &d.defs)
 }
