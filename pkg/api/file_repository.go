@@ -43,7 +43,7 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 			definition := repo.parseDefinition(appConfigBody)
 			for _, v := range definition.defs {
 				if err = repo.Add(&v); err != nil {
-					log.WithError(err).Error("Can't add the definition to the repository")
+					log.WithError(err).Error("Can't add the definition" + v.Name + " to the repository")
 					return nil, err
 				}
 			}
