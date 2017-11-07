@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/DATA-DOG/godog"
+	"github.com/DATA-DOG/godog/gherkin"
 	jwtgo "github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt"
@@ -42,7 +43,7 @@ func RegisterRequestContext(s *godog.Suite, port, apiPort, portSecondary, apiPor
 	s.Step(`^response JSON body has "([^"]*)" path with value \'([^']*)\'$`, ctx.responseJSONBodyHasPathWithValue)
 	s.Step(`^response JSON body has "([^"]*)" path`, ctx.responseJSONBodyHasPath)
 	s.Step(`^response JSON body is an array of length (\d+)$`, ctx.responseJSONBodyIsAnArrayOfLength)
-	s.Step(`^request JSON payload \'([^']*)\'$`, ctx.requestJSONPayload)
+	s.Step(`^request JSON payload:$`, ctx.requestJSONPayload)
 	s.Step(`^request header "([^"]*)" is set to "([^"]*)"$`, ctx.requestHeaderIsSetTo)
 	s.Step(`^request JWT token is not set$`, ctx.requestJWTTokenIsNotSet)
 	s.Step(`^request JWT token is valid admin token$`, ctx.requestJWTTokenIsValidAdminToken)
@@ -183,8 +184,8 @@ func (c *requestContext) responseJSONBodyIsAnArrayOfLength(length int) error {
 	return nil
 }
 
-func (c *requestContext) requestJSONPayload(payload string) error {
-	c.requestBody = bytes.NewBufferString(payload)
+func (c *requestContext) requestJSONPayload(body *gherkin.DocString) error {
+	c.requestBody = bytes.NewBufferString(body.Content)
 	return nil
 }
 
