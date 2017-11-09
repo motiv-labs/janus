@@ -114,7 +114,7 @@ func check(definition *api.Definition) func() error {
 	return func() error {
 		resp, err := doStatusRequest(definition, true)
 		if err != nil {
-			return err
+			return fmt.Errorf("%s health check endpoint %s is unreachable", definition.Name, definition.HealthCheck.URL)
 		}
 
 		if resp.StatusCode >= http.StatusInternalServerError {
