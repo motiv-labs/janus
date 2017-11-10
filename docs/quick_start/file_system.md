@@ -34,7 +34,7 @@ and is forwarding the response back to us.
 
 ## Understanding the directory structure
 
-By default all apis configurations are splitted in separated files (one for each API) and they are stored in `/etc/janus`. You can change that path by simply defining the configuration `database.dsn`, for instance, you can define the value to `file:///usr/local/janus`.
+By default all apis configurations are splitted in separated files (both single and multiple api definitions per file are supported) and they are stored in `/etc/janus`. You can change that path by simply defining the configuration `database.dsn`, for instance, you can define the value to `file:///usr/local/janus`.
 
 There are two required folder that needs to be there:
 
