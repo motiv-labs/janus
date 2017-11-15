@@ -76,7 +76,7 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		}
 
 		err = json.NewDecoder(r.Body).Decode(oauth)
-		if nil != err {
+		if err != nil {
 			errors.Handler(w, err)
 			return
 		}
@@ -86,7 +86,7 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		c.dispatch(notifier.NoticeOAuthServerUpdated)
 		span.Finish()
 
-		if nil != err {
+		if err != nil {
 			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
 			return
 		}
@@ -106,13 +106,13 @@ func (c *Controller) Post() http.HandlerFunc {
 			return
 		}
 
-		span := opentracing.FromContext(r.Context(), "datastore.Add")
-		err = c.repo.Add(&oauth)
+		span := opentracing.FromContext(r.Context(), "datastore.Persist")
+		err = c.repo.Persist(&oauth)
 		c.dispatch(notifier.NoticeOAuthServerAdded)
 		span.Finish()
 
 		if nil != err {
-			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
+			errors.Handler(w, err)
 			return
 		}
 
