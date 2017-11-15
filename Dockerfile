@@ -15,7 +15,7 @@ COPY --from=builder /tmp/janus_linux-amd64 /
 
 RUN mkdir -p /etc/janus/apis && \
     mkdir -p /etc/janus/auth
-    
+
 RUN apk add --update curl && \
     rm -rf /var/cache/apk/*
 
