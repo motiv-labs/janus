@@ -51,6 +51,20 @@ func (r *InMemoryRepository) FindByTokenURL(url url.URL) (*OAuth, error) {
 	return nil, ErrOauthServerNotFound
 }
 
+// Persist add a new OAuth Server to the repository
+func (r *InMemoryRepository) Persist(server *OAuth) error {
+	r.Lock()
+	defer r.Unlock()
+
+	if _, ok := r.servers[server.Name]; ok {
+		return ErrOauthServerNameExists
+	}
+
+	r.servers[server.Name] = server
+
+	return nil
+}
+
 // Add adds an OAuth Server to the repository
 func (r *InMemoryRepository) Add(server *OAuth) error {
 	r.Lock()

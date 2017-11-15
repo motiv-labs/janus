@@ -18,6 +18,7 @@ type Repository interface {
 	FindAll() ([]*OAuth, error)
 	FindByName(name string) (*OAuth, error)
 	FindByTokenURL(url url.URL) (*OAuth, error)
+	Persist(oauth *OAuth) error
 	Add(oauth *OAuth) error
 	Remove(id string) error
 }
@@ -63,6 +64,31 @@ func (r *MongoRepository) FindByName(name string) (*OAuth, error) {
 	return result, err
 }
 
+// Persist add a new OAuth Server to the repository
+func (r *MongoRepository) Persist(oauth *OAuth) error {
+	session, coll := r.getSession()
+	defer session.Close()
+
+	isValid, err := govalidator.ValidateStruct(oauth)
+	if !isValid && err != nil {
+		log.WithField("errors", err.Error()).Error("Validation errors")
+		return err
+	}
+
+	if err = coll.Insert(oauth); err != nil {
+		log.WithField("name", oauth.Name).
+			WithError(err).
+			Error("There was an error adding the resource")
+		if mgo.IsDup(err) {
+			return ErrOauthServerNameExists
+		}
+		return err
+	}
+
+	log.WithField("name", oauth.Name).Debug("Resource added")
+	return nil
+}
+
 // Add adds an OAuth Server to the repository
 func (r *MongoRepository) Add(oauth *OAuth) error {
 	session, coll := r.getSession()
@@ -80,6 +106,9 @@ func (r *MongoRepository) Add(oauth *OAuth) error {
 	_, err = coll.Upsert(bson.M{"name": oauth.Name}, oauth)
 	if err != nil {
 		log.Errorf("There was an error adding the resource %s", oauth.Name)
+		if mgo.IsDup(err) {
+			return ErrOauthServerNameExists
+		}
 		return err
 	}
 
