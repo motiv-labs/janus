@@ -27,6 +27,22 @@ func TestOauthServerInMemoryRepository(t *testing.T) {
 			scenario: "find all oauth servers",
 			function: testFindAllOAuthServers,
 		},
+		{
+			scenario: "find by token url",
+			function: testFindByTokenURL,
+		},
+		{
+			scenario: "not find by token url",
+			function: testNotFindByTokenURL,
+		},
+		{
+			scenario: "find by name",
+			function: testFindByName,
+		},
+		{
+			scenario: "not find by name",
+			function: testNotFindByName,
+		},
 	}
 
 	for _, test := range tests {
