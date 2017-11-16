@@ -37,7 +37,8 @@ func (r *InMemoryRepository) FindValidAPIHealthChecks() ([]*Definition, error) {
 
 	var definitions []*Definition
 	for _, definition := range r.definitions {
-		if definition.HealthCheck.URL != "" {
+		isValid := definition.Active && definition.HealthCheck.URL != ""
+		if isValid {
 			definitions = append(definitions, definition)
 		}
 	}

@@ -3,6 +3,43 @@ Feature: Run health-check against registered proxies.
     Background:
         Given request JWT token is valid admin token
 
+    Scenario: Check healthcheck status is active
+        Given request JSON payload:
+            """
+            {
+                "name":"example-ok",
+                "active":false,
+                "proxy":{
+                    "preserve_host":false,
+                    "listen_path":"/example-ok/*",
+                    "upstreams":{
+                        "balancing":"roundrobin",
+                        "targets":[
+                            {
+                                "target":"http://localhost:9089/hello-world"
+                            }
+                        ]
+                    },
+                    "strip_path":false,
+                    "append_path":false,
+                    "enable_load_balancing":false,
+                    "methods":[
+                        "GET"
+                    ]
+                },
+                "health_check":{
+                    "url":"http://localhost:9089/status-ok"
+                }
+            }
+            """
+        When I request "/apis" API path with "POST" method
+        Then I should receive 201 response code
+        And header "Location" should be "/apis/example-ok"
+
+        When I request "/status" API path with "GET" method
+        Then I should receive 200 response code
+
+
     Scenario: Request health-checks statuses
         Given request JSON payload:
             """
