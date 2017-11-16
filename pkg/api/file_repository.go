@@ -43,7 +43,7 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 			definition := repo.parseDefinition(appConfigBody)
 			for _, v := range definition.defs {
 				if err = repo.Add(&v); err != nil {
-					log.WithError(err).Error("Can't add the definition" + v.Name + " to the repository")
+					log.WithField("name", v.Name).WithError(err).Error("Failed during add definition to the repository")
 					return nil, err
 				}
 			}
@@ -53,15 +53,6 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 	return repo, nil
 }
 
-//Unmarshal a single Definition
-func unmarshalDefinition(b []byte, d *Definition) error {
-	if err := json.Unmarshal(b, d); err != nil {
-		log.WithError(err).Error("[RPC] --> Couldn't unmarshal api configuration")
-		return err
-	}
-	return nil
-}
-
 func (r *FileSystemRepository) parseDefinition(apiDef []byte) definitionList {
 	appConfigs := definitionList{}
 
@@ -69,7 +60,9 @@ func (r *FileSystemRepository) parseDefinition(apiDef []byte) definitionList {
 	if err := json.Unmarshal(apiDef, &appConfigs); err != nil {
 		//Try unmarshalling as if json is a single Definition
 		appConfigs.defs = append(appConfigs.defs, *NewDefinition())
-		unmarshalDefinition(apiDef, &appConfigs.defs[0])
+		if err := json.Unmarshal(apiDef, &appConfigs.defs[0]); err != nil {
+			log.WithError(err).Error("[RPC] --> Couldn't unmarshal api configuration")
+		}
 	}
 
 	return appConfigs
