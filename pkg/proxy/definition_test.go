@@ -14,7 +14,7 @@ func TestNewDefinitions(t *testing.T) {
 func TestSuccessfulValidation(t *testing.T) {
 	definition := Definition{
 		ListenPath:  "/*",
-		UpstreamURL: "http://test.com",
+		UpstreamURL: "",
 	}
 	isValid, err := definition.Validate()
 

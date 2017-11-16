@@ -47,7 +47,7 @@ func TestNewFileSystemRepository(t *testing.T) {
 		Name: "foo-bar",
 		Proxy: &proxy.Definition{
 			ListenPath:  "/foo/bar/*",
-			UpstreamURL: "http://example.com/foo/bar/",
+			UpstreamURL: "",
 		},
 	}
 	err = fsRepo.Add(defToAdd)
