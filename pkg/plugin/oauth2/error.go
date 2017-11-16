@@ -1,7 +1,10 @@
 package oauth2
 
-import "net/http"
-import "github.com/hellofresh/janus/pkg/errors"
+import (
+	"net/http"
+
+	"github.com/hellofresh/janus/pkg/errors"
+)
 
 var (
 	// ErrClientIDNotFound is raised when a client_id was not found
@@ -27,4 +30,7 @@ var (
 
 	// ErrInvalidIntrospectionURL is used when an introspection URL is invalid
 	ErrInvalidIntrospectionURL = errors.New(http.StatusBadRequest, "The provided introspection URL is invalid")
+
+	// ErrOauthServerNameExists is used when the Oauth Server name is already registered on the datastore
+	ErrOauthServerNameExists = errors.New(http.StatusConflict, "oauth server name is already registered")
 )

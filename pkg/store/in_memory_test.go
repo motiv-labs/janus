@@ -1,8 +1,10 @@
 package store
 
 import (
+	"sync"
 	"testing"
 
+	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -11,23 +13,58 @@ const (
 	testValue = "value"
 )
 
-func TestInMemoryStore_NewInMemoryStore(t *testing.T) {
-	instance := NewInMemoryStore()
+func TestInMemoryStore(t *testing.T) {
+	t.Parallel()
 
+	tests := []struct {
+		scenario string
+		function func(*testing.T, *InMemoryStore)
+	}{
+		{
+			scenario: "new in memory store",
+			function: testNewInMemoryStore,
+		},
+		{
+			scenario: "set in memory store",
+			function: testInMemoryStoreSet,
+		},
+		{
+			scenario: "check exists from in memory store",
+			function: testInMemoryStoreExists,
+		},
+		{
+			scenario: "get from in memory store",
+			function: testInMemoryStoreGet,
+		},
+		{
+			scenario: "remove from in memory store",
+			function: testInMemoryStoreRemove,
+		},
+		{
+			scenario: "publish subscribe into memory store",
+			function: testInMemoryStorePublishSubscribe,
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.scenario, func(t *testing.T) {
+			instance := NewInMemoryStore()
+			test.function(t, instance)
+		})
+	}
+}
+
+func testNewInMemoryStore(t *testing.T, instance *InMemoryStore) {
 	assert.IsType(t, &InMemoryStore{}, instance)
 	assert.Implements(t, (*Store)(nil), instance)
 }
 
-func TestInMemoryStore_Set(t *testing.T) {
-	instance := NewInMemoryStore()
-
+func testInMemoryStoreSet(t *testing.T, instance *InMemoryStore) {
 	err := instance.Set(testKey, testValue, 0)
 	assert.Nil(t, err)
 }
 
-func TestInMemoryStore_Exists(t *testing.T) {
-	instance := NewInMemoryStore()
-
+func testInMemoryStoreExists(t *testing.T, instance *InMemoryStore) {
 	instance.Set(testKey, testValue, 0)
 
 	val, err := instance.Exists("foo")
@@ -39,9 +76,7 @@ func TestInMemoryStore_Exists(t *testing.T) {
 	assert.True(t, val)
 }
 
-func TestInMemoryStore_Get(t *testing.T) {
-	instance := NewInMemoryStore()
-
+func testInMemoryStoreGet(t *testing.T, instance *InMemoryStore) {
 	instance.Set(testKey, testValue, 0)
 
 	val, err := instance.Get(testKey)
@@ -53,9 +88,7 @@ func TestInMemoryStore_Get(t *testing.T) {
 	assert.Empty(t, val)
 }
 
-func TestInMemoryStore_Remove(t *testing.T) {
-	instance := NewInMemoryStore()
-
+func testInMemoryStoreRemove(t *testing.T, instance *InMemoryStore) {
 	instance.Set(testKey, testValue, 0)
 
 	val, err := instance.Get(testKey)
@@ -67,4 +100,28 @@ func TestInMemoryStore_Remove(t *testing.T) {
 	val, err = instance.Get(testKey)
 	assert.Nil(t, err)
 	assert.Empty(t, val)
+}
+
+func testInMemoryStorePublishSubscribe(t *testing.T, instance *InMemoryStore) {
+	instance.Set(testKey, testValue, 0)
+
+	var (
+		wg     sync.WaitGroup
+		called bool
+	)
+
+	wg.Add(1)
+
+	go func() {
+		instance.Subscribe("test", func(notifier.Notification) {
+			called = true
+			wg.Done()
+		})
+	}()
+
+	instance.Publish("test", []byte(`foo`))
+
+	wg.Wait()
+
+	assert.True(t, called)
 }

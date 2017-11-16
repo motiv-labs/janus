@@ -12,6 +12,7 @@ import (
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"gopkg.in/mgo.v2"
 )
 
 const (
@@ -79,6 +80,20 @@ func onStartup(event interface{}) error {
 		repo, err = NewMongoRepository(e.MongoSession)
 		if err != nil {
 			return errors.Wrap(err, "Could not create a mongodb repository for oauth servers")
+		}
+
+		session := e.MongoSession.Copy()
+		coll := session.DB("").C(collectionName)
+		defer session.Close()
+
+		if err := coll.EnsureIndex(mgo.Index{
+			Key:        []string{"name"},
+			Unique:     true,
+			DropDups:   true,
+			Background: true,
+			Sparse:     true,
+		}); err != nil {
+			return errors.Wrap(err, "Failed to create indexes for oauth servers repository")
 		}
 	case file:
 		authPath := fmt.Sprintf("%s/auth", dsnURL.Path)
