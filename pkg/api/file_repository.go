@@ -16,7 +16,7 @@ type FileSystemRepository struct {
 	sync.RWMutex
 }
 
-// Type used for  JSON.Unmarshaller
+// Type used for JSON.Unmarshaller
 type definitionList struct {
 	defs []Definition
 }
