@@ -3,6 +3,7 @@
 ## Fixed
 
 - Fix oauth servers post endpoint incorrect behaviour. Reported on #234
+- Fix hot reload was not working when using in memory storage implementation
 
 ## Added
 
