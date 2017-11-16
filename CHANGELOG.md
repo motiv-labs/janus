@@ -1,5 +1,8 @@
 # Unreleased
 
+## Added
+- Monitor health check endpoints only of active proxies. Reported on #203
+
 ## Fixed
 
 - Fix oauth servers post endpoint incorrect behaviour. Reported on #234
