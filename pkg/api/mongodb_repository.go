@@ -110,7 +110,7 @@ func (r *MongoRepository) FindValidAPIHealthChecks() ([]*Definition, error) {
 	defer session.Close()
 
 	query := bson.M{
-		"active": false,
+		"active": true,
 		"health_check.url": bson.M{
 			"$exists": true,
 		},
