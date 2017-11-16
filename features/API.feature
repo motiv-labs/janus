@@ -491,3 +491,154 @@ Feature: Manage proxies wit API.
 
         When I request "/apis/posts" API path with "DELETE" method
         Then I should receive 404 response code
+
+    Scenario: API fails to create oauth servers with the same name
+        Given request JWT token is valid admin token
+        And request JSON payload:
+            """
+            {
+                "name" : "oauth-server-test",
+                "oauth_endpoints" : {
+                    "authorize" : {
+                        "listen_path" : "/auth/github/authorize",
+                        "methods" : [
+                            "ALL"
+                        ],
+                        "preserve_host" : false,
+                        "strip_path" : false,
+                        "upstream_url" : "https://github.com/login/oauth/authorize"
+                    },
+                    "token" : {
+                        "listen_path" : "/auth/github/token",
+                        "methods" : [
+                            "GET",
+                            "POST"
+                        ],
+                        "preserve_host" : false,
+                        "strip_path" : false,
+                        "upstream_url" : "https://github.com/login/oauth/access_token"
+                    },
+                    "introspect" : {
+                        "listen_path" : "/auth/github/introspect",
+                        "methods" : [
+                            "GET"
+                        ],
+                        "preserve_host" : false,
+                        "strip_path" : false,
+                        "upstream_url" : "https://api.github.com/user"
+                    }
+                },
+                "secrets" : {
+                    "admin" : "admin"
+                },
+                "cors_meta" : {
+                    "domains" : [
+                        "*"
+                    ],
+                    "methods" : [
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "PATCH",
+                        "DELETE"
+                    ],
+                    "request_headers" : [
+                        "Origin",
+                        "Authorization",
+                        "Content-Type"
+                    ],
+                    "exposed_headers" : [
+                        "X-Debug-Token",
+                        "X-Debug-Token-Link"
+                    ],
+                    "enabled" : true
+                },
+                "rate_limit" : {
+                    "limit" : "200-S"
+                },
+                "token_strategy" : {
+                    "name" : "introspection",
+                    "settings" : {
+                        "use_auth_header" : true,
+                        "auth_header_type" : "token"
+                    }
+                }
+            }
+            """
+        When I request "/oauth/servers" API path with "POST" method
+        Then I should receive 201 response code
+
+        Given request JSON payload:
+            """
+            {
+                "name" : "oauth-server-test",
+                "oauth_endpoints" : {
+                    "authorize" : {
+                        "listen_path" : "/auth/github/authorize",
+                        "methods" : [
+                            "ALL"
+                        ],
+                        "preserve_host" : false,
+                        "strip_path" : false,
+                        "upstream_url" : "https://github.com/login/oauth/authorize"
+                    },
+                    "token" : {
+                        "listen_path" : "/auth/github/token",
+                        "methods" : [
+                            "GET",
+                            "POST"
+                        ],
+                        "preserve_host" : false,
+                        "strip_path" : false,
+                        "upstream_url" : "https://github.com/login/oauth/access_token"
+                    },
+                    "introspect" : {
+                        "listen_path" : "/auth/github/introspect",
+                        "methods" : [
+                            "GET"
+                        ],
+                        "preserve_host" : false,
+                        "strip_path" : false,
+                        "upstream_url" : "https://api.github.com/user"
+                    }
+                },
+                "secrets" : {
+                    "admin" : "admin"
+                },
+                "cors_meta" : {
+                    "domains" : [
+                        "*"
+                    ],
+                    "methods" : [
+                        "GET",
+                        "POST",
+                        "PUT",
+                        "PATCH",
+                        "DELETE"
+                    ],
+                    "request_headers" : [
+                        "Origin",
+                        "Authorization",
+                        "Content-Type"
+                    ],
+                    "exposed_headers" : [
+                        "X-Debug-Token",
+                        "X-Debug-Token-Link"
+                    ],
+                    "enabled" : true
+                },
+                "rate_limit" : {
+                    "limit" : "200-S"
+                },
+                "token_strategy" : {
+                    "name" : "introspection",
+                    "settings" : {
+                        "use_auth_header" : true,
+                        "auth_header_type" : "token"
+                    }
+                }
+            }
+            """
+        When I request "/oauth/servers" API path with "POST" method
+        Then I should receive 409 response code
+        And the response should contain "oauth server name is already registered"
