@@ -19,20 +19,20 @@ func NewNotificationListener(subscriber Subscriber) *NotificationListener {
 // Start starts listening for signals on the cluster
 func (n *NotificationListener) Start(fn func(v Notification)) {
 	log.Debug("Listening for change events")
+	logWithFields := log.WithFields(log.Fields{
+		"prefix": "pub-sub",
+	})
 
 	go func() {
 		for {
-			err := n.subscriber.Subscribe(DefaultChannel, fn)
-			if err != nil {
-				log.WithFields(log.Fields{
-					"prefix": "pub-sub",
-					"err":    err,
-				}).Error("Connection failed, reconnect in 10s")
+			if err := n.subscriber.Subscribe(DefaultChannel, fn); err != nil {
+				logWithFields.
+					WithError(err).
+					Error("Connection failed, reconnect in 10s")
 
 				time.Sleep(10 * time.Second)
-				log.WithFields(log.Fields{
-					"prefix": "pub-sub",
-				}).Warning("Reconnecting")
+
+				logWithFields.Warning("Reconnecting")
 			}
 		}
 	}()
