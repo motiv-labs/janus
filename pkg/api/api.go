@@ -2,7 +2,7 @@ package api
 
 import (
 	"encoding/json"
-	
+
 	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/proxy"
 )
