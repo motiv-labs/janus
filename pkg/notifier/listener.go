@@ -26,7 +26,6 @@ func (n *NotificationListener) Start(fn func(v Notification)) {
 	go func() {
 		for {
 			if err := n.subscriber.Subscribe(DefaultChannel, fn); err != nil {
-				log.Info("n.subscriber.Subscribe")
 				logWithFields.
 					WithError(err).
 					Error("Connection failed, reconnect in 10s")
