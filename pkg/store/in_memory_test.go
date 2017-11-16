@@ -1,8 +1,10 @@
 package store
 
 import (
+	"sync"
 	"testing"
 
+	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -37,6 +39,10 @@ func TestInMemoryStore(t *testing.T) {
 		{
 			scenario: "remove from in memory store",
 			function: testInMemoryStoreRemove,
+		},
+		{
+			scenario: "publish subscribe into memory store",
+			function: testInMemoryStorePublishSubscribe,
 		},
 	}
 
@@ -94,4 +100,28 @@ func testInMemoryStoreRemove(t *testing.T, instance *InMemoryStore) {
 	val, err = instance.Get(testKey)
 	assert.Nil(t, err)
 	assert.Empty(t, val)
+}
+
+func testInMemoryStorePublishSubscribe(t *testing.T, instance *InMemoryStore) {
+	instance.Set(testKey, testValue, 0)
+
+	var (
+		wg     sync.WaitGroup
+		called bool
+	)
+
+	wg.Add(1)
+
+	go func() {
+		instance.Subscribe("test", func(notifier.Notification) {
+			called = true
+			wg.Done()
+		})
+	}()
+
+	instance.Publish("test", []byte(`foo`))
+
+	wg.Wait()
+
+	assert.True(t, called)
 }
