@@ -33,8 +33,8 @@
 [[projects]]
   name = "github.com/asaskevich/govalidator"
   packages = ["."]
-  revision = "7b3beb6df3c42abd3509abfc3bcacc0fbfb7c877"
-  version = "v5"
+  revision = "521b25f4b05fd26bec69d9dedeb8f9c9a83939a8"
+  version = "v8"
 
 [[projects]]
   name = "github.com/bshuster-repo/logrus-logstash-hook"
@@ -358,6 +358,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c15e19e7bc1268a25eaec2da5481f9bd3ac514e6a72339ec4dad8c08a8b0f639"
+  inputs-digest = "a45690b599766f7706b01f15d119c9d700293d88de0552951345a45bb1791783"
   solver-name = "gps-cdcl"
   solver-version = 1
