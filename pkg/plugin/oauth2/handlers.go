@@ -81,8 +81,8 @@ func (c *Controller) PutBy() http.HandlerFunc {
 			return
 		}
 
-		span = opentracing.FromContext(r.Context(), "datastore.Add")
-		err = c.repo.Add(oauth)
+		span = opentracing.FromContext(r.Context(), "datastore.Save")
+		err = c.repo.Save(oauth)
 		c.dispatch(notifier.NoticeOAuthServerUpdated)
 		span.Finish()
 
@@ -106,8 +106,8 @@ func (c *Controller) Post() http.HandlerFunc {
 			return
 		}
 
-		span := opentracing.FromContext(r.Context(), "datastore.Persist")
-		err = c.repo.Persist(&oauth)
+		span := opentracing.FromContext(r.Context(), "datastore.Add")
+		err = c.repo.Add(&oauth)
 		c.dispatch(notifier.NoticeOAuthServerAdded)
 		span.Finish()
 

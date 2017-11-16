@@ -101,7 +101,7 @@ func testNotFindByName(t *testing.T, repo Repository) {
 
 func newInMemoryRepo() *InMemoryRepository {
 	repo := NewInMemoryRepository()
-	repo.Persist(&OAuth{
+	repo.Add(&OAuth{
 		Name: "test1",
 		Endpoints: Endpoints{
 			Token: &proxy.Definition{
@@ -111,7 +111,7 @@ func newInMemoryRepo() *InMemoryRepository {
 		},
 	})
 
-	repo.Persist(&OAuth{
+	repo.Add(&OAuth{
 		Name: "test2",
 		Endpoints: Endpoints{
 			Token: &proxy.Definition{

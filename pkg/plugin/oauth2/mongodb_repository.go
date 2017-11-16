@@ -18,8 +18,8 @@ type Repository interface {
 	FindAll() ([]*OAuth, error)
 	FindByName(name string) (*OAuth, error)
 	FindByTokenURL(url url.URL) (*OAuth, error)
-	Persist(oauth *OAuth) error
 	Add(oauth *OAuth) error
+	Save(oauth *OAuth) error
 	Remove(id string) error
 }
 
@@ -63,8 +63,8 @@ func (r *MongoRepository) FindByName(name string) (*OAuth, error) {
 	return result, nil
 }
 
-// Persist add a new OAuth Server to the repository
-func (r *MongoRepository) Persist(oauth *OAuth) error {
+// Add add a new OAuth Server to the repository
+func (r *MongoRepository) Add(oauth *OAuth) error {
 	session, coll := r.getSession()
 	defer session.Close()
 
@@ -88,8 +88,8 @@ func (r *MongoRepository) Persist(oauth *OAuth) error {
 	return nil
 }
 
-// Add adds an OAuth Server to the repository
-func (r *MongoRepository) Add(oauth *OAuth) error {
+// Save saves OAuth Server to the repository
+func (r *MongoRepository) Save(oauth *OAuth) error {
 	session, coll := r.getSession()
 	defer session.Close()
 
