@@ -69,7 +69,13 @@ func (r *MongoRepository) Exists(def *Definition) (bool, error) {
 func (r *MongoRepository) Add(definition *Definition) error {
 	session, coll := r.getSession()
 	defer session.Close()
-	var err error
+
+	isValid, err := definition.Validate()
+	if false == isValid && err != nil {
+		log.WithError(err).Error("Validation errors")
+		return err
+	}
+
 	_, err = coll.Upsert(bson.M{"name": definition.Name}, definition)
 	if err != nil {
 		log.WithField("name", definition.Name).Error("There was an error adding the resource")
