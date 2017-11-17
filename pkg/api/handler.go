@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/hellofresh/janus/pkg/opentracing"
@@ -117,12 +116,6 @@ func (c *Controller) PutBy() http.HandlerFunc {
 func (c *Controller) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		definition := NewDefinition()
-
-		_, vErr := govalidator.ValidateStruct(definition)
-		if nil != vErr {
-			errors.Handler(w, ErrUpstreamURLdeprecated)
-			return
-		}
 
 		err := json.NewDecoder(r.Body).Decode(definition)
 		if nil != err {

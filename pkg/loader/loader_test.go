@@ -27,7 +27,7 @@ func TestLoadValidAPIDefinitions(t *testing.T) {
 		Active: true,
 		Proxy: &proxy.Definition{
 			ListenPath:  "/test1",
-			UpstreamURL: "",
+			UpstreamURL: "http://test1",
 			Methods:     []string{http.MethodGet},
 		},
 		Plugins: []api.Plugin{
@@ -51,7 +51,7 @@ func TestLoadValidAPIDefinitions(t *testing.T) {
 		Active: true,
 		Proxy: &proxy.Definition{
 			ListenPath:  "/test2",
-			UpstreamURL: "",
+			UpstreamURL: "http://test2",
 			Methods:     []string{http.MethodGet},
 		},
 	})
@@ -70,7 +70,7 @@ func TestLoadInvalidAPIDefinitions(t *testing.T) {
 		Active: true,
 		Proxy: &proxy.Definition{
 			ListenPath:  "/test2",
-			UpstreamURL: "",
+			UpstreamURL: "http://test2",
 			Methods:     []string{http.MethodGet},
 		},
 	}
@@ -92,7 +92,7 @@ func TestLoadAPIDefinitionsMissingHTTPMethods(t *testing.T) {
 		Active: true,
 		Proxy: &proxy.Definition{
 			ListenPath:  "/test1",
-			UpstreamURL: "",
+			UpstreamURL: "http://test1",
 		},
 	})
 
@@ -110,7 +110,7 @@ func TestLoadInactiveAPIDefinitions(t *testing.T) {
 		Active: false,
 		Proxy: &proxy.Definition{
 			ListenPath:  "/test1",
-			UpstreamURL: "",
+			UpstreamURL: "http://test1",
 		},
 	})
 

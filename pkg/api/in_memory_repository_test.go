@@ -14,7 +14,7 @@ func newInMemoryRepo() *InMemoryRepository {
 		Name: "test1",
 		Proxy: &proxy.Definition{
 			ListenPath:  "/test1",
-			UpstreamURL: "",
+			UpstreamURL: "http://test1",
 		},
 		HealthCheck: HealthCheck{
 			URL:     "http://test1.com/status",
@@ -26,7 +26,7 @@ func newInMemoryRepo() *InMemoryRepository {
 		Name: "test2",
 		Proxy: &proxy.Definition{
 			ListenPath:  "/test2",
-			UpstreamURL: "",
+			UpstreamURL: "http://test2",
 		},
 	})
 
@@ -38,7 +38,7 @@ func TestExists(t *testing.T) {
 		Name: "test3",
 		Proxy: &proxy.Definition{
 			ListenPath:  "/test3",
-			UpstreamURL: "",
+			UpstreamURL: "http://test3",
 		},
 	}
 	repo := newInMemoryRepo()
