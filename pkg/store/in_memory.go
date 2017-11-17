@@ -1,16 +1,23 @@
 package store
 
 import (
+	"encoding/json"
 	"sync"
 
 	"github.com/hellofresh/janus/pkg/notifier"
+	log "github.com/sirupsen/logrus"
 )
+
+type noopNotification struct {
+	topic string
+	data  []byte
+}
 
 // InMemoryStore is the redis store.
 type InMemoryStore struct {
 	sync.Mutex
 	data   map[string]string
-	client chan struct{}
+	client chan noopNotification
 }
 
 // NewInMemoryStore returns an instance of memory store.
@@ -22,7 +29,7 @@ func NewInMemoryStore() *InMemoryStore {
 func NewInMemoryStoreWithOptions() *InMemoryStore {
 	return &InMemoryStore{
 		data:   make(map[string]string),
-		client: make(chan struct{}),
+		client: make(chan noopNotification),
 	}
 }
 
@@ -60,14 +67,18 @@ func (s *InMemoryStore) Set(key string, value string, expire int64) error {
 
 // Publish publishes in memory
 func (s *InMemoryStore) Publish(topic string, data []byte) error {
-	s.client <- struct{}{}
+	s.client <- noopNotification{topic, data}
 	return nil
 }
 
 // Subscribe subscribes to messages in memory
 func (s *InMemoryStore) Subscribe(channel string, callback func(notifier.Notification)) error {
-	for range s.client {
+	for v := range s.client {
 		notification := notifier.Notification{}
+		if marshallErr := json.Unmarshal(v.data, &notification); marshallErr != nil {
+			log.WithError(marshallErr).Error("Unmarshalling message body failed, malformed")
+			return marshallErr
+		}
 		callback(notification)
 	}
 	return nil

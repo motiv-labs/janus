@@ -119,7 +119,7 @@ func testInMemoryStorePublishSubscribe(t *testing.T, instance *InMemoryStore) {
 		})
 	}()
 
-	instance.Publish("test", []byte(`foo`))
+	instance.Publish("test", []byte(`{"foo": "bar"}`))
 
 	wg.Wait()
 
