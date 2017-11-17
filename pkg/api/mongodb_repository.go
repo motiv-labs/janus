@@ -104,14 +104,20 @@ func (r *MongoRepository) Remove(name string) error {
 	return nil
 }
 
-// FindValidAPIHealthChecks retrieves all apis that has health check configured
+// FindValidAPIHealthChecks retrieves all active apis that has health check configured
 func (r *MongoRepository) FindValidAPIHealthChecks() ([]*Definition, error) {
-	result := []*Definition{}
 	session, coll := r.getSession()
 	defer session.Close()
 
-	err := coll.Find(bson.M{"health_check.url": bson.M{"$exists": true}}).All(&result)
-	if err != nil {
+	query := bson.M{
+		"active": true,
+		"health_check.url": bson.M{
+			"$exists": true,
+		},
+	}
+
+	result := []*Definition{}
+	if err := coll.Find(query).All(&result); err != nil {
 		return nil, err
 	}
 

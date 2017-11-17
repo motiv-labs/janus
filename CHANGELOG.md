@@ -2,8 +2,9 @@
 
 ## Fixed
 
-- Fix oauth servers post endpoint incorrect behaviour. Reported on #234
+- Monitor health check endpoints only of active proxies. Reported on #203
 - Fix hot reload was not working when using in memory storage implementation
+- Fix oauth servers post endpoint incorrect behaviour. Reported on #234
 
 ## Added
 
