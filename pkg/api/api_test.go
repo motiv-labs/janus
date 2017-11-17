@@ -19,7 +19,7 @@ func TestSuccessfulValidation(t *testing.T) {
 	instance := api.NewDefinition()
 	instance.Name = "Test"
 	instance.Proxy.ListenPath = "/"
-	instance.Proxy.UpstreamURL = ""
+	instance.Proxy.UpstreamURL = "http://example.com"
 
 	isValid, err := instance.Validate()
 	require.NoError(t, err)

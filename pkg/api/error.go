@@ -18,7 +18,4 @@ var (
 
 	// ErrDBContextNotSet is used when the database request context is not set
 	ErrDBContextNotSet = errors.New(http.StatusInternalServerError, "DB context was not set for this request")
-
-	// ErrUpstreamURLdeprecated is used when the proxy API definition upstream_url is set
-	ErrUpstreamURLdeprecated = errors.New(http.StatusBadRequest, "upstream_url is deprecated. please use upstreams instead")
 )
