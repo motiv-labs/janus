@@ -56,9 +56,9 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 func (r *FileSystemRepository) parseDefinition(apiDef []byte) definitionList {
 	appConfigs := definitionList{}
 
-	//Try unmarshalling as if json is an unnamed Array of multiple definitions
+	// Try unmarshalling as if json is an unnamed Array of multiple definitions
 	if err := json.Unmarshal(apiDef, &appConfigs); err != nil {
-		//Try unmarshalling as if json is a single Definition
+		// Try unmarshalling as if json is a single Definition
 		appConfigs.defs = append(appConfigs.defs, *NewDefinition())
 		if err := json.Unmarshal(apiDef, &appConfigs.defs[0]); err != nil {
 			log.WithError(err).Error("[RPC] --> Couldn't unmarshal api configuration")
