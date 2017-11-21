@@ -42,10 +42,22 @@ func (p *Register) AddMany(routes []*Route) error {
 func (p *Register) Add(route *Route) error {
 	definition := route.Proxy
 
+	var balancer Balancer
+	if definition.IsBalancerDefined() {
+		log.WithField("balancing_alg", definition.Upstreams.Balancing).Debug("Using a load balancing algorithm")
+
+		var err error
+		balancer, err = NewBalancer(definition.Upstreams.Balancing)
+		if err != nil {
+			log.WithError(err).Error("Could not create a balancer")
+			return err
+		}
+	}
+
 	p.params.Outbound = route.Outbound
 	p.params.InsecureSkipVerify = definition.InsecureSkipVerify
 	handler := &httputil.ReverseProxy{
-		Director:  p.createDirector(definition),
+		Director:  p.createDirector(definition, balancer),
 		Transport: NewTransportWithParams(p.params),
 	}
 
@@ -58,45 +70,33 @@ func (p *Register) Add(route *Route) error {
 	return nil
 }
 
-func (p *Register) createDirector(proxyDefinition *Definition) func(req *http.Request) {
+func (p *Register) createDirector(proxyDefinition *Definition, balancer Balancer) func(req *http.Request) {
 	return func(req *http.Request) {
-		var target *url.URL
-		var err error
+		var upstreamURL string
 
 		// TODO: find better solution
 		// maybe create "proxyDefinition.Upstreams.Targets every time",
 		// but currently we have several points of definition creation
-		if proxyDefinition.Upstreams != nil && proxyDefinition.Upstreams.Targets != nil && len(proxyDefinition.Upstreams.Targets) > 0 {
-			log.WithField("balancing_alg", proxyDefinition.Upstreams.Balancing).Debug("Using a load balancing algorithm")
-			balancer, err := NewBalancer(proxyDefinition.Upstreams.Balancing)
-			if err != nil {
-				log.WithError(err).Error("Could not create a balancer")
-				return
-			}
-
+		if proxyDefinition.IsBalancerDefined() {
 			upstream, err := balancer.Elect(proxyDefinition.Upstreams.Targets)
 			if err != nil {
 				log.WithError(err).Error("Could not elect one upstream")
 				return
 			}
-
-			log.WithField("target", upstream.Target).Debug("Elected Target")
-			target, err = url.Parse(upstream.Target)
-			if err != nil {
-				log.WithError(err).Error("Could not parse the target URL")
-				return
-			}
+			log.WithField("target", upstream.Target).Debug("Target upstream elected ")
+			upstreamURL = upstream.Target
 		} else {
 			log.Warn("The upstream URL is deprecated. Use Upstreams instead")
-			target, err = url.Parse(proxyDefinition.UpstreamURL)
-			if err != nil {
-				log.WithError(err).Error("Could not parse the target URL")
-				return
-			}
+			upstreamURL = proxyDefinition.UpstreamURL
+		}
+
+		target, err := url.Parse(upstreamURL)
+		if err != nil {
+			log.WithError(err).Error("Could not parse the target URL")
+			return
 		}
 
 		targetQuery := target.RawQuery
-
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
 		path := target.Path

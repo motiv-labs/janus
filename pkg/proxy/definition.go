@@ -51,6 +51,11 @@ func (d *Definition) Validate() (bool, error) {
 	return govalidator.ValidateStruct(d)
 }
 
+// IsBalancerDefined checks if load balancer is defined
+func (d *Definition) IsBalancerDefined() bool {
+	return d.Upstreams != nil && d.Upstreams.Targets != nil && len(d.Upstreams.Targets) > 0
+}
+
 // Route is the container for a proxy and it's handlers
 type Route struct {
 	Proxy    *Definition
