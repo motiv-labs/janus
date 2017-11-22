@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/hellofresh/janus/pkg/router"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -49,8 +50,9 @@ func (p *Register) Add(route *Route) error {
 		var err error
 		balancer, err = NewBalancer(definition.Upstreams.Balancing)
 		if err != nil {
-			log.WithError(err).Error("Could not create a balancer")
-			return err
+			msg := "Could not create a balancer"
+			log.WithError(err).Error(msg)
+			return errors.Wrap(err, msg)
 		}
 	}
 
@@ -73,11 +75,7 @@ func (p *Register) Add(route *Route) error {
 func (p *Register) createDirector(proxyDefinition *Definition, balancer Balancer) func(req *http.Request) {
 	return func(req *http.Request) {
 		var upstreamURL string
-
-		// TODO: find better solution
-		// maybe create "proxyDefinition.Upstreams.Targets every time",
-		// but currently we have several points of definition creation
-		if proxyDefinition.IsBalancerDefined() {
+		if proxyDefinition.IsBalancerDefined() && balancer != nil {
 			upstream, err := balancer.Elect(proxyDefinition.Upstreams.Targets)
 			if err != nil {
 				log.WithError(err).Error("Could not elect one upstream")
