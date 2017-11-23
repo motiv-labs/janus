@@ -11,10 +11,6 @@ import (
 	"github.com/pkg/errors"
 )
 
-const (
-	janusOwners = "janus-owners"
-)
-
 func init() {
 	provider.Register("github", &Provider{})
 }
@@ -23,7 +19,8 @@ func init() {
 type Provider struct {
 	provider.Verifier
 
-	teams []Team
+	teams  []Team
+	config config.Credentials
 }
 
 // Build acts like the constructor for a provider
@@ -36,7 +33,8 @@ func (gp *Provider) Build(config config.Credentials) provider.Provider {
 			NewTeamVerifier(teams, client),
 			NewOrganizationVerifier(config.Github.Organizations, client),
 		),
-		teams: teams,
+		teams:  teams,
+		config: config,
 	}
 }
 
@@ -48,7 +46,7 @@ func (gp *Provider) GetClaims(httpClient *http.Client) (jwt.MapClaims, error) {
 		wg            sync.WaitGroup
 		user          *github.User
 		usersOrgTeams OrganizationTeams
-		errs          []error
+		err           error
 	)
 
 	wg.Add(2)
@@ -57,7 +55,7 @@ func (gp *Provider) GetClaims(httpClient *http.Client) (jwt.MapClaims, error) {
 		defer wg.Done()
 		res, err := client.CurrentUser(httpClient)
 		if err != nil {
-			errs = append(errs, errors.Wrap(err, "failed to get github users"))
+			err = append(errs, errors.Wrap(err, "failed to get github users"))
 			return
 		}
 		user = res
@@ -67,7 +65,7 @@ func (gp *Provider) GetClaims(httpClient *http.Client) (jwt.MapClaims, error) {
 		defer wg.Done()
 		res, err := client.Teams(httpClient)
 		if err != nil {
-			errs = append(errs, errors.Wrap(err, "failed to get github teams"))
+			err = append(errs, errors.Wrap(err, "failed to get github teams"))
 			return
 		}
 		usersOrgTeams = res
@@ -75,8 +73,8 @@ func (gp *Provider) GetClaims(httpClient *http.Client) (jwt.MapClaims, error) {
 
 	wg.Wait()
 
-	if len(errs) > 0 {
-		return nil, errs[0]
+	if err != nil {
+		return nil, err
 	}
 
 	return jwt.MapClaims{
@@ -100,7 +98,7 @@ func (gp *Provider) isAdmin(usersOrgTeams OrganizationTeams) bool {
 	for _, team := range gp.teams {
 		if teams, ok := usersOrgTeams[team.Organization]; ok {
 			for _, teamUserBelongsTo := range teams {
-				if teamUserBelongsTo == janusOwners {
+				if teamUserBelongsTo == gp.config.JanusAdminTeam {
 					return true
 				}
 			}
