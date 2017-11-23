@@ -14,6 +14,7 @@ func Test_LoadEnv(t *testing.T) {
 	os.Setenv("BASIC_USERS", "admin:admin,test:test")
 	os.Setenv("GITHUB_ORGANIZATIONS", "hellofresh,tests")
 	os.Setenv("GITHUB_TEAMS", "hellofresh:tests,tests:devs")
+	os.Setenv("JANUS_ADMIN_TEAM", "janus-owners")
 
 	globalConfig, err := LoadEnv()
 	require.NoError(t, err)
@@ -30,5 +31,6 @@ func Test_LoadEnv(t *testing.T) {
 	assert.Equal(t, map[string]string{"admin": "admin", "test": "test"}, globalConfig.Web.Credentials.Basic.Users)
 	assert.Equal(t, map[string]string{"hellofresh": "tests", "tests": "devs"}, globalConfig.Web.Credentials.Github.Teams)
 	assert.Equal(t, []string{"hellofresh", "tests"}, globalConfig.Web.Credentials.Github.Organizations)
+	assert.Equal(t, "janus-owners", globalConfig.Web.Credentials.JanusAdminTeam)
 	assert.True(t, globalConfig.Web.Credentials.Github.IsConfigured())
 }
