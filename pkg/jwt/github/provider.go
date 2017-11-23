@@ -54,23 +54,23 @@ func (gp *Provider) GetClaims(httpClient *http.Client) (jwt.MapClaims, error) {
 	wg.Add(2)
 
 	go func() {
+		defer wg.Done()
 		res, err := client.CurrentUser(httpClient)
 		if err != nil {
 			errs = append(errs, errors.Wrap(err, "failed to get github users"))
-		} else {
-			user = res
+			return
 		}
-		wg.Done()
+		user = res
 	}()
 
 	go func() {
+		defer wg.Done()
 		res, err := client.Teams(httpClient)
 		if err != nil {
 			errs = append(errs, errors.Wrap(err, "failed to get github teams"))
-		} else {
-			usersOrgTeams = res
+			return
 		}
-		wg.Done()
+		usersOrgTeams = res
 	}()
 
 	wg.Wait()
