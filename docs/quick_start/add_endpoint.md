@@ -24,7 +24,38 @@ Create an `example.json` file containing your endpoint configuration:
     }
 }
 ```
+Alternatively, it's possible to store multiple endpoints in one file:
 
+```json
+[{
+    "name" : "my-endpointOne",
+    "active" : true,
+    "proxy" : {
+        "listen_path" : "/exampleOne/*",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://www.mocky.io/v2/595625d22900008702cd71e8"}
+            ]
+        },
+        "methods" : ["GET"]
+    }
+},
+{
+    "name" : "my-endpointTwo",
+    "active" : true,
+    "proxy" : {
+        "listen_path" : "/exampleTwo/*",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://www.mocky.io/v2/5185415ba171ea3a00704eed"}
+            ]
+        },
+        "methods" : ["GET"]
+    }
+}]
+```
 And now let's add it to Janus:
 
 {% codetabs name="HTTPie", type="bash" -%}

@@ -79,10 +79,11 @@ type Prometheus struct {
 type Credentials struct {
 	// Algorithm defines admin JWT signing algorithm.
 	// Currently the following algorithms are supported: HS256, HS384, HS512.
-	Algorithm string `envconfig:"ALGORITHM"`
-	Secret    string `envconfig:"SECRET"`
-	Github    Github
-	Basic     Basic
+	Algorithm      string `envconfig:"ALGORITHM"`
+	Secret         string `envconfig:"SECRET"`
+	JanusAdminTeam string `envconfig:"JANUS_ADMIN_TEAM"`
+	Github         Github
+	Basic          Basic
 }
 
 // Basic holds the basic users configurations

@@ -33,11 +33,11 @@ func TestNewFileSystemRepository(t *testing.T) {
 
 	allDefinitions, err := fsRepo.FindAll()
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(allDefinitions))
+	assert.Equal(t, 3, len(allDefinitions))
 
 	healthDefinitions, err := fsRepo.FindValidAPIHealthChecks()
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(healthDefinitions))
+	assert.Equal(t, 3, len(healthDefinitions))
 
 	assertFindByName(t, fsRepo)
 	assertFindByFindByListenPath(t, fsRepo)

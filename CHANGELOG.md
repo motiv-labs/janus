@@ -1,5 +1,11 @@
 # Unreleased
 
+## Fixed
+
+- Monitor health check endpoints only of active proxies. Reported on #203
+- Fix hot reload was not working when using in memory storage implementation
+- Fix oauth servers post endpoint incorrect behaviour. Reported on #234
+
 ## Added
 
 - Added Proxy Listen Path validation to prevent `chi` from panicking in case of invalid listen path
@@ -74,7 +80,7 @@
 
 - Using viper to load the API definitions when using file based configurations. This allows you to configure your API definitions in YAML, JSON and TOML.
 - The underling router was changed from [httptreemux](https://github.com/dimfeld/httptreemux) to [Chi](https://github.com/pressly/chi).
-- Proper Mux reload when an API or OAuth server is changed 
+- Proper Mux reload when an API or OAuth server is changed
 
 ## Added
 

@@ -1,6 +1,8 @@
 package api
 
 import (
+	"encoding/json"
+
 	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/proxy"
 )
@@ -44,4 +46,18 @@ func NewDefinition() *Definition {
 // Validate validates proxy data
 func (d *Definition) Validate() (bool, error) {
 	return govalidator.ValidateStruct(d)
+}
+
+// UnmarshalJSON api.Definition JSON.Unmarshaller implementation
+func (d *Definition) UnmarshalJSON(b []byte) error {
+	// Aliasing Definition to avoid recursive call of this method
+	type definitionAlias Definition
+	defAlias := definitionAlias(*NewDefinition())
+
+	if err := json.Unmarshal(b, &defAlias); err != nil {
+		return err
+	}
+
+	*d = Definition(defAlias)
+	return nil
 }
