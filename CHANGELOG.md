@@ -1,5 +1,8 @@
 # Unreleased
 
+## Added
+- Check GitHub permissions. Sets `is_admin` into the jwt token when the chosen provider is Github
+
 ## Fixed
 
 - Monitor health check endpoints only of active proxies. Reported on #203
