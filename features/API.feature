@@ -140,6 +140,51 @@ Feature: Manage proxies wit API.
         Then I should receive 200 response code
         And response JSON body is an array of length 2
 
+    Scenario: API fails to create routes with invalid fields
+        Given request JWT token is valid admin token
+        And request JSON payload:
+            """
+            {
+                "active":true,
+                "proxy":{
+                    "listen_path":"/example/*",
+                    "upstreams":{
+                        "balancing":"roundrobin",
+                        "targets":[
+                            {
+                                "target":"http://localhost:9089/hello-world"
+                            }
+                        ]
+                    }
+                }
+            }
+            """
+        When I request "/apis" API path with "POST" method
+        Then I should receive 400 response code
+        And the response should contain "name is required"
+
+        Given request JWT token is valid admin token
+        And request JSON payload:
+            """
+            {
+                "name": "example",
+                "active":true,
+                "proxy":{
+                    "upstreams":{
+                        "balancing":"roundrobin",
+                        "targets":[
+                            {
+                                "target":"http://localhost:9089/hello-world"
+                            }
+                        ]
+                    }
+                }
+            }
+            """
+        When I request "/apis" API path with "POST" method
+        Then I should receive 400 response code
+        And the response should contain "proxy.listen_path is required"
+
     Scenario: API fails to create routes with the same name
         Given request JWT token is valid admin token
         And request JSON payload:

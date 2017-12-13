@@ -31,7 +31,7 @@ type Upstreams struct {
 
 // Target is an ip address/hostname with a port that identifies an instance of a backend service
 type Target struct {
-	Target string `bson:"target" json:"target" valid:"url,required~proxy.upstreams.targets.target is required"`
+	Target string `bson:"target" json:"target" valid:"url"`
 	Weight int    `bson:"weight" json:"weight"`
 }
 
