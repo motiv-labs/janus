@@ -21,7 +21,7 @@ type Plugin struct {
 
 // Definition Represents an API that you want to proxy
 type Definition struct {
-	Name        string            `bson:"name" json:"name" valid:"required"`
+	Name        string            `bson:"name" json:"name" valid:"required~name is required"`
 	Active      bool              `bson:"active" json:"active"`
 	Proxy       *proxy.Definition `bson:"proxy" json:"proxy" valid:"required"`
 	Plugins     []Plugin          `bson:"plugins" json:"plugins"`
