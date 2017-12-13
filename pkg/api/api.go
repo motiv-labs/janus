@@ -30,7 +30,7 @@ type Definition struct {
 
 // HealthCheck represents the health check configs
 type HealthCheck struct {
-	URL     string `bson:"url" json:"url" valid:"url~health_check.url is required"`
+	URL     string `bson:"url" json:"url" valid:"url"`
 	Timeout int    `bson:"timeout" json:"timeout"`
 }
 
