@@ -11,7 +11,7 @@ import (
 // Definition defines proxy rules for a route
 type Definition struct {
 	PreserveHost bool   `bson:"preserve_host" json:"preserve_host" mapstructure:"preserve_host"`
-	ListenPath   string `bson:"listen_path" json:"listen_path" mapstructure:"listen_path" valid:"required,urlpath"`
+	ListenPath   string `bson:"listen_path" json:"listen_path" mapstructure:"listen_path" valid:"required~proxy.listen_path is required,urlpath"`
 	// Deprecated: Use Upstreams instead.
 	UpstreamURL         string     `bson:"upstream_url" json:"upstream_url" valid:"url"`
 	Upstreams           *Upstreams `bson:"upstreams" json:"upstreams" mapstructure:"upstreams"`
@@ -31,7 +31,7 @@ type Upstreams struct {
 
 // Target is an ip address/hostname with a port that identifies an instance of a backend service
 type Target struct {
-	Target string `bson:"target" json:"target" valid:"url,required"`
+	Target string `bson:"target" json:"target" valid:"url,required~proxy.upstreams.targets.target is required"`
 	Weight int    `bson:"weight" json:"weight"`
 }
 
