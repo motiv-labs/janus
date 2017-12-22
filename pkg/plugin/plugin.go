@@ -94,7 +94,7 @@ func EmitEvent(name string, event interface{}) error {
 	for _, hook := range hooks {
 		err := hook(event)
 		if err != nil {
-			log.WithError(err).WithField("event_name", name).Warn("an error ocurred when an event was triggered")
+			log.WithError(err).WithField("event_name", name).Warn("an error occurred when an event was triggered")
 		}
 	}
 
