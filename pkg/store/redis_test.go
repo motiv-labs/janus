@@ -71,7 +71,7 @@ func (suite *RedisTestSuite) TestExists() {
 	assert.Nil(suite.T(), err)
 	assert.False(suite.T(), exists)
 
-	// Set the key and check existance
+	// Set the key and check existence
 	suite.redisServer.Set(testKey, testValue)
 	exists, err = suite.redisStore.Exists(testKey)
 	assert.Nil(suite.T(), err)

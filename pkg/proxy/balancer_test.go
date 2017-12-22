@@ -13,9 +13,9 @@ type BalancerTestSuite struct {
 
 func (suite *BalancerTestSuite) SetupTest() {
 	suite.hosts = []*Target{
-		&Target{Target: "127.0.0.1", Weight: 5},
-		&Target{Target: "http://test.com", Weight: 10},
-		&Target{Target: "http://example.com", Weight: 8},
+		{Target: "127.0.0.1", Weight: 5},
+		{Target: "http://test.com", Weight: 10},
+		{Target: "http://example.com", Weight: 8},
 	}
 }
 
@@ -64,7 +64,7 @@ func (suite *BalancerTestSuite) TestWeightBalancerEmptyList() {
 func (suite *BalancerTestSuite) TestWeightBalancerZeroWeight() {
 	balancer := NewWeightBalancer()
 
-	_, err := balancer.Elect([]*Target{&Target{Target: "", Weight: 0}})
+	_, err := balancer.Elect([]*Target{{Target: "", Weight: 0}})
 	suite.Error(err)
 }
 
