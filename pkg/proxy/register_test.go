@@ -74,7 +74,7 @@ func createProxyDefinitions() []*Definition {
 			ListenPath: "/example/*",
 			Upstreams: &Upstreams{
 				Balancing: "roundrobin",
-				Targets:   []*Target{&Target{Target: "http://localhost:9089/hello-world"}},
+				Targets:   []*Target{{Target: "http://localhost:9089/hello-world"}},
 			},
 			Methods: []string{"ALL"},
 		},
@@ -83,7 +83,7 @@ func createProxyDefinitions() []*Definition {
 			StripPath:  true,
 			Upstreams: &Upstreams{
 				Balancing: "roundrobin",
-				Targets:   []*Target{&Target{Target: "http://localhost:9089/posts"}},
+				Targets:   []*Target{{Target: "http://localhost:9089/posts"}},
 			},
 			Methods: []string{"ALL"},
 		},

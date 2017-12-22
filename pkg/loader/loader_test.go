@@ -31,15 +31,15 @@ func TestLoadValidAPIDefinitions(t *testing.T) {
 			Methods:     []string{http.MethodGet},
 		},
 		Plugins: []api.Plugin{
-			api.Plugin{
+			{
 				Name:    "oauth2",
 				Enabled: false,
 			},
-			api.Plugin{
+			{
 				Name:    "compression",
 				Enabled: true,
 			},
-			api.Plugin{
+			{
 				Name:    "rate_limit",
 				Enabled: true,
 				Config:  map[string]interface{}{"limit": "10-S", "policy": "local"},
