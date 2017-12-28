@@ -120,8 +120,9 @@ func (p *Register) createDirector(proxyDefinition *Definition, balancer Balancer
 		req.URL.Path = path
 
 		// This is very important to avoid problems with ssl verification for the HOST header
-		if !proxyDefinition.PreserveHost {
+		if proxyDefinition.PreserveHost {
 			log.Debug("Preserving the host header")
+		} else {
 			req.Host = target.Host
 		}
 
