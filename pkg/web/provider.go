@@ -30,11 +30,7 @@ func onStartup(event interface{}) error {
 	}
 
 	config := e.Config.Web
-
-	repo, err := api.BuildRepository(e.Config.Database.DSN, e.MongoSession)
-	if err != nil {
-		return err
-	}
+	repo := e.Repository
 
 	log.Info("Janus Admin API starting...")
 	router.DefaultOptions.NotFoundHandler = httpErrors.NotFound
