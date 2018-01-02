@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -22,6 +23,7 @@ const (
 type OnStartup struct {
 	Notifier     notifier.Notifier
 	StatsClient  stats.Client
+	Repository   api.Repository
 	MongoSession *mgo.Session
 	Register     *proxy.Register
 	Config       *config.Specification
@@ -29,7 +31,8 @@ type OnStartup struct {
 
 // OnReload represents a event that happens when Janus hot reloads it's configurations
 type OnReload struct {
-	Register *proxy.Register
+	Register   *proxy.Register
+	Repository api.Repository
 }
 
 // OnAdminAPIStartup represents a event that happens when Janus starts up the admin API

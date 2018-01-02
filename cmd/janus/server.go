@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/notifier"
@@ -54,9 +55,14 @@ func RunServer(cmd *cobra.Command, args []string) {
 	defer globalConfig.Log.Flush()
 	defer session.Close()
 
+	repo, err := api.BuildRepository(globalConfig.Database.DSN, session)
+	if err != nil {
+		log.Panic(err)
+	}
+
 	if subscriber, ok := storage.(notifier.Subscriber); ok {
 		listener := notifier.NewNotificationListener(subscriber)
-		listener.Start(handleEvent)
+		listener.Start(handleEvent(repo))
 	}
 
 	if publisher, ok := storage.(notifier.Publisher); ok {
@@ -73,8 +79,9 @@ func RunServer(cmd *cobra.Command, args []string) {
 
 	event := plugin.OnStartup{
 		Notifier:     ntf,
-		MongoSession: session,
+		Repository:   repo,
 		StatsClient:  statsClient,
+		MongoSession: session,
 		Register:     register,
 		Config:       globalConfig,
 	}
@@ -119,18 +126,25 @@ func createRouter() router.Router {
 	return r
 }
 
-func handleEvent(notification notifier.Notification) {
-	if notifier.RequireReload(notification.Command) {
-		newRouter := createRouter()
-		register := proxy.NewRegister(newRouter, proxy.Params{
-			StatsClient:            statsClient,
-			FlushInterval:          globalConfig.BackendFlushInterval,
-			IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
-			CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
-		})
+func handleEvent(repo api.Repository) func(notification notifier.Notification) {
+	return func(notification notifier.Notification) {
+		if notifier.RequireReload(notification.Command) {
+			newRouter := createRouter()
+			register := proxy.NewRegister(newRouter, proxy.Params{
+				StatsClient:            statsClient,
+				FlushInterval:          globalConfig.BackendFlushInterval,
+				IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
+				CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
+			})
 
-		plugin.EmitEvent(plugin.ReloadEvent, plugin.OnReload{Register: register})
+			event := plugin.OnReload{
+				Register:   register,
+				Repository: repo,
+			}
 
-		server.Handler = newRouter
+			plugin.EmitEvent(plugin.ReloadEvent, event)
+
+			server.Handler = newRouter
+		}
 	}
 }
