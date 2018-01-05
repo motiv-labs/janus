@@ -46,31 +46,30 @@ func (gp *Provider) GetClaims(httpClient *http.Client) (jwt.MapClaims, error) {
 		wg            sync.WaitGroup
 		user          *github.User
 		usersOrgTeams OrganizationTeams
-		err           error
+		errs          []error
 	)
 
 	wg.Add(2)
-
-	go func() {
+	go func(user *github.User, client Client, httpClient *http.Client) {
 		defer wg.Done()
-		user, err = client.CurrentUser(httpClient)
+		user, err := client.CurrentUser(httpClient)
 		if err != nil {
-			err = errors.Wrap(err, "failed to get github users")
+			errs = append(errs, errors.Wrap(err, "failed to get github users"))
 		}
-	}()
+	}(user, client, httpClient)
 
-	go func() {
+	go func(usersOrgTeams OrganizationTeams, client Client, httpClient *http.Client) {
 		defer wg.Done()
-		usersOrgTeams, err = client.Teams(httpClient)
+		usersOrgTeams, err := client.Teams(httpClient)
 		if err != nil {
-			err = errors.Wrap(err, "failed to get github teams")
+			errs = append(errs, errors.Wrap(err, "failed to get github teams"))
 		}
-	}()
+	}(usersOrgTeams, client, httpClient)
 
 	wg.Wait()
 
-	if err != nil {
-		return nil, err
+	if len(errs) > 0 {
+		return nil, errs[0]
 	}
 
 	return jwt.MapClaims{
