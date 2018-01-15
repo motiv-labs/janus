@@ -2,6 +2,7 @@ package github
 
 import (
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/dgrijalva/jwt-go"
@@ -46,31 +47,31 @@ func (gp *Provider) GetClaims(httpClient *http.Client) (jwt.MapClaims, error) {
 		wg            sync.WaitGroup
 		user          *github.User
 		usersOrgTeams OrganizationTeams
-		err           error
+		errs          []string
 	)
 
 	wg.Add(2)
-
 	go func() {
 		defer wg.Done()
+		var err error
 		user, err = client.CurrentUser(httpClient)
 		if err != nil {
-			err = errors.Wrap(err, "failed to get github users")
+			errs = append(errs, "failed to get github users")
 		}
 	}()
 
 	go func() {
 		defer wg.Done()
+		var err error
 		usersOrgTeams, err = client.Teams(httpClient)
 		if err != nil {
-			err = errors.Wrap(err, "failed to get github teams")
+			errs = append(errs, "failed to get github teams")
 		}
 	}()
-
 	wg.Wait()
 
-	if err != nil {
-		return nil, err
+	if len(errs) > 0 {
+		return nil, errors.New(strings.Join(errs, ", "))
 	}
 
 	return jwt.MapClaims{
