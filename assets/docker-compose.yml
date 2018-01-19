@@ -25,3 +25,9 @@ services:
       - '9088:8080'
     volumes:
       - ./stubs/auth:/home/wiremock/mappings
+
+  jaeger:
+    image: jaegertracing/all-in-one
+    ports:
+      - '6831:6831/udp'
+      - '16686:16686'
