@@ -116,3 +116,7 @@
 [[constraint]]
   name = "github.com/alicebob/miniredis"
   version = "2.2.1"
+
+[[constraint]]
+  name = "github.com/uber/jaeger-client-go"
+  version = "2.11.2"

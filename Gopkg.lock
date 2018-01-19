@@ -31,6 +31,12 @@
   version = "2.2.1"
 
 [[projects]]
+  name = "github.com/apache/thrift"
+  packages = ["lib/go/thrift"]
+  revision = "b2a4d4ae21c789b689dd162deb819665567f481c"
+  version = "0.10.0"
+
+[[projects]]
   name = "github.com/asaskevich/govalidator"
   packages = ["."]
   revision = "521b25f4b05fd26bec69d9dedeb8f9c9a83939a8"
@@ -41,6 +47,12 @@
   packages = ["."]
   revision = "dbc1e22735aa6ed7bd9579a407c17bc7c4a4e046"
   version = "v0.4.1"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/codahale/hdrhistogram"
+  packages = ["."]
+  revision = "3a0bb77429bd3a61596f5e8a3172445844342120"
 
 [[projects]]
   name = "github.com/davecgh/go-spew"
@@ -267,6 +279,18 @@
   revision = "173748da739a410c5b0b813b956f89ff94730b4c"
 
 [[projects]]
+  name = "github.com/uber/jaeger-client-go"
+  packages = [".","config","internal/baggage","internal/baggage/remote","internal/spanlog","log","rpcmetrics","thrift-gen/agent","thrift-gen/baggage","thrift-gen/jaeger","thrift-gen/sampling","thrift-gen/zipkincore","utils"]
+  revision = "3ac96c6e679cb60a74589b0d0aa7c70a906183f7"
+  version = "v2.11.2"
+
+[[projects]]
+  name = "github.com/uber/jaeger-lib"
+  packages = ["metrics"]
+  revision = "7f95f4f7e80028096410abddaae2556e4c61b59f"
+  version = "v1.3.1"
+
+[[projects]]
   name = "github.com/ulule/limiter"
   packages = [".","drivers/middleware/stdlib","drivers/store/common","drivers/store/memory","drivers/store/redis"]
   revision = "fe4c2975cbe8dfd005b4450464817499ec10d1dd"
@@ -358,6 +382,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "a45690b599766f7706b01f15d119c9d700293d88de0552951345a45bb1791783"
+  inputs-digest = "fb0f56f51b0ee9f5e8d4e8faa1da9175c0a15c2c59005dd0dd438a95c3a4f57d"
   solver-name = "gps-cdcl"
   solver-version = 1
