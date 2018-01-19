@@ -1,10 +1,25 @@
 package main
 
 import (
+	"github.com/apex/log"
 	"github.com/spf13/cobra"
 )
 
-// RunVersion is the run command to check Janus version
-func RunVersion(cmd *cobra.Command, args []string) {
-	cmd.Printf("Janus v%s", version)
+var version = "0.0.0-dev"
+
+// NewVersionCmd creates a new version command
+func NewVersionCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:     "version",
+		Short:   "Print the version information",
+		Aliases: []string{"v"},
+		Run: func(cmd *cobra.Command, args []string) {
+			RunVersion()
+		},
+	}
+}
+
+// RunVersion runs the command to print the current version
+func RunVersion() {
+	log.Infof("janus %s", version)
 }
