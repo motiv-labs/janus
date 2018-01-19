@@ -1,6 +1,7 @@
 package config
 
 import (
+	"os/user"
 	"time"
 
 	"github.com/hellofresh/logging-go"
@@ -110,20 +111,17 @@ type AppdashTracing struct {
 	URL string `envconfig:"TRACING_APPDASH_URL"`
 }
 
+// JaegerTracing holds the Jaeger tracing configuration
+type JaegerTracing struct {
+	DSN string `envconfig:"JAEGER_DSN"`
+}
+
 // Tracing represents the distributed tracing configuration
 type Tracing struct {
+	Tracer             string             `envconfig:"TRACER"`
 	GoogleCloudTracing GoogleCloudTracing `mapstructure:"googleCloud"`
 	AppdashTracing     AppdashTracing     `mapstructure:"appdash"`
-}
-
-// IsGoogleCloudEnabled checks if google cloud is enabled
-func (t Tracing) IsGoogleCloudEnabled() bool {
-	return len(t.GoogleCloudTracing.Email) > 0 && len(t.GoogleCloudTracing.PrivateKey) > 0 && len(t.GoogleCloudTracing.PrivateKeyID) > 0 && len(t.GoogleCloudTracing.ProjectID) > 0
-}
-
-// IsAppdashEnabled checks if appdash is enabled
-func (t Tracing) IsAppdashEnabled() bool {
-	return len(t.AppdashTracing.DSN) > 0
+	JaegerTracing      JaegerTracing      `mapstructure:"jaeger"`
 }
 
 func init() {
@@ -151,7 +149,13 @@ func Load(configFile string) (*Specification, error) {
 	if configFile != "" {
 		viper.SetConfigFile(configFile)
 	} else {
+		usr, err := user.Current()
+		if err != nil {
+			return nil, err
+		}
+
 		viper.SetConfigName("janus")
+		viper.AddConfigPath(usr.HomeDir)
 		viper.AddConfigPath("/etc/janus")
 		viper.AddConfigPath(".")
 	}
