@@ -207,3 +207,75 @@ Feature: Proxy requests to upstream.
 
         When I request "/posts-public/nested/path" path with "GET" method
         Then I should receive 404 response code
+
+        Given request JSON payload:
+            """
+            {
+                "name":"one parameter",
+                "active":true,
+                "proxy":{
+                    "preserve_host":false,
+                    "listen_path":"/api/recipes/{id:[\\da-f]{24}}",
+                    "upstreams":{
+                        "balancing":"roundrobin",
+                        "targets":[
+                            {
+                                "target":"http://localhost:9089/recipes/{id}"
+                            }
+                        ]
+                    },
+                    "strip_path":false,
+                    "append_path":false,
+                    "enable_load_balancing":false,
+                    "methods":[
+                        "GET"
+                    ]
+                },
+                "health_check":{
+                    "url":"https://example.com/status"
+                }
+            }
+            """
+        When I request "/apis" API path with "POST" method
+        Then I should receive 201 response code
+
+        When I wait for a while
+        And I request "/api/recipes/5252b1b5301bbf46038b473f" path with "GET" method
+        Then I should receive 200 response code
+        And the response should contain "I'm a slug"
+
+        Given request JSON payload:
+            """
+            {
+                "name":"two parameters",
+                "active":true,
+                "proxy":{
+                    "preserve_host":false,
+                    "listen_path":"/api/recipes/{recipeId:[\\da-f]{24}}/menus/{menuId:[\\da-f]{24}}",
+                    "upstreams":{
+                        "balancing":"roundrobin",
+                        "targets":[
+                            {
+                                "target":"http://localhost:9089/recipes/{recipeId}/menus/{menuId}"
+                            }
+                        ]
+                    },
+                    "strip_path":false,
+                    "append_path":false,
+                    "enable_load_balancing":false,
+                    "methods":[
+                        "GET"
+                    ]
+                },
+                "health_check":{
+                    "url":"https://example.com/status"
+                }
+            }
+            """
+        When I request "/apis" API path with "POST" method
+        Then I should receive 201 response code
+
+        When I wait for a while
+        And I request "/api/recipes/5252b1b5301bbf46038b473f/menus/6362b1b5301bbf46038b4766" path with "GET" method
+        Then I should receive 200 response code
+        And the response should contain "A menu description"

@@ -48,23 +48,39 @@ var tests = []struct {
 		expectedContentType: "application/json; charset=utf-8",
 		expectedCode:        http.StatusOK,
 	},
+	{
+		description:         "Get one recipe - parameter interpolation",
+		url:                 "/api/recipes/5252b1b5301bbf46038b473f",
+		expectedContentType: "application/json; charset=utf-8",
+		expectedCode:        http.StatusOK,
+	},
+	{
+		description:         "No parameter to interpolate",
+		url:                 "/api/recipes/search",
+		expectedContentType: "application/json",
+		expectedCode:        http.StatusNotFound,
+	},
 }
 
 func TestSuccessfulProxy(t *testing.T) {
+	t.Parallel()
+
 	log.SetOutput(ioutil.Discard)
 
 	ts := test.NewServer(createRegisterAndRouter())
 	defer ts.Close()
 
 	for _, tc := range tests {
-		res, err := ts.Do(tc.method, tc.url, make(map[string]string))
-		assert.NoError(t, err)
-		if res != nil {
-			defer res.Body.Close()
-		}
+		t.Run(tc.description, func(t *testing.T) {
+			res, err := ts.Do(tc.method, tc.url, make(map[string]string))
+			assert.NoError(t, err)
+			if res != nil {
+				defer res.Body.Close()
+			}
 
-		assert.Equal(t, tc.expectedContentType, res.Header.Get("Content-Type"), tc.description)
-		assert.Equal(t, tc.expectedCode, res.StatusCode, tc.description)
+			assert.Equal(t, tc.expectedContentType, res.Header.Get("Content-Type"), tc.description)
+			assert.Equal(t, tc.expectedCode, res.StatusCode, tc.description)
+		})
 	}
 }
 
@@ -93,6 +109,22 @@ func createProxyDefinitions() []*Definition {
 			AppendPath:  true,
 			Upstreams:   &Upstreams{},
 			Methods:     []string{"GET"},
+		},
+		{
+			ListenPath: "/api/recipes/{id:[\\da-f]{24}}",
+			Upstreams: &Upstreams{
+				Balancing: "roundrobin",
+				Targets:   []*Target{{Target: "http://localhost:9089/recipes/{id}"}},
+			},
+			Methods: []string{"GET"},
+		},
+		{
+			ListenPath: "/api/recipes/search",
+			Upstreams: &Upstreams{
+				Balancing: "roundrobin",
+				Targets:   []*Target{{Target: "http://localhost:9089/recipes/{id}"}},
+			},
+			Methods: []string{"GET"},
 		},
 	}
 }
