@@ -105,26 +105,22 @@ type GoogleCloudTracing struct {
 	PrivateKeyID string `envconfig:"TRACING_GC_PRIVATE_ID"`
 }
 
-// AppdashTracing holds the Appdash tracing configuration
-type AppdashTracing struct {
-	DSN string `envconfig:"TRACING_APPDASH_DSN"`
-	URL string `envconfig:"TRACING_APPDASH_URL"`
-}
-
 // JaegerTracing holds the Jaeger tracing configuration
 type JaegerTracing struct {
-	DSN string `envconfig:"JAEGER_DSN"`
+	DSN         string `envconfig:"JAEGER_DSN"`
+	ServiceName string `envconfig:"JAEGER_SERVICE_NAME"`
 }
 
 // Tracing represents the distributed tracing configuration
 type Tracing struct {
 	Tracer             string             `envconfig:"TRACER"`
 	GoogleCloudTracing GoogleCloudTracing `mapstructure:"googleCloud"`
-	AppdashTracing     AppdashTracing     `mapstructure:"appdash"`
 	JaegerTracing      JaegerTracing      `mapstructure:"jaeger"`
 }
 
 func init() {
+	serviceName := "janus"
+
 	viper.SetDefault("port", "8080")
 	viper.SetDefault("tls.port", "8433")
 	viper.SetDefault("tls.redirect", true)
@@ -135,11 +131,10 @@ func init() {
 	viper.SetDefault("web.tls.port", "8444")
 	viper.SetDefault("web.tls.redisrect", true)
 	viper.SetDefault("web.credentials.algorithm", "HS256")
-	viper.SetDefault("web.credentials.basic.users", map[string]string{
-		"admin": "admin",
-	})
+	viper.SetDefault("web.credentials.basic.users", map[string]string{"admin": "admin"})
 	viper.SetDefault("stats.dsn", "log://")
 	viper.SetDefault("stats.errorsSection", "error-log")
+	viper.SetDefault("tracing.jaeger.serviceName", serviceName)
 
 	logging.InitDefaults(viper.GetViper(), "log")
 }
