@@ -26,8 +26,6 @@ func Test_LoadEnv(t *testing.T) {
 	assert.Equal(t, []string{"api", "foo", "bar"}, globalConfig.Stats.AutoDiscoverWhiteList)
 	assert.Equal(t, "error-log", globalConfig.Stats.ErrorsSection)
 	assert.False(t, globalConfig.TLS.IsHTTPS())
-	assert.False(t, globalConfig.Tracing.IsGoogleCloudEnabled())
-	assert.False(t, globalConfig.Tracing.IsAppdashEnabled())
 	assert.Equal(t, map[string]string{"admin": "admin", "test": "test"}, globalConfig.Web.Credentials.Basic.Users)
 	assert.Equal(t, map[string]string{"hellofresh": "tests", "tests": "devs"}, globalConfig.Web.Credentials.Github.Teams)
 	assert.Equal(t, []string{"hellofresh", "tests"}, globalConfig.Web.Credentials.Github.Organizations)
