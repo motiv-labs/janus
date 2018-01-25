@@ -1,7 +1,8 @@
 package main
 
 import (
-	log "github.com/sirupsen/logrus"
+	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
@@ -14,12 +15,7 @@ func NewVersionCmd() *cobra.Command {
 		Short:   "Print the version information",
 		Aliases: []string{"v"},
 		Run: func(cmd *cobra.Command, args []string) {
-			RunVersion()
+			fmt.Printf("janus %s", version)
 		},
 	}
-}
-
-// RunVersion runs the command to print the current version
-func RunVersion() {
-	log.Infof("janus %s", version)
 }
