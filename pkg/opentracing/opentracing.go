@@ -8,6 +8,7 @@ import (
 
 	"github.com/hellofresh/gcloud-opentracing"
 	"github.com/hellofresh/janus/pkg/config"
+	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 	jaeger "github.com/uber/jaeger-client-go"
@@ -46,7 +47,7 @@ func ToContext(r *http.Request, span opentracing.Span) *http.Request {
 }
 
 func buildGCloud(config config.GoogleCloudTracing) (opentracing.Tracer, error) {
-	tracer, err := gcloudtracer.NewTracer(
+	return gcloudtracer.NewTracer(
 		context.Background(),
 		gcloudtracer.WithLogger(log.StandardLogger()),
 		gcloudtracer.WithProject(config.ProjectID),
@@ -56,23 +57,24 @@ func buildGCloud(config config.GoogleCloudTracing) (opentracing.Tracer, error) {
 			PrivateKeyID: config.PrivateKeyID,
 		}),
 	)
-	if err != nil {
-		return nil, err
-	}
-
-	return tracer, nil
 }
 
 func buildJaeger(c config.JaegerTracing) (opentracing.Tracer, io.Closer, error) {
+	bufferFLushInterval, err := time.ParseDuration(c.BufferFlushInterval)
+	if err != nil {
+		return nil, noopCloser{}, errors.Wrap(err, "could not parse buffer flush interval for jaeger")
+	}
+
 	cfg := jaegercfg.Configuration{
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  jaeger.SamplerTypeConst,
 			Param: 1,
 		},
 		Reporter: &jaegercfg.ReporterConfig{
-			LogSpans:            true,
-			BufferFlushInterval: 1 * time.Second,
+			LogSpans:            c.LogSpans,
+			BufferFlushInterval: bufferFLushInterval,
 			LocalAgentHostPort:  c.DSN,
+			QueueSize:           c.QueueSize,
 		},
 	}
 

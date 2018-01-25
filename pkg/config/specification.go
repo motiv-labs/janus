@@ -107,8 +107,11 @@ type GoogleCloudTracing struct {
 
 // JaegerTracing holds the Jaeger tracing configuration
 type JaegerTracing struct {
-	DSN         string `envconfig:"JAEGER_DSN"`
-	ServiceName string `envconfig:"JAEGER_SERVICE_NAME"`
+	DSN                 string `envconfig:"JAEGER_DSN"`
+	ServiceName         string `envconfig:"JAEGER_SERVICE_NAME"`
+	BufferFlushInterval string `envconfig:"JAEGER_BUFFER_FLUSH_INTERVAL"`
+	LogSpans            bool   `envconfig:"JAEGER_LOG_SPANS"`
+	QueueSize           int    `envconfig:"JAEGER_QUEUE_SIZE"`
 }
 
 // Tracing represents the distributed tracing configuration
@@ -135,6 +138,8 @@ func init() {
 	viper.SetDefault("stats.dsn", "log://")
 	viper.SetDefault("stats.errorsSection", "error-log")
 	viper.SetDefault("tracing.jaeger.serviceName", serviceName)
+	viper.SetDefault("tracing.jaeger.bufferFlushInterval", "1s")
+	viper.SetDefault("tracing.jaeger.logSpans", false)
 
 	logging.InitDefaults(viper.GetViper(), "log")
 }
