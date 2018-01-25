@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	gcloudTracing = "gcloud"
+	gcloudTracing = "googleCloud"
 	jaegerTracing = "jaeger"
 )
 
