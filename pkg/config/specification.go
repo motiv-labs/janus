@@ -107,16 +107,16 @@ type GoogleCloudTracing struct {
 
 // JaegerTracing holds the Jaeger tracing configuration
 type JaegerTracing struct {
-	DSN                 string `envconfig:"JAEGER_DSN"`
-	ServiceName         string `envconfig:"JAEGER_SERVICE_NAME"`
-	BufferFlushInterval string `envconfig:"JAEGER_BUFFER_FLUSH_INTERVAL"`
-	LogSpans            bool   `envconfig:"JAEGER_LOG_SPANS"`
-	QueueSize           int    `envconfig:"JAEGER_QUEUE_SIZE"`
+	DSN                 string `envconfig:"TRACING_JAEGER_DSN"`
+	ServiceName         string `envconfig:"TRACING_JAEGER_SERVICE_NAME"`
+	BufferFlushInterval string `envconfig:"TRACING_JAEGER_BUFFER_FLUSH_INTERVAL"`
+	LogSpans            bool   `envconfig:"TRACING_JAEGER_LOG_SPANS"`
+	QueueSize           int    `envconfig:"TRACING_JAEGER_QUEUE_SIZE"`
 }
 
 // Tracing represents the distributed tracing configuration
 type Tracing struct {
-	Tracer             string             `envconfig:"TRACER"`
+	Tracer             string             `envconfig:"TRACING_TRACER"`
 	GoogleCloudTracing GoogleCloudTracing `mapstructure:"googleCloud"`
 	JaegerTracing      JaegerTracing      `mapstructure:"jaeger"`
 }
