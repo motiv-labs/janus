@@ -70,7 +70,7 @@
 
 [[constraint]] 
   name = "github.com/mitchellh/mapstructure"
-  branch = "master"
+  revision = "b4575eea38cca1123ec2dc90c26529b5c5acfcff"
 
 [[constraint]]
   name = "github.com/opentracing/opentracing-go"
