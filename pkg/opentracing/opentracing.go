@@ -16,6 +16,11 @@ import (
 	"github.com/uber/jaeger-lib/metrics"
 )
 
+const (
+	gcloudTracing = "gcloud"
+	jaegerTracing = "jaeger"
+)
+
 type noopCloser struct{}
 
 func (n noopCloser) Close() error { return nil }
@@ -23,11 +28,11 @@ func (n noopCloser) Close() error { return nil }
 // Build a tracer based on the configuration provided
 func Build(config config.Tracing) (opentracing.Tracer, io.Closer, error) {
 	switch config.Tracer {
-	case "gcloud":
+	case gcloudTracing:
 		log.Debug("Using google cloud platform (stackdriver trace) as tracing system")
 		tracer, err := buildGCloud(config.GoogleCloudTracing)
 		return tracer, noopCloser{}, err
-	case "jaeger":
+	case jaegerTracing:
 		return buildJaeger(config.JaegerTracing)
 	default:
 		log.Debug("No tracer selected")
