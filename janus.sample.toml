@@ -144,7 +144,7 @@
   #   privateKey = ""
   #   privateKeyID = ""
 
-# Jeager - Stackdriver Trace
+# Jeager Distributed Tracing
   # [jaeger]
   #   dsn = "localhost:6831"
   #   serviceName = ""
