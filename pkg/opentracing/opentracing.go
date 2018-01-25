@@ -8,7 +8,6 @@ import (
 
 	"github.com/hellofresh/gcloud-opentracing"
 	"github.com/hellofresh/janus/pkg/config"
-	"github.com/hellofresh/janus/pkg/opentracing/appdash"
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 	jaeger "github.com/uber/jaeger-client-go"
@@ -26,9 +25,6 @@ func Build(config config.Tracing) (opentracing.Tracer, io.Closer, error) {
 	case "gcloud":
 		log.Debug("Using google cloud platform (stackdriver trace) as tracing system")
 		tracer, err := buildGCloud(config.GoogleCloudTracing)
-		return tracer, noopCloser{}, err
-	case "appdash":
-		tracer, err := buildAppdash(config.AppdashTracing)
 		return tracer, noopCloser{}, err
 	case "jaeger":
 		return buildJaeger(config.JaegerTracing)
@@ -67,27 +63,6 @@ func buildGCloud(config config.GoogleCloudTracing) (opentracing.Tracer, error) {
 	return tracer, nil
 }
 
-func buildAppdash(config config.AppdashTracing) (opentracing.Tracer, error) {
-	server := appdash.NewServer(config.DSN, config.URL)
-
-	appdashFields := log.WithFields(log.Fields{
-		"appdash_dsn":    config.DSN,
-		"appdash_web_ui": config.URL,
-	})
-
-	if config.URL != "" {
-		appdashFields.Debug("Using local appdash server as tracing system")
-		err := server.Listen()
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		appdashFields.Debug("Using remote appdash server as tracing system")
-	}
-
-	return server.GetTracer(), nil
-}
-
 func buildJaeger(c config.JaegerTracing) (opentracing.Tracer, io.Closer, error) {
 	cfg := jaegercfg.Configuration{
 		Sampler: &jaegercfg.SamplerConfig{
@@ -102,7 +77,7 @@ func buildJaeger(c config.JaegerTracing) (opentracing.Tracer, io.Closer, error) 
 	}
 
 	return cfg.New(
-		"janus",
+		c.ServiceName,
 		jaegercfg.Logger(jaegerLoggerAdapter{log.StandardLogger()}),
 		jaegercfg.Metrics(metrics.NullFactory),
 	)
