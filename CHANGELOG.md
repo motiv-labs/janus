@@ -2,21 +2,24 @@
 
 ## Added
 - Check GitHub permissions. Sets `is_admin` into the jwt token when the chosen provider is Github
+- Jaeger support as distributed tracing backend
+- Added Proxy Listen Path validation to prevent `chi` from panicking in case of invalid listen path
+- Added load balancing for upstream targets. Now you can add multiple upstream targets and Janus will balance the requests.
 
 ## Fixed
 
 - Monitor health check endpoints only of active proxies. Reported on #203
 - Fix hot reload was not working when using in memory storage implementation
 - Fix oauth servers post endpoint incorrect behaviour. Reported on #234
-
-## Added
-
-- Added Proxy Listen Path validation to prevent `chi` from panicking in case of invalid listen path
-- Added load balancing for upstream targets. Now you can add multiple upstream targets and Janus will balance the requests.
-
-## Fixed
-
 - Add constant time compare to basic auth password. Reported on #194
+
+## Removed
+
+- Appdash support
+
+## Updated
+
+- THe docker image does not depend on a github release anymore
 
 ## Deprecated
 
@@ -118,7 +121,7 @@
 
 ## Added
 
-- Added Open Tracing support. Available tracers are Google Cloud Platform, Zipkin and appdash.
+- Added Open Tracing support. Available tracers are Google Cloud Platform and Jaeger.
 
 # 2.0.0
 

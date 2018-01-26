@@ -1,6 +1,7 @@
 package config
 
 import (
+	"os/user"
 	"time"
 
 	"github.com/hellofresh/logging-go"
@@ -104,29 +105,25 @@ type GoogleCloudTracing struct {
 	PrivateKeyID string `envconfig:"TRACING_GC_PRIVATE_ID"`
 }
 
-// AppdashTracing holds the Appdash tracing configuration
-type AppdashTracing struct {
-	DSN string `envconfig:"TRACING_APPDASH_DSN"`
-	URL string `envconfig:"TRACING_APPDASH_URL"`
+// JaegerTracing holds the Jaeger tracing configuration
+type JaegerTracing struct {
+	DSN                 string `envconfig:"TRACING_JAEGER_DSN"`
+	ServiceName         string `envconfig:"TRACING_JAEGER_SERVICE_NAME"`
+	BufferFlushInterval string `envconfig:"TRACING_JAEGER_BUFFER_FLUSH_INTERVAL"`
+	LogSpans            bool   `envconfig:"TRACING_JAEGER_LOG_SPANS"`
+	QueueSize           int    `envconfig:"TRACING_JAEGER_QUEUE_SIZE"`
 }
 
 // Tracing represents the distributed tracing configuration
 type Tracing struct {
+	Provider           string             `envconfig:"TRACING_PROVIDER"`
 	GoogleCloudTracing GoogleCloudTracing `mapstructure:"googleCloud"`
-	AppdashTracing     AppdashTracing     `mapstructure:"appdash"`
-}
-
-// IsGoogleCloudEnabled checks if google cloud is enabled
-func (t Tracing) IsGoogleCloudEnabled() bool {
-	return len(t.GoogleCloudTracing.Email) > 0 && len(t.GoogleCloudTracing.PrivateKey) > 0 && len(t.GoogleCloudTracing.PrivateKeyID) > 0 && len(t.GoogleCloudTracing.ProjectID) > 0
-}
-
-// IsAppdashEnabled checks if appdash is enabled
-func (t Tracing) IsAppdashEnabled() bool {
-	return len(t.AppdashTracing.DSN) > 0
+	JaegerTracing      JaegerTracing      `mapstructure:"jaeger"`
 }
 
 func init() {
+	serviceName := "janus"
+
 	viper.SetDefault("port", "8080")
 	viper.SetDefault("tls.port", "8433")
 	viper.SetDefault("tls.redirect", true)
@@ -137,11 +134,12 @@ func init() {
 	viper.SetDefault("web.tls.port", "8444")
 	viper.SetDefault("web.tls.redisrect", true)
 	viper.SetDefault("web.credentials.algorithm", "HS256")
-	viper.SetDefault("web.credentials.basic.users", map[string]string{
-		"admin": "admin",
-	})
+	viper.SetDefault("web.credentials.basic.users", map[string]string{"admin": "admin"})
 	viper.SetDefault("stats.dsn", "log://")
 	viper.SetDefault("stats.errorsSection", "error-log")
+	viper.SetDefault("tracing.jaeger.serviceName", serviceName)
+	viper.SetDefault("tracing.jaeger.bufferFlushInterval", "1s")
+	viper.SetDefault("tracing.jaeger.logSpans", false)
 
 	logging.InitDefaults(viper.GetViper(), "log")
 }
@@ -151,7 +149,13 @@ func Load(configFile string) (*Specification, error) {
 	if configFile != "" {
 		viper.SetConfigFile(configFile)
 	} else {
+		usr, err := user.Current()
+		if err != nil {
+			return nil, err
+		}
+
 		viper.SetConfigName("janus")
+		viper.AddConfigPath(usr.HomeDir)
 		viper.AddConfigPath("/etc/janus")
 		viper.AddConfigPath(".")
 	}

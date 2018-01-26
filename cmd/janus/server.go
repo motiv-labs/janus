@@ -46,11 +46,12 @@ func RunServer(cmd *cobra.Command, args []string) {
 
 	initConfig()
 	initLog()
-	initDistributedTracing()
 	initStatsd()
 	initStorage()
 	initDatabase()
+	dtCloser := initDistributedTracing()
 
+	defer dtCloser.Close()
 	defer statsClient.Close()
 	defer globalConfig.Log.Flush()
 	defer session.Close()

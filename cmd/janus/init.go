@@ -1,6 +1,7 @@
 package main
 
 import (
+	"io"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -11,7 +12,7 @@ import (
 	"github.com/hellofresh/stats-go"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/hooks"
-	"github.com/opentracing/opentracing-go"
+	opentracing "github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 )
@@ -40,19 +41,21 @@ func initConfig() {
 func initLog() {
 	err := globalConfig.Log.Apply()
 	if nil != err {
-		log.WithError(err).Panic("Could not apply logging configurations")
+		log.WithError(err).Fatal("Could not apply logging configurations")
 	}
 }
 
 // initializes distributed tracing
-func initDistributedTracing() {
+func initDistributedTracing() io.Closer {
 	log.Debug("Initializing distributed tracing")
-	tracer, err := tracerfactory.Build(globalConfig.Tracing)
+	tracer, closer, err := tracerfactory.Build(globalConfig.Tracing)
 	if err != nil {
-		log.WithError(err).Panic("Could not build a tracer")
+		log.WithError(err).Fatal("Could not build a tracer")
 	}
 
 	opentracing.SetGlobalTracer(tracer)
+
+	return closer
 }
 
 func initStatsd() {
@@ -68,7 +71,7 @@ func initStatsd() {
 
 	statsClient, err = stats.NewClient(globalConfig.Stats.DSN, globalConfig.Stats.Prefix)
 	if err != nil {
-		log.WithError(err).Panic("Error initializing statsd client")
+		log.WithError(err).Fatal("Error initializing statsd client")
 	}
 
 	statsClient.SetHTTPMetricCallback(bucket.NewHasIDAtSecondLevelCallback(&bucket.SecondLevelIDConfig{
@@ -93,7 +96,7 @@ func initStorage() {
 	log.WithField("dsn", globalConfig.Storage.DSN).Debug("Initializing storage")
 	s, err := store.Build(globalConfig.Storage.DSN)
 	if nil != err {
-		log.Panic(err)
+		log.Fatal(err)
 	}
 
 	storage = s
@@ -109,7 +112,7 @@ func initDatabase() {
 		log.WithField("dsn", globalConfig.Database.DSN).Debug("Trying to connect to MongoDB...")
 		session, err = mgo.Dial(globalConfig.Database.DSN)
 		if err != nil {
-			log.Panic(err)
+			log.Fatal(err)
 		}
 
 		log.Debug("Connected to MongoDB")

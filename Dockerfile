@@ -1,17 +1,18 @@
-FROM alpine AS builder
+FROM golang:1.9-alpine AS builder
 
-ARG JANUS_VERSION
+WORKDIR /go/src/github.com/hellofresh/janus
 
-RUN apk add --no-cache openssl tar \
-    && wget -O janus.tar.gz https://github.com/hellofresh/janus/releases/download/${JANUS_VERSION}/janus_linux-amd64.tar.gz \
-    && tar -xzf janus.tar.gz -C /tmp
+COPY . .
+
+RUN apk add --update bash make git
+RUN make
 
 # ---
 
 FROM alpine
 
 ADD assets/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder /tmp/janus_linux-amd64 /
+COPY --from=builder ./janus_linux-amd64 /
 
 RUN mkdir -p /etc/janus/apis && \
     mkdir -p /etc/janus/auth
