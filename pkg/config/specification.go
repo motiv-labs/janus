@@ -116,7 +116,7 @@ type JaegerTracing struct {
 
 // Tracing represents the distributed tracing configuration
 type Tracing struct {
-	Tracer             string             `envconfig:"TRACING_TRACER"`
+	Provider           string             `envconfig:"TRACING_PROVIDER"`
 	GoogleCloudTracing GoogleCloudTracing `mapstructure:"googleCloud"`
 	JaegerTracing      JaegerTracing      `mapstructure:"jaeger"`
 }

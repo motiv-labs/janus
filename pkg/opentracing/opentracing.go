@@ -27,7 +27,7 @@ func (n noopCloser) Close() error { return nil }
 
 // Build a tracer based on the configuration provided
 func Build(config config.Tracing) (opentracing.Tracer, io.Closer, error) {
-	switch config.Tracer {
+	switch config.Provider {
 	case gcloudTracing:
 		log.Debug("Using google cloud platform (stackdriver trace) as tracing system")
 		tracer, err := buildGCloud(config.GoogleCloudTracing)
