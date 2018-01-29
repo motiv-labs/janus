@@ -83,3 +83,21 @@ Now that we understand how the hosts, uris, and methods properties work together
     }
 }
 ```
+
+*Named url parameters:* you can have named parameters inside your upstream and then specify where they should be in the targets, like the following:
+```json
+{
+    "name": "My API",
+    "proxy": {
+        "listen_path": "/myresource/{id:[\\da-f]{24}}",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://my-application.com/api/myresource/{id}"}
+            ]
+        },
+        "methods": ["GET"]
+    }
+}
+```
+When you define a parameter in the upstream you can provide regex to match a pattern, then when you define the target you can put the parameter anywhere you like.

@@ -5,6 +5,7 @@
 - Jaeger support as distributed tracing backend
 - Added Proxy Listen Path validation to prevent `chi` from panicking in case of invalid listen path
 - Added load balancing for upstream targets. Now you can add multiple upstream targets and Janus will balance the requests.
+- Added support for url parameters both in listen path and upstreams.
 
 ## Fixed
 

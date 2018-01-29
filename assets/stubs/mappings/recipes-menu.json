@@ -1,0 +1,13 @@
+{
+    "request": {
+        "method": "GET",
+        "urlPathPattern": "/recipes/5252b1b5301bbf46038b473f/menus/6362b1b5301bbf46038b4766"
+    },
+    "response": {
+        "status": 200,
+        "headers": {
+            "Content-Type": "application/json; charset=utf-8"
+        },
+        "jsonBody": {"description": "A menu description"}
+    }
+}
