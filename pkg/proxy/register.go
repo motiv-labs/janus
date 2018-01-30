@@ -85,16 +85,17 @@ func (p *Register) createDirector(proxyDefinition *Definition, balancer Balancer
 				log.WithError(err).Error("Could not elect one upstream")
 				return
 			}
-			log.WithField("target", upstream.Target).Debug("Target upstream elected ")
+			log.WithField("target", upstream.Target).Debug("Target upstream elected")
 			upstreamURL = upstream.Target
 		} else {
-			log.Warn("The upstream URL is deprecated. Use Upstreams instead")
+			log.WithField("upstream_url", proxyDefinition.UpstreamURL).
+				Warn("The upstream URL is deprecated. Use Upstreams instead")
 			upstreamURL = proxyDefinition.UpstreamURL
 		}
 
 		target, err := url.Parse(upstreamURL)
 		if err != nil {
-			log.WithError(err).Error("Could not parse the target URL")
+			log.WithError(err).WithField("upstream_url", upstreamURL).Error("Could not parse the target URL")
 			return
 		}
 
@@ -151,7 +152,7 @@ func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, metho
 
 	if strings.Index(listenPath, "/") != 0 {
 		log.WithField("listen_path", listenPath).
-			Error("Route listen path must begin with '/'.Skipping invalid route.")
+			Error("Route listen path must begin with '/'. Skipping invalid route.")
 	} else {
 		for _, method := range methods {
 			if strings.ToUpper(method) == methodAll {
