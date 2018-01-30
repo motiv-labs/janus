@@ -152,7 +152,7 @@ func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, metho
 
 	if strings.Index(listenPath, "/") != 0 {
 		log.WithField("listen_path", listenPath).
-			Error("Route listen path must begin with '/'.Skipping invalid route.")
+			Error("Route listen path must begin with '/'. Skipping invalid route.")
 	} else {
 		for _, method := range methods {
 			if strings.ToUpper(method) == methodAll {
