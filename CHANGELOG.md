@@ -3,6 +3,7 @@
 # 3.5.0
 
 ## Added
+
 - Check GitHub permissions. Sets `is_admin` into the jwt token when the chosen provider is Github
 - Jaeger support as distributed tracing backend
 - Added Proxy Listen Path validation to prevent `chi` from panicking in case of invalid listen path
