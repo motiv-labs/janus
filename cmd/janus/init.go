@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/afex/hystrix-go/hystrix/metric_collector"
 	"github.com/afex/hystrix-go/plugins"
 	"github.com/hellofresh/janus/pkg/config"
 	tracerfactory "github.com/hellofresh/janus/pkg/opentracing"
