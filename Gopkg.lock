@@ -24,10 +24,27 @@
   version = "v0.7.4"
 
 [[projects]]
+  name = "github.com/DataDog/datadog-go"
+  packages = ["statsd"]
+  revision = "9487d3a9d3be5bf3cf60b86ae810b97926964515"
+  version = "2.0.0"
+
+[[projects]]
   name = "github.com/Knetic/govaluate"
   packages = ["."]
   revision = "d216395917cc49052c7c7094cf57f09657ca08a8"
   version = "v3.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/afex/hystrix-go"
+  packages = [
+    "hystrix",
+    "hystrix/metric_collector",
+    "hystrix/rolling",
+    "plugins"
+  ]
+  revision = "27fae8d30f1a3cbcab6618d2ee55a4cb43064376"
 
 [[projects]]
   name = "github.com/alicebob/miniredis"
@@ -55,6 +72,12 @@
   packages = ["."]
   revision = "dbc1e22735aa6ed7bd9579a407c17bc7c4a4e046"
   version = "v0.4.1"
+
+[[projects]]
+  name = "github.com/cactus/go-statsd-client"
+  packages = ["statsd"]
+  revision = "138b925ccdf617776955904ba7759fce64406cec"
+  version = "v3.1.1"
 
 [[projects]]
   branch = "master"
@@ -180,7 +203,6 @@
   packages = [
     ".",
     "bucket",
-    "hooks",
     "incrementer",
     "state",
     "timer"
@@ -247,6 +269,12 @@
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/rcrowley/go-metrics"
+  packages = ["."]
+  revision = "8732c616f52954686704c8645fe1a9d59e9df7c1"
 
 [[projects]]
   name = "github.com/rs/cors"
@@ -489,6 +517,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "379061914d52ee2ede3170e5d59b3a4d66cdf64c4e0b51dfafcb9d8b15064b2c"
+  inputs-digest = "370559e9e246c984c07f84e34eca4308c5fe7bf73e292313ea2c2e39d2488938"
   solver-name = "gps-cdcl"
   solver-version = 1

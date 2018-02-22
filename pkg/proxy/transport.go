@@ -7,8 +7,10 @@ import (
 	"net/http/httputil"
 	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
 	"github.com/hellofresh/janus/pkg/router"
 	stats "github.com/hellofresh/stats-go"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -46,6 +48,13 @@ type Params struct {
 	FlushInterval time.Duration
 
 	Outbound OutChain
+
+	Breaker Breaker
+}
+
+// Breaker is the circuit breaker identifier configuration
+type Breaker struct {
+	ID string
 }
 
 // OutLink interface for outbound request plugins
@@ -61,11 +70,12 @@ type InChain []router.Constructor
 type Transport struct {
 	statsClient stats.Client
 	outbound    OutChain
+	breaker     Breaker
 }
 
 // NewTransport creates a new instance of Transport
-func NewTransport(statsClient stats.Client, outbound OutChain) *Transport {
-	return &Transport{statsClient, outbound}
+func NewTransport(statsClient stats.Client, outbound OutChain, breaker Breaker) *Transport {
+	return &Transport{statsClient: statsClient, outbound: outbound, breaker: breaker}
 }
 
 // NewTransportWithParams creates a new instance of Transport with the given params
@@ -99,7 +109,7 @@ func NewTransportWithParams(o Params) *Transport {
 		}()
 	}
 
-	return NewTransport(o.StatsClient, o.Outbound)
+	return NewTransport(o.StatsClient, o.Outbound, o.Breaker)
 }
 
 // NewInChain variadic constructor for inbound plugin sequence
@@ -116,9 +126,21 @@ func NewOutChain(out ...OutLink) OutChain {
 func (s *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
 	timing := s.statsClient.BuildTimer().Start()
 
-	// use default RoundTrip function handle the actual request/response
-	resp, err = http.DefaultTransport.RoundTrip(req)
-	if err != nil {
+	err = hystrix.Do(s.breaker.ID, func() error {
+		resp, err = http.DefaultTransport.RoundTrip(req)
+		if err != nil {
+			return err
+		}
+
+		// treat 500 and above as errors for the sake of the circuit breaker
+		if resp.StatusCode >= http.StatusInternalServerError {
+			return errors.New("internal server error")
+		}
+
+		return nil
+	}, nil)
+
+	if err != nil && resp == nil {
 		s.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
 			TrackRequest(req, timing, false).
 			ResetHTTPRequestSection()

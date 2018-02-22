@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/afex/hystrix-go/plugins"
 	"github.com/hellofresh/janus/pkg/config"
 	tracerfactory "github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/store"
@@ -87,8 +88,17 @@ func initStatsd() {
 
 	_, appFile := filepath.Split(os.Args[0])
 	statsClient.TrackMetric("app", bucket.MetricOperation{"init", host, appFile})
-
 	log.AddHook(hooks.NewLogrusHook(statsClient, globalConfig.Stats.ErrorsSection))
+
+	// Setup metrics for circuit breaker
+	c, err := plugins.InitializeStatsdCollector(&plugins.StatsdCollectorConfig{
+		StatsdAddr: globalConfig.Stats.DSN,
+		Prefix:     globalConfig.Stats.Prefix,
+	})
+	metricCollector.Registry.Register(c.NewStatsdCollector)
+	if err != nil {
+		log.WithError(err).Error("Error initializing statsd client for circuit breaker")
+	}
 }
 
 // initializes the storage and managers

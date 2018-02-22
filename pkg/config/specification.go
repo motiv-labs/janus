@@ -4,6 +4,7 @@ import (
 	"os/user"
 	"time"
 
+	"github.com/afex/hystrix-go/hystrix"
 	"github.com/hellofresh/logging-go"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/pkg/errors"
@@ -25,6 +26,7 @@ type Specification struct {
 	Stats                Stats
 	Tracing              Tracing
 	TLS                  TLS
+	CircuitBreaker       CircuitBreaker
 }
 
 // Web represents the API configurations
@@ -121,6 +123,15 @@ type Tracing struct {
 	JaegerTracing      JaegerTracing      `mapstructure:"jaeger"`
 }
 
+// CircuitBreaker represents the global circuit breaker settings
+type CircuitBreaker struct {
+	Timeout               int `envconfig:"CB_TIMEOUT"`
+	MaxConcurrent         int `envconfig:"CB_MAX_CONCURRENT"`
+	VolumeThreshold       int `envconfig:"CB_VOLUME_THRESHOLD"`
+	SleepWindow           int `envconfig:"CB_SLEEP_WINDOW"`
+	ErrorPercentThreshold int `envconfig:"CB_ERROR_PRECENT_THRESHOLD"`
+}
+
 func init() {
 	serviceName := "janus"
 
@@ -140,6 +151,11 @@ func init() {
 	viper.SetDefault("tracing.jaeger.serviceName", serviceName)
 	viper.SetDefault("tracing.jaeger.bufferFlushInterval", "1s")
 	viper.SetDefault("tracing.jaeger.logSpans", false)
+	viper.SetDefault("circuitBreaker.timeout", hystrix.DefaultTimeout)
+	viper.SetDefault("circuitBreaker.MaxConcurrent", hystrix.DefaultMaxConcurrent)
+	viper.SetDefault("circuitBreaker.VolumeThreshold", hystrix.DefaultVolumeThreshold)
+	viper.SetDefault("circuitBreaker.SleepWindow", hystrix.DefaultSleepWindow)
+	viper.SetDefault("circuitBreaker.ErrorPercentThreshold", hystrix.DefaultErrorPercentThreshold)
 
 	logging.InitDefaults(viper.GetViper(), "log")
 }
@@ -168,6 +184,12 @@ func Load(configFile string) (*Specification, error) {
 	if err := viper.Unmarshal(&config); err != nil {
 		return nil, err
 	}
+
+	hystrix.DefaultTimeout = config.CircuitBreaker.Timeout
+	hystrix.DefaultMaxConcurrent = config.CircuitBreaker.MaxConcurrent
+	hystrix.DefaultVolumeThreshold = config.CircuitBreaker.VolumeThreshold
+	hystrix.DefaultSleepWindow = config.CircuitBreaker.SleepWindow
+	hystrix.DefaultErrorPercentThreshold = config.CircuitBreaker.ErrorPercentThreshold
 
 	return &config, nil
 }

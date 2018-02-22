@@ -123,3 +123,7 @@
 [[constraint]]
   name = "github.com/uber/jaeger-client-go"
   version = "2.11.2"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/afex/hystrix-go"

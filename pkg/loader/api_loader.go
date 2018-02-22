@@ -1,6 +1,7 @@
 package loader
 
 import (
+	"github.com/afex/hystrix-go/hystrix"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/plugin"
@@ -87,9 +88,20 @@ func (m *APILoader) getAPISpecs(repo api.Repository) []*api.Spec {
 	}
 
 	var specs []*api.Spec
-	for _, definition := range definitions {
-		specs = append(specs, &api.Spec{Definition: definition})
+	for _, d := range definitions {
+		m.createCircuitBreakerDefinition(d)
+		specs = append(specs, &api.Spec{Definition: d})
 	}
 
 	return specs
+}
+
+func (m *APILoader) createCircuitBreakerDefinition(d *api.Definition) {
+	hystrix.ConfigureCommand(d.Proxy.ListenPath, hystrix.CommandConfig{
+		Timeout:                d.CircuitBreaker.Timeout,
+		MaxConcurrentRequests:  d.CircuitBreaker.MaxConcurrentRequests,
+		ErrorPercentThreshold:  d.CircuitBreaker.ErrorPercentThreshold,
+		RequestVolumeThreshold: d.CircuitBreaker.RequestVolumeThreshold,
+		SleepWindow:            d.CircuitBreaker.SleepWindow,
+	})
 }
