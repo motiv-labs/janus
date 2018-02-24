@@ -2,9 +2,11 @@ package api
 
 import (
 	"encoding/json"
+	"regexp"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/proxy"
+	"github.com/pkg/errors"
 )
 
 // Spec Holds an api definition and basic options
@@ -45,6 +47,13 @@ func NewDefinition() *Definition {
 
 // Validate validates proxy data
 func (d *Definition) Validate() (bool, error) {
+	r := regexp.MustCompile(`^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$`)
+
+	slug := r.MatchString(d.Name)
+	if !slug {
+		return false, errors.New("Name cannot contain non-URL friendly characters")
+	}
+
 	return govalidator.ValidateStruct(d)
 }
 

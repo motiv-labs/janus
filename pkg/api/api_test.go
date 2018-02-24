@@ -33,3 +33,12 @@ func TestFailedValidation(t *testing.T) {
 	assert.Error(t, err)
 	assert.False(t, isValid)
 }
+
+func TestNameFailedValidation(t *testing.T) {
+	instance := api.NewDefinition()
+	instance.Name = "test~"
+	isValid, err := instance.Validate()
+
+	assert.Error(t, err)
+	assert.False(t, isValid)
+}
