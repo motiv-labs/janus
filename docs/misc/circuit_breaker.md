@@ -9,7 +9,8 @@ Set the following environment variables to overwrite the settings globally:
 *CB_MAX_CONCURRENT* CB_MAX_CONCURRENT is how many commands of the same type can run at the same time
 *CB_VOLUME_THRESHOLD* CB_VOLUME_THRESHOLD is the minimum number of requests needed before a circuit can be tripped due to health
 *CB_SLEEP_WINDOW* CB_SLEEP_WINDOW is how long, in milliseconds, to wait after a circuit opens before testing for recovery
-*CB_ERROR_PRECENT_THRESHOLD* CB_ERROR_PRECENT_THRESHOL DefaultErrorPercentThreshold causes circuits to open once the rolling measure of errors exceeds this percent of requests
+*CB_ERROR_PRECENT_THRESHOLD* CB_ERROR_PRECENT_THRESHOLD DefaultErrorPercentThreshold causes circuits to open once the rolling measure of errors exceeds this percent of requests
+*CB_DASHBOARD_ENABLED* CB_DASHBOARD_ENABLED enables a streaming endpoint which can be consumed by the hystrix-dashboard
 
 To overwrite the settings per endpoint add the `circuit_breaker` config to your endpoint definition:
 ```json

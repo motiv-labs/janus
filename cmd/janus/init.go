@@ -2,10 +2,13 @@ package main
 
 import (
 	"io"
+	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 
+	"github.com/afex/hystrix-go/hystrix"
 	"github.com/afex/hystrix-go/hystrix/metric_collector"
 	"github.com/afex/hystrix-go/plugins"
 	"github.com/hellofresh/janus/pkg/config"
@@ -60,6 +63,26 @@ func initDistributedTracing() io.Closer {
 	return closer
 }
 
+func initCircuitBreaker() {
+	// Setup metrics for circuit breaker
+	c, err := plugins.InitializeStatsdCollector(&plugins.StatsdCollectorConfig{
+		StatsdAddr: globalConfig.Stats.DSN,
+		Prefix:     globalConfig.Stats.Prefix,
+	})
+
+	metricCollector.Registry.Register(c.NewStatsdCollector)
+	if err != nil {
+		log.WithError(err).Error("Error initializing statsd client for circuit breaker")
+	}
+
+	// Setup hystrix dashboard stream
+	if globalConfig.CircuitBreaker.DashboardEnabled {
+		hystrixStreamHandler := hystrix.NewStreamHandler()
+		hystrixStreamHandler.Start()
+		go http.ListenAndServe(net.JoinHostPort("", "81"), hystrixStreamHandler)
+	}
+}
+
 func initStatsd() {
 	sectionsTestsMap, err := bucket.ParseSectionsTestsMap(globalConfig.Stats.IDs)
 	if err != nil {
@@ -90,16 +113,6 @@ func initStatsd() {
 	_, appFile := filepath.Split(os.Args[0])
 	statsClient.TrackMetric("app", bucket.MetricOperation{"init", host, appFile})
 	log.AddHook(hooks.NewLogrusHook(statsClient, globalConfig.Stats.ErrorsSection))
-
-	// Setup metrics for circuit breaker
-	c, err := plugins.InitializeStatsdCollector(&plugins.StatsdCollectorConfig{
-		StatsdAddr: globalConfig.Stats.DSN,
-		Prefix:     globalConfig.Stats.Prefix,
-	})
-	metricCollector.Registry.Register(c.NewStatsdCollector)
-	if err != nil {
-		log.WithError(err).Error("Error initializing statsd client for circuit breaker")
-	}
 }
 
 // initializes the storage and managers

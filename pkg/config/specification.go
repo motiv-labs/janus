@@ -125,11 +125,12 @@ type Tracing struct {
 
 // CircuitBreaker represents the global circuit breaker settings
 type CircuitBreaker struct {
-	Timeout               int `envconfig:"CB_TIMEOUT"`
-	MaxConcurrent         int `envconfig:"CB_MAX_CONCURRENT"`
-	VolumeThreshold       int `envconfig:"CB_VOLUME_THRESHOLD"`
-	SleepWindow           int `envconfig:"CB_SLEEP_WINDOW"`
-	ErrorPercentThreshold int `envconfig:"CB_ERROR_PRECENT_THRESHOLD"`
+	Timeout               int  `envconfig:"CB_TIMEOUT"`
+	MaxConcurrent         int  `envconfig:"CB_MAX_CONCURRENT"`
+	VolumeThreshold       int  `envconfig:"CB_VOLUME_THRESHOLD"`
+	SleepWindow           int  `envconfig:"CB_SLEEP_WINDOW"`
+	ErrorPercentThreshold int  `envconfig:"CB_ERROR_PRECENT_THRESHOLD"`
+	DashboardEnabled      bool `envconfig:"CB_DASHBOARD_ENABLED"`
 }
 
 func init() {
@@ -156,6 +157,7 @@ func init() {
 	viper.SetDefault("circuitBreaker.VolumeThreshold", hystrix.DefaultVolumeThreshold)
 	viper.SetDefault("circuitBreaker.SleepWindow", hystrix.DefaultSleepWindow)
 	viper.SetDefault("circuitBreaker.ErrorPercentThreshold", hystrix.DefaultErrorPercentThreshold)
+	viper.SetDefault("circuitBreaker.DashboardEnabled", false)
 
 	logging.InitDefaults(viper.GetViper(), "log")
 }
