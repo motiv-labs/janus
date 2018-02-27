@@ -1,5 +1,3 @@
-// +build integration
-
 package loader
 
 import (
@@ -25,6 +23,7 @@ var tests = []struct {
 	headers         map[string]string
 	expectedHeaders map[string]string
 	expectedCode    int
+	cbFunc          func(t *testing.T) ConfigureCircuitBreakerFunc
 }{
 	{
 		description: "Get example route",
@@ -34,6 +33,28 @@ var tests = []struct {
 			"Content-Type": "application/json; charset=utf-8",
 		},
 		expectedCode: http.StatusOK,
+		cbFunc: func(t *testing.T) ConfigureCircuitBreakerFunc {
+			return func(name string, c CircuitBreakerConfig) {
+				if name == "" {
+					t.Fatalf("unexpected circuit breaker timeout: %d", c.Timeout)
+				}
+				if c.Timeout != 1 {
+					t.Fatalf("unexpected circuit breaker timeout: %d", c.Timeout)
+				}
+				if c.MaxConcurrentRequests != 2 {
+					t.Fatalf("unexpected circuit breaker max concurrent requests: %d", c.MaxConcurrentRequests)
+				}
+				if c.RequestVolumeThreshold != 3 {
+					t.Fatalf("unexpected circuit breaker request volume threshold: %d", c.RequestVolumeThreshold)
+				}
+				if c.SleepWindow != 4 {
+					t.Fatalf("unexpected circuit breaker sleep window: %d", c.SleepWindow)
+				}
+				if c.ErrorPercentThreshold != 5 {
+					t.Fatalf("unexpected circuit breaker error percent threshold: %d", c.ErrorPercentThreshold)
+				}
+			}
+		},
 	}, {
 		description: "Get invalid route",
 		method:      "GET",
@@ -42,18 +63,21 @@ var tests = []struct {
 			"Content-Type": "application/json",
 		},
 		expectedCode: http.StatusNotFound,
+		cbFunc: func(t *testing.T) ConfigureCircuitBreakerFunc {
+			return func(name string, c CircuitBreakerConfig) {}
+		},
 	},
 }
 
 func TestSuccessfulLoader(t *testing.T) {
 	log.SetOutput(ioutil.Discard)
 
-	routerInstance, err := createRegisterAndRouter()
-	assert.NoError(t, err)
-	ts := test.NewServer(routerInstance)
-	defer ts.Close()
-
 	for _, tc := range tests {
+		routerInstance, err := createRegisterAndRouter(tc.cbFunc(t))
+		assert.NoError(t, err)
+		ts := test.NewServer(routerInstance)
+		defer ts.Close()
+
 		res, err := ts.Do(tc.method, tc.url, tc.headers)
 		assert.NoError(t, err)
 		if res != nil {
@@ -68,7 +92,7 @@ func TestSuccessfulLoader(t *testing.T) {
 	}
 }
 
-func createRegisterAndRouter() (router.Router, error) {
+func createRegisterAndRouter(fn ConfigureCircuitBreakerFunc) (router.Router, error) {
 	r := createRouter()
 	r.Use(middleware.NewRecovery(errors.RecoveryHandler))
 
@@ -79,7 +103,7 @@ func createRegisterAndRouter() (router.Router, error) {
 		return nil, err
 	}
 
-	loader := NewAPILoader(register)
+	loader := NewAPILoader(register, ConfigureCircuitBreaker(fn))
 	loader.LoadDefinitions(proxyRepo)
 
 	return r, nil

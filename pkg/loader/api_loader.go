@@ -1,7 +1,6 @@
 package loader
 
 import (
-	"github.com/afex/hystrix-go/hystrix"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/plugin"
@@ -11,12 +10,42 @@ import (
 
 // APILoader is responsible for loading all apis form a datastore and configure them in a register
 type APILoader struct {
-	register *proxy.Register
+	register          *proxy.Register
+	breakerConfigFunc ConfigureCircuitBreakerFunc
+}
+
+// APILoaderOption represents an option you can pass to NewAPILoader
+type APILoaderOption func(*APILoader)
+
+// ConfigureCircuitBreaker is an APILoaderOption to apply a circuitbreaker
+func ConfigureCircuitBreaker(fn ConfigureCircuitBreakerFunc) APILoaderOption {
+	return func(a *APILoader) {
+		a.breakerConfigFunc = fn
+	}
+}
+
+// ConfigureCircuitBreakerFunc is a function to configure the circuit breaker per endpoint
+type ConfigureCircuitBreakerFunc func(name string, c CircuitBreakerConfig)
+
+// CircuitBreakerConfig are the configuration options for the circuit breaker
+type CircuitBreakerConfig struct {
+	Timeout                int
+	MaxConcurrentRequests  int
+	RequestVolumeThreshold int
+	SleepWindow            int
+	ErrorPercentThreshold  int
 }
 
 // NewAPILoader creates a new instance of the api manager
-func NewAPILoader(register *proxy.Register) *APILoader {
-	return &APILoader{register}
+func NewAPILoader(register *proxy.Register, options ...APILoaderOption) *APILoader {
+	a := &APILoader{register: register}
+
+	// apply option
+	for _, o := range options {
+		o(a)
+	}
+
+	return a
 }
 
 // LoadDefinitions registers all ApiDefinitions from a data source
@@ -97,7 +126,7 @@ func (m *APILoader) getAPISpecs(repo api.Repository) []*api.Spec {
 }
 
 func (m *APILoader) createCircuitBreakerDefinition(d *api.Definition) {
-	hystrix.ConfigureCommand(d.Proxy.ListenPath, hystrix.CommandConfig{
+	m.breakerConfigFunc(d.Proxy.ListenPath, CircuitBreakerConfig{
 		Timeout:                d.CircuitBreaker.Timeout,
 		MaxConcurrentRequests:  d.CircuitBreaker.MaxConcurrentRequests,
 		ErrorPercentThreshold:  d.CircuitBreaker.ErrorPercentThreshold,
