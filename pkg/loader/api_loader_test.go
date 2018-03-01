@@ -35,24 +35,12 @@ var tests = []struct {
 		expectedCode: http.StatusOK,
 		cbFunc: func(t *testing.T) ConfigureCircuitBreakerFunc {
 			return func(name string, c CircuitBreakerConfig) {
-				if name == "" {
-					t.Fatalf("unexpected circuit breaker timeout: %d", c.Timeout)
-				}
-				if c.Timeout != 1 {
-					t.Fatalf("unexpected circuit breaker timeout: %d", c.Timeout)
-				}
-				if c.MaxConcurrentRequests != 2 {
-					t.Fatalf("unexpected circuit breaker max concurrent requests: %d", c.MaxConcurrentRequests)
-				}
-				if c.RequestVolumeThreshold != 3 {
-					t.Fatalf("unexpected circuit breaker request volume threshold: %d", c.RequestVolumeThreshold)
-				}
-				if c.SleepWindow != 4 {
-					t.Fatalf("unexpected circuit breaker sleep window: %d", c.SleepWindow)
-				}
-				if c.ErrorPercentThreshold != 5 {
-					t.Fatalf("unexpected circuit breaker error percent threshold: %d", c.ErrorPercentThreshold)
-				}
+				assert.NotEmpty(t, name, "circuit breaker not should not be empty")
+				assert.Equal(t, 1, c.Timeout, "unexpected circuit breaker timeout")
+				assert.Equal(t, 2, c.MaxConcurrentRequests, "unexpected circuit breaker max concurrent requests")
+				assert.Equal(t, 3, c.RequestVolumeThreshold, "unexpected circuit breaker request volume threshold")
+				assert.Equal(t, 4, c.SleepWindow, "unexpected circuit breaker sleep window")
+				assert.Equal(t, 5, c.SleepWindow, "unexpected circuit breaker error percent threshold")
 			}
 		},
 	}, {
