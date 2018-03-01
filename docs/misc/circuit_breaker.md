@@ -11,6 +11,7 @@ Set the following environment variables to overwrite the settings globally:
 *CB_SLEEP_WINDOW* CB_SLEEP_WINDOW is how long, in milliseconds, to wait after a circuit opens before testing for recovery
 *CB_ERROR_PRECENT_THRESHOLD* CB_ERROR_PRECENT_THRESHOLD DefaultErrorPercentThreshold causes circuits to open once the rolling measure of errors exceeds this percent of requests
 *CB_DASHBOARD_ENABLED* CB_DASHBOARD_ENABLED enables a streaming endpoint which can be consumed by the hystrix-dashboard
+*CB_DASHBOARD_PORT* CB_DASHBOARD_PORT port for the streaming endpoint
 
 To overwrite the settings per endpoint add the `circuit_breaker` config to your endpoint definition:
 ```json

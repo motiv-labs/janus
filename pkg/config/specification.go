@@ -131,6 +131,7 @@ type CircuitBreaker struct {
 	SleepWindow           int  `envconfig:"CB_SLEEP_WINDOW"`
 	ErrorPercentThreshold int  `envconfig:"CB_ERROR_PRECENT_THRESHOLD"`
 	DashboardEnabled      bool `envconfig:"CB_DASHBOARD_ENABLED"`
+	DashboardPort         int  `envconfig:"CB_DASHBOARD_PORT"`
 }
 
 func init() {
@@ -158,6 +159,7 @@ func init() {
 	viper.SetDefault("circuitBreaker.SleepWindow", hystrix.DefaultSleepWindow)
 	viper.SetDefault("circuitBreaker.ErrorPercentThreshold", hystrix.DefaultErrorPercentThreshold)
 	viper.SetDefault("circuitBreaker.DashboardEnabled", false)
+	viper.SetDefault("circuitBreaker.DashboardPort", 81)
 
 	logging.InitDefaults(viper.GetViper(), "log")
 }

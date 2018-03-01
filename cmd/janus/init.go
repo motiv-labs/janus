@@ -79,7 +79,7 @@ func initCircuitBreaker() {
 	if globalConfig.CircuitBreaker.DashboardEnabled {
 		hystrixStreamHandler := hystrix.NewStreamHandler()
 		hystrixStreamHandler.Start()
-		go http.ListenAndServe(net.JoinHostPort("", "81"), hystrixStreamHandler)
+		go http.ListenAndServe(net.JoinHostPort("", globalConfig.CircuitBreaker.DashboardPort), hystrixStreamHandler)
 	}
 }
 
