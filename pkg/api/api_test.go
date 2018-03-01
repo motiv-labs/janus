@@ -34,11 +34,28 @@ func TestFailedValidation(t *testing.T) {
 	assert.False(t, isValid)
 }
 
-func TestNameFailedValidation(t *testing.T) {
-	instance := api.NewDefinition()
-	instance.Name = "test~"
-	isValid, err := instance.Validate()
+func TestNameValidation(t *testing.T) {
+	instanceSimple := api.NewDefinition()
+	instanceSimple.Name = "simple"
+	instanceSimple.Proxy.ListenPath = "/"
+	isValid, err := instanceSimple.Validate()
 
-	assert.Error(t, err)
-	assert.False(t, isValid)
+	require.NoError(t, err)
+	require.True(t, isValid)
+
+	instanceDash := api.NewDefinition()
+	instanceDash.Name = "with-dash-and-123"
+	instanceDash.Proxy.ListenPath = "/"
+	isValid, err = instanceDash.Validate()
+
+	require.NoError(t, err)
+	require.True(t, isValid)
+
+	instanceBadSymbol := api.NewDefinition()
+	instanceBadSymbol.Name = "test~"
+	instanceBadSymbol.Proxy.ListenPath = "/"
+	isValid, err = instanceBadSymbol.Validate()
+
+	require.Error(t, err)
+	require.False(t, isValid)
 }
