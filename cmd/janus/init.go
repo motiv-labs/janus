@@ -71,7 +71,7 @@ func initCircuitBreaker() {
 	}
 
 	// Setup metrics for circuit breaker
-	c, err = plugins.InitializeStatsdCollector(&plugins.StatsdCollectorConfig{
+	c, err := plugins.InitializeStatsdCollector(&plugins.StatsdCollectorConfig{
 		StatsdAddr: globalConfig.Stats.DSN,
 		Prefix:     globalConfig.Stats.Prefix,
 	})

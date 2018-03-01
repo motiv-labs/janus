@@ -125,13 +125,13 @@ type Tracing struct {
 
 // CircuitBreaker represents the global circuit breaker settings
 type CircuitBreaker struct {
-	Timeout               int  `envconfig:"CB_TIMEOUT"`
-	MaxConcurrent         int  `envconfig:"CB_MAX_CONCURRENT"`
-	VolumeThreshold       int  `envconfig:"CB_VOLUME_THRESHOLD"`
-	SleepWindow           int  `envconfig:"CB_SLEEP_WINDOW"`
-	ErrorPercentThreshold int  `envconfig:"CB_ERROR_PRECENT_THRESHOLD"`
-	DashboardEnabled      bool `envconfig:"CB_DASHBOARD_ENABLED"`
-	DashboardPort         int  `envconfig:"CB_DASHBOARD_PORT"`
+	Timeout               int    `envconfig:"CB_TIMEOUT"`
+	MaxConcurrent         int    `envconfig:"CB_MAX_CONCURRENT"`
+	VolumeThreshold       int    `envconfig:"CB_VOLUME_THRESHOLD"`
+	SleepWindow           int    `envconfig:"CB_SLEEP_WINDOW"`
+	ErrorPercentThreshold int    `envconfig:"CB_ERROR_PRECENT_THRESHOLD"`
+	DashboardEnabled      bool   `envconfig:"CB_DASHBOARD_ENABLED"`
+	DashboardPort         string `envconfig:"CB_DASHBOARD_PORT"`
 }
 
 func init() {
