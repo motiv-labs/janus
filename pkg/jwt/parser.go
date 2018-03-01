@@ -124,7 +124,13 @@ func (jp *Parser) Parse(tokenString string) (*jwt.Token, error) {
 		})
 
 		if err != nil {
-			continue
+			if err == ErrSigningMethodMismatch {
+				continue
+			}
+
+			if validationErr, ok := err.(jwt.ValidationError); ok && validationErr.Errors&jwt.ValidationErrorSignatureInvalid != 0 {
+				continue
+			}
 		}
 
 		return token, err
