@@ -8,29 +8,18 @@ import (
 	"github.com/pkg/errors"
 )
 
-var (
-	repo api.Repository
-)
-
 func init() {
 	plugin.RegisterEventHook(plugin.StartupEvent, onStartup)
 	plugin.RegisterEventHook(plugin.ReloadEvent, onReload)
 }
 
 func onStartup(event interface{}) error {
-	var err error
-
 	e, ok := event.(plugin.OnStartup)
 	if !ok {
 		return errors.New("Could not convert event to startup type")
 	}
 
-	repo, err = api.BuildRepository(e.Config.Database.DSN, e.MongoSession)
-	if err != nil {
-		return err
-	}
-
-	Load(e.Register, repo)
+	Load(e.Register, e.Repository)
 	return nil
 }
 
@@ -40,7 +29,7 @@ func onReload(event interface{}) error {
 		return errors.New("Could not convert event to reload type")
 	}
 
-	Load(e.Register, repo)
+	Load(e.Register, e.Repository)
 	return nil
 }
 

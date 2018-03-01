@@ -1,6 +1,7 @@
 package proxy
 
 import (
+	"fmt"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
@@ -73,6 +74,9 @@ func (p *Register) Add(route *Route) error {
 }
 
 func (p *Register) createDirector(proxyDefinition *Definition, balancer Balancer) func(req *http.Request) {
+	paramNameExtractor := router.NewListenPathParamNameExtractor()
+	matcher := router.NewListenPathMatcher()
+
 	return func(req *http.Request) {
 		var upstreamURL string
 		if proxyDefinition.IsBalancerDefined() && balancer != nil {
@@ -81,16 +85,17 @@ func (p *Register) createDirector(proxyDefinition *Definition, balancer Balancer
 				log.WithError(err).Error("Could not elect one upstream")
 				return
 			}
-			log.WithField("target", upstream.Target).Debug("Target upstream elected ")
+			log.WithField("target", upstream.Target).Debug("Target upstream elected")
 			upstreamURL = upstream.Target
 		} else {
-			log.Warn("The upstream URL is deprecated. Use Upstreams instead")
+			log.WithField("upstream_url", proxyDefinition.UpstreamURL).
+				Warn("The upstream URL is deprecated. Use Upstreams instead")
 			upstreamURL = proxyDefinition.UpstreamURL
 		}
 
 		target, err := url.Parse(upstreamURL)
 		if err != nil {
-			log.WithError(err).Error("Could not parse the target URL")
+			log.WithError(err).WithField("upstream_url", upstreamURL).Error("Could not parse the target URL")
 			return
 		}
 
@@ -106,7 +111,6 @@ func (p *Register) createDirector(proxyDefinition *Definition, balancer Balancer
 
 		if proxyDefinition.StripPath {
 			path = singleJoiningSlash(target.Path, req.URL.Path)
-			matcher := router.NewListenPathMatcher()
 			listenPath := matcher.Extract(proxyDefinition.ListenPath)
 
 			log.WithField("listen_path", listenPath).Debug("Stripping listen path")
@@ -114,6 +118,14 @@ func (p *Register) createDirector(proxyDefinition *Definition, balancer Balancer
 			if !strings.HasSuffix(target.Path, "/") && strings.HasSuffix(path, "/") {
 				path = path[:len(path)-1]
 			}
+		}
+
+		paramNames := paramNameExtractor.Extract(path)
+		parametrizedPath, err := p.applyParameters(req, path, paramNames)
+		if err != nil {
+			log.WithError(err).Warn("Unable to extract param from request")
+		} else {
+			path = parametrizedPath
 		}
 
 		log.WithField("path", path).Debug("Upstream Path")
@@ -141,7 +153,7 @@ func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, metho
 
 	if strings.Index(listenPath, "/") != 0 {
 		log.WithField("listen_path", listenPath).
-			Error("Route listen path must begin with '/'.Skipping invalid route.")
+			Error("Route listen path must begin with '/'. Skipping invalid route.")
 	} else {
 		for _, method := range methods {
 			if strings.ToUpper(method) == methodAll {
@@ -151,6 +163,25 @@ func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, metho
 			}
 		}
 	}
+}
+
+func (p *Register) applyParameters(req *http.Request, path string, paramNames []string) (string, error) {
+	for _, paramName := range paramNames {
+		paramValue := router.URLParam(req, paramName)
+
+		if len(paramValue) == 0 {
+			return "", errors.Errorf("unable to extract {%s} from request", paramName)
+		}
+
+		path = strings.Replace(
+			path,
+			fmt.Sprintf("{%s}", paramName),
+			paramValue,
+			-1,
+		)
+	}
+
+	return path, nil
 }
 
 func cleanSlashes(a string) string {

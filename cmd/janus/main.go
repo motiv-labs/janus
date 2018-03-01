@@ -1,14 +1,11 @@
 package main
 
 import (
-	"fmt"
-	"os"
-
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 )
 
 var (
-	version     string
 	configFile  string
 	versionFlag bool
 
@@ -24,38 +21,17 @@ with your API and when things go wrong.
 Complete documentation is available at https://hellofresh.gitbooks.io/janus`,
 		Run: RunServer,
 	}
-
-	checkCmd = &cobra.Command{
-		Use:   "check [config-file]",
-		Short: "Check the validity of a given Janus configuration file. (default /etc/janus/janus.toml)",
-		Args:  cobra.MinimumNArgs(1),
-		Run:   RunCheck,
-	}
-
-	versionCmd = &cobra.Command{
-		Use:   "version",
-		Short: "Print Janus's version",
-		Run:   RunVersion,
-	}
 )
 
 func init() {
-	cobra.OnInitialize(func() {
-		if versionFlag {
-			fmt.Println("Janus v" + version)
-			os.Exit(0)
-		}
-	})
+	rootCmd.Flags().StringVarP(&configFile, "config", "c", "", "config file (default is $PWD/janus.toml)")
 
-	rootCmd.Flags().StringVarP(&configFile, "config", "c", "", "Source of a configuration file")
-	rootCmd.Flags().BoolVarP(&versionFlag, "version", "v", false, "Print application version")
-	rootCmd.AddCommand(checkCmd)
-	rootCmd.AddCommand(versionCmd)
+	rootCmd.AddCommand(NewCheckCmd())
+	rootCmd.AddCommand(NewVersionCmd())
 }
 
 func main() {
 	if err := rootCmd.Execute(); err != nil {
-		fmt.Println(err)
-		os.Exit(-1)
+		log.WithError(err).Error("Something went wrong")
 	}
 }

@@ -40,7 +40,7 @@ This API Gateway offers powerful, yet lightweight features that allows fine gain
 * REST API, full programatic access to the internals makes it easy to manage your API users, keys and API Configuration from within your systems
 * Hot-reloading of configuration. No need to restart the process
 * Graceful shutdown of http connections
-* [OpenTracing](http://opentracing.io/) support for Distributed tracing (Supports Google Cloud Platform, Zipkin and Appdash)
+* [OpenTracing](http://opentracing.io/) support for Distributed tracing (Supports Google Cloud Platform and Jaeger)
 * HTTP/2 support
 * Rate Limiting, easily rate limit your API users, rate limiting is granular and can be applied on a per-key basis
 * CORS Filter, enable cors for your API, or even for specific endpoints

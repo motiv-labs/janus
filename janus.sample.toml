@@ -136,7 +136,7 @@
 ################################################################
 #
 # [tracing]
-
+# tracer = "jaeger"
 # Google Clooud Platform - Stackdriver Trace
   # [googleCloud]
   #   projectID = ""
@@ -144,11 +144,7 @@
   #   privateKey = ""
   #   privateKeyID = ""
 
-# Appdash - Embedded Server
-  # [appdash]
-  #   dsn = "localhost:8701"
-  #   url = ":8700"
-
-# Appdash - Remote Server
-  # [appdash]
-  #   dsn = "remote-url:8701"
+# Jeager Distributed Tracing
+  # [jaeger]
+  #   dsn = "localhost:6831"
+  #   serviceName = ""
