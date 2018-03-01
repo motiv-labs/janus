@@ -1,6 +1,7 @@
 package oauth2
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"testing"
@@ -13,7 +14,7 @@ type mockManager struct {
 	authorized bool
 }
 
-func (m *mockManager) IsKeyAuthorized(accessToken string) bool {
+func (m *mockManager) IsKeyAuthorized(ctx context.Context, accessToken string) bool {
 	return m.authorized
 }
 

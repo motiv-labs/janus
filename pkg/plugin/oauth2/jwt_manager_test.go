@@ -1,11 +1,14 @@
 package oauth2
 
 import (
+	"context"
 	"testing"
 	"time"
 
 	jwtbase "github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/jwt"
+	"github.com/hellofresh/janus/pkg/metrics"
+	stats "github.com/hellofresh/stats-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -19,7 +22,11 @@ func TestJWTManagerValidKey(t *testing.T) {
 	token, err := issueToken(signingMethod, 1*time.Hour)
 	require.NoError(t, err)
 
-	assert.True(t, manager.IsKeyAuthorized(token))
+	client, err := stats.NewClient("noop://", "")
+	require.NoError(t, err)
+
+	ctx := metrics.NewContext(context.Background(), client)
+	assert.True(t, manager.IsKeyAuthorized(ctx, token))
 }
 
 func TestJWTManagerInvalidKey(t *testing.T) {
@@ -28,7 +35,29 @@ func TestJWTManagerInvalidKey(t *testing.T) {
 	parser := jwt.NewParser(config)
 	manager := NewJWTManager(parser)
 
-	assert.False(t, manager.IsKeyAuthorized("wrong"))
+	client, err := stats.NewClient("noop://", "")
+	require.NoError(t, err)
+
+	ctx := metrics.NewContext(context.Background(), client)
+	assert.False(t, manager.IsKeyAuthorized(ctx, "wrong"))
+}
+
+func TestJWTManagerNilContext(t *testing.T) {
+	signingMethod := jwt.SigningMethod{Alg: "HS256", Key: "secret"}
+	config := jwt.NewParserConfig(signingMethod)
+	parser := jwt.NewParser(config)
+	manager := NewJWTManager(parser)
+
+	assert.False(t, manager.IsKeyAuthorized(nil, "wrong"))
+}
+
+func TestJWTManagerNilStast(t *testing.T) {
+	signingMethod := jwt.SigningMethod{Alg: "HS256", Key: "secret"}
+	config := jwt.NewParserConfig(signingMethod)
+	parser := jwt.NewParser(config)
+	manager := NewJWTManager(parser)
+
+	assert.False(t, manager.IsKeyAuthorized(context.Background(), "wrong"))
 }
 
 func issueToken(signingMethod jwt.SigningMethod, expireIn time.Duration) (string, error) {
