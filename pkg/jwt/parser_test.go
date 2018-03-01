@@ -92,7 +92,7 @@ func TestParser_Parse(t *testing.T) {
 	req := &http.Request{Header: http.Header{"Authorization": {"Bearer " + tokenString}}}
 
 	_, err = parser.ParseFromRequest(req)
-	assert.Equal(t, ErrFailedToParseToken, err)
+	require.Error(t, err)
 
 	parser.Config.SigningMethods = append(parser.Config.SigningMethods, SigningMethod{Alg: alg, Key: rsa2048Public})
 
