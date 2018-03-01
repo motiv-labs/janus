@@ -1,6 +1,7 @@
 package oauth2
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -29,7 +30,7 @@ func NewIntrospectionManager(url string, settings *IntrospectionSettings) (*Intr
 }
 
 // IsKeyAuthorized checks if the access token is valid
-func (o *IntrospectionManager) IsKeyAuthorized(accessToken string) bool {
+func (o *IntrospectionManager) IsKeyAuthorized(ctx context.Context, accessToken string) bool {
 	resp, err := o.doStatusRequest(accessToken)
 	defer resp.Body.Close()
 

@@ -1,6 +1,7 @@
 package oauth2
 
 import (
+	"context"
 	"strings"
 
 	"github.com/hellofresh/janus/pkg/jwt"
@@ -36,7 +37,7 @@ type ManagerType uint8
 
 // Manager holds the methods to handle tokens
 type Manager interface {
-	IsKeyAuthorized(accessToken string) bool
+	IsKeyAuthorized(ctx context.Context, accessToken string) bool
 }
 
 // ManagerFactory is used for creating a new manager
