@@ -62,7 +62,7 @@
 
 [[constraint]]
   name = "github.com/hellofresh/stats-go"
-  version = "0.4.2"
+  version = "0.5.0"
 
 [[constraint]]
   name = "github.com/kelseyhightower/envconfig"
