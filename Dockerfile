@@ -1,18 +1,18 @@
-FROM golang:1.9-alpine AS builder
+FROM golang:1.10-alpine AS builder
 
 WORKDIR /go/src/github.com/hellofresh/janus
 
 COPY . .
 
 RUN apk add --update bash make git
-RUN make
+RUN export JANUS_BUILD_ONLY_DEFAULT=1 && make
 
 # ---
 
 FROM alpine
 
 ADD assets/ca-certificates.crt /etc/ssl/certs/
-COPY --from=builder ./janus_linux-amd64 /
+COPY --from=builder /go/src/github.com/hellofresh/janus/dist/janus /
 
 RUN mkdir -p /etc/janus/apis && \
     mkdir -p /etc/janus/auth
