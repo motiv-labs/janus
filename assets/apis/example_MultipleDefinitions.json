@@ -25,11 +25,11 @@
         }
     ],
     "circuit_breaker":{
-      "timeout": 1,
-      "max_concurrent_requests": 2,
-      "request_volume_threshold": 3,
-      "sleep_window": 4,
-      "error_percent_threshold": 5
+      "timeout": 3000,
+      "max_concurrent_requests": 10,
+      "request_volume_threshold": 20,
+      "sleep_window": 5000,
+      "error_percent_threshold": 50
     },
     "health_check": {
         "url": "http://localhost:9089/status",
@@ -63,11 +63,11 @@
         }
     ],
     "circuit_breaker":{
-      "timeout": 1,
-      "max_concurrent_requests": 2,
-      "request_volume_threshold": 3,
-      "sleep_window": 4,
-      "error_percent_threshold": 5
+      "timeout": 3000,
+      "max_concurrent_requests": 10,
+      "request_volume_threshold": 20,
+      "sleep_window": 5000,
+      "error_percent_threshold": 50
     },
     "health_check": {
         "url": "http://localhost:9089/status",
@@ -101,11 +101,11 @@
         }
     ],
     "circuit_breaker":{
-      "timeout": 1,
-      "max_concurrent_requests": 2,
-      "request_volume_threshold": 3,
-      "sleep_window": 4,
-      "error_percent_threshold": 5
+      "timeout": 3000,
+      "max_concurrent_requests": 10,
+      "request_volume_threshold": 20,
+      "sleep_window": 5000,
+      "error_percent_threshold": 50
     },
     "health_check": {
         "url": "http://localhost:9089/status",

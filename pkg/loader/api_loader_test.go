@@ -36,11 +36,11 @@ var tests = []struct {
 		cbFunc: func(t *testing.T) ConfigureCircuitBreakerFunc {
 			return func(name string, c CircuitBreakerConfig) {
 				assert.NotEmpty(t, name, "circuit breaker not should not be empty")
-				assert.Equal(t, 1, c.Timeout, "unexpected circuit breaker timeout")
-				assert.Equal(t, 2, c.MaxConcurrentRequests, "unexpected circuit breaker max concurrent requests")
-				assert.Equal(t, 3, c.RequestVolumeThreshold, "unexpected circuit breaker request volume threshold")
-				assert.Equal(t, 4, c.SleepWindow, "unexpected circuit breaker sleep window")
-				assert.Equal(t, 5, c.ErrorPercentThreshold, "unexpected circuit breaker error percent threshold")
+				assert.Equal(t, 3000, c.Timeout, "unexpected circuit breaker timeout")
+				assert.Equal(t, 10, c.MaxConcurrentRequests, "unexpected circuit breaker max concurrent requests")
+				assert.Equal(t, 20, c.RequestVolumeThreshold, "unexpected circuit breaker request volume threshold")
+				assert.Equal(t, 5000, c.SleepWindow, "unexpected circuit breaker sleep window")
+				assert.Equal(t, 50, c.ErrorPercentThreshold, "unexpected circuit breaker error percent threshold")
 			}
 		},
 	}, {
