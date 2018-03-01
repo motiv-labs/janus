@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"sync"
 
+	"github.com/hellofresh/janus/pkg/metrics"
 	"github.com/hellofresh/janus/pkg/response"
 	"github.com/hellofresh/stats-go"
 	log "github.com/sirupsen/logrus"
@@ -31,6 +32,7 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 		)
 
 		log.WithField("path", r.URL.Path).Debug("Starting Stats middleware")
+		r.WithContext(metrics.NewContext(r.Context(), m.statsClient))
 
 		hooks := response.Hooks{
 			WriteHeader: func(next response.WriteHeaderFunc) response.WriteHeaderFunc {
