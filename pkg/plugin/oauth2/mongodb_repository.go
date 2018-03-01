@@ -38,10 +38,10 @@ func (r *MongoRepository) FindAll() ([]*OAuth, error) {
 	session, coll := r.getSession()
 	defer session.Close()
 
-	var result []*OAuth
+	result := []*OAuth{}
 	err := coll.Find(nil).All(&result)
 	if err != nil {
-		return nil, err
+		return result, err
 	}
 
 	return result, nil
