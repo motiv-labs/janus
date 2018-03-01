@@ -64,8 +64,14 @@ func initDistributedTracing() io.Closer {
 }
 
 func initCircuitBreaker() {
+	// hystrix-go only supports statsd at the moment
+	u, err := url.Parse(globalConfig.Stats.DSN)
+	if err != nil || u.Scheme != "statsd" {
+		return
+	}
+
 	// Setup metrics for circuit breaker
-	c, err := plugins.InitializeStatsdCollector(&plugins.StatsdCollectorConfig{
+	c, err = plugins.InitializeStatsdCollector(&plugins.StatsdCollectorConfig{
 		StatsdAddr: globalConfig.Stats.DSN,
 		Prefix:     globalConfig.Stats.Prefix,
 	})
