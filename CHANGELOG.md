@@ -1,5 +1,13 @@
 # Unreleased
 
+## Added
+
+- Extra JWT metrics for token validation success and error
+
+## Fixed
+ 
+ - Fixed a bug for the `oauth servers` when rows were empty it was returnig `null` on the json reponse.
+ 
 # 3.5.0
 
 ## Added
