@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/godog"
 	"github.com/hellofresh/janus/features/bootstrap"
@@ -15,12 +16,14 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
-var runGoDogTests bool
+var (
+	runGoDogTests bool
+	stopOnFailure bool
+)
 
 func init() {
 	flag.BoolVar(&runGoDogTests, "godog", false, "Set this flag is you want to run godog BDD tests")
-	flag.Bool("random", false, "Randomize features/scenarios execution. Flag is passed to godog")
-	flag.Bool("stop-on-failure", false, "Stop processing on first failed scenario.. Flag is passed to godog")
+	flag.BoolVar(&stopOnFailure, "stop-on-failure", false, "Stop processing on first failed scenario.. Flag is passed to godog")
 	flag.Parse()
 }
 
@@ -81,11 +84,18 @@ func TestMain(m *testing.M) {
 		os.Exit(m.Run())
 	}
 
-	status := godog.RunWithOptions("godogs", func(s *godog.Suite) {
+	status := godog.RunWithOptions("Janus", func(s *godog.Suite) {
 		FeatureContext(s)
 	}, godog.Options{
-		Format: "progress",
-		Paths:  []string{"features"},
+		Format:        "pretty",
+		Paths:         []string{"features"},
+		Randomize:     time.Now().UTC().UnixNano(),
+		StopOnFailure: stopOnFailure,
 	})
+
+	if st := m.Run(); st > status {
+		status = st
+	}
+
 	os.Exit(status)
 }
