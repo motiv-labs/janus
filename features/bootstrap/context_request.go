@@ -93,7 +93,7 @@ func (c *requestContext) doRequest(url, method string) error {
 		req, err = http.NewRequest(method, url, c.requestBody)
 	}
 	if nil != err {
-		return fmt.Errorf("Failed to instantiate request instance: %v", err)
+		return fmt.Errorf("failed to instantiate request instance: %v", err)
 	}
 
 	req.Header = c.requestHeaders
@@ -103,12 +103,12 @@ func (c *requestContext) doRequest(url, method string) error {
 
 	c.response, err = http.DefaultClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("Failed to perform request: %v", err)
+		return fmt.Errorf("failed to perform request: %v", err)
 	}
 
 	c.responseBody, err = ioutil.ReadAll(c.response.Body)
 	if nil != err {
-		return fmt.Errorf("Failed to read response body: %v", err)
+		return fmt.Errorf("failed to read response body: %v", err)
 	}
 
 	return nil
@@ -116,7 +116,12 @@ func (c *requestContext) doRequest(url, method string) error {
 
 func (c *requestContext) iShouldReceiveResponseCode(code int) error {
 	if c.response.StatusCode != code {
-		return fmt.Errorf("expected response code %d, but actual is %d", code, c.response.StatusCode)
+		return fmt.Errorf(
+			"expected response code %d, but actual is %d (response body is: %s)",
+			code,
+			c.response.StatusCode,
+			c.responseBody,
+		)
 	}
 
 	return nil
@@ -174,7 +179,7 @@ func (c *requestContext) responseJSONBodyIsAnArrayOfLength(length int) error {
 	var jsonResponse []interface{}
 	err := json.Unmarshal(c.responseBody, &jsonResponse)
 	if nil != err {
-		return fmt.Errorf("Failed to unmarshal JSON: %v", err)
+		return fmt.Errorf("failed to unmarshal JSON: %v", err)
 	}
 
 	if len(jsonResponse) != length {
@@ -203,7 +208,7 @@ func (c *requestContext) requestJWTTokenIsValidAdminToken() error {
 	jwtConfig := jwt.NewGuard(c.adminCred)
 	accessToken, err := jwt.IssueAdminToken(jwtConfig.SigningMethod, jwtgo.MapClaims{}, jwtConfig.Timeout)
 	if nil != err {
-		return fmt.Errorf("Failed to issue JWT: %v", err)
+		return fmt.Errorf("failed to issue JWT: %v", err)
 	}
 
 	c.requestHeaders.Set(headerAuthorization, "Bearer "+accessToken.Token)
