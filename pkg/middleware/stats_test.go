@@ -6,12 +6,13 @@ import (
 
 	"github.com/hellofresh/janus/pkg/test"
 	"github.com/hellofresh/stats-go"
+	"github.com/hellofresh/stats-go/client"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestSuccessfulStats(t *testing.T) {
-	statsClient, err := stats.NewClient("memory://", "")
+	statsClient, err := stats.NewClient("memory://")
 	require.NoError(t, err)
 
 	mw := NewStats(statsClient)
@@ -28,8 +29,8 @@ func TestSuccessfulStats(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 
-	require.IsType(t, &stats.MemoryClient{}, statsClient)
-	memoryClient := statsClient.(*stats.MemoryClient)
+	require.IsType(t, &client.Memory{}, statsClient)
+	memoryClient := statsClient.(*client.Memory)
 
 	require.Equal(t, 1, len(memoryClient.TimerMetrics), 1)
 	assert.Equal(t, "request.get.-.-", memoryClient.TimerMetrics[0].Bucket)
@@ -42,7 +43,7 @@ func TestSuccessfulStats(t *testing.T) {
 }
 
 func TestUnknownPath(t *testing.T) {
-	statsClient, err := stats.NewClient("memory://", "")
+	statsClient, err := stats.NewClient("memory://")
 	require.NoError(t, err)
 
 	mw := NewStats(statsClient)
@@ -61,8 +62,8 @@ func TestUnknownPath(t *testing.T) {
 
 	assert.Equal(t, http.StatusNotFound, w.Code)
 
-	require.IsType(t, &stats.MemoryClient{}, statsClient)
-	memoryClient := statsClient.(*stats.MemoryClient)
+	require.IsType(t, &client.Memory{}, statsClient)
+	memoryClient := statsClient.(*client.Memory)
 
 	require.Equal(t, 1, len(memoryClient.TimerMetrics), 1)
 	assert.Equal(t, "request.get.-not-found-.-", memoryClient.TimerMetrics[0].Bucket)

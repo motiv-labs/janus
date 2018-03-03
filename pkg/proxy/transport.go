@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/hellofresh/janus/pkg/router"
-	stats "github.com/hellofresh/stats-go"
+	"github.com/hellofresh/stats-go/client"
 )
 
 const (
@@ -25,7 +25,7 @@ const (
 // Params initialization options.
 type Params struct {
 	// StatsClient defines the stats client for tracing
-	StatsClient stats.Client
+	StatsClient client.Client
 
 	// When set, the proxy will skip the TLS verification on outgoing requests.
 	InsecureSkipVerify bool
@@ -59,12 +59,12 @@ type InChain []router.Constructor
 
 // Transport construct holding plugin sequences
 type Transport struct {
-	statsClient stats.Client
+	statsClient client.Client
 	outbound    OutChain
 }
 
 // NewTransport creates a new instance of Transport
-func NewTransport(statsClient stats.Client, outbound OutChain) *Transport {
+func NewTransport(statsClient client.Client, outbound OutChain) *Transport {
 	return &Transport{statsClient, outbound}
 }
 
