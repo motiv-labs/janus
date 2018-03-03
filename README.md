@@ -10,9 +10,7 @@
 
 > An API Gateway written in Go
 
-This is a lightweight API Gateway and Management Platform that enables you to control who accesses your API,
-when they access it and how they access it. Janus will also record detailed analytics on how your
-users are interacting with your API and when things go wrong.
+This is a lightweight API Gateway and Management Platform that enables you to control who accesses your API, when they access it and how they access it. Janus will also record detailed analytics on how your users are interacting with your API and when things go wrong.
 
 Go version 1.9 or later is required to build master, the current development version. Janus is officially supported on `linux/amd64`, `linux/i386`, `linux/arm64`, `darwin/i386`, `darwin/amd64`, `windows/i386` and `windows/amd64`.
 
