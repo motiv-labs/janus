@@ -47,8 +47,7 @@ This API Gateway offers powerful, yet lightweight features that allows fine gain
 
 ## Installation
 
-> Note: All examples here and in the documentation will be using [HTTPie](https://httpie.org/) for simplicity.
-But all requests can easily be converted to `curl` if needed.
+> Note: All examples here and in the documentation will be using [HTTPie](https://httpie.org/) for simplicity. But all requests can easily be converted to `curl` if needed.
 
 ### Docker
 
