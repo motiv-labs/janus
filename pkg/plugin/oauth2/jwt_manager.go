@@ -6,8 +6,8 @@ import (
 	jwtBase "github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/metrics"
-	stats "github.com/hellofresh/stats-go"
 	"github.com/hellofresh/stats-go/bucket"
+	"github.com/hellofresh/stats-go/client"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -55,7 +55,7 @@ func (m *JWTManager) IsKeyAuthorized(ctx context.Context, accessToken string) bo
 	return true
 }
 
-func shouldReport(client stats.Client, typeCheck bool, operation string) {
+func shouldReport(client client.Client, typeCheck bool, operation string) {
 	if typeCheck {
 		client.TrackMetric("tokens", bucket.MetricOperation{"jwt-manager", "parse-error", operation})
 	}

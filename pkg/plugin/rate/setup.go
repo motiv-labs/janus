@@ -4,11 +4,11 @@ import (
 	"net/http"
 	"time"
 
-	redis "github.com/go-redis/redis"
+	"github.com/go-redis/redis"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
-	stats "github.com/hellofresh/stats-go"
+	"github.com/hellofresh/stats-go/client"
 	"github.com/ulule/limiter"
 	"github.com/ulule/limiter/drivers/middleware/stdlib"
 	smemory "github.com/ulule/limiter/drivers/store/memory"
@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	statsClient stats.Client
+	statsClient client.Client
 	// ErrInvalidPolicy is used when an invalid policy was provided
 	ErrInvalidPolicy = errors.New(http.StatusBadRequest, "policy is not supported")
 	// ErrInvalidStorage is used when an invalid storage was provided

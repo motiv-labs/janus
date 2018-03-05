@@ -11,15 +11,17 @@ import (
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/hellofresh/stats-go"
 	"github.com/hellofresh/stats-go/bucket"
+	"github.com/hellofresh/stats-go/client"
 	"github.com/hellofresh/stats-go/hooks"
-	opentracing "github.com/opentracing/opentracing-go"
+	statsLog "github.com/hellofresh/stats-go/log"
+	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 )
 
 var (
 	globalConfig *config.Specification
-	statsClient  stats.Client
+	statsClient  client.Client
 	storage      store.Store
 	session      *mgo.Session
 )
@@ -59,6 +61,15 @@ func initDistributedTracing() io.Closer {
 }
 
 func initStatsd() {
+	statsLog.SetHandler(func(msg string, fields map[string]interface{}, err error) {
+		entry := log.WithFields(log.Fields(fields))
+		if err == nil {
+			entry.Debug(msg)
+		} else {
+			entry.WithError(err).Error(msg)
+		}
+	})
+
 	sectionsTestsMap, err := bucket.ParseSectionsTestsMap(globalConfig.Stats.IDs)
 	if err != nil {
 		log.WithError(err).WithField("config", globalConfig.Stats.IDs).
@@ -69,7 +80,7 @@ func initStatsd() {
 		WithField("map", sectionsTestsMap.String()).
 		Debug("Setting stats second level IDs")
 
-	statsClient, err = stats.NewClient(globalConfig.Stats.DSN, globalConfig.Stats.Prefix)
+	statsClient, err = stats.NewClient(globalConfig.Stats.DSN)
 	if err != nil {
 		log.WithError(err).Fatal("Error initializing statsd client")
 	}

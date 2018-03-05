@@ -211,7 +211,7 @@ Feature: Proxy requests to upstream.
         Given request JSON payload:
             """
             {
-                "name":"one parameter",
+                "name":"one-parameter",
                 "active":true,
                 "proxy":{
                     "preserve_host":false,
@@ -247,7 +247,7 @@ Feature: Proxy requests to upstream.
         Given request JSON payload:
             """
             {
-                "name":"two parameters",
+                "name":"two-parameters",
                 "active":true,
                 "proxy":{
                     "preserve_host":false,

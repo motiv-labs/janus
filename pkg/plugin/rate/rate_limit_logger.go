@@ -7,8 +7,8 @@ import (
 	"sync"
 
 	"github.com/hellofresh/janus/pkg/response"
-	"github.com/hellofresh/stats-go"
 	"github.com/hellofresh/stats-go/bucket"
+	"github.com/hellofresh/stats-go/client"
 	log "github.com/sirupsen/logrus"
 	"github.com/ulule/limiter"
 )
@@ -19,7 +19,7 @@ const (
 )
 
 // NewRateLimitLogger logs the IP of blocked users with rate limit
-func NewRateLimitLogger(lmt *limiter.Limiter, statsClient stats.Client) func(handler http.Handler) http.Handler {
+func NewRateLimitLogger(lmt *limiter.Limiter, statsClient client.Client) func(handler http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			var (
@@ -57,7 +57,7 @@ func NewRateLimitLogger(lmt *limiter.Limiter, statsClient stats.Client) func(han
 	}
 }
 
-func trackLimitState(lmt *limiter.Limiter, statsClient stats.Client, limiterIP net.IP, r *http.Request) {
+func trackLimitState(lmt *limiter.Limiter, statsClient client.Client, limiterIP net.IP, r *http.Request) {
 	context, err := lmt.Peek(context.Background(), limiterIP.String())
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{
