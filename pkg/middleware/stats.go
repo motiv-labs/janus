@@ -32,7 +32,7 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 		)
 
 		log.WithField("path", r.URL.Path).Debug("Starting Stats middleware")
-		r.WithContext(metrics.NewContext(r.Context(), m.statsClient))
+		r = r.WithContext(metrics.NewContext(r.Context(), m.statsClient))
 
 		hooks := response.Hooks{
 			WriteHeader: func(next response.WriteHeaderFunc) response.WriteHeaderFunc {

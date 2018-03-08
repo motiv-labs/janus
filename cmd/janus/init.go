@@ -13,7 +13,6 @@ import (
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
 	"github.com/hellofresh/stats-go/hooks"
-	statsLog "github.com/hellofresh/stats-go/log"
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2"
@@ -61,14 +60,15 @@ func initDistributedTracing() io.Closer {
 }
 
 func initStatsd() {
-	statsLog.SetHandler(func(msg string, fields map[string]interface{}, err error) {
-		entry := log.WithFields(log.Fields(fields))
-		if err == nil {
-			entry.Debug(msg)
-		} else {
-			entry.WithError(err).Error(msg)
-		}
-	})
+	// FIXME: this causes application hang because we're in the locked log already
+	//statsLog.SetHandler(func(msg string, fields map[string]interface{}, err error) {
+	//	entry := log.WithFields(log.Fields(fields))
+	//	if err == nil {
+	//		entry.Warn(msg)
+	//	} else {
+	//		entry.WithError(err).Warn(msg)
+	//	}
+	//})
 
 	sectionsTestsMap, err := bucket.ParseSectionsTestsMap(globalConfig.Stats.IDs)
 	if err != nil {
