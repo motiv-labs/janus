@@ -11,9 +11,9 @@ RUN export JANUS_BUILD_ONLY_DEFAULT=1 && make
 
 FROM alpine
 
-ADD assets/ca-certificates.crt /etc/ssl/certs/
 COPY --from=builder /go/src/github.com/hellofresh/janus/dist/janus /
 
+RUN apk add --no-cache ca-certificates
 RUN mkdir -p /etc/janus/apis && \
     mkdir -p /etc/janus/auth
 
