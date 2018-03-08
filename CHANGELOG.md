@@ -1,5 +1,7 @@
 # Unreleased
 
+# 3.6.0
+
 ## Added
 
 - Extra JWT metrics for token validation success and error
