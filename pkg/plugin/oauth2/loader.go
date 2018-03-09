@@ -1,8 +1,6 @@
 package oauth2
 
 import (
-	"net/http"
-
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
@@ -32,13 +30,12 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*Spec, repo Repository
 	log.Debug("Loading OAuth servers configurations")
 
 	for _, oauthServer := range oauthServers {
-		var corsHandler func(h http.Handler) http.Handler
-		var rateLimitHandler func(h http.Handler) http.Handler
+		var inChain proxy.InChain
 
 		logger := log.WithField("name", oauthServer.Name)
 		logger.Debug("Registering OAuth server")
 
-		corsHandler = cors.New(cors.Options{
+		corsHandler := cors.New(cors.Options{
 			AllowedOrigins:   oauthServer.CorsMeta.Domains,
 			AllowedMethods:   oauthServer.CorsMeta.Methods,
 			AllowedHeaders:   oauthServer.CorsMeta.RequestHeaders,
@@ -46,22 +43,28 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*Spec, repo Repository
 			AllowCredentials: true,
 		}).Handler
 
-		rate, err := limiter.NewRateFromFormatted(oauthServer.RateLimit.Limit)
-		if err != nil {
-			logger.WithError(err).Error("Not able to create rate limit")
+		inChain = append(inChain, corsHandler)
+
+		if oauthServer.RateLimit.Enabled {
+			rate, err := limiter.NewRateFromFormatted(oauthServer.RateLimit.Limit)
+			if err != nil {
+				logger.WithError(err).Error("Not able to create rate limit")
+			}
+
+			limiterStore := smemory.NewStore()
+			limiterInstance := limiter.New(limiterStore, rate)
+			rateLimitHandler := stdlib.NewMiddleware(limiterInstance).Handler
+
+			inChain = append(inChain, rateLimitHandler)
 		}
 
-		limiterStore := smemory.NewStore()
-		limiterInstance := limiter.New(limiterStore, rate)
-		rateLimitHandler = stdlib.NewMiddleware(limiterInstance).Handler
-
 		endpoints := map[*proxy.Definition]proxy.InChain{
-			oauthServer.Endpoints.Authorize:    proxy.NewInChain(corsHandler, rateLimitHandler),
-			oauthServer.Endpoints.Token:        proxy.NewInChain(NewSecretMiddleware(oauthServer).Handler, corsHandler, rateLimitHandler),
-			oauthServer.Endpoints.Introspect:   proxy.NewInChain(corsHandler, rateLimitHandler),
-			oauthServer.Endpoints.Revoke:       proxy.NewInChain(corsHandler, rateLimitHandler),
-			oauthServer.ClientEndpoints.Create: proxy.NewInChain(corsHandler, rateLimitHandler),
-			oauthServer.ClientEndpoints.Remove: proxy.NewInChain(corsHandler, rateLimitHandler),
+			oauthServer.Endpoints.Authorize:    inChain,
+			oauthServer.Endpoints.Token:        append(inChain, NewSecretMiddleware(oauthServer).Handler),
+			oauthServer.Endpoints.Introspect:   inChain,
+			oauthServer.Endpoints.Revoke:       inChain,
+			oauthServer.ClientEndpoints.Create: inChain,
+			oauthServer.ClientEndpoints.Remove: inChain,
 		}
 
 		m.registerRoutes(endpoints)
