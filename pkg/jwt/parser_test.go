@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	basejwt "github.com/dgrijalva/jwt-go"
+	baseJWT "github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -23,7 +23,7 @@ func TestParser_ParseFromRequest_jwtFromHeader(t *testing.T) {
 
 	req := &http.Request{Header: http.Header{}}
 
-	config := NewParserConfig(SigningMethod{Alg: alg, Key: key})
+	config := NewParserConfig(0, SigningMethod{Alg: alg, Key: key})
 	parser := NewParser(config)
 
 	_, err = parser.ParseFromRequest(req)
@@ -45,7 +45,7 @@ func TestParser_ParseFromRequest_jwtFromQuery(t *testing.T) {
 	tokenString, err := generateToken(alg, key)
 	require.NoError(t, err)
 
-	config := NewParserConfig(SigningMethod{Alg: alg, Key: key})
+	config := NewParserConfig(0, SigningMethod{Alg: alg, Key: key})
 	config.TokenLookup = "query:token"
 	parser := NewParser(config)
 
@@ -66,7 +66,7 @@ func TestParser_ParseFromRequest_jwtFromCookie(t *testing.T) {
 	tokenString, err := generateToken(alg, key)
 	require.NoError(t, err)
 
-	config := NewParserConfig(SigningMethod{Alg: alg, Key: key})
+	config := NewParserConfig(0, SigningMethod{Alg: alg, Key: key})
 	config.TokenLookup = "cookie:token"
 	parser := NewParser(config)
 
@@ -86,7 +86,7 @@ func TestParser_Parse(t *testing.T) {
 	tokenString, err := generateToken(alg, rsa2048Private)
 	require.NoError(t, err)
 
-	config := NewParserConfig(SigningMethod{Alg: "HS256", Key: time.Now().Format(time.RFC3339Nano)})
+	config := NewParserConfig(0, SigningMethod{Alg: "HS256", Key: time.Now().Format(time.RFC3339Nano)})
 	parser := NewParser(config)
 
 	req := &http.Request{Header: http.Header{"Authorization": {"Bearer " + tokenString}}}
@@ -105,7 +105,7 @@ func TestParser_Parse_ErrInvalidPEMBlock(t *testing.T) {
 	tokenString, err := generateToken(alg, rsa2048Private)
 	require.NoError(t, err)
 
-	config := NewParserConfig(SigningMethod{Alg: alg, Key: "invalid public key"})
+	config := NewParserConfig(0, SigningMethod{Alg: alg, Key: "invalid public key"})
 	parser := NewParser(config)
 
 	req := &http.Request{Header: http.Header{"Authorization": {"Bearer " + tokenString}}}
@@ -120,7 +120,7 @@ func TestParser_Parse_ErrNotRSAPublicKey(t *testing.T) {
 	tokenString, err := generateToken(alg, rsa2048Private)
 	require.NoError(t, err)
 
-	config := NewParserConfig(SigningMethod{Alg: alg, Key: rsa2048Private})
+	config := NewParserConfig(0, SigningMethod{Alg: alg, Key: rsa2048Private})
 	parser := NewParser(config)
 
 	req := &http.Request{Header: http.Header{"Authorization": {"Bearer " + tokenString}}}
@@ -135,7 +135,7 @@ func TestParser_Parse_ParsePKIXPublicKey(t *testing.T) {
 	tokenString, err := generateToken(alg, rsa2048Private)
 	require.NoError(t, err)
 
-	config := NewParserConfig(SigningMethod{Alg: alg, Key: `-----BEGIN PUBLIC KEY-----
+	config := NewParserConfig(0, SigningMethod{Alg: alg, Key: `-----BEGIN PUBLIC KEY-----
 AIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAvHA+KjSHPzVp7HIVGrQv
 xUNnYrfdUR5+MRn3SM/Ts7GwwfifIlTgqjRHjm+sPOhVauF+ZX5PkUmW/HBlOxsj
 zA55mCBFymO+nyjl/DhhFNLnKu3IWL8Q3IsnM1EgE9FHgwFqf3X5Eh5h2NdsOWPk
@@ -162,7 +162,7 @@ func TestParser_Parse_ErrBadPublicKey(t *testing.T) {
 	// ssh-keygen -t dsa
 	// openssl dsa -in ~/.ssh/id_dsa -outform pem > dsa_priv.pem
 	// openssl dsa -in dsa_priv.pem -pubout -out dsa_pub.pem
-	config := NewParserConfig(SigningMethod{Alg: alg, Key: `-----BEGIN PUBLIC KEY-----
+	config := NewParserConfig(0, SigningMethod{Alg: alg, Key: `-----BEGIN PUBLIC KEY-----
 MIIBtjCCASsGByqGSM44BAEwggEeAoGBAIATdqQyUyprc8NtzuttJz8JahT+vwVK
 4d2eVufm5IHyuqUyYroPQYpjQ1AfHOTE3ntmNFJcF+KhyqCTVdnaWwrmfiH2H6+D
 2b+O8J50QFONKgktxy5LSBpUIIJfbhJG6vWW5GETnKOC7unoMh7yWDkDBYx+sSdg
@@ -188,7 +188,7 @@ func TestParser_Parse_ErrUnsupportedSigningMethod(t *testing.T) {
 	tokenString, err := generateToken(alg, rsa2048Private)
 	require.NoError(t, err)
 
-	config := NewParserConfig(SigningMethod{Alg: alg, Key: rsa2048Public})
+	config := NewParserConfig(0, SigningMethod{Alg: alg, Key: rsa2048Public})
 	parser := NewParser(config)
 
 	req := &http.Request{Header: http.Header{"Authorization": {"Bearer " + tokenString}}}
@@ -246,21 +246,18 @@ func assertParseToken(t *testing.T, parser *Parser, r *http.Request) {
 	claims, ok := parser.GetMapClaims(token)
 	assert.True(t, ok)
 	assert.Equal(t, clientID, claims["iss"])
-
-	customClaims, ok := parser.GetMapClaims(token)
-	assert.True(t, ok)
-	assert.Equal(t, userName, customClaims["username"])
+	assert.Equal(t, userName, claims["username"])
 }
 
 func generateToken(alg, key string) (string, error) {
 	type userClaims struct {
 		Username string `json:"username"`
-		basejwt.StandardClaims
+		baseJWT.StandardClaims
 	}
 
-	token := basejwt.NewWithClaims(basejwt.GetSigningMethod(alg), userClaims{
+	token := baseJWT.NewWithClaims(baseJWT.GetSigningMethod(alg), userClaims{
 		userName,
-		basejwt.StandardClaims{
+		baseJWT.StandardClaims{
 			Issuer:    clientID,
 			IssuedAt:  time.Now().Unix(),
 			ExpiresAt: time.Now().Add(time.Hour).Unix(),
@@ -269,15 +266,15 @@ func generateToken(alg, key string) (string, error) {
 
 	var signingKey interface{}
 	switch token.Method.(type) {
-	case *basejwt.SigningMethodHMAC:
+	case *baseJWT.SigningMethodHMAC:
 		signingKey = []byte(key)
-	case *basejwt.SigningMethodRSA, *basejwt.SigningMethodRSAPSS:
+	case *baseJWT.SigningMethodRSA, *baseJWT.SigningMethodRSAPSS:
 		block, _ := pem.Decode([]byte(key))
 		if block == nil {
 			return "", ErrInvalidPEMBlock
 		}
 		if got, want := block.Type, "RSA PRIVATE KEY"; got != want {
-			return "", errors.New("Invalid RSA: expected RSA PRIVATE KEY block type")
+			return "", errors.New("invalid RSA: expected RSA PRIVATE KEY block type")
 		}
 
 		var err error
