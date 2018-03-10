@@ -1,5 +1,9 @@
 # Unreleased
 
+## Added
+
+- Leeway support for JWT date fields validation
+
 # 3.6.0
 
 ## Added
