@@ -79,7 +79,7 @@ Settings structure has the following format:
 ```
 
 List of signing methods allows signing method and keys rotation w/out immediate invalidation of the old one, so the
-tokens signed with ald and new methods will be valid.
+tokens signed with old and new methods will be valid.
 
 For backward compatibility the following settings format is also valid: `{"secret": "<key>"}` that is equal to the
 new format `[{"alg": "HS256", "key", "<key>"}]`.
