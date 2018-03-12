@@ -78,7 +78,7 @@ type IntrospectionSettings struct {
 type TokenStrategy struct {
 	Name     string      `bson:"name" json:"name"`
 	Settings interface{} `bson:"settings" json:"settings"`
-	// TODO: this should become part of the settings, but fot "jwt" strategy we expect array of signing methods
+	// TODO: this should become part of the settings, but for "jwt" strategy we expect array of signing methods
 	// at the moment, so this will be BC-breaking change. In the next major version we need to turn settings
 	// into object/dictionary and make leeway one of the settings.
 	Leeway int64 `bson:"leeway" json:"leeway"`
