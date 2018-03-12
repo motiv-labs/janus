@@ -15,7 +15,7 @@ import (
 
 func TestJWTManagerValidKey(t *testing.T) {
 	signingMethod := jwt.SigningMethod{Alg: "HS256", Key: "secret"}
-	config := jwt.NewParserConfig(signingMethod)
+	config := jwt.NewParserConfig(0, signingMethod)
 	parser := jwt.NewParser(config)
 	manager := NewJWTManager(parser)
 
@@ -31,7 +31,7 @@ func TestJWTManagerValidKey(t *testing.T) {
 
 func TestJWTManagerInvalidKey(t *testing.T) {
 	signingMethod := jwt.SigningMethod{Alg: "HS256", Key: "secret"}
-	config := jwt.NewParserConfig(signingMethod)
+	config := jwt.NewParserConfig(0, signingMethod)
 	parser := jwt.NewParser(config)
 	manager := NewJWTManager(parser)
 
@@ -44,7 +44,7 @@ func TestJWTManagerInvalidKey(t *testing.T) {
 
 func TestJWTManagerNilContext(t *testing.T) {
 	signingMethod := jwt.SigningMethod{Alg: "HS256", Key: "secret"}
-	config := jwt.NewParserConfig(signingMethod)
+	config := jwt.NewParserConfig(0, signingMethod)
 	parser := jwt.NewParser(config)
 	manager := NewJWTManager(parser)
 
@@ -53,7 +53,7 @@ func TestJWTManagerNilContext(t *testing.T) {
 
 func TestJWTManagerNilStast(t *testing.T) {
 	signingMethod := jwt.SigningMethod{Alg: "HS256", Key: "secret"}
-	config := jwt.NewParserConfig(signingMethod)
+	config := jwt.NewParserConfig(0, signingMethod)
 	parser := jwt.NewParser(config)
 	manager := NewJWTManager(parser)
 

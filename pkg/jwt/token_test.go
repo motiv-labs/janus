@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -17,7 +17,7 @@ func TestIssueAdminToken(t *testing.T) {
 	accessToken, err := IssueAdminToken(SigningMethod{alg, key}, jwt.MapClaims{"id": claimsID}, time.Hour)
 	require.NoError(t, err)
 
-	config := NewParserConfig(SigningMethod{Alg: alg, Key: key})
+	config := NewParserConfig(0, SigningMethod{Alg: alg, Key: key})
 	parser := NewParser(config)
 
 	token, err := parser.Parse(accessToken.Token)

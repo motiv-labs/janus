@@ -78,6 +78,10 @@ type IntrospectionSettings struct {
 type TokenStrategy struct {
 	Name     string      `bson:"name" json:"name"`
 	Settings interface{} `bson:"settings" json:"settings"`
+	// TODO: this should become part of the settings, but for "jwt" strategy we expect array of signing methods
+	// at the moment, so this will be BC-breaking change. In the next major version we need to turn settings
+	// into object/dictionary and make leeway one of the settings.
+	Leeway int64 `bson:"leeway" json:"leeway"`
 }
 
 // GetIntrospectionSettings returns the settings for introspection
@@ -95,6 +99,7 @@ func (t TokenStrategy) GetIntrospectionSettings() (*IntrospectionSettings, error
 func (t TokenStrategy) GetJWTSigningMethods() ([]jwt.SigningMethod, error) {
 	var methods []jwt.SigningMethod
 	err := mapstructure.Decode(t.Settings, &methods)
+	// TODO: remove legacy format support in couple minor releases
 	if err != nil {
 		var legacy struct {
 			Secret string `json:"secret"`

@@ -13,17 +13,17 @@ import (
 
 var (
 	// ErrSigningMethodMismatch is the error returned when token is signed with the method other than verified
-	ErrSigningMethodMismatch = errors.New("Signing method mismatch")
+	ErrSigningMethodMismatch = errors.New("signing method mismatch")
 	// ErrFailedToParseToken is the error returned when token is failed to parse and validate against secret and expiration date
-	ErrFailedToParseToken = errors.New("Failed to parse token")
+	ErrFailedToParseToken = errors.New("failed to parse token")
 	// ErrUnsupportedSigningMethod is the error returned when token is signed with unsupported by the library method
-	ErrUnsupportedSigningMethod = errors.New("Unsupported signing method")
+	ErrUnsupportedSigningMethod = errors.New("unsupported signing method")
 	// ErrInvalidPEMBlock is the error returned for keys expected to be PEM-encoded
-	ErrInvalidPEMBlock = errors.New("Invalid RSA: not PEM-encoded")
+	ErrInvalidPEMBlock = errors.New("invalid RSA: not PEM-encoded")
 	// ErrNotRSAPublicKey is the error returned for invalid RSA public key
-	ErrNotRSAPublicKey = errors.New("Invalid RSA: expected PUBLIC KEY block type")
+	ErrNotRSAPublicKey = errors.New("invalid RSA: expected PUBLIC KEY block type")
 	// ErrBadPublicKey is the error returned for invalid RSA public key
-	ErrBadPublicKey = errors.New("Invalid RSA: failed to assert public key")
+	ErrBadPublicKey = errors.New("invalid RSA: failed to assert public key")
 )
 
 // SigningMethod defines signing method algorithm and key
@@ -46,13 +46,17 @@ type ParserConfig struct {
 	// - "query:<name>"
 	// - "cookie:<name>"
 	TokenLookup string
+
+	// Leeway is the time in seconds to account for clock skew when checking nbf, iat or expiration times
+	Leeway int64
 }
 
 // NewParserConfig creates a new instance of ParserConfig
-func NewParserConfig(signingMethod ...SigningMethod) ParserConfig {
+func NewParserConfig(leeway int64, signingMethod ...SigningMethod) ParserConfig {
 	return ParserConfig{
 		SigningMethods: signingMethod,
 		TokenLookup:    "header:Authorization",
+		Leeway:         leeway,
 	}
 }
 
@@ -92,7 +96,7 @@ func (jp *Parser) ParseFromRequest(r *http.Request) (*jwt.Token, error) {
 // Parse a JWT token and validates it
 func (jp *Parser) Parse(tokenString string) (*jwt.Token, error) {
 	for _, method := range jp.Config.SigningMethods {
-		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.ParseWithClaims(tokenString, NewJanusClaims(jp.Config.Leeway), func(token *jwt.Token) (interface{}, error) {
 			if token.Method.Alg() != method.Alg {
 				return nil, ErrSigningMethodMismatch
 			}
@@ -141,8 +145,11 @@ func (jp *Parser) Parse(tokenString string) (*jwt.Token, error) {
 
 // GetMapClaims returns a map version of Claims Section
 func (jp *Parser) GetMapClaims(token *jwt.Token) (jwt.MapClaims, bool) {
-	claims, ok := token.Claims.(jwt.MapClaims)
-	return claims, ok
+	claims, ok := token.Claims.(*JanusClaims)
+	if !ok {
+		return jwt.MapClaims{}, ok
+	}
+	return claims.MapClaims, ok
 }
 
 func (jp *Parser) jwtFromHeader(r *http.Request, key string) (string, error) {
@@ -164,7 +171,7 @@ func (jp *Parser) jwtFromQuery(r *http.Request, key string) (string, error) {
 	token := r.URL.Query().Get(key)
 
 	if token == "" {
-		return "", errors.New("Query token empty")
+		return "", errors.New("query token empty")
 	}
 
 	return token, nil
@@ -174,7 +181,7 @@ func (jp *Parser) jwtFromCookie(r *http.Request, key string) (string, error) {
 	cookie, _ := r.Cookie(key)
 
 	if nil == cookie {
-		return "", errors.New("Cookie token empty")
+		return "", errors.New("cookie token empty")
 	}
 
 	return cookie.Value, nil

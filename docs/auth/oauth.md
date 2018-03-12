@@ -50,8 +50,9 @@ curl -X "GET" http://localhost:8080/auth/token?grant_type=client_credentials -H 
 | allowed_authorize_types       | The allowed authorize types for this oauth server                                         |
 | auth_login_redirect           | The auth login redirect URL                                                               |
 | secrets                       | A map of client_id: client_secret that allows you to authenticate only with the client_id |
-| token_strategy.name           | The token strategy for this server. Could be `introspection` or `jwt`                           |
-| token_strategy.settings       | Token strategy settings, see bellow by strategy              |
+| token_strategy.name           | The token strategy for this server. Could be `introspection` or `jwt`                     |
+| token_strategy.settings       | Token strategy settings, see bellow by strategy                                           |
+| token_strategy.leeway         | Token date fields validation leeway to solve clock skew problem                           |
 
 ## Token Strategy Settings
 
@@ -78,7 +79,7 @@ Settings structure has the following format:
 ```
 
 List of signing methods allows signing method and keys rotation w/out immediate invalidation of the old one, so the
-tokens signed with ald and new methods will be valid.
+tokens signed with old and new methods will be valid.
 
 For backward compatibility the following settings format is also valid: `{"secret": "<key>"}` that is equal to the
 new format `[{"alg": "HS256", "key", "<key>"}]`.
