@@ -1,6 +1,6 @@
 FROM golang:1.10-alpine AS builder
 
-ARG JANUS_VERSION='0.0.1-docker'
+ARG VERSION='0.0.1-docker'
 
 WORKDIR /go/src/github.com/hellofresh/janus
 
@@ -8,7 +8,7 @@ COPY . .
 
 RUN apk add --update bash make git
 RUN export JANUS_BUILD_ONLY_DEFAULT=1 && \
-    export VERSION=$JANUS_VERSION && \
+    export VERSION=$VERSION && \
     make
 
 # ---
