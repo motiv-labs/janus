@@ -15,7 +15,7 @@ func NewVersionCmd() *cobra.Command {
 		Short:   "Print the version information",
 		Aliases: []string{"v"},
 		Run: func(cmd *cobra.Command, args []string) {
-			fmt.Printf("janus %s", version)
+			fmt.Printf("janus %s\n", version)
 		},
 	}
 }
