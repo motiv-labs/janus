@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"context"
+	"fmt"
 	"strings"
 
 	"github.com/hellofresh/janus/pkg/jwt"
@@ -67,6 +68,12 @@ func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 		if nil != err {
 			return nil, err
 		}
+
+		logEntry := log.WithField("leeway", f.oAuthServer.TokenStrategy.Leeway)
+		for i, signingMethod := range signingMethods {
+			logEntry = logEntry.WithField(fmt.Sprintf("alg_%d", i), signingMethod.Alg)
+		}
+		logEntry.Debug("Building JWT token parser")
 
 		return NewJWTManager(jwt.NewParser(jwt.NewParserConfig(f.oAuthServer.TokenStrategy.Leeway, signingMethods...))), nil
 	case Introspection:
