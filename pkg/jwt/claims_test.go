@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"math/rand"
 	"testing"
-	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -28,7 +28,7 @@ func TestJanusClaims_UnmarshalJSON(t *testing.T) {
 func TestJanusClaims_VerifyExpiresAt(t *testing.T) {
 	leeway := 1 + rand.Int63n(120)
 	claims := NewJanusClaims(leeway)
-	now := time.Now().Unix()
+	now := jwt.TimeFunc().Unix()
 
 	claims.MapClaims["exp"] = float64(now - 1)
 	assert.True(t, claims.VerifyExpiresAt(now, true))
@@ -43,7 +43,7 @@ func TestJanusClaims_VerifyExpiresAt(t *testing.T) {
 func TestJanusClaims_VerifyIssuedAt(t *testing.T) {
 	leeway := 1 + rand.Int63n(120)
 	claims := NewJanusClaims(leeway)
-	now := time.Now().Unix()
+	now := jwt.TimeFunc().Unix()
 
 	claims.MapClaims["iat"] = float64(now + 1)
 	assert.True(t, claims.VerifyIssuedAt(now, true))
@@ -58,7 +58,7 @@ func TestJanusClaims_VerifyIssuedAt(t *testing.T) {
 func TestJanusClaims_VerifyNotBefore(t *testing.T) {
 	leeway := 1 + rand.Int63n(120)
 	claims := NewJanusClaims(leeway)
-	now := time.Now().Unix()
+	now := jwt.TimeFunc().Unix()
 
 	claims.MapClaims["nbf"] = float64(now + 1)
 	assert.True(t, claims.VerifyNotBefore(now, true))
@@ -68,4 +68,13 @@ func TestJanusClaims_VerifyNotBefore(t *testing.T) {
 
 	claims.MapClaims["nbf"] = float64(now + leeway + 1)
 	assert.False(t, claims.VerifyNotBefore(now, true))
+}
+
+func TestJanusClaims_Valid(t *testing.T) {
+	leeway := 1 + rand.Int63n(120)
+	claims := NewJanusClaims(leeway)
+	now := jwt.TimeFunc().Unix()
+
+	claims.MapClaims["iat"] = float64(now + 1)
+	assert.NoError(t, claims.Valid())
 }
