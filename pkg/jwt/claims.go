@@ -2,6 +2,7 @@ package jwt
 
 import (
 	"encoding/json"
+	"errors"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -24,6 +25,35 @@ func NewJanusClaims(leeway int64) *JanusClaims {
 // UnmarshalJSON is Unmarshaler interface implementation for JanusClaims to unmarshal nested map claims correctly
 func (c *JanusClaims) UnmarshalJSON(text []byte) error {
 	return json.Unmarshal(text, &c.MapClaims)
+}
+
+// Valid validates time based claims "exp, iat, nbf".
+// As well, if any of the above claims are not in the token, it will still
+// be considered a valid claim.
+func (c *JanusClaims) Valid() error {
+	vErr := new(jwt.ValidationError)
+	now := jwt.TimeFunc().Unix()
+
+	if c.VerifyExpiresAt(now, false) == false {
+		vErr.Inner = errors.New("token is expired")
+		vErr.Errors |= jwt.ValidationErrorExpired
+	}
+
+	if c.VerifyIssuedAt(now, false) == false {
+		vErr.Inner = errors.New("token used before issued")
+		vErr.Errors |= jwt.ValidationErrorIssuedAt
+	}
+
+	if c.VerifyNotBefore(now, false) == false {
+		vErr.Inner = errors.New("token is not valid yet")
+		vErr.Errors |= jwt.ValidationErrorNotValidYet
+	}
+
+	if vErr.Errors == 0 {
+		return nil
+	}
+
+	return vErr
 }
 
 // VerifyExpiresAt overrides jwt.StandardClaims.VerifyExpiresAt() to use leeway for check
