@@ -27,14 +27,14 @@ FAIL="${ERROR_COLOR}FAIL ${NO_COLOR}"
 TARGETS=$@
 
 if [ "$RUN_INTEGRATION" ]; then
-    echo "${OK_COLOR}Running unit and integration tests: ${NO_COLOR}"
+    echo "${OK_COLOR}Running unit and integration tests:${NO_COLOR}"
     go test -race -cover -cpu=1,2,4 -tags=integration ${TARGETS}
 else
-    echo "${OK_COLOR}Running unit tests: ${NO_COLOR}"
+    echo "${OK_COLOR}Running unit tests:${NO_COLOR}"
     go test -race -cover -cpu=1,2,4 ${TARGETS}
 fi
 
-echo "${OK_COLOR}Formatting: ${NO_COLOR}"
+echo "${OK_COLOR}Formatting:${NO_COLOR}"
 ERRS=$(find cmd pkg -type f -name \*.go | xargs gofmt -l 2>&1 || true)
 if [ -n "${ERRS}" ]; then
     echo "${ERROR_COLOR}FAIL - the following files need to be gofmt'ed: ${NO_COLOR}"
@@ -45,7 +45,7 @@ if [ -n "${ERRS}" ]; then
 fi
 echo ${PASS}
 
-echo "${OK_COLOR}Vetting: ${NO_COLOR}"
+echo "${OK_COLOR}Vetting:${NO_COLOR}"
 ERRS=$(go vet ${TARGETS} 2>&1 || true)
 if [ -n "${ERRS}" ]; then
     echo ${FAIL}
@@ -54,7 +54,7 @@ if [ -n "${ERRS}" ]; then
 fi
 echo ${PASS}
 
-echo "${OK_COLOR}Linting: ${NO_COLOR}"
+echo "${OK_COLOR}Linting:${NO_COLOR}"
 ERRS=$(golint ${TARGETS} 2>&1 || true)
 if [ -n "${ERRS}" ]; then
     echo ${FAIL}
