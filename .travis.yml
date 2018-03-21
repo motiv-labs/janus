@@ -6,6 +6,10 @@ services:
 go:
   - 1.x
 
+env:
+  - MAKE_TASK=test-integration
+  - MAKE_TASK=test-features
+
 before_install:
   - docker-compose -f assets/docker-compose.yml up -d
 
@@ -15,6 +19,8 @@ install:
   - make deps
 
 script:
-- make test-integration
-- $GOPATH/bin/overalls -project=github.com/hellofresh/janus -covermode=count
-- if [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then bash <(curl -s https://codecov.io/bash) -f overalls.coverprofile; fi
+  - make $MAKE_TASK
+
+after_success:
+  - $GOPATH/bin/overalls -project=github.com/hellofresh/janus -covermode=count
+  - if [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then bash <(curl -s https://codecov.io/bash) -f overalls.coverprofile; fi

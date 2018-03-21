@@ -20,7 +20,7 @@ services:
       - ./stubs:/home/wiremock
 
   auth-service:
-    image: rodolpheche/wiremock
+    image: rodolpheche/wiremock:2.6.0-alpine
     ports:
       - '9088:8080'
     volumes:

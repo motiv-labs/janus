@@ -33,6 +33,10 @@ test:
 test-integration:
 	@/bin/sh -c "RUN_INTEGRATION=1 ./build/test.sh $(allpackages)"
 
+test-features:
+	@/bin/sh -c "JANUS_BUILD_ONLY_DEFAULT=1 PKG_SRC=$(PKG_SRC) ./build/build.sh"
+	@/bin/sh -c "./build/features.sh"
+
 lint:
 	@echo "$(OK_COLOR)==> Linting... $(NO_COLOR)"
 	@golint $(allpackages)
