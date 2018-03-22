@@ -203,13 +203,15 @@
   packages = [
     ".",
     "bucket",
+    "client",
     "hooks",
     "incrementer",
+    "log",
     "state",
     "timer"
   ]
-  revision = "e0b358f02d1929073e932ffd82a9bfe144be9f0e"
-  version = "v0.4.3"
+  revision = "0627c498c8cf525b2622b13a8c71431714a44243"
+  version = "v0.6.3"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -518,6 +520,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "930550b1e7f16d6b2bb1751f3d2224bcf552b613643cddbc50011413e40559b6"
+  inputs-digest = "b52823c02214ab42b7429638013abb8ac8a3a381c5c5b1cac67e59b9f22adae7"
   solver-name = "gps-cdcl"
   solver-version = 1

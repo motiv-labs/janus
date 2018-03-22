@@ -8,21 +8,21 @@ import (
 	jwtbase "github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/metrics"
-	stats "github.com/hellofresh/stats-go"
+	"github.com/hellofresh/stats-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
 func TestJWTManagerValidKey(t *testing.T) {
 	signingMethod := jwt.SigningMethod{Alg: "HS256", Key: "secret"}
-	config := jwt.NewParserConfig(signingMethod)
+	config := jwt.NewParserConfig(0, signingMethod)
 	parser := jwt.NewParser(config)
 	manager := NewJWTManager(parser)
 
 	token, err := issueToken(signingMethod, 1*time.Hour)
 	require.NoError(t, err)
 
-	client, err := stats.NewClient("noop://", "")
+	client, err := stats.NewClient("noop://")
 	require.NoError(t, err)
 
 	ctx := metrics.NewContext(context.Background(), client)
@@ -31,11 +31,11 @@ func TestJWTManagerValidKey(t *testing.T) {
 
 func TestJWTManagerInvalidKey(t *testing.T) {
 	signingMethod := jwt.SigningMethod{Alg: "HS256", Key: "secret"}
-	config := jwt.NewParserConfig(signingMethod)
+	config := jwt.NewParserConfig(0, signingMethod)
 	parser := jwt.NewParser(config)
 	manager := NewJWTManager(parser)
 
-	client, err := stats.NewClient("noop://", "")
+	client, err := stats.NewClient("noop://")
 	require.NoError(t, err)
 
 	ctx := metrics.NewContext(context.Background(), client)
@@ -44,7 +44,7 @@ func TestJWTManagerInvalidKey(t *testing.T) {
 
 func TestJWTManagerNilContext(t *testing.T) {
 	signingMethod := jwt.SigningMethod{Alg: "HS256", Key: "secret"}
-	config := jwt.NewParserConfig(signingMethod)
+	config := jwt.NewParserConfig(0, signingMethod)
 	parser := jwt.NewParser(config)
 	manager := NewJWTManager(parser)
 
@@ -53,7 +53,7 @@ func TestJWTManagerNilContext(t *testing.T) {
 
 func TestJWTManagerNilStast(t *testing.T) {
 	signingMethod := jwt.SigningMethod{Alg: "HS256", Key: "secret"}
-	config := jwt.NewParserConfig(signingMethod)
+	config := jwt.NewParserConfig(0, signingMethod)
 	parser := jwt.NewParser(config)
 	manager := NewJWTManager(parser)
 

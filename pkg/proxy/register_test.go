@@ -143,7 +143,7 @@ func createRegister(r router.Router) *Register {
 		routes = append(routes, NewRoute(def))
 	}
 
-	statsClient, _ := stats.NewClient("noop://", "")
+	statsClient, _ := stats.NewClient("noop://")
 	register := NewRegister(r, Params{StatsClient: statsClient})
 	register.AddMany(routes)
 

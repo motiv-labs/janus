@@ -64,6 +64,7 @@ func (m *APILoader) RegisterApis(apiSpecs []*api.Spec) {
 // RegisterAPI register an API Spec in the register
 func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 	logger := log.WithField("api_name", referenceSpec.Name)
+	logger.Debug("Starting RegisterAPI")
 
 	active, err := referenceSpec.Validate()
 	if false == active && err != nil {

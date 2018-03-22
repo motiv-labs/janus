@@ -84,7 +84,7 @@ func createRegisterAndRouter(fn ConfigureCircuitBreakerFunc) (router.Router, err
 	r := createRouter()
 	r.Use(middleware.NewRecovery(errors.RecoveryHandler))
 
-	statsClient, _ := stats.NewClient("noop://", "")
+	statsClient, _ := stats.NewClient("noop://")
 	register := proxy.NewRegister(r, proxy.Params{StatsClient: statsClient})
 	proxyRepo, err := api.NewFileSystemRepository("../../assets/apis")
 	if err != nil {

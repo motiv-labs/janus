@@ -12,7 +12,7 @@ import (
 )
 
 func TestSuccessfulRateLimitLog(t *testing.T) {
-	statsClient, _ := stats.NewClient("noop://", "")
+	statsClient, _ := stats.NewClient("noop://")
 	limiterStore := smemory.NewStore()
 	rate, _ := limiter.NewRateFromFormatted("100-M")
 	limiterInstance := limiter.New(limiterStore, rate)

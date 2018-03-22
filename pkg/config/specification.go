@@ -63,7 +63,6 @@ type Database struct {
 // Stats holds the configuration for stats
 type Stats struct {
 	DSN                   string   `envconfig:"STATS_DSN"`
-	Prefix                string   `envconfig:"STATS_PREFIX"`
 	IDs                   string   `envconfig:"STATS_IDS"`
 	AutoDiscoverThreshold uint     `envconfig:"STATS_AUTO_DISCOVER_THRESHOLD"`
 	AutoDiscoverWhiteList []string `envconfig:"STATS_AUTO_DISCOVER_WHITE_LIST"`

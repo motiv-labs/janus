@@ -62,13 +62,13 @@
 
 [[constraint]]
   name = "github.com/hellofresh/stats-go"
-  version = "0.4.3"
+  version = "0.6.3"
 
 [[constraint]]
   name = "github.com/kelseyhightower/envconfig"
   version = "1.3.0"
 
-[[constraint]] 
+[[constraint]]
   name = "github.com/mitchellh/mapstructure"
   revision = "b4575eea38cca1123ec2dc90c26529b5c5acfcff"
 
@@ -102,7 +102,7 @@
 
 [[constraint]]
   name = "github.com/tidwall/gjson"
-  version = "1.0.6" 
+  version = "1.0.6"
 
 [[constraint]]
   name = "github.com/ulule/limiter"

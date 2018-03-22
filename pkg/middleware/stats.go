@@ -7,7 +7,7 @@ import (
 
 	"github.com/hellofresh/janus/pkg/metrics"
 	"github.com/hellofresh/janus/pkg/response"
-	"github.com/hellofresh/stats-go"
+	"github.com/hellofresh/stats-go/client"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -15,11 +15,11 @@ const notFoundPath = "/-not-found-"
 
 // Stats represents the stats middleware
 type Stats struct {
-	statsClient stats.Client
+	statsClient client.Client
 }
 
 // NewStats creates a new instance of Stats
-func NewStats(statsClient stats.Client) *Stats {
+func NewStats(statsClient client.Client) *Stats {
 	return &Stats{statsClient}
 }
 
@@ -32,7 +32,7 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 		)
 
 		log.WithField("path", r.URL.Path).Debug("Starting Stats middleware")
-		r.WithContext(metrics.NewContext(r.Context(), m.statsClient))
+		r = r.WithContext(metrics.NewContext(r.Context(), m.statsClient))
 
 		hooks := response.Hooks{
 			WriteHeader: func(next response.WriteHeaderFunc) response.WriteHeaderFunc {

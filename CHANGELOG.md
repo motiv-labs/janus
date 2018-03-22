@@ -2,11 +2,21 @@
 
 ## Added
 
+- Leeway support for JWT date fields validation
+
+# 3.6.0
+
+## Added
+
 - Extra JWT metrics for token validation success and error
 
 ## Fixed
  
- - Fixed a bug for the `oauth servers` when rows were empty it was returnig `null` on the json reponse.
+- Fixed a bug for the `oauth servers` when rows were empty it was returning `null` on the json response
+
+## Updated
+
+- Bumped [stats-go](https://github.com/hellofresh/stats-go) to current latest stable version (0.6.3) - this changes stats DSN config value format, see [`stats-go`](https://github.com/hellofresh/stats-go#instance-creation) docs for details
  
 # 3.5.0
 
