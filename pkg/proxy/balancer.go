@@ -68,10 +68,11 @@ func (b *WeightBalancer) Elect(hosts []*Target) (*Target, error) {
 
 	totalWeight := 0
 	for _, host := range hosts {
-		if host.Weight <= 0 {
-			return nil, ErrZeroWeight
-		}
 		totalWeight += host.Weight
+	}
+
+	if totalWeight <= 0 {
+		return nil, ErrZeroWeight
 	}
 
 	r := rand.Intn(totalWeight)
