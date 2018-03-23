@@ -4,6 +4,7 @@
 
 - Leeway support for JWT date fields validation
 - Support for zero weight when using the weight algorithm for balancing
+- New header `X-Request-Id` that makes sure it create a new id for each request. It also ties it up with open tracing
 
 # Fixed
 
