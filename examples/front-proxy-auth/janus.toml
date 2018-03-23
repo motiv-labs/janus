@@ -2,7 +2,8 @@
 # Global configuration
 ################################################################
 port = 8080
-logLevel = "debug"
+[log]
+  level = "debug"
 
 ################################################################
 # API configuration backend
