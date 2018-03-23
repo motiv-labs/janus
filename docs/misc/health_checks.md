@@ -1,4 +1,4 @@
-### Health Checks
+# Health Checks
 
 Health checks can be added to each API definition by simply setting these properties:
 

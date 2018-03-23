@@ -1,4 +1,4 @@
-### Monitoring
+# Monitoring
 
 `Janus` monitoring is built on top of [`hellofresh/stats-go`](https://github.com/hellofresh/stats-go) library.
 You can configure it with the following env variables:
