@@ -20,37 +20,55 @@ const (
 	jaegerTracing = "jaeger"
 )
 
+// Tracing is the tracing functionality
+type Tracing struct {
+	config config.Tracing
+	tracer opentracing.Tracer
+	closer io.Closer
+}
+
 type noopCloser struct{}
 
 func (n noopCloser) Close() error { return nil }
 
-// Build a tracer based on the configuration provided
-func Build(config config.Tracing) (opentracing.Tracer, io.Closer, error) {
-	switch config.Provider {
+// New creates a new instance of Tracing
+func New(config config.Tracing) *Tracing {
+	return &Tracing{config: config}
+}
+
+// Setup a tracer based on the configuration provided
+func (t *Tracing) Setup() {
+	var err error
+
+	log.Debug("Initializing distributed tracing")
+	switch t.config.Provider {
 	case gcloudTracing:
 		log.Debug("Using google cloud platform (stackdriver trace) as tracing system")
-		return buildGCloud(config.GoogleCloudTracing)
+		t.tracer, t.closer, err = t.buildGCloud(t.config.GoogleCloudTracing)
 	case jaegerTracing:
 		log.Debug("Using Jaeger as tracing system")
-		return buildJaeger(config.ServiceName, config.JaegerTracing)
+		t.tracer, t.closer, err = t.buildJaeger(t.config.ServiceName, t.config.JaegerTracing)
 	default:
 		log.Debug("No tracer selected")
-		return &opentracing.NoopTracer{}, noopCloser{}, nil
+		t.tracer, t.closer, err = &opentracing.NoopTracer{}, noopCloser{}, nil
+	}
+
+	if err != nil {
+		log.WithError(err).WithField("provider", t.config.Provider).Warnf("Could not initialize tracing")
+		return
+	}
+
+	opentracing.SetGlobalTracer(t.tracer)
+}
+
+// Close tracer
+func (t *Tracing) Close() {
+	if t.closer != nil {
+		t.closer.Close()
 	}
 }
 
-// FromContext creates a span from a context that contains a parent span
-func FromContext(ctx context.Context, name string) opentracing.Span {
-	span, _ := opentracing.StartSpanFromContext(ctx, name)
-	return span
-}
-
-// ToContext sets a span to a context
-func ToContext(r *http.Request, span opentracing.Span) *http.Request {
-	return r.WithContext(opentracing.ContextWithSpan(r.Context(), span))
-}
-
-func buildGCloud(config config.GoogleCloudTracing) (opentracing.Tracer, io.Closer, error) {
+func (t *Tracing) buildGCloud(config config.GoogleCloudTracing) (opentracing.Tracer, io.Closer, error) {
 	tracer, err := gcloudtracer.NewTracer(
 		context.Background(),
 		gcloudtracer.WithLogger(log.StandardLogger()),
@@ -65,7 +83,7 @@ func buildGCloud(config config.GoogleCloudTracing) (opentracing.Tracer, io.Close
 	return tracer, noopCloser{}, err
 }
 
-func buildJaeger(componentName string, c config.JaegerTracing) (opentracing.Tracer, io.Closer, error) {
+func (t *Tracing) buildJaeger(componentName string, c config.JaegerTracing) (opentracing.Tracer, io.Closer, error) {
 	bufferFLushInterval, err := time.ParseDuration(c.BufferFlushInterval)
 	if err != nil {
 		return nil, noopCloser{}, errors.Wrap(err, "could not parse buffer flush interval for jaeger")
@@ -89,4 +107,15 @@ func buildJaeger(componentName string, c config.JaegerTracing) (opentracing.Trac
 		jaegercfg.Logger(jaegerLoggerAdapter{log.StandardLogger()}),
 		jaegercfg.Metrics(metrics.NullFactory),
 	)
+}
+
+// FromContext creates a span from a context that contains a parent span
+func FromContext(ctx context.Context, name string) opentracing.Span {
+	span, _ := opentracing.StartSpanFromContext(ctx, name)
+	return span
+}
+
+// ToContext sets a span to a context
+func ToContext(r *http.Request, span opentracing.Span) *http.Request {
+	return r.WithContext(opentracing.ContextWithSpan(r.Context(), span))
 }
