@@ -3,6 +3,11 @@
 ## Added
 
 - Leeway support for JWT date fields validation
+- Support for zero weight when using the weight algorithm for balancing
+
+# Fixed
+
+- Fixed oauth rate limit reported on on #276
 
 # 3.6.0
 
