@@ -1,19 +1,16 @@
 package main
 
 import (
-	"io"
 	"net/url"
 	"os"
 	"path/filepath"
 
 	"github.com/hellofresh/janus/pkg/config"
-	tracerfactory "github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/store"
 	"github.com/hellofresh/stats-go"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
 	"github.com/hellofresh/stats-go/hooks"
-	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 )
@@ -44,19 +41,6 @@ func initLog() {
 	if nil != err {
 		log.WithError(err).Fatal("Could not apply logging configurations")
 	}
-}
-
-// initializes distributed tracing
-func initDistributedTracing() io.Closer {
-	log.Debug("Initializing distributed tracing")
-	tracer, closer, err := tracerfactory.Build(globalConfig.Tracing)
-	if err != nil {
-		log.WithError(err).Fatal("Could not build a tracer")
-	}
-
-	opentracing.SetGlobalTracer(tracer)
-
-	return closer
 }
 
 func initStatsd() {
