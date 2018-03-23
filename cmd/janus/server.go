@@ -127,6 +127,11 @@ func createRouter() router.Router {
 		middleware.NewRecovery(errors.RecoveryHandler),
 		middleware.NewOpenTracing(globalConfig.TLS.IsHTTPS()).Handler,
 	)
+
+	if globalConfig.RequestID {
+		r.Use(middleware.RequestID)
+	}
+
 	return r
 }
 

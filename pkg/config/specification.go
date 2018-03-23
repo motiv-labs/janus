@@ -18,6 +18,7 @@ type Specification struct {
 	MaxIdleConnsPerHost  int           `envconfig:"MAX_IDLE_CONNS_PER_HOST"`
 	BackendFlushInterval time.Duration `envconfig:"BACKEND_FLUSH_INTERVAL"`
 	CloseIdleConnsPeriod time.Duration `envconfig:"CLOSE_IDLE_CONNS_PERIOD"`
+	RequestID            bool          `envconfig:"REQUEST_ID_ENABLED"`
 	Log                  logging.LogConfig
 	Web                  Web
 	Database             Database
@@ -129,13 +130,17 @@ func init() {
 	viper.SetDefault("tls.port", "8433")
 	viper.SetDefault("tls.redirect", true)
 	viper.SetDefault("backendFlushInterval", "20ms")
+	viper.SetDefault("requestID", true)
+
 	viper.SetDefault("database.dsn", "file:///etc/janus")
 	viper.SetDefault("storage.dsn", "memory://localhost")
+
 	viper.SetDefault("web.port", "8081")
 	viper.SetDefault("web.tls.port", "8444")
 	viper.SetDefault("web.tls.redisrect", true)
 	viper.SetDefault("web.credentials.algorithm", "HS256")
 	viper.SetDefault("web.credentials.basic.users", map[string]string{"admin": "admin"})
+
 	viper.SetDefault("stats.dsn", "log://")
 	viper.SetDefault("stats.errorsSection", "error-log")
 
@@ -159,9 +164,9 @@ func Load(configFile string) (*Specification, error) {
 		}
 
 		viper.SetConfigName("janus")
+		viper.AddConfigPath(".")
 		viper.AddConfigPath(usr.HomeDir)
 		viper.AddConfigPath("/etc/janus")
-		viper.AddConfigPath(".")
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
