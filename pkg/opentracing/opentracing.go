@@ -11,7 +11,6 @@ import (
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
-	jaeger "github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
 	"github.com/uber/jaeger-lib/metrics"
 )
@@ -30,10 +29,10 @@ func Build(config config.Tracing) (opentracing.Tracer, io.Closer, error) {
 	switch config.Provider {
 	case gcloudTracing:
 		log.Debug("Using google cloud platform (stackdriver trace) as tracing system")
-		tracer, err := buildGCloud(config.GoogleCloudTracing)
-		return tracer, noopCloser{}, err
+		return buildGCloud(config.GoogleCloudTracing)
 	case jaegerTracing:
-		return buildJaeger(config.JaegerTracing)
+		log.Debug("Using Jaeger as tracing system")
+		return buildJaeger(config.ServiceName, config.JaegerTracing)
 	default:
 		log.Debug("No tracer selected")
 		return &opentracing.NoopTracer{}, noopCloser{}, nil
@@ -51,8 +50,8 @@ func ToContext(r *http.Request, span opentracing.Span) *http.Request {
 	return r.WithContext(opentracing.ContextWithSpan(r.Context(), span))
 }
 
-func buildGCloud(config config.GoogleCloudTracing) (opentracing.Tracer, error) {
-	return gcloudtracer.NewTracer(
+func buildGCloud(config config.GoogleCloudTracing) (opentracing.Tracer, io.Closer, error) {
+	tracer, err := gcloudtracer.NewTracer(
 		context.Background(),
 		gcloudtracer.WithLogger(log.StandardLogger()),
 		gcloudtracer.WithProject(config.ProjectID),
@@ -62,9 +61,11 @@ func buildGCloud(config config.GoogleCloudTracing) (opentracing.Tracer, error) {
 			PrivateKeyID: config.PrivateKeyID,
 		}),
 	)
+
+	return tracer, noopCloser{}, err
 }
 
-func buildJaeger(c config.JaegerTracing) (opentracing.Tracer, io.Closer, error) {
+func buildJaeger(componentName string, c config.JaegerTracing) (opentracing.Tracer, io.Closer, error) {
 	bufferFLushInterval, err := time.ParseDuration(c.BufferFlushInterval)
 	if err != nil {
 		return nil, noopCloser{}, errors.Wrap(err, "could not parse buffer flush interval for jaeger")
@@ -72,19 +73,19 @@ func buildJaeger(c config.JaegerTracing) (opentracing.Tracer, io.Closer, error) 
 
 	cfg := jaegercfg.Configuration{
 		Sampler: &jaegercfg.SamplerConfig{
-			Type:  jaeger.SamplerTypeConst,
-			Param: 1,
+			Type:  c.SamplingType,
+			Param: c.SamplingParam,
 		},
 		Reporter: &jaegercfg.ReporterConfig{
 			LogSpans:            c.LogSpans,
 			BufferFlushInterval: bufferFLushInterval,
-			LocalAgentHostPort:  c.DSN,
+			LocalAgentHostPort:  c.SamplingServerURL,
 			QueueSize:           c.QueueSize,
 		},
 	}
 
 	return cfg.New(
-		c.ServiceName,
+		componentName,
 		jaegercfg.Logger(jaegerLoggerAdapter{log.StandardLogger()}),
 		jaegercfg.Metrics(metrics.NullFactory),
 	)
