@@ -42,6 +42,11 @@
 # Defines the time period of how often the idle connections maintained by the proxy are closed.
 # Optional
 # CloseIdleConnsPeriod = 0
+#
+# Defines if Janus should create a X-Request-Id
+# Optional
+# Default: true
+# RequestID = true
 
 ################################################################
 # Logging
