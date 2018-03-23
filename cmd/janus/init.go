@@ -2,10 +2,15 @@ package main
 
 import (
 	"io"
+	"net"
+	"net/http"
 	"net/url"
 	"os"
 	"path/filepath"
 
+	"github.com/afex/hystrix-go/hystrix"
+	"github.com/afex/hystrix-go/hystrix/metric_collector"
+	"github.com/afex/hystrix-go/plugins"
 	"github.com/hellofresh/janus/pkg/config"
 	tracerfactory "github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/store"
@@ -59,6 +64,32 @@ func initDistributedTracing() io.Closer {
 	return closer
 }
 
+func initCircuitBreaker() {
+	// hystrix-go only supports statsd at the moment
+	u, err := url.Parse(globalConfig.Stats.DSN)
+	if err != nil || u.Scheme != "statsd" {
+		return
+	}
+
+	// Setup metrics for circuit breaker
+	c, err := plugins.InitializeStatsdCollector(&plugins.StatsdCollectorConfig{
+		StatsdAddr: globalConfig.Stats.DSN,
+		Prefix:     globalConfig.Stats.Prefix,
+	})
+
+	metricCollector.Registry.Register(c.NewStatsdCollector)
+	if err != nil {
+		log.WithError(err).Error("Error initializing statsd client for circuit breaker")
+	}
+
+	// Setup hystrix dashboard stream
+	if globalConfig.CircuitBreaker.DashboardEnabled {
+		hystrixStreamHandler := hystrix.NewStreamHandler()
+		hystrixStreamHandler.Start()
+		go http.ListenAndServe(net.JoinHostPort("", globalConfig.CircuitBreaker.DashboardPort), hystrixStreamHandler)
+	}
+}
+
 func initStatsd() {
 	// FIXME: this causes application hang because we're in the locked log already
 	//statsLog.SetHandler(func(msg string, fields map[string]interface{}, err error) {
@@ -98,7 +129,6 @@ func initStatsd() {
 
 	_, appFile := filepath.Split(os.Args[0])
 	statsClient.TrackMetric("app", bucket.MetricOperation{"init", host, appFile})
-
 	log.AddHook(hooks.NewLogrusHook(statsClient, globalConfig.Stats.ErrorsSection))
 }
 

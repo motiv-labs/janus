@@ -1,6 +1,7 @@
 package loader
 
 import (
+	"github.com/afex/hystrix-go/hystrix"
 	"github.com/hellofresh/janus/pkg/api"
 	httpErrors "github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/plugin"
@@ -35,7 +36,17 @@ func onReload(event interface{}) error {
 
 // Load loads all the basic components and definitions into a router
 func Load(register *proxy.Register, repo api.Repository) {
-	apiLoader := NewAPILoader(register)
+	fn := func(name string, c CircuitBreakerConfig) {
+		hystrix.ConfigureCommand(name, hystrix.CommandConfig{
+			Timeout:                c.Timeout,
+			MaxConcurrentRequests:  c.MaxConcurrentRequests,
+			ErrorPercentThreshold:  c.ErrorPercentThreshold,
+			RequestVolumeThreshold: c.RequestVolumeThreshold,
+			SleepWindow:            c.SleepWindow,
+		})
+	}
+
+	apiLoader := NewAPILoader(register, ConfigureCircuitBreaker(ConfigureCircuitBreakerFunc(fn)))
 	apiLoader.LoadDefinitions(repo)
 
 	// some routers may panic when have empty routes list, so add one dummy 404 route to avoid this
