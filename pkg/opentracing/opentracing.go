@@ -54,7 +54,7 @@ func (t *Tracing) Setup() {
 	}
 
 	if err != nil {
-		log.WithError(err).WithField("provider", t.config.Provider).Warnf("Could not initialize tracing")
+		log.WithError(err).WithField("provider", t.config.Provider).Warn("Could not initialize tracing")
 		return
 	}
 
