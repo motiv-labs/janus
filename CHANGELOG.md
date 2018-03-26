@@ -8,7 +8,7 @@
 
 # Fixed
 
-- Fixed oauth rate limit reported on on #276
+- Fixed oauth rate limit reported on #276
 
 # 3.6.0
 
