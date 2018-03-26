@@ -4,7 +4,9 @@
 port = 8443
 CertFile = "/etc/janus/janus.crt"
 KeyFile = "/etc/janus/janus.key"
-logLevel = "debug"
+
+[log]
+  level = "debug"
 
 [tls]
   port = 8433

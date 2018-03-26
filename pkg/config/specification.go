@@ -18,6 +18,7 @@ type Specification struct {
 	MaxIdleConnsPerHost  int           `envconfig:"MAX_IDLE_CONNS_PER_HOST"`
 	BackendFlushInterval time.Duration `envconfig:"BACKEND_FLUSH_INTERVAL"`
 	CloseIdleConnsPeriod time.Duration `envconfig:"CLOSE_IDLE_CONNS_PERIOD"`
+	RequestID            bool          `envconfig:"REQUEST_ID_ENABLED"`
 	Log                  logging.LogConfig
 	Web                  Web
 	Database             Database
@@ -106,16 +107,18 @@ type GoogleCloudTracing struct {
 
 // JaegerTracing holds the Jaeger tracing configuration
 type JaegerTracing struct {
-	DSN                 string `envconfig:"TRACING_JAEGER_DSN"`
-	ServiceName         string `envconfig:"TRACING_JAEGER_SERVICE_NAME"`
-	BufferFlushInterval string `envconfig:"TRACING_JAEGER_BUFFER_FLUSH_INTERVAL"`
-	LogSpans            bool   `envconfig:"TRACING_JAEGER_LOG_SPANS"`
-	QueueSize           int    `envconfig:"TRACING_JAEGER_QUEUE_SIZE"`
+	SamplingServerURL   string  `envconfig:"TRACING_JAEGER_SAMPLING_SERVER_URL"`
+	SamplingParam       float64 `envconfig:"TRACING_JAEGER_SAMPLING_PARAM"`
+	SamplingType        string  `envconfig:"TRACING_JAEGER_SAMPLING_TYPE"`
+	BufferFlushInterval string  `envconfig:"TRACING_JAEGER_BUFFER_FLUSH_INTERVAL"`
+	LogSpans            bool    `envconfig:"TRACING_JAEGER_LOG_SPANS"`
+	QueueSize           int     `envconfig:"TRACING_JAEGER_QUEUE_SIZE"`
 }
 
 // Tracing represents the distributed tracing configuration
 type Tracing struct {
 	Provider           string             `envconfig:"TRACING_PROVIDER"`
+	ServiceName        string             `envconfig:"TRACING_SERVICE_NAME"`
 	GoogleCloudTracing GoogleCloudTracing `mapstructure:"googleCloud"`
 	JaegerTracing      JaegerTracing      `mapstructure:"jaeger"`
 }
@@ -127,16 +130,23 @@ func init() {
 	viper.SetDefault("tls.port", "8433")
 	viper.SetDefault("tls.redirect", true)
 	viper.SetDefault("backendFlushInterval", "20ms")
+	viper.SetDefault("requestID", true)
+
 	viper.SetDefault("database.dsn", "file:///etc/janus")
 	viper.SetDefault("storage.dsn", "memory://localhost")
+
 	viper.SetDefault("web.port", "8081")
 	viper.SetDefault("web.tls.port", "8444")
 	viper.SetDefault("web.tls.redisrect", true)
 	viper.SetDefault("web.credentials.algorithm", "HS256")
 	viper.SetDefault("web.credentials.basic.users", map[string]string{"admin": "admin"})
+
 	viper.SetDefault("stats.dsn", "log://")
 	viper.SetDefault("stats.errorsSection", "error-log")
-	viper.SetDefault("tracing.jaeger.serviceName", serviceName)
+
+	viper.SetDefault("tracing.serviceName", serviceName)
+	viper.SetDefault("tracing.jaeger.samplingParam", 1.0)
+	viper.SetDefault("tracing.jaeger.samplingType", "const")
 	viper.SetDefault("tracing.jaeger.bufferFlushInterval", "1s")
 	viper.SetDefault("tracing.jaeger.logSpans", false)
 
@@ -154,9 +164,9 @@ func Load(configFile string) (*Specification, error) {
 		}
 
 		viper.SetConfigName("janus")
+		viper.AddConfigPath(".")
 		viper.AddConfigPath(usr.HomeDir)
 		viper.AddConfigPath("/etc/janus")
-		viper.AddConfigPath(".")
 	}
 
 	if err := viper.ReadInConfig(); err != nil {

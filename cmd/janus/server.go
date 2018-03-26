@@ -8,6 +8,7 @@ import (
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/notifier"
+	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
@@ -49,9 +50,11 @@ func RunServer(cmd *cobra.Command, args []string) {
 	initStatsd()
 	initStorage()
 	initDatabase()
-	dtCloser := initDistributedTracing()
 
-	defer dtCloser.Close()
+	tracingFactory := opentracing.New(globalConfig.Tracing)
+	tracingFactory.Setup()
+
+	defer tracingFactory.Close()
 	defer statsClient.Close()
 	defer globalConfig.Log.Flush()
 	defer session.Close()
@@ -124,6 +127,11 @@ func createRouter() router.Router {
 		middleware.NewRecovery(errors.RecoveryHandler),
 		middleware.NewOpenTracing(globalConfig.TLS.IsHTTPS()).Handler,
 	)
+
+	if globalConfig.RequestID {
+		r.Use(middleware.RequestID)
+	}
+
 	return r
 }
 

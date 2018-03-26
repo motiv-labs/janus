@@ -1,6 +1,6 @@
 # Add an endpoint
 
-The main feature of the API Gateway is to proxy the requests to different services, so let's do this.
+The main feature of an API Gateway is to proxy requests to different services, so let's do this.
 
 ## Adding a new endpoint
 
@@ -24,38 +24,7 @@ Create an `example.json` file containing your endpoint configuration:
     }
 }
 ```
-Alternatively, it's possible to store multiple endpoints in one file:
 
-```json
-[{
-    "name" : "my-endpointOne",
-    "active" : true,
-    "proxy" : {
-        "listen_path" : "/exampleOne/*",
-        "upstreams" : {
-            "balancing": "roundrobin",
-            "targets": [
-                {"target": "http://www.mocky.io/v2/595625d22900008702cd71e8"}
-            ]
-        },
-        "methods" : ["GET"]
-    }
-},
-{
-    "name" : "my-endpointTwo",
-    "active" : true,
-    "proxy" : {
-        "listen_path" : "/exampleTwo/*",
-        "upstreams" : {
-            "balancing": "roundrobin",
-            "targets": [
-                {"target": "http://www.mocky.io/v2/5185415ba171ea3a00704eed"}
-            ]
-        },
-        "methods" : ["GET"]
-    }
-}]
-```
 And now let's add it to Janus:
 
 {% codetabs name="HTTPie", type="bash" -%}
@@ -81,7 +50,7 @@ curl -X "GET" localhost:8081/apis -H "Authorization:Bearer yourToken" -H "Conten
 ## 3. Forward your requests through Janus
 
 Issue the following request to verify that Janus is properly forwarding
-requests to your API. Note that [by default][proxy-port] Janus handles proxy
+requests to your API. Note that by default Janus handles proxy
 requests on port `:8080`:
 
 {% codetabs name="HTTPie", type="bash" -%}
@@ -90,6 +59,6 @@ http -v GET http://localhost:8080/example
 curl -vX "GET" http://localhost:8080/example
 {%- endcodetabs %}
 
-A successful response means Janus is now forwarding requests made to `http://localhost:8000` to the elected upstream target (chosen by the load balancer) that we configured in step #1, and is forwarding the response back to us.
+A successful response means Janus is now forwarding requests made to `http://localhost:8080` to the elected upstream target (chosen by the load balancer) that we configured in step #1, and is forwarding the response back to us.
 
 [Next](add_plugins.md) we'll learn how to add plugins to our endpoint.

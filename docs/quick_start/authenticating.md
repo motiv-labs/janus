@@ -21,12 +21,17 @@ curl -X "POST" localhost:8081/login?provider=github -H 'Authorization:Bearer git
 You can also configure which organizations/teams will be allowed to log into the Admin API. This can be done with the following [configuration](../install/configuration.md):
 
 ```toml
-  [web.credentials]
-    secret = "secret"
+[web.credentials]
+  # The algorithm that you want to use to create your JWT
+  algorithm = "HS256"
+  # This is the secret that you will use to encrypt your JWT
+  secret = "secret key"
 
-    [web.credentials.github]
-    organizations = ["hellofresh"]
-    teams = {hellofresh = "devs"}
+  [web.credentials.github]
+  # The github owner/organizations that will be allowed to login on the private API
+  organizations = ["hellofresh"]
+  # A map of the owner/organization and the team name that will have access to the private API
+  teams = {hellofresh = "devs"}
 ```
 
 ### Basic
@@ -42,11 +47,15 @@ curl -X "POST" localhost:8081/login -d '{"username": "admin", "password": "admin
 The username and password default to *admin*/*admin*, and **should be changed** using the following [configuration](../install/configuration.md):
 
 ```toml
-  [web.credentials]
-    secret = "secret"
+[web.credentials]
+  # The algorithm that you want to use to create your JWT
+  algorithm = "HS256"
+  # This is the secret that you will use to encrypt your JWT
+  secret = "secret key"
 
-    [web.credentials.basic]
-    users = [
-      {admin = "admin"}
-    ]
+  [web.credentials.basic]
+  # A dictionary with the user and password
+  users = [
+    {admin = "admin"}
+  ]
 ```

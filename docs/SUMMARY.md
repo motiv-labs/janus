@@ -13,6 +13,7 @@
     * [Terminology](proxy/terminology.md)
     * [Overview](proxy/overview.md)
     * [Routing capabilities](proxy/routing_capabilities.md)
+    * [Load Balacing](proxy/load_balancing.md)
     * [Request Host header](proxy/request_host_header.md)
         * [Using wildcard hostnames](proxy/wildcard_hostnames.md)
         * [The `preserve_host` property](proxy/preserve_host_property.md)
@@ -23,18 +24,20 @@
     * [Routing priorities](proxy/routing_priorities.md)
     * [Conclusion](proxy/conclusion.md)
 * Plugins
+    * [Basic](plugins/basic.md)
+    * [Body Limit](plugins/body_limit.md)
     * [Compression](plugins/compression.md)
+    * [CORS](plugins/cors.md)
     * [OAuth](plugins/oauth.md)
     * [Rate Limit](plugins/rate_limit.md)
-    * [CORS](plugins/cors.md)
     * [Request Transformer](plugins/request_transformer.md)
     * [Response Transformer](plugins/response_transformer.md)
-    * [Body Limit](plugins/body_limit.md)
 * Auth
     * [OAuth 2.0](auth/oauth.md)
 * Misc
-    * [Monitoring](misc/monitoring.md)
     * [Health Checks](misc/health_checks.md)
+    * [Monitoring](misc/monitoring.md)
     * [Storage](misc/storage.md)
+    * [Tracing](misc/tracing.md)
 * Upgrade Notes
     * [2.x to 3.x](upgrade/3x.md)

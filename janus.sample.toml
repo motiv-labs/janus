@@ -42,6 +42,11 @@
 # Defines the time period of how often the idle connections maintained by the proxy are closed.
 # Optional
 # CloseIdleConnsPeriod = 0
+#
+# Defines if Janus should create a X-Request-Id
+# Optional
+# Default: true
+# RequestID = true
 
 ################################################################
 # Logging
@@ -78,7 +83,9 @@
 # Required
 #
   [web.credentials]
+    # The algorithm that you want to use to create your JWT
     algorithm = "HS256"
+    # This is the secret that you will use to encrypt your JWT
     secret = "secret key"
 
     # [web.credentials.github]
@@ -136,15 +143,57 @@
 ################################################################
 #
 # [tracing]
-# tracer = "jaeger"
+# provider = "jaeger"
 # Google Clooud Platform - Stackdriver Trace
-  # [googleCloud]
+  # [tracing.googleCloud]
   #   projectID = ""
   #   email = ""
   #   privateKey = ""
   #   privateKeyID = ""
 
 # Jeager Distributed Tracing
-  # [jaeger]
-  #   dsn = "localhost:6831"
-  #   serviceName = ""
+  # [tracing.jaeger]
+    # SamplingServerURL is the address of jaeger-agent's HTTP sampling server
+    #
+    # Default: "http://localhost:5778/sampling"
+    #
+    # SamplingServerURL = "localhost:6832"
+
+    # Sampling Type specifies the type of the sampler: const, probabilistic, rateLimiting
+    #
+    # Default: "const"
+    #
+    # SamplingType = "const"
+
+    # SamplingParam Param is a value passed to the sampler.
+    # Valid values for Param field are:
+    #   - for "const" sampler, 0 or 1 for always false/true respectively
+    #   - for "probabilistic" sampler, a probability between 0 and 1
+    #   - for "rateLimiting" sampler, the number of spans per second
+    #
+    # Default: 1.0
+    #
+    # SamplingParam = 1.0
+
+    # BufferFlushInterval controls how often the buffer is force-flushed, even if it's not full.
+    # It is generally not useful, as it only matters for very low traffic services.
+    # 
+    # Default: 1s
+    #
+    # BufferFlushInterval = "1s"
+
+    # LogSpans, when true, enables LoggingReporter that runs in parallel with the main reporter
+    # and logs all submitted spans. Main Configuration.Logger must be initialized in the code
+    # for this option to have any effect.
+    # 
+    # Default: false
+    #
+    # LogSpans = false
+
+    # QueueSize controls how many spans the reporter can keep in memory before it starts dropping
+	  # new spans. The queue is continuously drained by a background go-routine, as fast as spans
+	  # can be sent out of process.
+    # 
+    # Default: 0
+    #
+    # QueueSize = 0
