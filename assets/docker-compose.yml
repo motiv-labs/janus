@@ -37,7 +37,6 @@ services:
       - "5778:5778"
       - "16686:16686"
       - "14268:14268"
-      - "9411:9411"
 
   zipkin:
     image: openzipkin/zipkin
