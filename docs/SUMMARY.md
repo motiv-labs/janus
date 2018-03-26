@@ -13,7 +13,7 @@
     * [Terminology](proxy/terminology.md)
     * [Overview](proxy/overview.md)
     * [Routing capabilities](proxy/routing_capabilities.md)
-    * [Load Balacing](proxy/load_balancing.md)
+    * [Load Balacing](proxy/load_balacing.md)
     * [Request Host header](proxy/request_host_header.md)
         * [Using wildcard hostnames](proxy/wildcard_hostnames.md)
         * [The `preserve_host` property](proxy/preserve_host_property.md)
