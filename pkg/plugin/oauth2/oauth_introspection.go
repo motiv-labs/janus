@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"net/url"
 
 	log "github.com/sirupsen/logrus"
 )
@@ -67,6 +68,7 @@ func (o *IntrospectionManager) doStatusRequest(accessToken string) (*http.Respon
 	} else if o.settings.UseCustomHeader {
 		req.Header.Add(o.settings.HeaderName, accessToken)
 	} else {
+		req.Form = make(url.Values)
 		req.Form.Add(o.settings.ParamName, accessToken)
 	}
 
