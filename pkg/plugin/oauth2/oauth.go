@@ -66,12 +66,12 @@ type corsMeta struct {
 
 // IntrospectionSettings represents the settings for introspection
 type IntrospectionSettings struct {
-	UseCustomHeader bool   `bson:"use_custom_header" json:"use_custom_header"`
-	HeaderName      string `bson:"header_name" json:"header_name"`
-	UseAuthHeader   bool   `bson:"use_auth_header" json:"use_auth_header"`
-	AuthHeaderType  string `bson:"auth_header_type" json:"auth_header_type"`
-	UseBody         bool   `bson:"use_body" json:"use_body"`
-	ParamName       string `bson:"param_name" json:"param_name"`
+	UseCustomHeader bool   `mapstructure:"use_custom_header" bson:"use_custom_header" json:"use_custom_header"`
+	HeaderName      string `mapstructure:"header_name" bson:"header_name" json:"header_name"`
+	UseAuthHeader   bool   `mapstructure:"use_auth_header" bson:"use_auth_header" json:"use_auth_header"`
+	AuthHeaderType  string `mapstructure:"auth_header_type" bson:"auth_header_type" json:"auth_header_type"`
+	UseBody         bool   `mapstructure:"use_body" bson:"use_body" json:"use_body"`
+	ParamName       string `mapstructure:"param_name" bson:"param_name" json:"param_name"`
 }
 
 // TokenStrategy defines the token strategy fields
