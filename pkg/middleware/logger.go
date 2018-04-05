@@ -55,9 +55,12 @@ func (m *Logger) Handler(handler http.Handler) http.Handler {
 		}
 
 		handler.ServeHTTP(response.Wrap(w, hooks), r)
+		requestDuration := time.Now().Sub(start)
 
 		fields["code"] = responseCode
-		fields["duration"] = int(time.Now().Sub(start) / time.Millisecond)
+		fields["duration"] = int(requestDuration / time.Millisecond)
+		fields["duration-fmt"] = requestDuration.String()
+
 		if originalURL.String() != r.URL.String() {
 			fields["upstream-host"] = r.URL.Host
 			fields["upstream-request"] = r.URL.RequestURI()
