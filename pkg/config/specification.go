@@ -26,6 +26,7 @@ type Specification struct {
 	Stats                Stats
 	Tracing              Tracing
 	TLS                  TLS
+	Prometheus           Prometheus
 }
 
 // Web represents the API configurations
@@ -66,6 +67,12 @@ type Stats struct {
 	AutoDiscoverThreshold uint     `envconfig:"STATS_AUTO_DISCOVER_THRESHOLD"`
 	AutoDiscoverWhiteList []string `envconfig:"STATS_AUTO_DISCOVER_WHITE_LIST"`
 	ErrorsSection         string   `envconfig:"STATS_ERRORS_SECTION"`
+}
+
+// Prometheus represents prometheus integration configuration
+type Prometheus struct {
+	Enabled    bool   `envconfig:"PROMETHEUS_ENABLED"`
+	MetricPath string `envconfig:"PROMETHEUS_METRIC_PATH"`
 }
 
 // Credentials represents the credentials that are going to be
@@ -143,6 +150,7 @@ func init() {
 
 	viper.SetDefault("stats.dsn", "log://")
 	viper.SetDefault("stats.errorsSection", "error-log")
+	viper.SetDefault("prometheus.metricPath", "/metrics")
 
 	viper.SetDefault("tracing.serviceName", serviceName)
 	viper.SetDefault("tracing.jaeger.samplingParam", 1.0)

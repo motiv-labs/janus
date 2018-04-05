@@ -22,6 +22,7 @@ import (
 	_ "github.com/hellofresh/janus/pkg/plugin/compression"
 	_ "github.com/hellofresh/janus/pkg/plugin/cors"
 	_ "github.com/hellofresh/janus/pkg/plugin/oauth2"
+	_ "github.com/hellofresh/janus/pkg/plugin/prometheus"
 	_ "github.com/hellofresh/janus/pkg/plugin/rate"
 	_ "github.com/hellofresh/janus/pkg/plugin/requesttransformer"
 	_ "github.com/hellofresh/janus/pkg/plugin/responsetransformer"
