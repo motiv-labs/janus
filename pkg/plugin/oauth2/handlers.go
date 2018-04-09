@@ -98,16 +98,15 @@ func (c *Controller) PutBy() http.HandlerFunc {
 // Post is the create handler
 func (c *Controller) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		var oauth OAuth
-
-		err := json.NewDecoder(r.Body).Decode(&oauth)
+		oauth := NewOAuth()
+		err := json.NewDecoder(r.Body).Decode(oauth)
 		if nil != err {
 			errors.Handler(w, err)
 			return
 		}
 
 		span := opentracing.FromContext(r.Context(), "datastore.Add")
-		err = c.repo.Add(&oauth)
+		err = c.repo.Add(oauth)
 		c.dispatch(notifier.NoticeOAuthServerAdded)
 		span.Finish()
 

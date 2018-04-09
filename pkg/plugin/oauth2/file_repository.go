@@ -47,7 +47,7 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 }
 
 func (r *FileSystemRepository) parseOAuthServer(oauthServerRaw []byte) *OAuth {
-	oauthServer := new(OAuth)
+	oauthServer := NewOAuth()
 	if err := json.Unmarshal(oauthServerRaw, oauthServer); err != nil {
 		log.WithError(err).Error("[RPC] --> Couldn't unmarshal oauth server configuration")
 	}
