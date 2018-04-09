@@ -110,7 +110,6 @@ func createProxyDefinitions() []*Definition {
 				Targets:   []*Target{{Target: "http://localhost:9089/hello-world"}},
 			},
 			AppendPath: true,
-			Upstreams:  &Upstreams{},
 			Methods:    []string{"GET"},
 		},
 		{
