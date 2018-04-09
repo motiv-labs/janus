@@ -551,7 +551,14 @@ Feature: Manage proxies wit API.
                         ],
                         "preserve_host" : false,
                         "strip_path" : false,
-                        "upstream_url" : "https://github.com/login/oauth/authorize"
+                        "upstreams":{
+                            "balancing":"roundrobin",
+                            "targets":[
+                                {
+                                "target":"https://github.com/login/oauth/authorize"
+                                }
+                            ]
+                        }
                     },
                     "token" : {
                         "listen_path" : "/auth/github/token",
@@ -561,7 +568,14 @@ Feature: Manage proxies wit API.
                         ],
                         "preserve_host" : false,
                         "strip_path" : false,
-                        "upstream_url" : "https://github.com/login/oauth/access_token"
+                        "upstreams":{
+                            "balancing":"roundrobin",
+                            "targets":[
+                                {
+                                "target":"https://github.com/login/oauth/access_token"
+                                }
+                            ]
+                        }
                     },
                     "introspect" : {
                         "listen_path" : "/auth/github/introspect",
@@ -570,7 +584,14 @@ Feature: Manage proxies wit API.
                         ],
                         "preserve_host" : false,
                         "strip_path" : false,
-                        "upstream_url" : "https://api.github.com/user"
+                        "upstreams":{
+                            "balancing":"roundrobin",
+                            "targets":[
+                                {
+                                "target":"https://api.github.com/user"
+                                }
+                            ]
+                        }
                     }
                 },
                 "secrets" : {
@@ -625,7 +646,14 @@ Feature: Manage proxies wit API.
                         ],
                         "preserve_host" : false,
                         "strip_path" : false,
-                        "upstream_url" : "https://github.com/login/oauth/authorize"
+                        "upstreams":{
+                            "balancing":"roundrobin",
+                            "targets":[
+                                {
+                                "target":"https://github.com/login/oauth/authorize"
+                                }
+                            ]
+                        }
                     },
                     "token" : {
                         "listen_path" : "/auth/github/token",
@@ -635,7 +663,14 @@ Feature: Manage proxies wit API.
                         ],
                         "preserve_host" : false,
                         "strip_path" : false,
-                        "upstream_url" : "https://github.com/login/oauth/access_token"
+                        "upstreams":{
+                            "balancing":"roundrobin",
+                            "targets":[
+                                {
+                                "target":"https://github.com/login/oauth/access_token"
+                                }
+                            ]
+                        }
                     },
                     "introspect" : {
                         "listen_path" : "/auth/github/introspect",
@@ -644,7 +679,14 @@ Feature: Manage proxies wit API.
                         ],
                         "preserve_host" : false,
                         "strip_path" : false,
-                        "upstream_url" : "https://api.github.com/user"
+                        "upstreams":{
+                            "balancing":"roundrobin",
+                            "targets":[
+                                {
+                                "target":"https://api.github.com/user"
+                                }
+                            ]
+                        }
                     }
                 },
                 "secrets" : {

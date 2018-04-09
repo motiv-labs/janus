@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/hellofresh/janus/pkg/api"
+	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -19,7 +20,12 @@ func TestSuccessfulValidation(t *testing.T) {
 	instance := api.NewDefinition()
 	instance.Name = "Test"
 	instance.Proxy.ListenPath = "/"
-	instance.Proxy.UpstreamURL = "http://example.com"
+	instance.Proxy.Upstreams = &proxy.Upstreams{
+		Balancing: "roundrobin",
+		Targets: []*proxy.Target{
+			&proxy.Target{Target: "http:/example.com"},
+		},
+	}
 
 	isValid, err := instance.Validate()
 	require.NoError(t, err)

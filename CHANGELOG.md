@@ -10,6 +10,10 @@
 
 - Fixed oauth rate limit reported on #276
 
+# Removed
+
+- `Upstream_URL` support is removed
+
 # 3.6.0
 
 ## Added

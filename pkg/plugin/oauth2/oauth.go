@@ -84,6 +84,19 @@ type TokenStrategy struct {
 	Leeway int64 `bson:"leeway" json:"leeway"`
 }
 
+// NewOAuth creates a new instance of OAuth
+func NewOAuth() *OAuth {
+	return &OAuth{
+		Secrets: make(map[string]string),
+		Endpoints: Endpoints{
+			Authorize:  proxy.NewDefinition(),
+			Introspect: proxy.NewDefinition(),
+			Revoke:     proxy.NewDefinition(),
+			Token:      proxy.NewDefinition(),
+		},
+	}
+}
+
 // GetIntrospectionSettings returns the settings for introspection
 func (t TokenStrategy) GetIntrospectionSettings() (*IntrospectionSettings, error) {
 	var settings *IntrospectionSettings

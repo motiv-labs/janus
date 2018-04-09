@@ -1,7 +1,6 @@
 package oauth2
 
 import (
-	"net/url"
 	"sync"
 )
 
@@ -35,20 +34,6 @@ func (r *InMemoryRepository) FindByName(name string) (*OAuth, error) {
 	defer r.RUnlock()
 
 	return r.findByName(name)
-}
-
-// FindByTokenURL returns OAuth Server records with corresponding token url
-func (r *InMemoryRepository) FindByTokenURL(url url.URL) (*OAuth, error) {
-	r.RLock()
-	defer r.RUnlock()
-
-	for _, server := range r.servers {
-		if server.Endpoints.Token.UpstreamURL == url.String() {
-			return server, nil
-		}
-	}
-
-	return nil, ErrOauthServerNotFound
 }
 
 // Add add a new OAuth Server to the repository

@@ -44,17 +44,12 @@ func (p *Register) AddMany(routes []*Route) error {
 func (p *Register) Add(route *Route) error {
 	definition := route.Proxy
 
-	var balancer Balancer
-	if definition.IsBalancerDefined() {
-		log.WithField("balancing_alg", definition.Upstreams.Balancing).Debug("Using a load balancing algorithm")
-
-		var err error
-		balancer, err = NewBalancer(definition.Upstreams.Balancing)
-		if err != nil {
-			msg := "Could not create a balancer"
-			log.WithError(err).Error(msg)
-			return errors.Wrap(err, msg)
-		}
+	log.WithField("balancing_alg", definition.Upstreams.Balancing).Debug("Using a load balancing algorithm")
+	balancer, err := NewBalancer(definition.Upstreams.Balancing)
+	if err != nil {
+		msg := "Could not create a balancer"
+		log.WithError(err).Error(msg)
+		return errors.Wrap(err, msg)
 	}
 
 	p.params.Outbound = route.Outbound
@@ -78,24 +73,16 @@ func (p *Register) createDirector(proxyDefinition *Definition, balancer Balancer
 	matcher := router.NewListenPathMatcher()
 
 	return func(req *http.Request) {
-		var upstreamURL string
-		if proxyDefinition.IsBalancerDefined() && balancer != nil {
-			upstream, err := balancer.Elect(proxyDefinition.Upstreams.Targets)
-			if err != nil {
-				log.WithError(err).Error("Could not elect one upstream")
-				return
-			}
-			log.WithField("target", upstream.Target).Debug("Target upstream elected")
-			upstreamURL = upstream.Target
-		} else {
-			log.WithField("upstream_url", proxyDefinition.UpstreamURL).
-				Warn("The upstream URL is deprecated. Use Upstreams instead")
-			upstreamURL = proxyDefinition.UpstreamURL
-		}
-
-		target, err := url.Parse(upstreamURL)
+		upstream, err := balancer.Elect(proxyDefinition.Upstreams.Targets)
 		if err != nil {
-			log.WithError(err).WithField("upstream_url", upstreamURL).Error("Could not parse the target URL")
+			log.WithError(err).Error("Could not elect one upstream")
+			return
+		}
+		log.WithField("target", upstream.Target).Debug("Target upstream elected")
+
+		target, err := url.Parse(upstream.Target)
+		if err != nil {
+			log.WithError(err).WithField("upstream_url", upstream.Target).Error("Could not parse the target URL")
 			return
 		}
 

@@ -82,7 +82,7 @@ func (f *ManagerFactory) Build(t ManagerType) (Manager, error) {
 			return nil, err
 		}
 
-		manager, err := NewIntrospectionManager(f.oAuthServer.Endpoints.Introspect.UpstreamURL, settings)
+		manager, err := NewIntrospectionManager(f.oAuthServer.Endpoints.Introspect, settings)
 		if err != nil {
 			return nil, err
 		}

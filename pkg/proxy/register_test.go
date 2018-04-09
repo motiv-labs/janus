@@ -104,11 +104,13 @@ func createProxyDefinitions() []*Definition {
 			Methods: []string{"ALL"},
 		},
 		{
-			ListenPath:  "/append/*",
-			UpstreamURL: "http://localhost:9089/hello-world",
-			AppendPath:  true,
-			Upstreams:   &Upstreams{},
-			Methods:     []string{"GET"},
+			ListenPath: "/append/*",
+			Upstreams: &Upstreams{
+				Balancing: "roundrobin",
+				Targets:   []*Target{{Target: "http://localhost:9089/hello-world"}},
+			},
+			AppendPath: true,
+			Methods:    []string{"GET"},
 		},
 		{
 			ListenPath: "/api/recipes/{id:[\\da-f]{24}}",

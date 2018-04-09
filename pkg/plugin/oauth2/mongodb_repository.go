@@ -1,8 +1,6 @@
 package oauth2
 
 import (
-	"net/url"
-
 	"github.com/asaskevich/govalidator"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2"
@@ -17,7 +15,6 @@ const (
 type Repository interface {
 	FindAll() ([]*OAuth, error)
 	FindByName(name string) (*OAuth, error)
-	FindByTokenURL(url url.URL) (*OAuth, error)
 	Add(oauth *OAuth) error
 	Save(oauth *OAuth) error
 	Remove(id string) error
@@ -52,8 +49,8 @@ func (r *MongoRepository) FindByName(name string) (*OAuth, error) {
 	session, coll := r.getSession()
 	defer session.Close()
 
-	var result *OAuth
-	if err := coll.Find(bson.M{"name": name}).One(&result); err != nil {
+	result := NewOAuth()
+	if err := coll.Find(bson.M{"name": name}).One(result); err != nil {
 		if err == mgo.ErrNotFound {
 			return nil, ErrOauthServerNotFound
 		}
@@ -125,21 +122,6 @@ func (r *MongoRepository) Remove(name string) error {
 
 	log.WithField("name", name).Debug("Resource removed")
 	return nil
-}
-
-// FindByTokenURL returns OAuth Server records with corresponding token url
-func (r *MongoRepository) FindByTokenURL(url url.URL) (*OAuth, error) {
-	session, coll := r.getSession()
-	defer session.Close()
-
-	query := bson.M{
-		"oauth_endpoints.token.upstreams.targets.target": url.String(),
-	}
-
-	var result *OAuth
-	err := coll.Find(query).One(&result)
-
-	return result, err
 }
 
 func (r *MongoRepository) getSession() (*mgo.Session, *mgo.Collection) {
