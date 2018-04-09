@@ -57,8 +57,13 @@ func testNewDefinitions(t *testing.T) {
 
 func testSuccessfulValidation(t *testing.T) {
 	definition := Definition{
-		ListenPath:  "/*",
-		UpstreamURL: "http://test.com",
+		ListenPath: "/*",
+		Upstreams: &Upstreams{
+			Balancing: "roundrobin",
+			Targets: []*Target{
+				&Target{Target: "http://test.com"},
+			},
+		},
 	}
 	isValid, err := definition.Validate()
 
@@ -76,8 +81,13 @@ func testEmptyListenPathValidation(t *testing.T) {
 
 func testInvalidTargetURLValidation(t *testing.T) {
 	definition := Definition{
-		ListenPath:  " ",
-		UpstreamURL: "wrong",
+		ListenPath: " ",
+		Upstreams: &Upstreams{
+			Balancing: "roundrobin",
+			Targets: []*Target{
+				&Target{Target: "wrong"},
+			},
+		},
 	}
 	isValid, err := definition.Validate()
 
@@ -100,7 +110,6 @@ func testRouteToJSON(t *testing.T) {
 			],
 			"preserve_host":false,
 			"listen_path":"",
-			"upstream_url":"",
 			"strip_path":false,
 			"upstreams":{
 				"balancing":"",
@@ -130,7 +139,6 @@ func testJSONToRoute(t *testing.T) {
 			"hosts":[],
 			"preserve_host":false,
 			"listen_path":"",
-			"upstream_url":"/*",
 			"strip_path":false
 		}
 	}`))
