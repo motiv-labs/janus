@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"net/url"
 
+	"github.com/hellofresh/janus/pkg/proxy"
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -17,17 +19,19 @@ type oAuthResponse struct {
 // IntrospectionManager is responsible for using OAuth2 Introspection definition to
 // validate tokens from an authentication provider
 type IntrospectionManager struct {
-	URL      string
+	balancer proxy.Balancer
+	urls     []*proxy.Target
 	settings *IntrospectionSettings
 }
 
 // NewIntrospectionManager creates a new instance of Introspection
-func NewIntrospectionManager(url string, settings *IntrospectionSettings) (*IntrospectionManager, error) {
-	if url == "" {
-		return nil, ErrInvalidIntrospectionURL
+func NewIntrospectionManager(def *proxy.Definition, settings *IntrospectionSettings) (*IntrospectionManager, error) {
+	balancer, err := proxy.NewBalancer(def.Upstreams.Balancing)
+	if err != nil {
+		return nil, errors.Wrap(err, "Could not create a balancer")
 	}
 
-	return &IntrospectionManager{url, settings}, nil
+	return &IntrospectionManager{balancer, def.Upstreams.Targets, settings}, nil
 }
 
 // IsKeyAuthorized checks if the access token is valid
@@ -36,8 +40,7 @@ func (o *IntrospectionManager) IsKeyAuthorized(ctx context.Context, accessToken 
 	defer resp.Body.Close()
 
 	if err != nil {
-		log.WithField("url", o.URL).
-			WithError(err).
+		log.WithError(err).
 			Error("Error making a request to the authentication provider")
 	}
 
@@ -57,7 +60,12 @@ func (o *IntrospectionManager) IsKeyAuthorized(ctx context.Context, accessToken 
 }
 
 func (o *IntrospectionManager) doStatusRequest(accessToken string) (*http.Response, error) {
-	req, err := http.NewRequest(http.MethodGet, o.URL, nil)
+	upstream, err := o.balancer.Elect(o.urls)
+	if err != nil {
+		return nil, errors.Wrap(err, "Could not elect one upstream")
+	}
+
+	req, err := http.NewRequest(http.MethodGet, upstream.Target, nil)
 	if err != nil {
 		log.WithError(err).Error("Creating the request for the health check failed")
 		return nil, err
