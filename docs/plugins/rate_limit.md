@@ -1,6 +1,6 @@
 # Rate Limiting
 
-Rate limit how many HTTP requests a developer can make in a given period of seconds, minutes, hours, days, months or years. If the API has no authentication layer, the Client IP address will be used, otherwise the Consumer will be used if an authentication plugin has been configured.
+Rate limit how many HTTP requests a developer can make in a given period of seconds, minutes, hours, days, months or years.
 
 ## Configuration
 
