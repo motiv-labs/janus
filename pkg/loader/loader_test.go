@@ -26,9 +26,14 @@ func TestLoadValidAPIDefinitions(t *testing.T) {
 		Name:   "test1",
 		Active: true,
 		Proxy: &proxy.Definition{
-			ListenPath:  "/test1",
-			UpstreamURL: "http://test1",
-			Methods:     []string{http.MethodGet},
+			ListenPath: "/test1",
+			Upstreams: &proxy.Upstreams{
+				Balancing: "roundrobin",
+				Targets: []*proxy.Target{
+					&proxy.Target{Target: "http://test1"},
+				},
+			},
+			Methods: []string{http.MethodGet},
 		},
 		Plugins: []api.Plugin{
 			{
@@ -50,9 +55,14 @@ func TestLoadValidAPIDefinitions(t *testing.T) {
 		Name:   "test2",
 		Active: true,
 		Proxy: &proxy.Definition{
-			ListenPath:  "/test2",
-			UpstreamURL: "http://test2",
-			Methods:     []string{http.MethodGet},
+			ListenPath: "/test2",
+			Upstreams: &proxy.Upstreams{
+				Balancing: "roundrobin",
+				Targets: []*proxy.Target{
+					&proxy.Target{Target: "http://test2"},
+				},
+			},
+			Methods: []string{http.MethodGet},
 		},
 	})
 
@@ -69,9 +79,14 @@ func TestLoadInvalidAPIDefinitions(t *testing.T) {
 		Name:   "test2",
 		Active: true,
 		Proxy: &proxy.Definition{
-			ListenPath:  "/test2",
-			UpstreamURL: "http://test2",
-			Methods:     []string{http.MethodGet},
+			ListenPath: "/test2",
+			Upstreams: &proxy.Upstreams{
+				Balancing: "roundrobin",
+				Targets: []*proxy.Target{
+					&proxy.Target{Target: "http://test2"},
+				},
+			},
+			Methods: []string{http.MethodGet},
 		},
 	}
 	err := apiRepo.Add(definition)
@@ -91,8 +106,13 @@ func TestLoadAPIDefinitionsMissingHTTPMethods(t *testing.T) {
 		Name:   "test1",
 		Active: true,
 		Proxy: &proxy.Definition{
-			ListenPath:  "/test1",
-			UpstreamURL: "http://test1",
+			ListenPath: "/test1",
+			Upstreams: &proxy.Upstreams{
+				Balancing: "roundrobin",
+				Targets: []*proxy.Target{
+					&proxy.Target{Target: "http://test1"},
+				},
+			},
 		},
 	})
 
@@ -109,8 +129,13 @@ func TestLoadInactiveAPIDefinitions(t *testing.T) {
 		Name:   "test1",
 		Active: false,
 		Proxy: &proxy.Definition{
-			ListenPath:  "/test1",
-			UpstreamURL: "http://test1",
+			ListenPath: "/test1",
+			Upstreams: &proxy.Upstreams{
+				Balancing: "roundrobin",
+				Targets: []*proxy.Target{
+					&proxy.Target{Target: "http://test1"},
+				},
+			},
 		},
 	})
 
