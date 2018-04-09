@@ -1,7 +1,6 @@
 package oauth2
 
 import (
-	"net/url"
 	"testing"
 
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -26,14 +25,6 @@ func TestOauthServerInMemoryRepository(t *testing.T) {
 		{
 			scenario: "find all oauth servers",
 			function: testFindAllOAuthServers,
-		},
-		{
-			scenario: "find by token url",
-			function: testFindByTokenURL,
-		},
-		{
-			scenario: "not find by token url",
-			function: testNotFindByTokenURL,
 		},
 		{
 			scenario: "find by name",
@@ -69,24 +60,6 @@ func testFindAllOAuthServers(t *testing.T, repo Repository) {
 	assert.Len(t, results, 2)
 }
 
-func testFindByTokenURL(t *testing.T, repo Repository) {
-	tokenURL, err := url.Parse("http://test.com/token")
-	assert.NoError(t, err)
-
-	server, err := repo.FindByTokenURL(*tokenURL)
-	assert.NoError(t, err)
-	assert.NotNil(t, server)
-}
-
-func testNotFindByTokenURL(t *testing.T, repo Repository) {
-	tokenURL, err := url.Parse("http://test.com/wrong")
-	assert.NoError(t, err)
-
-	server, err := repo.FindByTokenURL(*tokenURL)
-	assert.Error(t, err)
-	assert.Nil(t, server)
-}
-
 func testFindByName(t *testing.T, repo Repository) {
 	definition, err := repo.FindByName("test1")
 	assert.NoError(t, err)
@@ -105,8 +78,13 @@ func newInMemoryRepo() *InMemoryRepository {
 		Name: "test1",
 		Endpoints: Endpoints{
 			Token: &proxy.Definition{
-				ListenPath:  "/token",
-				UpstreamURL: "http://test.com/token",
+				ListenPath: "/token",
+				Upstreams: &proxy.Upstreams{
+					Balancing: "roundrobin",
+					Targets: []*proxy.Target{
+						&proxy.Target{Target: "http://test.com/token"},
+					},
+				},
 			},
 		},
 	})
@@ -115,8 +93,13 @@ func newInMemoryRepo() *InMemoryRepository {
 		Name: "test2",
 		Endpoints: Endpoints{
 			Token: &proxy.Definition{
-				ListenPath:  "/token",
-				UpstreamURL: "http://test2.com/token",
+				ListenPath: "/token",
+				Upstreams: &proxy.Upstreams{
+					Balancing: "roundrobin",
+					Targets: []*proxy.Target{
+						&proxy.Target{Target: "http://test2.com/token"},
+					},
+				},
 			},
 		},
 	})
