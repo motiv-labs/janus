@@ -82,11 +82,6 @@ func (t *Tracing) buildGCloud(config config.GoogleCloudTracing) (opentracing.Tra
 }
 
 func (t *Tracing) buildJaeger(componentName string, c config.JaegerTracing) (opentracing.Tracer, io.Closer, error) {
-	// bufferFLushInterval, err := time.ParseDuration(c.BufferFlushInterval)
-	// if err != nil {
-	// 	return nil, noopCloser{}, errors.Wrap(err, "could not parse buffer flush interval for jaeger")
-	// }
-
 	cfg := jaegercfg.Configuration{
 		Sampler: &jaegercfg.SamplerConfig{
 			Type:  c.SamplingType,
