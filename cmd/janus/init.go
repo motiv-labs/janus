@@ -6,7 +6,6 @@ import (
 	"path/filepath"
 
 	"github.com/hellofresh/janus/pkg/config"
-	"github.com/hellofresh/janus/pkg/store"
 	"github.com/hellofresh/stats-go"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
@@ -18,7 +17,6 @@ import (
 var (
 	globalConfig *config.Specification
 	statsClient  client.Client
-	storage      store.Store
 	session      *mgo.Session
 )
 
@@ -84,17 +82,6 @@ func initStatsd() {
 	statsClient.TrackMetric("app", bucket.MetricOperation{"init", host, appFile})
 
 	log.AddHook(hooks.NewLogrusHook(statsClient, globalConfig.Stats.ErrorsSection))
-}
-
-// initializes the storage and managers
-func initStorage() {
-	log.WithField("dsn", globalConfig.Storage.DSN).Debug("Initializing storage")
-	s, err := store.Build(globalConfig.Storage.DSN)
-	if nil != err {
-		log.Fatal(err)
-	}
-
-	storage = s
 }
 
 // initializes the storage and managers
