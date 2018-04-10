@@ -22,10 +22,14 @@ type Specification struct {
 	Log                  logging.LogConfig
 	Web                  Web
 	Database             Database
-	Storage              Storage
 	Stats                Stats
 	Tracing              Tracing
 	TLS                  TLS
+	Cluster              Cluster
+}
+
+type Cluster struct {
+	UpdateFrequency time.Duration `envconfig:"CLUSTER_UPDATE_FREQUENCY"`
 }
 
 // Web represents the API configurations
@@ -47,11 +51,6 @@ type TLS struct {
 // IsHTTPS checks if you have https enabled
 func (s *TLS) IsHTTPS() bool {
 	return s.CertFile != "" && s.KeyFile != ""
-}
-
-// Storage holds the configuration for a storage
-type Storage struct {
-	DSN string `envconfig:"STORAGE_DSN"`
 }
 
 // Database holds the configuration for a database
@@ -107,12 +106,12 @@ type GoogleCloudTracing struct {
 
 // JaegerTracing holds the Jaeger tracing configuration
 type JaegerTracing struct {
-	SamplingServerURL   string  `envconfig:"TRACING_JAEGER_SAMPLING_SERVER_URL"`
-	SamplingParam       float64 `envconfig:"TRACING_JAEGER_SAMPLING_PARAM"`
-	SamplingType        string  `envconfig:"TRACING_JAEGER_SAMPLING_TYPE"`
-	BufferFlushInterval string  `envconfig:"TRACING_JAEGER_BUFFER_FLUSH_INTERVAL"`
-	LogSpans            bool    `envconfig:"TRACING_JAEGER_LOG_SPANS"`
-	QueueSize           int     `envconfig:"TRACING_JAEGER_QUEUE_SIZE"`
+	SamplingServerURL   string        `envconfig:"TRACING_JAEGER_SAMPLING_SERVER_URL"`
+	SamplingParam       float64       `envconfig:"TRACING_JAEGER_SAMPLING_PARAM"`
+	SamplingType        string        `envconfig:"TRACING_JAEGER_SAMPLING_TYPE"`
+	BufferFlushInterval time.Duration `envconfig:"TRACING_JAEGER_BUFFER_FLUSH_INTERVAL"`
+	LogSpans            bool          `envconfig:"TRACING_JAEGER_LOG_SPANS"`
+	QueueSize           int           `envconfig:"TRACING_JAEGER_QUEUE_SIZE"`
 }
 
 // Tracing represents the distributed tracing configuration
@@ -132,8 +131,8 @@ func init() {
 	viper.SetDefault("backendFlushInterval", "20ms")
 	viper.SetDefault("requestID", true)
 
+	viper.SetDefault("cluster.updateFrequency", "10s")
 	viper.SetDefault("database.dsn", "file:///etc/janus")
-	viper.SetDefault("storage.dsn", "memory://localhost")
 
 	viper.SetDefault("web.port", "8081")
 	viper.SetDefault("web.tls.port", "8444")
