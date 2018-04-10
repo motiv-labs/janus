@@ -11,39 +11,46 @@ import (
 	httpErrors "github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/middleware"
-	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/router"
-	"github.com/pkg/errors"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 )
 
-func init() {
-	plugin.RegisterEventHook(plugin.StartupEvent, onStartup)
+// Server represents the web server
+type Server struct {
+	repo        api.Repository
+	Port        int
+	ReadOnly    bool
+	Credentials config.Credentials
+	TLS         config.TLS
 }
 
-func onStartup(event interface{}) error {
-	e, ok := event.(plugin.OnStartup)
-	if !ok {
-		return errors.New("Could not convert event to startup type")
+// New creates a new web server
+func New(repo api.Repository, opts ...Option) *Server {
+	s := Server{repo: repo}
+
+	for _, opt := range opts {
+		opt(&s)
 	}
 
-	config := e.Config.Web
-	repo := e.Repository
+	return &s
+}
 
+// Serve creates a router and serves requests async
+func (s *Server) Serve() error {
 	log.Info("Janus Admin API starting...")
 	router.DefaultOptions.NotFoundHandler = httpErrors.NotFound
 	r := router.NewChiRouterWithOptions(router.DefaultOptions)
 
 	// create authentication for Janus
-	guard := jwt.NewGuard(config.Credentials)
+	guard := jwt.NewGuard(s.Credentials)
 	r.Use(
 		chimiddleware.StripSlashes,
 		chimiddleware.DefaultCompress,
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(httpErrors.RecoveryHandler),
-		middleware.NewOpenTracing(config.TLS.IsHTTPS()).Handler,
+		middleware.NewOpenTracing(s.TLS.IsHTTPS()).Handler,
 		cors.New(cors.Options{
 			AllowedOrigins:   []string{"*"},
 			AllowedHeaders:   []string{"*"},
@@ -55,41 +62,41 @@ func onStartup(event interface{}) error {
 	// create endpoints
 	r.GET("/", Home())
 	// health checks
-	r.GET("/status", checker.NewOverviewHandler(repo))
-	r.GET("/status/{name}", checker.NewStatusHandler(repo))
+	r.GET("/status", checker.NewOverviewHandler(s.repo))
+	r.GET("/status/{name}", checker.NewStatusHandler(s.repo))
 
 	handlers := jwt.Handler{Guard: guard}
-	r.POST("/login", handlers.Login(config.Credentials))
+	r.POST("/login", handlers.Login(s.Credentials))
 	authGroup := r.Group("/auth")
 	{
 		authGroup.GET("/refresh_token", handlers.Refresh())
 	}
 
-	loadAPIEndpoints(r, repo, e.Notifier, guard)
+	s.loadAPIEndpoints(r, guard)
 	plugin.EmitEvent(plugin.AdminAPIStartupEvent, plugin.OnAdminAPIStartup{Router: r})
 
 	go func() {
-		listenAndServe(config, r)
+		s.listenAndServe(r)
 	}()
 
 	return nil
 }
 
-func listenAndServe(config config.Web, handler http.Handler) error {
-	address := fmt.Sprintf(":%v", config.Port)
+func (s *Server) listenAndServe(handler http.Handler) error {
+	address := fmt.Sprintf(":%v", s.Port)
 
 	log.Info("Janus Admin API started")
-	if config.TLS.IsHTTPS() {
-		addressTLS := fmt.Sprintf(":%v", config.TLS.Port)
-		if config.TLS.Redirect {
+	if s.TLS.IsHTTPS() {
+		addressTLS := fmt.Sprintf(":%v", s.TLS.Port)
+		if s.TLS.Redirect {
 			go func() {
 				log.WithField("address", address).Info("Listening HTTP redirects to HTTPS")
-				log.Fatal(http.ListenAndServe(address, RedirectHTTPS(config.TLS.Port)))
+				log.Fatal(http.ListenAndServe(address, RedirectHTTPS(s.TLS.Port)))
 			}()
 		}
 
 		log.WithField("address", addressTLS).Info("Listening HTTPS")
-		return http.ListenAndServeTLS(addressTLS, config.TLS.CertFile, config.TLS.KeyFile, handler)
+		return http.ListenAndServeTLS(addressTLS, s.TLS.CertFile, s.TLS.KeyFile, handler)
 	}
 
 	log.WithField("address", address).Info("Certificate and certificate key were not found, defaulting to HTTP")
@@ -97,12 +104,12 @@ func listenAndServe(config config.Web, handler http.Handler) error {
 }
 
 //loadAPIEndpoints register api endpoints
-func loadAPIEndpoints(router router.Router, repo api.Repository, ntf notifier.Notifier, guard jwt.Guard) {
+func (s *Server) loadAPIEndpoints(r router.Router, guard jwt.Guard) {
 	log.Debug("Loading API Endpoints")
 
 	// Apis endpoints
-	handler := api.NewController(repo, ntf)
-	group := router.Group("/apis")
+	handler := NewAPIHandler(s.repo)
+	group := r.Group("/apis")
 	group.Use(jwt.NewMiddleware(guard).Handler)
 	{
 		group.GET("/", handler.Get())

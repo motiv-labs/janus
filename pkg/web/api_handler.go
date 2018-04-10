@@ -1,30 +1,29 @@
-package api
+package web
 
 import (
 	"encoding/json"
 	"fmt"
 	"net/http"
 
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/errors"
-	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/render"
 	"github.com/hellofresh/janus/pkg/router"
 )
 
-// Controller is the api rest controller
-type Controller struct {
-	repo     Repository
-	notifier notifier.Notifier
+// APIHandler is the api rest controller
+type APIHandler struct {
+	repo api.Repository
 }
 
-// NewController creates a new instance of Controller
-func NewController(repo Repository, notifier notifier.Notifier) *Controller {
-	return &Controller{repo, notifier}
+// NewAPIHandler creates a new instance of Controller
+func NewAPIHandler(repo api.Repository) *APIHandler {
+	return &APIHandler{repo}
 }
 
 // Get is the find all handler
-func (c *Controller) Get() http.HandlerFunc {
+func (c *APIHandler) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		span := opentracing.FromContext(r.Context(), "datastore.FindAll")
 		data, err := c.repo.FindAll()
@@ -40,7 +39,7 @@ func (c *Controller) Get() http.HandlerFunc {
 }
 
 // GetBy is the find by handler
-func (c *Controller) GetBy() http.HandlerFunc {
+func (c *APIHandler) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.URLParam(r, "name")
 		span := opentracing.FromContext(r.Context(), "datastore.FindByName")
@@ -57,7 +56,7 @@ func (c *Controller) GetBy() http.HandlerFunc {
 }
 
 // PutBy is the update handler
-func (c *Controller) PutBy() http.HandlerFunc {
+func (c *APIHandler) PutBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var err error
 
@@ -67,7 +66,7 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		span.Finish()
 
 		if definition == nil {
-			errors.Handler(w, ErrAPIDefinitionNotFound)
+			errors.Handler(w, api.ErrAPIDefinitionNotFound)
 			return
 		}
 
@@ -88,13 +87,13 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		existingPathDefinition, err := c.repo.FindByListenPath(definition.Proxy.ListenPath)
 		span.Finish()
 
-		if err != nil && err != ErrAPIDefinitionNotFound {
+		if err != nil && err != api.ErrAPIDefinitionNotFound {
 			errors.Handler(w, err)
 			return
 		}
 
 		if nil != existingPathDefinition && existingPathDefinition.Name != definition.Name {
-			errors.Handler(w, ErrAPIListenPathExists)
+			errors.Handler(w, api.ErrAPIListenPathExists)
 			return
 		}
 
@@ -107,15 +106,14 @@ func (c *Controller) PutBy() http.HandlerFunc {
 			return
 		}
 
-		c.dispatch(notifier.NoticeAPIUpdated)
 		w.WriteHeader(http.StatusOK)
 	}
 }
 
 // Post is the create handler
-func (c *Controller) Post() http.HandlerFunc {
+func (c *APIHandler) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		definition := NewDefinition()
+		definition := api.NewDefinition()
 
 		err := json.NewDecoder(r.Body).Decode(definition)
 		if nil != err {
@@ -134,7 +132,6 @@ func (c *Controller) Post() http.HandlerFunc {
 
 		span = opentracing.FromContext(r.Context(), "datastore.Add")
 		err = c.repo.Add(definition)
-		c.dispatch(notifier.NoticeAPIAdded)
 		span.Finish()
 
 		if err != nil {
@@ -148,7 +145,7 @@ func (c *Controller) Post() http.HandlerFunc {
 }
 
 // DeleteBy is the delete handler
-func (c *Controller) DeleteBy() http.HandlerFunc {
+func (c *APIHandler) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.URLParam(r, "name")
 
@@ -161,13 +158,6 @@ func (c *Controller) DeleteBy() http.HandlerFunc {
 			return
 		}
 
-		c.dispatch(notifier.NoticeAPIRemoved)
 		w.WriteHeader(http.StatusNoContent)
-	}
-}
-
-func (c *Controller) dispatch(cmd notifier.NotificationCommand) {
-	if c.notifier != nil {
-		c.notifier.Notify(notifier.Notification{Command: cmd})
 	}
 }
