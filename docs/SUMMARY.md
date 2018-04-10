@@ -41,3 +41,4 @@
     * [Tracing](misc/tracing.md)
 * Upgrade Notes
     * [2.x to 3.x](upgrade/3x.md)
+    * [3.5.x to 3.6.x](upgrade/3.6.x.md)
