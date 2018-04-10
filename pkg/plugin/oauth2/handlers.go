@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/errors"
-	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/render"
 	"github.com/hellofresh/janus/pkg/router"
@@ -13,13 +12,12 @@ import (
 
 // Controller is the api rest controller
 type Controller struct {
-	repo     Repository
-	notifier notifier.Notifier
+	repo Repository
 }
 
 // NewController creates a new instance of Controller
-func NewController(repo Repository, notifier notifier.Notifier) *Controller {
-	return &Controller{repo, notifier}
+func NewController(repo Repository) *Controller {
+	return &Controller{repo}
 }
 
 // Get is the find all handler
@@ -83,7 +81,6 @@ func (c *Controller) PutBy() http.HandlerFunc {
 
 		span = opentracing.FromContext(r.Context(), "datastore.Save")
 		err = c.repo.Save(oauth)
-		c.dispatch(notifier.NoticeOAuthServerUpdated)
 		span.Finish()
 
 		if err != nil {
@@ -107,7 +104,6 @@ func (c *Controller) Post() http.HandlerFunc {
 
 		span := opentracing.FromContext(r.Context(), "datastore.Add")
 		err = c.repo.Add(oauth)
-		c.dispatch(notifier.NoticeOAuthServerAdded)
 		span.Finish()
 
 		if nil != err {
@@ -133,13 +129,6 @@ func (c *Controller) DeleteBy() http.HandlerFunc {
 			return
 		}
 
-		c.dispatch(notifier.NoticeOAuthServerRemoved)
 		w.WriteHeader(http.StatusNoContent)
-	}
-}
-
-func (c *Controller) dispatch(cmd notifier.NotificationCommand) {
-	if c.notifier != nil {
-		c.notifier.Notify(notifier.Notification{Command: cmd})
 	}
 }
