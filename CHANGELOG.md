@@ -1,5 +1,7 @@
 # Unreleased
 
+# 3.7.0
+
 ## Added
 
 - Leeway support for JWT date fields validation
@@ -12,7 +14,7 @@
 
 # Removed
 
-- `Upstream_URL` support is removed
+- `Upstream_URL` support is removed, see the [Upgrade Notes](docs/upgrade/3.7.x.md)
 
 # 3.6.0
 
