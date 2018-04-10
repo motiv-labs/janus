@@ -1,12 +1,13 @@
 package loader
 
 import (
-	"github.com/hellofresh/janus/pkg/api"
+	"github.com/apex/log"
 	httpErrors "github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/plugin"
-	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/pkg/errors"
 )
+
+var loader *APILoader
 
 func init() {
 	plugin.RegisterEventHook(plugin.StartupEvent, onStartup)
@@ -19,7 +20,14 @@ func onStartup(event interface{}) error {
 		return errors.New("Could not convert event to startup type")
 	}
 
-	Load(e.Register, e.Repository)
+	loader = NewAPILoader(e.Register)
+	loader.RegisterAPIs(e.Configuration)
+
+	// some routers may panic when have empty routes list, so add one dummy 404 route to avoid this
+	if e.Register.Router.RoutesCount() < 1 {
+		e.Register.Router.Any("/", httpErrors.NotFound)
+	}
+
 	return nil
 }
 
@@ -29,17 +37,11 @@ func onReload(event interface{}) error {
 		return errors.New("Could not convert event to reload type")
 	}
 
-	Load(e.Register, e.Repository)
-	return nil
-}
-
-// Load loads all the basic components and definitions into a router
-func Load(register *proxy.Register, repo api.Repository) {
-	apiLoader := NewAPILoader(register)
-	apiLoader.LoadDefinitions(repo)
-
-	// some routers may panic when have empty routes list, so add one dummy 404 route to avoid this
-	if register.Router.RoutesCount() < 1 {
-		register.Router.Any("/", httpErrors.NotFound)
+	if len(e.Configurations) == 0 {
+		log.Debug("No configurations found to reload")
+		return nil
 	}
+
+	loader.RegisterAPIs(e.Configurations)
+	return nil
 }
