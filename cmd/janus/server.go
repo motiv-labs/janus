@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/api"
+	"github.com/hellofresh/janus/pkg/cluster"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/middleware"
-	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -41,14 +41,11 @@ var (
 
 // RunServer is the run command to start Janus
 func RunServer(cmd *cobra.Command, args []string) {
-	var ntf notifier.Notifier
-
 	log.WithField("version", version).Info("Janus starting...")
 
 	initConfig()
 	initLog()
 	initStatsd()
-	initStorage()
 	initDatabase()
 
 	tracingFactory := opentracing.New(globalConfig.Tracing)
@@ -64,14 +61,7 @@ func RunServer(cmd *cobra.Command, args []string) {
 		log.Panic(err)
 	}
 
-	if subscriber, ok := storage.(notifier.Subscriber); ok {
-		listener := notifier.NewNotificationListener(subscriber)
-		listener.Start(handleEvent(repo))
-	}
-
-	if publisher, ok := storage.(notifier.Publisher); ok {
-		ntf = notifier.NewPublisherNotifier(publisher, "")
-	}
+	cluster.Watch(globalConfig.Cluster.UpdateFrequency, handleEvent(repo))
 
 	r := createRouter()
 	register := proxy.NewRegister(r, proxy.Params{
@@ -81,17 +71,43 @@ func RunServer(cmd *cobra.Command, args []string) {
 		CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
 	})
 
+	webServer := web.New(
+		repo,
+		web.WithPort(globalConfig.Web.Port),
+		web.WithTLS(globalConfig.Web.TLS),
+		web.WithCredentials(globalConfig.Web.Credentials),
+		web.ReadOnly(globalConfig.Web.ReadOnly),
+	)
+	if err := webServer.Serve(); err != nil {
+		log.WithError(err).Fatal("Could not start Janus web API")
+	}
+
+	configuration := buildConfiguration(repo)
+
 	event := plugin.OnStartup{
-		Notifier:     ntf,
-		Repository:   repo,
-		StatsClient:  statsClient,
-		MongoSession: session,
-		Register:     register,
-		Config:       globalConfig,
+		StatsClient:   statsClient,
+		MongoSession:  session,
+		Register:      register,
+		Config:        globalConfig,
+		Configuration: configuration,
 	}
 	plugin.EmitEvent(plugin.StartupEvent, event)
 
 	log.Fatal(listenAndServe(r))
+}
+
+func buildConfiguration(repo api.Repository) []*api.Spec {
+	defs, err := repo.FindAll()
+	if err != nil {
+		log.Panic(err)
+	}
+
+	var specs []*api.Spec
+	for _, definition := range defs {
+		specs = append(specs, &api.Spec{Definition: definition})
+	}
+
+	return specs
 }
 
 func listenAndServe(handler http.Handler) error {
@@ -135,25 +151,14 @@ func createRouter() router.Router {
 	return r
 }
 
-func handleEvent(repo api.Repository) func(notification notifier.Notification) {
-	return func(notification notifier.Notification) {
-		if notifier.RequireReload(notification.Command) {
-			newRouter := createRouter()
-			register := proxy.NewRegister(newRouter, proxy.Params{
-				StatsClient:            statsClient,
-				FlushInterval:          globalConfig.BackendFlushInterval,
-				IdleConnectionsPerHost: globalConfig.MaxIdleConnsPerHost,
-				CloseIdleConnsPeriod:   globalConfig.CloseIdleConnsPeriod,
-			})
+func handleEvent(repo api.Repository) func() {
+	return func() {
+		log.Debug("Refreshing configuration")
+		specs := buildConfiguration(repo)
 
-			event := plugin.OnReload{
-				Register:   register,
-				Repository: repo,
-			}
+		event := plugin.OnReload{Configurations: specs}
 
-			plugin.EmitEvent(plugin.ReloadEvent, event)
-
-			server.Handler = newRouter
-		}
+		plugin.EmitEvent(plugin.ReloadEvent, event)
+		log.Debug("Configuration refresh done")
 	}
 }
