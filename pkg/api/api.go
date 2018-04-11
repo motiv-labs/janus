@@ -34,6 +34,11 @@ type HealthCheck struct {
 	Timeout int    `bson:"timeout" json:"timeout"`
 }
 
+// ConfigrationChanged is the message that is sent when a database configuration has changed
+type ConfigrationChanged struct {
+	Configurations []*Definition
+}
+
 // NewDefinition creates a new API Definition with default values
 func NewDefinition() *Definition {
 	return &Definition{

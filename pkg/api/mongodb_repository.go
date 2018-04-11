@@ -1,6 +1,10 @@
 package api
 
 import (
+	"context"
+	"time"
+
+	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/mgo.v2"
 	"gopkg.in/mgo.v2/bson"
@@ -12,12 +16,61 @@ const (
 
 // MongoRepository represents a mongodb repository
 type MongoRepository struct {
-	session *mgo.Session
+	// TODO: we need to expose this so the plugins can use the same session. We should abstract the session and provide
+	// the plugins with a simple interface to search, insert, update and remove data from whatever backend implementation
+	Session     *mgo.Session
+	refreshTime time.Duration
 }
 
 // NewMongoAppRepository creates a mongo API definition repo
-func NewMongoAppRepository(session *mgo.Session) (*MongoRepository, error) {
-	return &MongoRepository{session}, nil
+func NewMongoAppRepository(dsn string, refreshTime time.Duration) (*MongoRepository, error) {
+	log.WithField("dsn", dsn).Debug("Trying to connect to MongoDB...")
+	session, err := mgo.Dial(dsn)
+	if err != nil {
+		return nil, errors.Wrap(err, "could not connect to mongodb")
+	}
+
+	log.Debug("Connected to MongoDB")
+	session.SetMode(mgo.Monotonic, true)
+
+	return &MongoRepository{Session: session, refreshTime: refreshTime}, nil
+}
+
+// Close terminates the session.  It's a runtime error to use a session
+// after it has been closed.
+func (r *MongoRepository) Close() error {
+	r.Session.Close()
+	return nil
+}
+
+// Watch watches for changes on the database
+func (r *MongoRepository) Watch(ctx context.Context) <-chan ConfigrationChanged {
+	ch := make(chan ConfigrationChanged)
+
+	t := time.NewTicker(r.refreshTime)
+	go func(refreshTicker *time.Ticker) {
+		defer refreshTicker.Stop()
+		log.Debug("Watching Provider...")
+		for {
+			select {
+			case <-refreshTicker.C:
+				defs, err := r.FindAll()
+				if err != nil {
+					log.WithError(err).Error("Failed to get configurations on watch")
+					continue
+				}
+
+				ch <- ConfigrationChanged{
+					Configurations: defs,
+				}
+			case <-ctx.Done():
+				close(ch)
+				return
+			}
+		}
+	}(t)
+
+	return ch
 }
 
 // FindAll fetches all the API definitions available
@@ -125,7 +178,7 @@ func (r *MongoRepository) FindValidAPIHealthChecks() ([]*Definition, error) {
 }
 
 func (r *MongoRepository) getSession() (*mgo.Session, *mgo.Collection) {
-	session := r.session.Copy()
+	session := r.Session.Copy()
 	coll := session.DB("").C(collectionName)
 
 	return session, coll

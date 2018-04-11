@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
@@ -15,6 +16,17 @@ type InMemoryRepository struct {
 // NewInMemoryRepository creates a in memory repository
 func NewInMemoryRepository() *InMemoryRepository {
 	return &InMemoryRepository{definitions: make(map[string]*Definition)}
+}
+
+// Close terminates the session.  It's a runtime error to use a session
+// after it has been closed.
+func (r *InMemoryRepository) Close() error {
+	return nil
+}
+
+// Watch watches for changes on the database
+func (r *InMemoryRepository) Watch(ctx context.Context) <-chan ConfigrationChanged {
+	return make(chan ConfigrationChanged)
 }
 
 // FindAll fetches all the api definitions available

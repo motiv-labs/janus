@@ -1,10 +1,11 @@
 package api
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"net/url"
-
-	mgo "gopkg.in/mgo.v2"
+	"time"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -17,6 +18,7 @@ const (
 
 // Repository defines the behavior of a proxy specs repository
 type Repository interface {
+	io.Closer
 	FindAll() ([]*Definition, error)
 	FindByName(name string) (*Definition, error)
 	FindByListenPath(path string) (*Definition, error)
@@ -24,6 +26,7 @@ type Repository interface {
 	Add(app *Definition) error
 	Remove(name string) error
 	FindValidAPIHealthChecks() ([]*Definition, error)
+	Watch(ctx context.Context) <-chan ConfigrationChanged
 }
 
 func exists(r Repository, def *Definition) (bool, error) {
@@ -45,7 +48,7 @@ func exists(r Repository, def *Definition) (bool, error) {
 }
 
 // BuildRepository creates a repository instance that will depend on your given DSN
-func BuildRepository(dsn string, session *mgo.Session) (Repository, error) {
+func BuildRepository(dsn string, refreshTime time.Duration) (Repository, error) {
 	dsnURL, err := url.Parse(dsn)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error parsing the DSN")
@@ -53,11 +56,8 @@ func BuildRepository(dsn string, session *mgo.Session) (Repository, error) {
 
 	switch dsnURL.Scheme {
 	case mongodb:
-		repo, err := NewMongoAppRepository(session)
-		if err != nil {
-			return nil, errors.Wrap(err, "Could not create a mongodb repository for api definitions")
-		}
-		return repo, nil
+		log.Debug("MongoDB configuration chosen")
+		return NewMongoAppRepository(dsn, refreshTime)
 	case file:
 		log.Debug("File system based configuration chosen")
 		apiPath := fmt.Sprintf("%s/apis", dsnURL.Path)
