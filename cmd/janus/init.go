@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net/url"
 	"os"
 	"path/filepath"
 
@@ -11,13 +10,11 @@ import (
 	"github.com/hellofresh/stats-go/client"
 	"github.com/hellofresh/stats-go/hooks"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/mgo.v2"
 )
 
 var (
 	globalConfig *config.Specification
 	statsClient  client.Client
-	session      *mgo.Session
 )
 
 func initConfig() {
@@ -82,24 +79,4 @@ func initStatsd() {
 	statsClient.TrackMetric("app", bucket.MetricOperation{"init", host, appFile})
 
 	log.AddHook(hooks.NewLogrusHook(statsClient, globalConfig.Stats.ErrorsSection))
-}
-
-// initializes the storage and managers
-func initDatabase() {
-	dsnURL, err := url.Parse(globalConfig.Database.DSN)
-	switch dsnURL.Scheme {
-	case "mongodb":
-		log.Debug("MongoDB configuration chosen")
-
-		log.WithField("dsn", globalConfig.Database.DSN).Debug("Trying to connect to MongoDB...")
-		session, err = mgo.Dial(globalConfig.Database.DSN)
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		log.Debug("Connected to MongoDB")
-		session.SetMode(mgo.Monotonic, true)
-	default:
-		log.Error("No Database selected")
-	}
 }
