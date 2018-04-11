@@ -37,12 +37,23 @@ func New(repo api.Repository, opts ...Option) *Server {
 	return &s
 }
 
-// Serve creates a router and serves requests async
-func (s *Server) Serve() error {
+// Start creates a router and serves requests async
+func (s *Server) Start() error {
 	log.Info("Janus Admin API starting...")
 	router.DefaultOptions.NotFoundHandler = httpErrors.NotFound
 	r := router.NewChiRouterWithOptions(router.DefaultOptions)
+	go func() {
+		s.listenAndServe(r)
+	}()
 
+	s.AddRoutes(r)
+	plugin.EmitEvent(plugin.AdminAPIStartupEvent, plugin.OnAdminAPIStartup{Router: r})
+
+	return nil
+}
+
+// AddRoutes adds the admin routes
+func (s *Server) AddRoutes(r router.Router) {
 	// create authentication for Janus
 	guard := jwt.NewGuard(s.Credentials)
 	r.Use(
@@ -59,27 +70,40 @@ func (s *Server) Serve() error {
 		}).Handler,
 	)
 
-	// create endpoints
+	s.addInternalPublicRoutes(r)
+	s.addInternalAuthRoutes(r, guard)
+	s.addInternalRoutes(r, guard)
+}
+
+func (s *Server) addInternalPublicRoutes(r router.Router) {
 	r.GET("/", Home())
-	// health checks
 	r.GET("/status", checker.NewOverviewHandler(s.repo))
 	r.GET("/status/{name}", checker.NewStatusHandler(s.repo))
+}
 
+func (s *Server) addInternalAuthRoutes(r router.Router, guard jwt.Guard) {
 	handlers := jwt.Handler{Guard: guard}
 	r.POST("/login", handlers.Login(s.Credentials))
 	authGroup := r.Group("/auth")
 	{
 		authGroup.GET("/refresh_token", handlers.Refresh())
 	}
+}
 
-	s.loadAPIEndpoints(r, guard)
-	plugin.EmitEvent(plugin.AdminAPIStartupEvent, plugin.OnAdminAPIStartup{Router: r})
+func (s *Server) addInternalRoutes(r router.Router, guard jwt.Guard) {
+	log.Debug("Loading API Endpoints")
 
-	go func() {
-		s.listenAndServe(r)
-	}()
-
-	return nil
+	// Apis endpoints
+	handler := NewAPIHandler(s.repo)
+	group := r.Group("/apis")
+	group.Use(jwt.NewMiddleware(guard).Handler)
+	{
+		group.GET("/", handler.Get())
+		group.GET("/{name}", handler.GetBy())
+		group.POST("/", handler.Post())
+		group.PUT("/{name}", handler.PutBy())
+		group.DELETE("/{name}", handler.DeleteBy())
+	}
 }
 
 func (s *Server) listenAndServe(handler http.Handler) error {
@@ -105,17 +129,5 @@ func (s *Server) listenAndServe(handler http.Handler) error {
 
 //loadAPIEndpoints register api endpoints
 func (s *Server) loadAPIEndpoints(r router.Router, guard jwt.Guard) {
-	log.Debug("Loading API Endpoints")
 
-	// Apis endpoints
-	handler := NewAPIHandler(s.repo)
-	group := r.Group("/apis")
-	group.Use(jwt.NewMiddleware(guard).Handler)
-	{
-		group.GET("/", handler.Get())
-		group.GET("/{name}", handler.GetBy())
-		group.POST("/", handler.Post())
-		group.PUT("/{name}", handler.PutBy())
-		group.DELETE("/{name}", handler.DeleteBy())
-	}
 }
