@@ -2,6 +2,9 @@
 
 # 3.7.0
 
+## Removed
+- Redis is not necessary anymore for the cluster to work
+
 ## Added
 
 - Leeway support for JWT date fields validation
