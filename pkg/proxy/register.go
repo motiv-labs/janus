@@ -28,7 +28,7 @@ func NewRegister(router router.Router, params Params) *Register {
 	return &Register{router, params}
 }
 
-// UpdateRouter updates the reference to the router. This is useful to reload the mutex
+// UpdateRouter updates the reference to the router. This is useful to reload the mux
 func (p *Register) UpdateRouter(router router.Router) {
 	p.Router = router
 }
