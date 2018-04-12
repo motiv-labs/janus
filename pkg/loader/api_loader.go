@@ -19,42 +19,42 @@ func NewAPILoader(register *proxy.Register) *APILoader {
 }
 
 // RegisterAPIs load application middleware
-func (m *APILoader) RegisterAPIs(cfgs []*api.Spec) {
+func (m *APILoader) RegisterAPIs(cfgs []*api.Definition) {
 	for _, spec := range cfgs {
 		m.RegisterAPI(spec)
 	}
 }
 
-// RegisterAPI register an API Spec in the register
-func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
-	logger := log.WithField("api_name", referenceSpec.Name)
+// RegisterAPI register an API Definition in the register
+func (m *APILoader) RegisterAPI(def *api.Definition) {
+	logger := log.WithField("api_name", def.Name)
 	logger.Debug("Starting RegisterAPI")
 
-	active, err := referenceSpec.Validate()
+	active, err := def.Validate()
 	if false == active && err != nil {
 		logger.WithError(err).Error("Validation errors")
 	}
 
-	if false == referenceSpec.Active {
+	if false == def.Active {
 		logger.Warn("API is not active, skipping...")
 		active = false
 	}
 
 	if active {
-		route := proxy.NewRoute(referenceSpec.Proxy)
+		route := proxy.NewRoute(def.Proxy)
 
-		for _, pDefinition := range referenceSpec.Plugins {
-			l := logger.WithField("name", pDefinition.Name)
-			if pDefinition.Enabled {
+		for _, plg := range def.Plugins {
+			l := logger.WithField("name", plg.Name)
+			if plg.Enabled {
 				l.Debug("Plugin enabled")
 
-				setup, err := plugin.DirectiveAction(pDefinition.Name)
+				setup, err := plugin.DirectiveAction(plg.Name)
 				if err != nil {
 					l.WithError(err).Error("Error loading plugin")
 					continue
 				}
 
-				err = setup(route, pDefinition.Config)
+				err = setup(route, plg.Config)
 				if err != nil {
 					l.WithError(err).Error("Error executing plugin")
 				}
@@ -63,8 +63,8 @@ func (m *APILoader) RegisterAPI(referenceSpec *api.Spec) {
 			}
 		}
 
-		if len(referenceSpec.Definition.Proxy.Hosts) > 0 {
-			route.AddInbound(middleware.NewHostMatcher(referenceSpec.Definition.Proxy.Hosts).Handler)
+		if len(def.Proxy.Hosts) > 0 {
+			route.AddInbound(middleware.NewHostMatcher(def.Proxy.Hosts).Handler)
 		}
 
 		m.register.Add(route)

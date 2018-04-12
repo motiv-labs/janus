@@ -59,7 +59,7 @@ func (r *MongoRepository) Watch(ctx context.Context, cfgChan chan<- Configuratio
 				}
 
 				cfgChan <- ConfigurationChanged{
-					Configurations: r.buildConfiguration(defs),
+					Configurations: defs,
 				}
 			case <-ctx.Done():
 				return
@@ -177,13 +177,4 @@ func (r *MongoRepository) getSession() (*mgo.Session, *mgo.Collection) {
 	coll := session.DB("").C(collectionName)
 
 	return session, coll
-}
-
-func (r *MongoRepository) buildConfiguration(defs []*Definition) []*Spec {
-	var specs []*Spec
-	for _, d := range defs {
-		specs = append(specs, &Spec{Definition: d})
-	}
-
-	return specs
 }

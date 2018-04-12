@@ -83,13 +83,8 @@ func createRegisterAndRouter() (router.Router, error) {
 		return nil, err
 	}
 
-	var specs []*api.Spec
-	for _, d := range defs {
-		specs = append(specs, &api.Spec{Definition: d})
-	}
-
 	loader := NewAPILoader(register)
-	loader.RegisterAPIs(specs)
+	loader.RegisterAPIs(defs)
 
 	return r, nil
 }

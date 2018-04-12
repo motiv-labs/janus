@@ -24,13 +24,11 @@ import (
 
 // Server is the Janus server
 type Server struct {
-	server    *http.Server
-	provider  api.Repository
-	register  *proxy.Register
-	defLoader *loader.APILoader
-	started   bool
-
-	currentConfigurations []*api.Spec
+	server                *http.Server
+	provider              api.Repository
+	register              *proxy.Register
+	defLoader             *loader.APILoader
+	currentConfigurations []*api.Definition
 	configurationChan     chan api.ConfigurationChanged
 	stopChan              chan bool
 	globalConfig          *config.Specification
@@ -82,6 +80,27 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 		log.WithError(err).Fatal("Could not start providers")
 	}
 
+	defs, err := s.provider.FindAll()
+	if err != nil {
+		return errors.Wrap(err, "could not find all configurations from the provider")
+	}
+
+	event := plugin.OnStartup{
+		StatsClient:   s.statsClient,
+		Register:      s.register,
+		Config:        s.globalConfig,
+		Configuration: defs,
+	}
+
+	if mgoRepo, ok := s.provider.(*api.MongoRepository); ok {
+		event.MongoSession = mgoRepo.Session
+	}
+
+	plugin.EmitEvent(plugin.StartupEvent, event)
+
+	s.defLoader.RegisterAPIs(defs)
+	log.Info("Janus started")
+
 	return nil
 }
 
@@ -128,11 +147,6 @@ func (s *Server) Close() error {
 
 func (s *Server) startHTTPServers() error {
 	r := s.createRouter()
-	// some routers may panic when have empty routes list, so add one dummy 404 route to avoid this
-	if r.RoutesCount() < 1 {
-		r.Any("/", httpErrors.NotFound)
-	}
-
 	s.register = proxy.NewRegister(r, proxy.Params{
 		StatsClient:            s.statsClient,
 		FlushInterval:          s.globalConfig.BackendFlushInterval,
@@ -166,7 +180,7 @@ func (s *Server) listenProviders(stop chan bool) {
 		case <-stop:
 			return
 		case configMsg, ok := <-s.configurationChan:
-			if !ok || configMsg.Configurations == nil {
+			if !ok {
 				return
 			}
 
@@ -223,36 +237,23 @@ func (s *Server) createRouter() router.Router {
 		r.Use(middleware.RequestID)
 	}
 
+	// some routers may panic when have empty routes list, so add one dummy 404 route to avoid this
+	if r.RoutesCount() < 1 {
+		r.Any("/", httpErrors.NotFound)
+	}
+
 	return r
 }
 
-func (s *Server) handleEvent(specs []*api.Spec) {
-	if !s.started {
-		event := plugin.OnStartup{
-			StatsClient:   s.statsClient,
-			Register:      s.register,
-			Config:        s.globalConfig,
-			Configuration: specs,
-		}
+func (s *Server) handleEvent(specs []*api.Definition) {
+	log.Debug("Refreshing configuration")
+	newRouter := s.createRouter()
 
-		if mgoRepo, ok := s.provider.(*api.MongoRepository); ok {
-			event.MongoSession = mgoRepo.Session
-		}
+	s.register.UpdateRouter(newRouter)
+	s.defLoader.RegisterAPIs(specs)
 
-		plugin.EmitEvent(plugin.StartupEvent, event)
+	plugin.EmitEvent(plugin.ReloadEvent, plugin.OnReload{Configurations: specs})
 
-		s.defLoader.RegisterAPIs(specs)
-		s.started = true
-		log.Info("Janus started")
-	} else {
-		log.Debug("Refreshing configuration")
-		newRouter := s.createRouter()
-		s.register.UpdateRouter(newRouter)
-		s.defLoader.RegisterAPIs(specs)
-
-		plugin.EmitEvent(plugin.ReloadEvent, plugin.OnReload{Configurations: specs})
-
-		s.server.Handler = newRouter
-		log.Debug("Configuration refresh done")
-	}
+	s.server.Handler = newRouter
+	log.Debug("Configuration refresh done")
 }

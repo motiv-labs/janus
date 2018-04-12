@@ -7,11 +7,6 @@ import (
 	"github.com/hellofresh/janus/pkg/proxy"
 )
 
-// Spec Holds an api definition and basic options
-type Spec struct {
-	*Definition
-}
-
 // Plugin represents the plugins for an API
 type Plugin struct {
 	Name    string                 `bson:"name" json:"name"`
@@ -36,7 +31,7 @@ type HealthCheck struct {
 
 // ConfigurationChanged is the message that is sent when a database configuration has changed
 type ConfigurationChanged struct {
-	Configurations []*Spec
+	Configurations []*Definition
 }
 
 // NewDefinition creates a new API Definition with default values

@@ -89,9 +89,8 @@ func (r *FileSystemRepository) Watch(ctx context.Context, cfgChan chan<- Configu
 						log.WithError(err).Error("Couldn't load the api definition file")
 						continue
 					}
-					specs := r.buildConfiguration(r.parseDefinition(body).defs)
 					cfgChan <- ConfigurationChanged{
-						Configurations: specs,
+						Configurations: r.parseDefinition(body).defs,
 					}
 				}
 			case err := <-r.watcher.Errors:
@@ -117,15 +116,6 @@ func (r *FileSystemRepository) parseDefinition(apiDef []byte) definitionList {
 	}
 
 	return appConfigs
-}
-
-func (r *FileSystemRepository) buildConfiguration(defs []*Definition) []*Spec {
-	var specs []*Spec
-	for _, d := range defs {
-		specs = append(specs, &Spec{Definition: d})
-	}
-
-	return specs
 }
 
 func (d *definitionList) UnmarshalJSON(b []byte) error {

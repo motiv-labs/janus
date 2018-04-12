@@ -24,12 +24,12 @@ type OnStartup struct {
 	MongoSession  *mgo.Session
 	Register      *proxy.Register
 	Config        *config.Specification
-	Configuration []*api.Spec
+	Configuration []*api.Definition
 }
 
 // OnReload represents a event that happens when Janus hot reloads it's configurations
 type OnReload struct {
-	Configurations []*api.Spec
+	Configurations []*api.Definition
 }
 
 // OnAdminAPIStartup represents a event that happens when Janus starts up the admin API
