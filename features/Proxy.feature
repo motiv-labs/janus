@@ -189,6 +189,7 @@ Feature: Proxy requests to upstream.
         Then I should receive 201 response code
         And header "Location" should be "/apis/posts-public"
 
+        When I wait for a while
         When I request "/example" path with "GET" method
         Then I should receive 200 response code
         And response JSON body has "hello" path with value 'world'
