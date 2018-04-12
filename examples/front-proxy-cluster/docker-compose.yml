@@ -8,7 +8,7 @@ services:
       - "8081:8081"
     depends_on:
       - service1
-      - janus-storage
+      - janus-database
     volumes:
       - ./janus.toml:/etc/janus/janus.toml
       - ./apis:/etc/janus/apis
@@ -20,7 +20,7 @@ services:
       - "8083:8081"
     depends_on:
       - service1
-      - janus-storage
+      - janus-database
     volumes:
       - ./janus.toml:/etc/janus/janus.toml
       - ./apis:/etc/janus/apis
@@ -32,7 +32,7 @@ services:
       - "8085:8081"
     depends_on:
       - service1
-      - janus-storage
+      - janus-database
     volumes:
       - ./janus.toml:/etc/janus/janus.toml
       - ./apis:/etc/janus/apis
@@ -44,7 +44,7 @@ services:
     volumes:
       - ../front-proxy/stubs:/home/wiremock/mappings
 
-  janus-storage:
-      image: redis
+  janus-database:
+      image: mongo
       ports:
-          - "6379:6379"
+        - "27017:27017"
