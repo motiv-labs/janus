@@ -23,7 +23,6 @@ export ADMIN_USERNAME="admin"
 export API_READONLY="false"
 export PORT_SECONDARY="3100"
 export API_PORT_SECONDARY="3101"
-export STORAGE_DSN="redis://localhost:6379"
 export BACKEND_UPDATE_FREQUENCY="1s"
 
 "./dist/janus" > /tmp/janus.log 2>&1 &
@@ -86,7 +85,7 @@ if [ ${exit_code} -ne 0 ]; then
     echo "${WARN_COLOR}=================================${NO_COLOR}"
     echo "${WARN_COLOR}===         WIREMOCK          ===${NO_COLOR}"
     echo "${WARN_COLOR}=================================${NO_COLOR}"
-    docker-compose logs service1
+    docker-compose -f assets/docker-compose.yml logs service1
 fi
 
 exit ${exit_code}
