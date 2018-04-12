@@ -78,9 +78,18 @@ func createRegisterAndRouter() (router.Router, error) {
 	if err != nil {
 		return nil, err
 	}
+	defs, err := proxyRepo.FindAll()
+	if err != nil {
+		return nil, err
+	}
+
+	var specs []*api.Spec
+	for _, d := range defs {
+		specs = append(specs, &api.Spec{Definition: d})
+	}
 
 	loader := NewAPILoader(register)
-	loader.LoadDefinitions(proxyRepo)
+	loader.RegisterAPIs(specs)
 
 	return r, nil
 }
