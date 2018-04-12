@@ -32,7 +32,6 @@ Start a Janus container and link it to your database container (if you are using
 ```sh
 $ docker run -d --name janus \
                 --link janus-database:janus-database \
-                --link janus-storage:janus-storage \
                 -e "DATABASE_DSN=mongodb://janus-database:27017/janus" \
                 -p 8080:8080 \
                 -p 8443:8443 \
