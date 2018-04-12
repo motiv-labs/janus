@@ -24,6 +24,7 @@ export API_READONLY="false"
 export PORT_SECONDARY="3100"
 export API_PORT_SECONDARY="3101"
 export STORAGE_DSN="redis://localhost:6379"
+export BACKEND_UPDATE_FREQUENCY="1s"
 
 "./dist/janus" > /tmp/janus.log 2>&1 &
 exit_code=$?
