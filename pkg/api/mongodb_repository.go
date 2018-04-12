@@ -44,7 +44,7 @@ func (r *MongoRepository) Close() error {
 }
 
 // Watch watches for changes on the database
-func (r *MongoRepository) Watch(ctx context.Context, cfgChan chan<- ConfigrationChanged) {
+func (r *MongoRepository) Watch(ctx context.Context, cfgChan chan<- ConfigurationChanged) {
 	t := time.NewTicker(r.refreshTime)
 	go func(refreshTicker *time.Ticker) {
 		defer refreshTicker.Stop()
@@ -58,7 +58,7 @@ func (r *MongoRepository) Watch(ctx context.Context, cfgChan chan<- Configration
 					continue
 				}
 
-				cfgChan <- ConfigrationChanged{
+				cfgChan <- ConfigurationChanged{
 					Configurations: r.buildConfiguration(defs),
 				}
 			case <-ctx.Done():

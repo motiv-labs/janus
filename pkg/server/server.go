@@ -31,7 +31,7 @@ type Server struct {
 	started   bool
 
 	currentConfigurations []*api.Spec
-	configurationChan     chan api.ConfigrationChanged
+	configurationChan     chan api.ConfigurationChanged
 	stopChan              chan bool
 	globalConfig          *config.Specification
 	statsClient           client.Client
@@ -40,7 +40,7 @@ type Server struct {
 // New creates a new instance of Server
 func New(opts ...Option) *Server {
 	s := Server{
-		configurationChan: make(chan api.ConfigrationChanged, 100),
+		configurationChan: make(chan api.ConfigurationChanged, 100),
 		stopChan:          make(chan bool, 1),
 	}
 

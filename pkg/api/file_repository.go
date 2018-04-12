@@ -77,7 +77,7 @@ func (r *FileSystemRepository) Close() error {
 }
 
 // Watch watches for changes on the database
-func (r *FileSystemRepository) Watch(ctx context.Context, cfgChan chan<- ConfigrationChanged) {
+func (r *FileSystemRepository) Watch(ctx context.Context, cfgChan chan<- ConfigurationChanged) {
 	go func() {
 		for {
 			select {
@@ -90,7 +90,7 @@ func (r *FileSystemRepository) Watch(ctx context.Context, cfgChan chan<- Configr
 						continue
 					}
 					specs := r.buildConfiguration(r.parseDefinition(body).defs)
-					cfgChan <- ConfigrationChanged{
+					cfgChan <- ConfigurationChanged{
 						Configurations: specs,
 					}
 				}

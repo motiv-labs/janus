@@ -25,7 +25,7 @@ func (r *InMemoryRepository) Close() error {
 }
 
 // Watch watches for changes on the database
-func (r *InMemoryRepository) Watch(ctx context.Context, cfgChan chan<- ConfigrationChanged) {
+func (r *InMemoryRepository) Watch(ctx context.Context, cfgChan chan<- ConfigurationChanged) {
 
 }
 

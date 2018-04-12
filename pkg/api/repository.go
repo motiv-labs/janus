@@ -26,7 +26,7 @@ type Repository interface {
 	Add(app *Definition) error
 	Remove(name string) error
 	FindValidAPIHealthChecks() ([]*Definition, error)
-	Watch(ctx context.Context, cfgChan chan<- ConfigrationChanged)
+	Watch(ctx context.Context, cfgChan chan<- ConfigurationChanged)
 }
 
 func exists(r Repository, def *Definition) (bool, error) {

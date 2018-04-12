@@ -34,8 +34,8 @@ type HealthCheck struct {
 	Timeout int    `bson:"timeout" json:"timeout"`
 }
 
-// ConfigrationChanged is the message that is sent when a database configuration has changed
-type ConfigrationChanged struct {
+// ConfigurationChanged is the message that is sent when a database configuration has changed
+type ConfigurationChanged struct {
 	Configurations []*Spec
 }
 
