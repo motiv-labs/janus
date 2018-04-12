@@ -6,12 +6,7 @@ services:
       image: mongo:3
       ports:
           - "27017:27017"
-
-  janus-storage:
-      image: redis:3-alpine
-      ports:
-          - "6379:6379"
-
+          
   service1:
     image: rodolpheche/wiremock:2.6.0-alpine
     ports:
