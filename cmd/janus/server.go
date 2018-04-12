@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/server"
 	log "github.com/sirupsen/logrus"
@@ -41,10 +42,22 @@ func RunServer(cmd *cobra.Command, args []string) {
 	defer statsClient.Close()
 	defer globalConfig.Log.Flush()
 
-	s := server.New(
+	repo, err := api.BuildRepository(globalConfig.Database.DSN, globalConfig.Cluster.UpdateFrequency)
+	defer repo.Close()
+	if err != nil {
+		log.WithError(err).Fatal("Could not build a repository for the database")
+	}
+
+	svr := server.New(
 		server.WithGlobalConfig(globalConfig),
 		server.WithMetricsClient(statsClient),
+		server.WithProvider(repo),
 	)
-	defer s.Close()
-	log.Fatal(s.StartWithContext(context.TODO()))
+
+	ctx := ContextWithSignal(context.Background())
+	svr.StartWithContext(ctx)
+	defer svr.Close()
+
+	svr.Wait()
+	log.Info("Shutting down")
 }
