@@ -13,7 +13,6 @@ import (
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/mgo.v2"
 )
 
 var (
@@ -38,14 +37,8 @@ func FeatureContext(s *godog.Suite) {
 	dsnURL, err := url.Parse(c.Database.DSN)
 	switch dsnURL.Scheme {
 	case "mongodb":
-		session, err := mgo.Dial(c.Database.DSN)
-		if err != nil {
-			panic(err)
-		}
-
-		session.SetMode(mgo.Monotonic, true)
-
-		apiRepo, err = api.NewMongoAppRepository(session)
+		apiRepo, err = api.NewMongoAppRepository(c.Database.DSN, c.BackendFlushInterval)
+		defer apiRepo.Close()
 		if err != nil {
 			panic(err)
 		}
@@ -53,6 +46,7 @@ func FeatureContext(s *godog.Suite) {
 		var apiPath = dsnURL.Path + "/apis"
 
 		apiRepo, err = api.NewFileSystemRepository(apiPath)
+		defer apiRepo.Close()
 		if err != nil {
 			panic(err)
 		}

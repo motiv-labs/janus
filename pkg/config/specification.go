@@ -28,8 +28,9 @@ type Specification struct {
 	Cluster              Cluster
 }
 
+// Cluster represents the cluster configuration
 type Cluster struct {
-	UpdateFrequency time.Duration `envconfig:"CLUSTER_UPDATE_FREQUENCY"`
+	UpdateFrequency time.Duration `envconfig:"BACKEND_UPDATE_FREQUENCY"`
 }
 
 // Web represents the API configurations
