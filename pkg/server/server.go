@@ -3,10 +3,11 @@ package server
 import (
 	"context"
 	"fmt"
+	"net"
 	"net/http"
+	"reflect"
 	"time"
 
-	"github.com/cnf/structhash"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/errors"
@@ -23,25 +24,36 @@ import (
 
 // Server is the Janus server
 type Server struct {
-	server       *http.Server
-	repo         api.Repository
-	register     *proxy.Register
-	defLoader    *loader.APILoader
-	started      bool
-	version      string
-	globalConfig *config.Specification
-	statsClient  client.Client
+	server    *http.Server
+	provider  api.Repository
+	register  *proxy.Register
+	defLoader *loader.APILoader
+	started   bool
+
+	currentConfigurations []*api.Spec
+	configurationChan     chan api.ConfigrationChanged
+	stopChan              chan bool
+	globalConfig          *config.Specification
+	statsClient           client.Client
 }
 
 // New creates a new instance of Server
 func New(opts ...Option) *Server {
-	s := Server{}
+	s := Server{
+		configurationChan: make(chan api.ConfigrationChanged, 100),
+		stopChan:          make(chan bool, 1),
+	}
 
 	for _, opt := range opts {
 		opt(&s)
 	}
 
 	return &s
+}
+
+// Start starts the server
+func (s *Server) Start() error {
+	return s.StartWithContext(context.Background())
 }
 
 // StartWithContext starts the server and Stop/Close it when context is Done
@@ -58,33 +70,63 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 		log.Info("Stopping server gracefully")
 		s.Close()
 	}()
-
-	repo, err := api.BuildRepository(s.globalConfig.Database.DSN, s.globalConfig.Cluster.UpdateFrequency)
-	s.repo = repo
-	defer repo.Close()
-	if err != nil {
-		return errors.Wrap(err, "could not build a repository for the database")
-	}
-
-	ch := repo.Watch(ctx)
 	go func() {
-		for c := range ch {
-			hash, err := structhash.Hash(c.Configurations, 1)
-			if err != nil {
-				log.WithError(err).Error("Could not calculate hash for configuration")
-				return
-			}
-
-			if s.version == hash {
-				log.Debug("Skipping same configuration")
-				return
-			}
-
-			s.version = hash
-			s.handleEvent(c.Configurations)
+		if err := s.startHTTPServers(); err != nil {
+			log.WithError(err).Fatal("Could not start http servers")
 		}
 	}()
+	go func() {
+		s.listenProviders(s.stopChan)
+	}()
+	if err := s.startProvider(ctx); err != nil {
+		log.WithError(err).Fatal("Could not start providers")
+	}
 
+	return nil
+}
+
+// Wait blocks until server is shutted down.
+func (s *Server) Wait() {
+	<-s.stopChan
+}
+
+// Stop stops the server
+func (s *Server) Stop() {
+	defer log.Info("Server stopped")
+
+	graceTimeOut := time.Duration(s.globalConfig.GraceTimeOut)
+	ctx, cancel := context.WithTimeout(context.Background(), graceTimeOut)
+	log.Debugf("Waiting %s seconds before killing connections...", graceTimeOut)
+	if err := s.server.Shutdown(ctx); err != nil {
+		log.WithError(err).Debug("Wait is over due to error")
+		s.server.Close()
+	}
+	cancel()
+	log.Debug("Server closed")
+
+	s.stopChan <- true
+}
+
+// Close closes the server
+func (s *Server) Close() error {
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	go func(ctx context.Context) {
+		<-ctx.Done()
+		if ctx.Err() == context.Canceled {
+			return
+		} else if ctx.Err() == context.DeadlineExceeded {
+			panic("Timeout while stopping janus, killing instance ✝")
+		}
+	}(ctx)
+
+	close(s.stopChan)
+	close(s.configurationChan)
+
+	return s.server.Close()
+}
+
+func (s *Server) startHTTPServers() error {
 	r := s.createRouter()
 	// some routers may panic when have empty routes list, so add one dummy 404 route to avoid this
 	if r.RoutesCount() < 1 {
@@ -99,8 +141,12 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 	})
 	s.defLoader = loader.NewAPILoader(s.register)
 
+	return s.listenAndServe(r)
+}
+
+func (s *Server) startProvider(ctx context.Context) error {
 	webServer := web.New(
-		repo,
+		s.provider,
 		web.WithPort(s.globalConfig.Web.Port),
 		web.WithTLS(s.globalConfig.Web.TLS),
 		web.WithCredentials(s.globalConfig.Web.Credentials),
@@ -110,39 +156,56 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 		return errors.Wrap(err, "could not start Janus web API")
 	}
 
-	return s.listenAndServe(r)
+	s.provider.Watch(ctx, s.configurationChan)
+	return nil
 }
 
-// Start starts the server
-func (s *Server) Start() error {
-	return s.StartWithContext(context.Background())
-}
+func (s *Server) listenProviders(stop chan bool) {
+	for {
+		select {
+		case <-stop:
+			return
+		case configMsg, ok := <-s.configurationChan:
+			if !ok || configMsg.Configurations == nil {
+				return
+			}
 
-// Close closes the server
-func (s *Server) Close() error {
-	return s.server.Close()
+			if reflect.DeepEqual(s.currentConfigurations, configMsg.Configurations) {
+				log.Debug("Skipping same configuration")
+				continue
+			}
+
+			s.currentConfigurations = configMsg.Configurations
+			s.handleEvent(configMsg.Configurations)
+		}
+	}
 }
 
 func (s *Server) listenAndServe(handler http.Handler) error {
 	address := fmt.Sprintf(":%v", s.globalConfig.Port)
+	logger := log.WithField("address", address)
 	s.server = &http.Server{Addr: address, Handler: handler}
+	listener, err := net.Listen("tcp", address)
+	if err != nil {
+		return errors.Wrap(err, "error opening listener")
+	}
 
 	if s.globalConfig.TLS.IsHTTPS() {
 		s.server.Addr = fmt.Sprintf(":%v", s.globalConfig.TLS.Port)
 
 		if s.globalConfig.TLS.Redirect {
 			go func() {
-				log.WithField("address", address).Info("Listening HTTP redirects to HTTPS")
-				log.Fatal(http.ListenAndServe(address, web.RedirectHTTPS(s.globalConfig.TLS.Port)))
+				logger.Info("Listening HTTP redirects to HTTPS")
+				log.Fatal(http.Serve(listener, web.RedirectHTTPS(s.globalConfig.TLS.Port)))
 			}()
 		}
 
-		log.WithField("address", s.server.Addr).Info("Listening HTTPS")
-		return s.server.ListenAndServeTLS(s.globalConfig.TLS.CertFile, s.globalConfig.TLS.KeyFile)
+		logger.Info("Listening HTTPS")
+		return s.server.ServeTLS(listener, s.globalConfig.TLS.CertFile, s.globalConfig.TLS.KeyFile)
 	}
 
-	log.WithField("address", address).Info("Certificate and certificate key were not found, defaulting to HTTP")
-	return s.server.ListenAndServe()
+	logger.Info("Certificate and certificate key were not found, defaulting to HTTP")
+	return s.server.Serve(listener)
 }
 
 func (s *Server) createRouter() router.Router {
@@ -163,19 +226,8 @@ func (s *Server) createRouter() router.Router {
 	return r
 }
 
-func (s *Server) buildConfiguration(defs []*api.Definition) []*api.Spec {
-	var specs []*api.Spec
-	for _, d := range defs {
-		specs = append(specs, &api.Spec{Definition: d})
-	}
-
-	return specs
-}
-
-func (s *Server) handleEvent(defs []*api.Definition) {
+func (s *Server) handleEvent(specs []*api.Spec) {
 	if !s.started {
-		specs := s.buildConfiguration(defs)
-
 		event := plugin.OnStartup{
 			StatsClient:   s.statsClient,
 			Register:      s.register,
@@ -183,7 +235,7 @@ func (s *Server) handleEvent(defs []*api.Definition) {
 			Configuration: specs,
 		}
 
-		if mgoRepo, ok := s.repo.(*api.MongoRepository); ok {
+		if mgoRepo, ok := s.provider.(*api.MongoRepository); ok {
 			event.MongoSession = mgoRepo.Session
 		}
 
@@ -196,8 +248,6 @@ func (s *Server) handleEvent(defs []*api.Definition) {
 		log.Debug("Refreshing configuration")
 		newRouter := s.createRouter()
 		s.register.UpdateRouter(newRouter)
-
-		specs := s.buildConfiguration(defs)
 		s.defLoader.RegisterAPIs(specs)
 
 		plugin.EmitEvent(plugin.ReloadEvent, plugin.OnReload{Configurations: specs})

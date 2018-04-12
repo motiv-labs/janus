@@ -1,6 +1,7 @@
 package server
 
 import (
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/stats-go/client"
 )
@@ -19,5 +20,12 @@ func WithGlobalConfig(globalConfig *config.Specification) Option {
 func WithMetricsClient(client client.Client) Option {
 	return func(s *Server) {
 		s.statsClient = client
+	}
+}
+
+// WithProvider sets the configuration provider
+func WithProvider(provider api.Repository) Option {
+	return func(s *Server) {
+		s.provider = provider
 	}
 }

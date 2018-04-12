@@ -11,7 +11,6 @@ import (
 // APILoader is responsible for loading all apis form a datastore and configure them in a register
 type APILoader struct {
 	register *proxy.Register
-	configs  []*api.Spec
 }
 
 // NewAPILoader creates a new instance of the api manager
@@ -21,9 +20,7 @@ func NewAPILoader(register *proxy.Register) *APILoader {
 
 // RegisterAPIs load application middleware
 func (m *APILoader) RegisterAPIs(cfgs []*api.Spec) {
-	m.configs = cfgs
-
-	for _, spec := range m.configs {
+	for _, spec := range cfgs {
 		m.RegisterAPI(spec)
 	}
 }
