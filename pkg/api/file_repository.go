@@ -77,9 +77,7 @@ func (r *FileSystemRepository) Close() error {
 }
 
 // Watch watches for changes on the database
-func (r *FileSystemRepository) Watch(ctx context.Context) <-chan ConfigrationChanged {
-	ch := make(chan ConfigrationChanged)
-
+func (r *FileSystemRepository) Watch(ctx context.Context, cfgChan chan<- ConfigrationChanged) {
 	go func() {
 		for {
 			select {
@@ -91,22 +89,19 @@ func (r *FileSystemRepository) Watch(ctx context.Context) <-chan ConfigrationCha
 						log.WithError(err).Error("Couldn't load the api definition file")
 						continue
 					}
-
-					ch <- ConfigrationChanged{
-						Configurations: r.parseDefinition(body).defs,
+					specs := r.buildConfiguration(r.parseDefinition(body).defs)
+					cfgChan <- ConfigrationChanged{
+						Configurations: specs,
 					}
 				}
 			case err := <-r.watcher.Errors:
 				log.WithError(err).Error("error received from file system notify")
 				return
 			case <-ctx.Done():
-				close(ch)
 				return
 			}
 		}
 	}()
-
-	return ch
 }
 
 func (r *FileSystemRepository) parseDefinition(apiDef []byte) definitionList {
@@ -122,6 +117,15 @@ func (r *FileSystemRepository) parseDefinition(apiDef []byte) definitionList {
 	}
 
 	return appConfigs
+}
+
+func (r *FileSystemRepository) buildConfiguration(defs []*Definition) []*Spec {
+	var specs []*Spec
+	for _, d := range defs {
+		specs = append(specs, &Spec{Definition: d})
+	}
+
+	return specs
 }
 
 func (d *definitionList) UnmarshalJSON(b []byte) error {

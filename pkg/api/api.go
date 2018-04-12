@@ -36,7 +36,7 @@ type HealthCheck struct {
 
 // ConfigrationChanged is the message that is sent when a database configuration has changed
 type ConfigrationChanged struct {
-	Configurations []*Definition
+	Configurations []*Spec
 }
 
 // NewDefinition creates a new API Definition with default values

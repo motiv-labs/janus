@@ -44,9 +44,7 @@ func (r *MongoRepository) Close() error {
 }
 
 // Watch watches for changes on the database
-func (r *MongoRepository) Watch(ctx context.Context) <-chan ConfigrationChanged {
-	ch := make(chan ConfigrationChanged)
-
+func (r *MongoRepository) Watch(ctx context.Context, cfgChan chan<- ConfigrationChanged) {
 	t := time.NewTicker(r.refreshTime)
 	go func(refreshTicker *time.Ticker) {
 		defer refreshTicker.Stop()
@@ -60,17 +58,14 @@ func (r *MongoRepository) Watch(ctx context.Context) <-chan ConfigrationChanged 
 					continue
 				}
 
-				ch <- ConfigrationChanged{
-					Configurations: defs,
+				cfgChan <- ConfigrationChanged{
+					Configurations: r.buildConfiguration(defs),
 				}
 			case <-ctx.Done():
-				close(ch)
 				return
 			}
 		}
 	}(t)
-
-	return ch
 }
 
 // FindAll fetches all the API definitions available
@@ -182,4 +177,13 @@ func (r *MongoRepository) getSession() (*mgo.Session, *mgo.Collection) {
 	coll := session.DB("").C(collectionName)
 
 	return session, coll
+}
+
+func (r *MongoRepository) buildConfiguration(defs []*Definition) []*Spec {
+	var specs []*Spec
+	for _, d := range defs {
+		specs = append(specs, &Spec{Definition: d})
+	}
+
+	return specs
 }
