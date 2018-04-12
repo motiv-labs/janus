@@ -38,7 +38,6 @@ func FeatureContext(s *godog.Suite) {
 	switch dsnURL.Scheme {
 	case "mongodb":
 		apiRepo, err = api.NewMongoAppRepository(c.Database.DSN, c.BackendFlushInterval)
-		defer apiRepo.Close()
 		if err != nil {
 			panic(err)
 		}
@@ -46,7 +45,6 @@ func FeatureContext(s *godog.Suite) {
 		var apiPath = dsnURL.Path + "/apis"
 
 		apiRepo, err = api.NewFileSystemRepository(apiPath)
-		defer apiRepo.Close()
 		if err != nil {
 			panic(err)
 		}
