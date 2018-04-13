@@ -16,6 +16,7 @@ func ContextWithSignal(ctx context.Context) context.Context {
 		select {
 		case <-signals:
 			cancel()
+			close(signals)
 		}
 	}()
 	return newCtx
