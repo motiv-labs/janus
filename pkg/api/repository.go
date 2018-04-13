@@ -26,6 +26,10 @@ type Repository interface {
 	Add(app *Definition) error
 	Remove(name string) error
 	FindValidAPIHealthChecks() ([]*Definition, error)
+}
+
+// Watcher defines how a provider should watch for changes on configurations
+type Watcher interface {
 	Watch(ctx context.Context, cfgChan chan<- ConfigurationChanged)
 }
 
