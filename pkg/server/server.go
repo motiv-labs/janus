@@ -30,7 +30,7 @@ type Server struct {
 	defLoader             *loader.APILoader
 	currentConfigurations []*api.Definition
 	configurationChan     chan api.ConfigurationChanged
-	stopChan              chan bool
+	stopChan              chan struct{}
 	globalConfig          *config.Specification
 	statsClient           client.Client
 }
@@ -39,7 +39,7 @@ type Server struct {
 func New(opts ...Option) *Server {
 	s := Server{
 		configurationChan: make(chan api.ConfigurationChanged, 100),
-		stopChan:          make(chan bool, 1),
+		stopChan:          make(chan struct{}, 1),
 	}
 
 	for _, opt := range opts {
@@ -66,16 +66,15 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 			time.Sleep(reqAcceptGraceTimeOut)
 		}
 		log.Info("Stopping server gracefully")
-		s.Close()
 	}()
 	go func() {
 		if err := s.startHTTPServers(); err != nil {
 			log.WithError(err).Fatal("Could not start http servers")
 		}
 	}()
-	go func() {
-		s.listenProviders(s.stopChan)
-	}()
+
+	go s.listenProviders(s.stopChan)
+
 	if err := s.startProvider(ctx); err != nil {
 		log.WithError(err).Fatal("Could not start providers")
 	}
@@ -115,19 +114,22 @@ func (s *Server) Stop() {
 
 	graceTimeOut := time.Duration(s.globalConfig.GraceTimeOut)
 	ctx, cancel := context.WithTimeout(context.Background(), graceTimeOut)
+	defer cancel()
 	log.Debugf("Waiting %s seconds before killing connections...", graceTimeOut)
 	if err := s.server.Shutdown(ctx); err != nil {
 		log.WithError(err).Debug("Wait is over due to error")
 		s.server.Close()
 	}
-	cancel()
 	log.Debug("Server closed")
 
-	s.stopChan <- true
+	s.stopChan <- struct{}{}
 }
 
 // Close closes the server
 func (s *Server) Close() error {
+	defer close(s.stopChan)
+	defer close(s.configurationChan)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	go func(ctx context.Context) {
@@ -138,9 +140,6 @@ func (s *Server) Close() error {
 			panic("Timeout while stopping janus, killing instance ✝")
 		}
 	}(ctx)
-
-	close(s.stopChan)
-	close(s.configurationChan)
 
 	return s.server.Close()
 }
@@ -170,11 +169,14 @@ func (s *Server) startProvider(ctx context.Context) error {
 		return errors.Wrap(err, "could not start Janus web API")
 	}
 
-	s.provider.Watch(ctx, s.configurationChan)
+	if watcher, ok := s.provider.(api.Watcher); ok {
+		watcher.Watch(ctx, s.configurationChan)
+	}
+
 	return nil
 }
 
-func (s *Server) listenProviders(stop chan bool) {
+func (s *Server) listenProviders(stop chan struct{}) {
 	for {
 		select {
 		case <-stop:
