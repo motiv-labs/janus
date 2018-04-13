@@ -42,9 +42,7 @@ func (s *Server) Start() error {
 	log.Info("Janus Admin API starting...")
 	router.DefaultOptions.NotFoundHandler = httpErrors.NotFound
 	r := router.NewChiRouterWithOptions(router.DefaultOptions)
-	go func() {
-		s.listenAndServe(r)
-	}()
+	go s.listenAndServe(r)
 
 	s.AddRoutes(r)
 	plugin.EmitEvent(plugin.AdminAPIStartupEvent, plugin.OnAdminAPIStartup{Router: r})
