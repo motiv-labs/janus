@@ -14,27 +14,21 @@ import (
 
 // APIHandler is the api rest controller
 type APIHandler struct {
-	repo api.Repository
+	configurationChan chan<- api.ConfigurationMessage
+	Cfgs              *api.Configuration
 }
 
 // NewAPIHandler creates a new instance of Controller
-func NewAPIHandler(repo api.Repository) *APIHandler {
-	return &APIHandler{repo}
+func NewAPIHandler(cfgChan chan<- api.ConfigurationMessage) *APIHandler {
+	return &APIHandler{
+		configurationChan: cfgChan,
+	}
 }
 
 // Get is the find all handler
 func (c *APIHandler) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		span := opentracing.FromContext(r.Context(), "datastore.FindAll")
-		data, err := c.repo.FindAll()
-		span.Finish()
-
-		if err != nil {
-			errors.Handler(w, err)
-			return
-		}
-
-		render.JSON(w, http.StatusOK, data)
+		render.JSON(w, http.StatusOK, c.Cfgs.Definitions)
 	}
 }
 
@@ -43,15 +37,15 @@ func (c *APIHandler) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.URLParam(r, "name")
 		span := opentracing.FromContext(r.Context(), "datastore.FindByName")
-		data, err := c.repo.FindByName(name)
+		cfg := c.findByName(name)
 		span.Finish()
 
-		if err != nil {
-			errors.Handler(w, err)
+		if cfg == nil {
+			errors.Handler(w, api.ErrAPIDefinitionNotFound)
 			return
 		}
 
-		render.JSON(w, http.StatusOK, data)
+		render.JSON(w, http.StatusOK, cfg)
 	}
 }
 
@@ -62,20 +56,15 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 
 		name := router.URLParam(r, "name")
 		span := opentracing.FromContext(r.Context(), "datastore.FindByName")
-		definition, err := c.repo.FindByName(name)
+		cfg := c.findByName(name)
 		span.Finish()
 
-		if definition == nil {
+		if cfg == nil {
 			errors.Handler(w, api.ErrAPIDefinitionNotFound)
 			return
 		}
 
-		if err != nil {
-			errors.Handler(w, err)
-			return
-		}
-
-		err = json.NewDecoder(r.Body).Decode(definition)
+		err = json.NewDecoder(r.Body).Decode(cfg)
 		if err != nil {
 			errors.Handler(w, err)
 			return
@@ -84,27 +73,20 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 		// avoid situation when trying to update existing definition with new path
 		// that is already registered with another name
 		span = opentracing.FromContext(r.Context(), "datastore.FindByListenPath")
-		existingPathDefinition, err := c.repo.FindByListenPath(definition.Proxy.ListenPath)
+		existingCfg := c.findByListenPath(cfg.Proxy.ListenPath)
 		span.Finish()
 
-		if err != nil && err != api.ErrAPIDefinitionNotFound {
-			errors.Handler(w, err)
-			return
-		}
-
-		if nil != existingPathDefinition && existingPathDefinition.Name != definition.Name {
+		if existingCfg != nil && existingCfg.Name != cfg.Name {
 			errors.Handler(w, api.ErrAPIListenPathExists)
 			return
 		}
 
-		span = opentracing.FromContext(r.Context(), "datastore.Add")
-		err = c.repo.Add(definition)
-		span.Finish()
-
-		if err != nil {
-			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
-			return
+		span = opentracing.FromContext(r.Context(), "datastore.Update")
+		c.configurationChan <- api.ConfigurationMessage{
+			Operation:     api.UpdatedOperation,
+			Configuration: cfg,
 		}
+		span.Finish()
 
 		w.WriteHeader(http.StatusOK)
 	}
@@ -113,16 +95,16 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 // Post is the create handler
 func (c *APIHandler) Post() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		definition := api.NewDefinition()
+		cfg := api.NewDefinition()
 
-		err := json.NewDecoder(r.Body).Decode(definition)
+		err := json.NewDecoder(r.Body).Decode(cfg)
 		if nil != err {
 			errors.Handler(w, err)
 			return
 		}
 
 		span := opentracing.FromContext(r.Context(), "datastore.Exists")
-		exists, err := c.repo.Exists(definition)
+		exists, err := c.exists(cfg)
 		span.Finish()
 
 		if err != nil || exists {
@@ -131,15 +113,13 @@ func (c *APIHandler) Post() http.HandlerFunc {
 		}
 
 		span = opentracing.FromContext(r.Context(), "datastore.Add")
-		err = c.repo.Add(definition)
+		c.configurationChan <- api.ConfigurationMessage{
+			Operation:     api.AddedOperation,
+			Configuration: cfg,
+		}
 		span.Finish()
 
-		if err != nil {
-			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
-			return
-		}
-
-		w.Header().Add("Location", fmt.Sprintf("/apis/%s", definition.Name))
+		w.Header().Add("Location", fmt.Sprintf("/apis/%s", cfg.Name))
 		w.WriteHeader(http.StatusCreated)
 	}
 }
@@ -147,17 +127,55 @@ func (c *APIHandler) Post() http.HandlerFunc {
 // DeleteBy is the delete handler
 func (c *APIHandler) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		name := router.URLParam(r, "name")
-
 		span := opentracing.FromContext(r.Context(), "datastore.Remove")
-		err := c.repo.Remove(name)
-		span.Finish()
+		defer span.Finish()
 
-		if err != nil {
-			errors.Handler(w, err)
+		name := router.URLParam(r, "name")
+		cfg := c.findByName(name)
+		if cfg == nil {
+			errors.Handler(w, api.ErrAPIDefinitionNotFound)
 			return
+		}
+
+		c.configurationChan <- api.ConfigurationMessage{
+			Operation:     api.RemovedOperation,
+			Configuration: cfg,
 		}
 
 		w.WriteHeader(http.StatusNoContent)
 	}
+}
+
+func (c *APIHandler) exists(cfg *api.Definition) (bool, error) {
+	for _, storedCfg := range c.Cfgs.Definitions {
+		if storedCfg.Name == cfg.Name {
+			return true, api.ErrAPINameExists
+		}
+
+		if storedCfg.Proxy.ListenPath == cfg.Proxy.ListenPath {
+			return true, api.ErrAPIListenPathExists
+		}
+	}
+
+	return false, nil
+}
+
+func (c *APIHandler) findByName(name string) *api.Definition {
+	for _, cfg := range c.Cfgs.Definitions {
+		if cfg.Name == name {
+			return cfg
+		}
+	}
+
+	return nil
+}
+
+func (c *APIHandler) findByListenPath(listenPath string) *api.Definition {
+	for _, cfg := range c.Cfgs.Definitions {
+		if cfg.Proxy.ListenPath == listenPath {
+			return cfg
+		}
+	}
+
+	return nil
 }

@@ -6,7 +6,6 @@ import (
 
 	chimiddleware "github.com/go-chi/chi/middleware"
 	"github.com/hellofresh/janus/pkg/api"
-	"github.com/hellofresh/janus/pkg/checker"
 	"github.com/hellofresh/janus/pkg/config"
 	httpErrors "github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/jwt"
@@ -19,16 +18,21 @@ import (
 
 // Server represents the web server
 type Server struct {
-	repo        api.Repository
-	Port        int
-	ReadOnly    bool
-	Credentials config.Credentials
-	TLS         config.TLS
+	Port              int
+	ReadOnly          bool
+	Credentials       config.Credentials
+	TLS               config.TLS
+	ConfigurationChan chan api.ConfigurationMessage
+	apiHandler        *APIHandler
 }
 
 // New creates a new web server
-func New(repo api.Repository, opts ...Option) *Server {
-	s := Server{repo: repo}
+func New(opts ...Option) *Server {
+	cfgChan := make(chan api.ConfigurationMessage)
+	s := Server{
+		ConfigurationChan: cfgChan,
+		apiHandler:        NewAPIHandler(cfgChan),
+	}
 
 	for _, opt := range opts {
 		opt(&s)
@@ -48,6 +52,16 @@ func (s *Server) Start() error {
 	plugin.EmitEvent(plugin.AdminAPIStartupEvent, plugin.OnAdminAPIStartup{Router: r})
 
 	return nil
+}
+
+// Stop stops the server
+func (s *Server) Stop() {
+	close(s.ConfigurationChan)
+}
+
+// UpdateConfigurations updates the configurations reference held by the handler
+func (s *Server) UpdateConfigurations(cfgs *api.Configuration) {
+	s.apiHandler.Cfgs = cfgs
 }
 
 // AddRoutes adds the admin routes
@@ -75,8 +89,8 @@ func (s *Server) AddRoutes(r router.Router) {
 
 func (s *Server) addInternalPublicRoutes(r router.Router) {
 	r.GET("/", Home())
-	r.GET("/status", checker.NewOverviewHandler(s.repo))
-	r.GET("/status/{name}", checker.NewStatusHandler(s.repo))
+	r.GET("/status", NewOverviewHandler(s.apiHandler.Cfgs))
+	r.GET("/status/{name}", NewStatusHandler(s.apiHandler.Cfgs))
 }
 
 func (s *Server) addInternalAuthRoutes(r router.Router, guard jwt.Guard) {
@@ -92,15 +106,14 @@ func (s *Server) addInternalRoutes(r router.Router, guard jwt.Guard) {
 	log.Debug("Loading API Endpoints")
 
 	// Apis endpoints
-	handler := NewAPIHandler(s.repo)
 	group := r.Group("/apis")
 	group.Use(jwt.NewMiddleware(guard).Handler)
 	{
-		group.GET("/", handler.Get())
-		group.GET("/{name}", handler.GetBy())
-		group.POST("/", handler.Post())
-		group.PUT("/{name}", handler.PutBy())
-		group.DELETE("/{name}", handler.DeleteBy())
+		group.GET("/", s.apiHandler.Get())
+		group.GET("/{name}", s.apiHandler.GetBy())
+		group.POST("/", s.apiHandler.Post())
+		group.PUT("/{name}", s.apiHandler.PutBy())
+		group.DELETE("/{name}", s.apiHandler.DeleteBy())
 	}
 }
 
@@ -123,9 +136,4 @@ func (s *Server) listenAndServe(handler http.Handler) error {
 
 	log.WithField("address", address).Info("Certificate and certificate key were not found, defaulting to HTTP")
 	return http.ListenAndServe(address, handler)
-}
-
-//loadAPIEndpoints register api endpoints
-func (s *Server) loadAPIEndpoints(r router.Router, guard jwt.Guard) {
-
 }

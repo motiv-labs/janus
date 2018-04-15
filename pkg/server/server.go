@@ -28,11 +28,12 @@ type Server struct {
 	provider              api.Repository
 	register              *proxy.Register
 	defLoader             *loader.APILoader
-	currentConfigurations []*api.Definition
+	currentConfigurations *api.Configuration
 	configurationChan     chan api.ConfigurationChanged
 	stopChan              chan struct{}
 	globalConfig          *config.Specification
 	statsClient           client.Client
+	webServer             *web.Server
 }
 
 // New creates a new instance of Server
@@ -75,13 +76,14 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 
 	go s.listenProviders(s.stopChan)
 
-	if err := s.startProvider(ctx); err != nil {
-		log.WithError(err).Fatal("Could not start providers")
-	}
-
 	defs, err := s.provider.FindAll()
 	if err != nil {
 		return errors.Wrap(err, "could not find all configurations from the provider")
+	}
+
+	s.currentConfigurations = &api.Configuration{Definitions: defs}
+	if err := s.startProvider(ctx); err != nil {
+		log.WithError(err).Fatal("Could not start providers")
 	}
 
 	event := plugin.OnStartup{
@@ -96,8 +98,8 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 	}
 
 	plugin.EmitEvent(plugin.StartupEvent, event)
-
 	s.defLoader.RegisterAPIs(defs)
+
 	log.Info("Janus started")
 
 	return nil
@@ -129,6 +131,7 @@ func (s *Server) Stop() {
 func (s *Server) Close() error {
 	defer close(s.stopChan)
 	defer close(s.configurationChan)
+	defer s.webServer.Stop()
 
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
@@ -158,15 +161,20 @@ func (s *Server) startHTTPServers() error {
 }
 
 func (s *Server) startProvider(ctx context.Context) error {
-	webServer := web.New(
-		s.provider,
+	s.webServer = web.New(
+		web.WithConfigurations(s.currentConfigurations),
 		web.WithPort(s.globalConfig.Web.Port),
 		web.WithTLS(s.globalConfig.Web.TLS),
 		web.WithCredentials(s.globalConfig.Web.Credentials),
 		web.ReadOnly(s.globalConfig.Web.ReadOnly),
 	)
-	if err := webServer.Start(); err != nil {
+
+	if err := s.webServer.Start(); err != nil {
 		return errors.Wrap(err, "could not start Janus web API")
+	}
+
+	if listener, ok := s.provider.(api.Listener); ok {
+		listener.Listen(ctx, s.webServer.ConfigurationChan)
 	}
 
 	if watcher, ok := s.provider.(api.Watcher); ok {
@@ -192,6 +200,7 @@ func (s *Server) listenProviders(stop chan struct{}) {
 			}
 
 			s.currentConfigurations = configMsg.Configurations
+			s.webServer.UpdateConfigurations(configMsg.Configurations)
 			s.handleEvent(configMsg.Configurations)
 		}
 	}
@@ -247,14 +256,14 @@ func (s *Server) createRouter() router.Router {
 	return r
 }
 
-func (s *Server) handleEvent(specs []*api.Definition) {
+func (s *Server) handleEvent(cfg *api.Configuration) {
 	log.Debug("Refreshing configuration")
 	newRouter := s.createRouter()
 
 	s.register.UpdateRouter(newRouter)
-	s.defLoader.RegisterAPIs(specs)
+	s.defLoader.RegisterAPIs(cfg.Definitions)
 
-	plugin.EmitEvent(plugin.ReloadEvent, plugin.OnReload{Configurations: specs})
+	plugin.EmitEvent(plugin.ReloadEvent, plugin.OnReload{Configurations: cfg.Definitions})
 
 	s.server.Handler = newRouter
 	log.Debug("Configuration refresh done")
