@@ -52,17 +52,17 @@ func (r *MongoRepository) Listen(ctx context.Context, cfgChan <-chan Configurati
 			case cfg := <-cfgChan:
 				switch cfg.Operation {
 				case AddedOperation:
-					err := r.Add(cfg.Configuration)
+					err := r.add(cfg.Configuration)
 					if err != nil {
 						log.WithError(err).Error("Could not add the configuration on the provider")
 					}
 				case UpdatedOperation:
-					err := r.Add(cfg.Configuration)
+					err := r.add(cfg.Configuration)
 					if err != nil {
 						log.WithError(err).Error("Could not update the configuration on the provider")
 					}
 				case RemovedOperation:
-					err := r.Remove(cfg.Configuration.Name)
+					err := r.remove(cfg.Configuration.Name)
 					if err != nil {
 						log.WithError(err).Error("Could not remove the configuration from the provider")
 					}
@@ -113,39 +113,8 @@ func (r *MongoRepository) FindAll() ([]*Definition, error) {
 	return result, nil
 }
 
-// FindByName find an API definition by name
-func (r *MongoRepository) FindByName(name string) (*Definition, error) {
-	return r.findOneByQuery(bson.M{"name": name})
-}
-
-// FindByListenPath find an API definition by proxy listen path
-func (r *MongoRepository) FindByListenPath(path string) (*Definition, error) {
-	return r.findOneByQuery(bson.M{"proxy.listen_path": path})
-}
-
-func (r *MongoRepository) findOneByQuery(query interface{}) (*Definition, error) {
-	var result = NewDefinition()
-	session, coll := r.getSession()
-	defer session.Close()
-
-	err := coll.Find(query).One(&result)
-	if err != nil {
-		if err == mgo.ErrNotFound {
-			return nil, ErrAPIDefinitionNotFound
-		}
-		return nil, err
-	}
-
-	return result, err
-}
-
-// Exists searches an existing API definition by its listen_path
-func (r *MongoRepository) Exists(def *Definition) (bool, error) {
-	return exists(r, def)
-}
-
 // Add adds an API definition to the repository
-func (r *MongoRepository) Add(definition *Definition) error {
+func (r *MongoRepository) add(definition *Definition) error {
 	session, coll := r.getSession()
 	defer session.Close()
 
@@ -166,7 +135,7 @@ func (r *MongoRepository) Add(definition *Definition) error {
 }
 
 // Remove removes an API definition from the repository
-func (r *MongoRepository) Remove(name string) error {
+func (r *MongoRepository) remove(name string) error {
 	session, coll := r.getSession()
 	defer session.Close()
 
@@ -181,26 +150,6 @@ func (r *MongoRepository) Remove(name string) error {
 
 	log.WithField("name", name).Debug("Resource removed")
 	return nil
-}
-
-// FindValidAPIHealthChecks retrieves all active apis that has health check configured
-func (r *MongoRepository) FindValidAPIHealthChecks() ([]*Definition, error) {
-	session, coll := r.getSession()
-	defer session.Close()
-
-	query := bson.M{
-		"active": true,
-		"health_check.url": bson.M{
-			"$exists": true,
-		},
-	}
-
-	result := []*Definition{}
-	if err := coll.Find(query).All(&result); err != nil {
-		return nil, err
-	}
-
-	return result, nil
 }
 
 func (r *MongoRepository) getSession() (*mgo.Session, *mgo.Collection) {

@@ -20,12 +20,6 @@ const (
 type Repository interface {
 	io.Closer
 	FindAll() ([]*Definition, error)
-	FindByName(name string) (*Definition, error)
-	FindByListenPath(path string) (*Definition, error)
-	Exists(def *Definition) (bool, error)
-	Add(app *Definition) error
-	Remove(name string) error
-	FindValidAPIHealthChecks() ([]*Definition, error)
 }
 
 // Watcher defines how a provider should watch for changes on configurations
@@ -36,24 +30,6 @@ type Watcher interface {
 // Listener defines how a provider should listen for changes on configurations
 type Listener interface {
 	Listen(ctx context.Context, cfgChan <-chan ConfigurationMessage)
-}
-
-func exists(r Repository, def *Definition) (bool, error) {
-	_, err := r.FindByName(def.Name)
-	if nil != err && err != ErrAPIDefinitionNotFound {
-		return false, err
-	} else if err != ErrAPIDefinitionNotFound {
-		return true, ErrAPINameExists
-	}
-
-	_, err = r.FindByListenPath(def.Proxy.ListenPath)
-	if nil != err && err != ErrAPIDefinitionNotFound {
-		return false, err
-	} else if err != ErrAPIDefinitionNotFound {
-		return true, ErrAPIListenPathExists
-	}
-
-	return false, nil
 }
 
 // BuildRepository creates a repository instance that will depend on your given DSN
