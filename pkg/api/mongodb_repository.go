@@ -43,6 +43,37 @@ func (r *MongoRepository) Close() error {
 	return nil
 }
 
+// Listen watches for changes on the configuration
+func (r *MongoRepository) Listen(ctx context.Context, cfgChan <-chan ConfigurationMessage) {
+	go func() {
+		log.Debug("Listening for changes on the provider...")
+		for {
+			select {
+			case cfg := <-cfgChan:
+				switch cfg.Operation {
+				case AddedOperation:
+					err := r.Add(cfg.Configuration)
+					if err != nil {
+						log.WithError(err).Error("Could not add the configuration on the provider")
+					}
+				case UpdatedOperation:
+					err := r.Add(cfg.Configuration)
+					if err != nil {
+						log.WithError(err).Error("Could not update the configuration on the provider")
+					}
+				case RemovedOperation:
+					err := r.Remove(cfg.Configuration.Name)
+					if err != nil {
+						log.WithError(err).Error("Could not remove the configuration from the provider")
+					}
+				}
+			case <-ctx.Done():
+				return
+			}
+		}
+	}()
+}
+
 // Watch watches for changes on the database
 func (r *MongoRepository) Watch(ctx context.Context, cfgChan chan<- ConfigurationChanged) {
 	t := time.NewTicker(r.refreshTime)
@@ -59,7 +90,7 @@ func (r *MongoRepository) Watch(ctx context.Context, cfgChan chan<- Configuratio
 				}
 
 				cfgChan <- ConfigurationChanged{
-					Configurations: defs,
+					Configurations: &Configuration{Definitions: defs},
 				}
 			case <-ctx.Done():
 				return

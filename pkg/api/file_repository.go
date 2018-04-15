@@ -90,7 +90,7 @@ func (r *FileSystemRepository) Watch(ctx context.Context, cfgChan chan<- Configu
 						continue
 					}
 					cfgChan <- ConfigurationChanged{
-						Configurations: r.parseDefinition(body).defs,
+						Configurations: &Configuration{Definitions: r.parseDefinition(body).defs},
 					}
 				}
 			case err := <-r.watcher.Errors:

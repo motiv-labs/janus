@@ -33,6 +33,11 @@ type Watcher interface {
 	Watch(ctx context.Context, cfgChan chan<- ConfigurationChanged)
 }
 
+// Listener defines how a provider should listen for changes on configurations
+type Listener interface {
+	Listen(ctx context.Context, cfgChan <-chan ConfigurationMessage)
+}
+
 func exists(r Repository, def *Definition) (bool, error) {
 	_, err := r.FindByName(def.Name)
 	if nil != err && err != ErrAPIDefinitionNotFound {
