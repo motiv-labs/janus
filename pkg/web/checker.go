@@ -119,11 +119,7 @@ func findValidAPIHealthChecks(defs []*api.Definition) []*api.Definition {
 	var validDefs []*api.Definition
 
 	for _, def := range defs {
-		if !def.Active {
-			continue
-		}
-
-		if def.HealthCheck.URL != "" {
+		if def.Active && def.HealthCheck.URL != "" {
 			validDefs = append(validDefs, def)
 		}
 	}
