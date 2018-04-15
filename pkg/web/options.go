@@ -1,9 +1,19 @@
 package web
 
-import "github.com/hellofresh/janus/pkg/config"
+import (
+	"github.com/hellofresh/janus/pkg/api"
+	"github.com/hellofresh/janus/pkg/config"
+)
 
 // Option represents the available options
 type Option func(*Server)
+
+// WithConfigurations sets the current configurations in memory
+func WithConfigurations(cfgs *api.Configuration) Option {
+	return func(s *Server) {
+		s.apiHandler.Cfgs = cfgs
+	}
+}
 
 // WithPort sets the server port
 func WithPort(port int) Option {
