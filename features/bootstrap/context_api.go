@@ -7,8 +7,8 @@ import (
 )
 
 // RegisterAPIContext registers godog suite context for handling API related steps
-func RegisterAPIContext(s *godog.Suite, readOnly bool, apiRepo api.Repository) {
-	ctx := &apiContext{readOnly: readOnly, apiRepo: apiRepo}
+func RegisterAPIContext(s *godog.Suite, readOnly bool, apiRepo api.Repository, ch chan<- api.ConfigurationMessage) {
+	ctx := &apiContext{readOnly: readOnly, apiRepo: apiRepo, ch: ch}
 
 	s.BeforeScenario(ctx.clearAPI)
 }
@@ -16,6 +16,7 @@ func RegisterAPIContext(s *godog.Suite, readOnly bool, apiRepo api.Repository) {
 type apiContext struct {
 	readOnly bool
 	apiRepo  api.Repository
+	ch       chan<- api.ConfigurationMessage
 }
 
 func (c *apiContext) clearAPI(arg interface{}) {
@@ -26,9 +27,9 @@ func (c *apiContext) clearAPI(arg interface{}) {
 		}
 
 		for _, definition := range data {
-			err := c.apiRepo.Remove(definition.Name)
-			if nil != err {
-				panic(errors.Wrapf(err, "Failed to remove route spec \"%s\"", definition.Name))
+			c.ch <- api.ConfigurationMessage{
+				Operation:     api.RemovedOperation,
+				Configuration: definition,
 			}
 		}
 	}

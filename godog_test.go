@@ -1,6 +1,7 @@
 package janus
 
 import (
+	"context"
 	"flag"
 	"net/url"
 	"os"
@@ -62,8 +63,14 @@ func FeatureContext(s *godog.Suite) {
 		panic(err)
 	}
 
+	ch := make(chan api.ConfigurationMessage, 100)
+
+	if listener, ok := apiRepo.(api.Listener); ok {
+		listener.Listen(context.Background(), ch)
+	}
+
 	bootstrap.RegisterRequestContext(s, c.Port, c.Web.Port, portSecondary, apiPortSecondary, c.Web.Credentials)
-	bootstrap.RegisterAPIContext(s, c.Web.ReadOnly, apiRepo)
+	bootstrap.RegisterAPIContext(s, c.Web.ReadOnly, apiRepo, ch)
 	bootstrap.RegisterMiscContext(s)
 }
 
