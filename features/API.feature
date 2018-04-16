@@ -320,6 +320,7 @@ Feature: Manage proxies wit API.
         When I request "/apis" API path with "POST" method
         Then I should receive 201 response code
 
+        When I wait for a while
         When I request "/apis/example" API path with "GET" method
         Then I should receive 200 response code
         And response JSON body has "name" path with value 'example'
