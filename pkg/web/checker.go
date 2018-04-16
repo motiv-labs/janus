@@ -13,9 +13,9 @@ import (
 )
 
 // NewOverviewHandler creates instance of all status checks handler
-func NewOverviewHandler(cfgs *api.Configuration) func(w http.ResponseWriter, r *http.Request) {
+func NewOverviewHandler(handler *APIHandler) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		defs := findValidAPIHealthChecks(cfgs.Definitions)
+		defs := findValidAPIHealthChecks(handler.Cfgs.Definitions)
 
 		log.WithField("len", len(defs)).Debug("Loading health check endpoints")
 		health.Reset()
@@ -35,9 +35,9 @@ func NewOverviewHandler(cfgs *api.Configuration) func(w http.ResponseWriter, r *
 }
 
 // NewStatusHandler creates instance of single proxy status check handler
-func NewStatusHandler(cfgs *api.Configuration) func(w http.ResponseWriter, r *http.Request) {
+func NewStatusHandler(handler *APIHandler) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		defs := findValidAPIHealthChecks(cfgs.Definitions)
+		defs := findValidAPIHealthChecks(handler.Cfgs.Definitions)
 
 		name := chi.URLParam(r, "name")
 		for _, def := range defs {

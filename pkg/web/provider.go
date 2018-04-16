@@ -89,8 +89,8 @@ func (s *Server) AddRoutes(r router.Router) {
 
 func (s *Server) addInternalPublicRoutes(r router.Router) {
 	r.GET("/", Home())
-	r.GET("/status", NewOverviewHandler(s.apiHandler.Cfgs))
-	r.GET("/status/{name}", NewStatusHandler(s.apiHandler.Cfgs))
+	r.GET("/status", NewOverviewHandler(s.apiHandler))
+	r.GET("/status/{name}", NewStatusHandler(s.apiHandler))
 }
 
 func (s *Server) addInternalAuthRoutes(r router.Router, guard jwt.Guard) {

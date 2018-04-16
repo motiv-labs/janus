@@ -174,7 +174,26 @@ func (s *Server) startProvider(ctx context.Context) error {
 	}
 
 	if listener, ok := s.provider.(api.Listener); ok {
-		listener.Listen(ctx, s.webServer.ConfigurationChan)
+		go func() {
+			ch := make(chan api.ConfigurationMessage)
+			listener.Listen(ctx, ch)
+			for {
+				select {
+				case c, more := <-s.webServer.ConfigurationChan:
+					if !more {
+						return
+					}
+
+					s.updateConfigurations(c)
+					s.webServer.UpdateConfigurations(s.currentConfigurations)
+					s.handleEvent(s.currentConfigurations)
+					ch <- c
+				case <-ctx.Done():
+					close(ch)
+					return
+				}
+			}
+		}()
 	}
 
 	if watcher, ok := s.provider.(api.Watcher); ok {
@@ -254,6 +273,31 @@ func (s *Server) createRouter() router.Router {
 	}
 
 	return r
+}
+
+func (s *Server) updateConfigurations(cfg api.ConfigurationMessage) {
+	currentDefinitions := s.currentConfigurations.Definitions
+
+	switch cfg.Operation {
+	case api.AddedOperation:
+		currentDefinitions = append(currentDefinitions, cfg.Configuration)
+	case api.UpdatedOperation:
+		for i, d := range currentDefinitions {
+			if d.Name == cfg.Configuration.Name {
+				currentDefinitions[i] = cfg.Configuration
+			}
+		}
+	case api.RemovedOperation:
+		for i, d := range currentDefinitions {
+			if d.Name == cfg.Configuration.Name {
+				copy(currentDefinitions[i:], currentDefinitions[i+1:])
+				// currentDefinitions[len(currentDefinitions)-1] = nil // or the zero value of T
+				currentDefinitions = currentDefinitions[:len(currentDefinitions)-1]
+			}
+		}
+	}
+
+	s.currentConfigurations.Definitions = currentDefinitions
 }
 
 func (s *Server) handleEvent(cfg *api.Configuration) {
