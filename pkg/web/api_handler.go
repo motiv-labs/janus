@@ -75,7 +75,7 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 
 		isValid, err := cfg.Validate()
 		if false == isValid && err != nil {
-			errors.Handler(w, err)
+			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
 			return
 		}
 
@@ -114,7 +114,7 @@ func (c *APIHandler) Post() http.HandlerFunc {
 
 		isValid, err := cfg.Validate()
 		if false == isValid && err != nil {
-			errors.Handler(w, err)
+			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
 			return
 		}
 
