@@ -30,15 +30,6 @@
   version = "v3.0.0"
 
 [[projects]]
-  name = "github.com/alicebob/miniredis"
-  packages = [
-    ".",
-    "server"
-  ]
-  revision = "aefbaa72e488a5bbca434ab16c56cdffecbdfd47"
-  version = "2.3.0"
-
-[[projects]]
   name = "github.com/apache/thrift"
   packages = ["lib/go/thrift"]
   revision = "b2a4d4ae21c789b689dd162deb819665567f481c"
@@ -85,15 +76,6 @@
   packages = ["."]
   revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
   version = "v1.4.7"
-
-[[projects]]
-  name = "github.com/garyburd/redigo"
-  packages = [
-    "internal",
-    "redis"
-  ]
-  revision = "d1ed5c67e5794de818ea85e6b522fda02623a484"
-  version = "v1.4.0"
 
 [[projects]]
   name = "github.com/go-chi/chi"
@@ -372,17 +354,6 @@
 
 [[projects]]
   branch = "master"
-  name = "github.com/yuin/gopher-lua"
-  packages = [
-    ".",
-    "ast",
-    "parse",
-    "pm"
-  ]
-  revision = "7d7bc8747e3f614c5c587729a341fe7d8903cdb8"
-
-[[projects]]
-  branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   revision = "3d37316aaa6bd9929127ac9a527abf408178ea7b"
@@ -497,6 +468,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d9227ad9d62ede0ab003b05151be1d6189861afbef293113a3e434bfa426378f"
+  inputs-digest = "ac28f9bb9b90ebbadd4b791c4c9fa5c8506274748a1e4b23414fd6acf6981098"
   solver-name = "gps-cdcl"
   solver-version = 1

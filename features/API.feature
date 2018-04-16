@@ -323,6 +323,9 @@ Feature: Manage proxies wit API.
         Then I should receive 200 response code
         And response JSON body has "name" path with value 'example'
 
+        When I request "/apis/example" API path with "DELETE" method
+        Then I should receive 204 response code
+
     Scenario: API must update existing routes with new path value
         Given request JWT token is valid admin token
         And request JSON payload:

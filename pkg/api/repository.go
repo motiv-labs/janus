@@ -1,10 +1,11 @@
 package api
 
 import (
+	"context"
 	"fmt"
+	"io"
 	"net/url"
-
-	mgo "gopkg.in/mgo.v2"
+	"time"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -17,35 +18,22 @@ const (
 
 // Repository defines the behavior of a proxy specs repository
 type Repository interface {
+	io.Closer
 	FindAll() ([]*Definition, error)
-	FindByName(name string) (*Definition, error)
-	FindByListenPath(path string) (*Definition, error)
-	Exists(def *Definition) (bool, error)
-	Add(app *Definition) error
-	Remove(name string) error
-	FindValidAPIHealthChecks() ([]*Definition, error)
 }
 
-func exists(r Repository, def *Definition) (bool, error) {
-	_, err := r.FindByName(def.Name)
-	if nil != err && err != ErrAPIDefinitionNotFound {
-		return false, err
-	} else if err != ErrAPIDefinitionNotFound {
-		return true, ErrAPINameExists
-	}
+// Watcher defines how a provider should watch for changes on configurations
+type Watcher interface {
+	Watch(ctx context.Context, cfgChan chan<- ConfigurationChanged)
+}
 
-	_, err = r.FindByListenPath(def.Proxy.ListenPath)
-	if nil != err && err != ErrAPIDefinitionNotFound {
-		return false, err
-	} else if err != ErrAPIDefinitionNotFound {
-		return true, ErrAPIListenPathExists
-	}
-
-	return false, nil
+// Listener defines how a provider should listen for changes on configurations
+type Listener interface {
+	Listen(ctx context.Context, cfgChan <-chan ConfigurationMessage)
 }
 
 // BuildRepository creates a repository instance that will depend on your given DSN
-func BuildRepository(dsn string, session *mgo.Session) (Repository, error) {
+func BuildRepository(dsn string, refreshTime time.Duration) (Repository, error) {
 	dsnURL, err := url.Parse(dsn)
 	if err != nil {
 		return nil, errors.Wrap(err, "Error parsing the DSN")
@@ -53,11 +41,8 @@ func BuildRepository(dsn string, session *mgo.Session) (Repository, error) {
 
 	switch dsnURL.Scheme {
 	case mongodb:
-		repo, err := NewMongoAppRepository(session)
-		if err != nil {
-			return nil, errors.Wrap(err, "Could not create a mongodb repository for api definitions")
-		}
-		return repo, nil
+		log.Debug("MongoDB configuration chosen")
+		return NewMongoAppRepository(dsn, refreshTime)
 	case file:
 		log.Debug("File system based configuration chosen")
 		apiPath := fmt.Sprintf("%s/apis", dsnURL.Path)

@@ -49,6 +49,12 @@
 # RequestID = true
 
 ################################################################
+# Clustering
+################################################################
+# [cluster]
+#  UpdateFrequency = "5s"
+
+################################################################
 # Logging
 ################################################################
 # Configure Janus logging
@@ -104,17 +110,6 @@
 #    prefix = "sandbox.janus."
 
 ################################################################
-# Storage
-################################################################
-# You can choose to use `redis` or `in memory` datastores
-# [storage]
-#   dsn = "memory://localhost"
-#
-# If you wanna use redis enable this
-# [storage]
-#   dsn = "redis://janus-storage:6379"
-
-################################################################
 # Proxy Definition Database
 ################################################################
 # You can choose to use `mongodb` or `file based` databases to store your
@@ -136,7 +131,6 @@
 # If you want to use mongodb enable this
 # [database]
 #   dsn = "mongodb://janus-database:27017/janus"
-
 
 ################################################################
 # Distributed Tracing

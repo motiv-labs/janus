@@ -12,16 +12,8 @@ func TestAPIInMemoryRepository(t *testing.T) {
 
 	tests := []struct {
 		scenario string
-		function func(*testing.T, Repository)
+		function func(*testing.T, *InMemoryRepository)
 	}{
-		{
-			scenario: "api in memory exists",
-			function: testExists,
-		},
-		{
-			scenario: "api in memory not exists",
-			function: testNotExists,
-		},
 		{
 			scenario: "api in memory add missing name",
 			function: testAddMissingName,
@@ -39,24 +31,12 @@ func TestAPIInMemoryRepository(t *testing.T) {
 			function: testFindAll,
 		},
 		{
-			scenario: "api in memory find by listen path",
-			function: testFindByListenPath,
-		},
-		{
-			scenario: "api in memory not find by listen path",
-			function: testNotFindByListenPath,
-		},
-		{
 			scenario: "api in memory find by name",
 			function: testFindByName,
 		},
 		{
 			scenario: "api in memory not find by name",
 			function: testNotFindByName,
-		},
-		{
-			scenario: "api in memory not find by health checks",
-			function: testFindValidHealthChecks,
 		},
 	}
 
@@ -68,92 +48,43 @@ func TestAPIInMemoryRepository(t *testing.T) {
 	}
 }
 
-func testExists(t *testing.T, repo Repository) {
-	definition := &Definition{
-		Name: "test3",
-		Proxy: &proxy.Definition{
-			ListenPath: "/test3",
-			Upstreams: &proxy.Upstreams{
-				Targets: []*proxy.Target{
-					{
-						Target: "http://test3.com",
-					},
-				},
-			},
-		},
-	}
-	repo.Add(definition)
-
-	ok, err := repo.Exists(definition)
-	assert.Error(t, err)
-	assert.True(t, ok)
-
-	ok, err = repo.Exists(&Definition{Name: "Not valid", Proxy: proxy.NewDefinition()})
-	assert.NoError(t, err)
-	assert.False(t, ok)
-}
-
-func testNotExists(t *testing.T, repo Repository) {
-	ok, err := repo.Exists(&Definition{Name: "Not valid", Proxy: proxy.NewDefinition()})
-	assert.NoError(t, err)
-	assert.False(t, ok)
-}
-
-func testAddMissingName(t *testing.T, repo Repository) {
-	err := repo.Add(NewDefinition())
+func testAddMissingName(t *testing.T, repo *InMemoryRepository) {
+	err := repo.add(NewDefinition())
 	assert.Error(t, err)
 }
 
-func testRemoveExistentDefinition(t *testing.T, repo Repository) {
-	err := repo.Remove("test1")
+func testRemoveExistentDefinition(t *testing.T, repo *InMemoryRepository) {
+	err := repo.remove("test1")
 	assert.NoError(t, err)
 }
 
-func testRemoveInexistentDefinition(t *testing.T, repo Repository) {
-	err := repo.Remove("test")
+func testRemoveInexistentDefinition(t *testing.T, repo *InMemoryRepository) {
+	err := repo.remove("test")
 	assert.Error(t, err)
 }
 
-func testFindAll(t *testing.T, repo Repository) {
+func testFindAll(t *testing.T, repo *InMemoryRepository) {
 	results, err := repo.FindAll()
 	assert.NoError(t, err)
 	assert.Len(t, results, 3)
 }
 
-func testFindByListenPath(t *testing.T, repo Repository) {
-	definition, err := repo.FindByListenPath("/test1")
+func testFindByName(t *testing.T, repo *InMemoryRepository) {
+	definition, err := repo.findByName("test1")
 	assert.NoError(t, err)
 	assert.NotNil(t, definition)
 }
 
-func testNotFindByListenPath(t *testing.T, repo Repository) {
-	definition, err := repo.FindByListenPath("/invalid")
+func testNotFindByName(t *testing.T, repo *InMemoryRepository) {
+	definition, err := repo.findByName("invalid")
 	assert.Error(t, err)
 	assert.Nil(t, definition)
-}
-
-func testFindByName(t *testing.T, repo Repository) {
-	definition, err := repo.FindByName("test1")
-	assert.NoError(t, err)
-	assert.NotNil(t, definition)
-}
-
-func testNotFindByName(t *testing.T, repo Repository) {
-	definition, err := repo.FindByName("invalid")
-	assert.Error(t, err)
-	assert.Nil(t, definition)
-}
-
-func testFindValidHealthChecks(t *testing.T, repo Repository) {
-	definitions, err := repo.FindValidAPIHealthChecks()
-	assert.NoError(t, err)
-	assert.Len(t, definitions, 1)
 }
 
 func newInMemoryRepo() *InMemoryRepository {
 	repo := NewInMemoryRepository()
 
-	repo.Add(&Definition{
+	repo.add(&Definition{
 		Name:   "test1",
 		Active: true,
 		Proxy: &proxy.Definition{
@@ -172,7 +103,7 @@ func newInMemoryRepo() *InMemoryRepository {
 		},
 	})
 
-	repo.Add(&Definition{
+	repo.add(&Definition{
 		Name:   "test2",
 		Active: true,
 		Proxy: &proxy.Definition{
@@ -187,7 +118,7 @@ func newInMemoryRepo() *InMemoryRepository {
 		},
 	})
 
-	repo.Add(&Definition{
+	repo.add(&Definition{
 		Name: "test3",
 		Proxy: &proxy.Definition{
 			ListenPath: "/test3",

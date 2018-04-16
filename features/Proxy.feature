@@ -239,7 +239,6 @@ Feature: Proxy requests to upstream.
         When I request "/apis" API path with "POST" method
         Then I should receive 201 response code
 
-        When I wait for a while
         And I request "/api/recipes/5252b1b5301bbf46038b473f" path with "GET" method
         Then I should receive 200 response code
         And the response should contain "I'm a slug"
@@ -275,7 +274,6 @@ Feature: Proxy requests to upstream.
         When I request "/apis" API path with "POST" method
         Then I should receive 201 response code
 
-        When I wait for a while
         And I request "/api/recipes/5252b1b5301bbf46038b473f/menus/6362b1b5301bbf46038b4766" path with "GET" method
         Then I should receive 200 response code
         And the response should contain "A menu description"

@@ -7,11 +7,6 @@ import (
 	"github.com/hellofresh/janus/pkg/proxy"
 )
 
-// Spec Holds an api definition and basic options
-type Spec struct {
-	*Definition
-}
-
 // Plugin represents the plugins for an API
 type Plugin struct {
 	Name    string                 `bson:"name" json:"name"`
@@ -33,6 +28,34 @@ type HealthCheck struct {
 	URL     string `bson:"url" json:"url" valid:"url"`
 	Timeout int    `bson:"timeout" json:"timeout"`
 }
+
+// Configuration represents all the api definitions
+type Configuration struct {
+	Definitions []*Definition
+}
+
+// ConfigurationChanged is the message that is sent when a database configuration has changed
+type ConfigurationChanged struct {
+	Configurations *Configuration
+}
+
+// ConfigurationOperation is the available operations that a configuration can have
+type ConfigurationOperation int
+
+// ConfigurationMessage is used to notify listeners about something that happened with a configuration
+type ConfigurationMessage struct {
+	Operation     ConfigurationOperation
+	Configuration *Definition
+}
+
+const (
+	// RemovedOperation means a definition was removed
+	RemovedOperation ConfigurationOperation = iota
+	// UpdatedOperation means a definition was updated
+	UpdatedOperation
+	// AddedOperation means a definition was added
+	AddedOperation
+)
 
 // NewDefinition creates a new API Definition with default values
 func NewDefinition() *Definition {

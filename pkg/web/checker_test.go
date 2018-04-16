@@ -1,4 +1,4 @@
-package checker
+package web
 
 import (
 	"testing"
@@ -13,9 +13,7 @@ import (
 
 func TestRegister(t *testing.T) {
 	r := router.NewChiRouter()
-	repo := api.NewInMemoryRepository()
-
-	r.GET("/status", NewOverviewHandler(repo))
+	r.GET("/status", NewOverviewHandler(&api.Configuration{}))
 
 	ts := test.NewServer(r)
 	defer ts.Close()

@@ -78,9 +78,13 @@ func createRegisterAndRouter() (router.Router, error) {
 	if err != nil {
 		return nil, err
 	}
+	defs, err := proxyRepo.FindAll()
+	if err != nil {
+		return nil, err
+	}
 
 	loader := NewAPILoader(register)
-	loader.LoadDefinitions(proxyRepo)
+	loader.RegisterAPIs(defs)
 
 	return r, nil
 }

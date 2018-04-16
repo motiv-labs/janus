@@ -6,7 +6,6 @@ import (
 
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt"
-	"github.com/hellofresh/janus/pkg/notifier"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
@@ -22,6 +21,7 @@ const (
 
 var (
 	repo        Repository
+	loader      *OAuthLoader
 	adminRouter router.Router
 )
 
@@ -50,20 +50,17 @@ func onAdminAPIStartup(event interface{}) error {
 }
 
 func onReload(event interface{}) error {
-	e, ok := event.(plugin.OnReload)
+	_, ok := event.(plugin.OnReload)
 	if !ok {
 		return errors.New("Could not convert event to reload type")
 	}
 
-	loader := NewOAuthLoader(e.Register)
 	loader.LoadDefinitions(repo)
 
 	return nil
 }
 
 func onStartup(event interface{}) error {
-	var ntf notifier.Notifier
-
 	e, ok := event.(plugin.OnStartup)
 	if !ok {
 		return errors.New("Could not convert event to startup type")
@@ -107,12 +104,8 @@ func onStartup(event interface{}) error {
 		return errors.New("The selected scheme is not supported to load OAuth servers")
 	}
 
-	if rawNtf := e.Notifier; rawNtf != nil {
-		ntf = rawNtf.(notifier.Notifier)
-	}
-
-	loadOAuthEndpoints(adminRouter, repo, ntf, e.Config.Web.Credentials)
-	loader := NewOAuthLoader(e.Register)
+	loadOAuthEndpoints(adminRouter, repo, e.Config.Web.Credentials)
+	loader = NewOAuthLoader(e.Register)
 	loader.LoadDefinitions(repo)
 
 	return nil
@@ -157,11 +150,11 @@ func getManager(oauthServer *OAuth, oAuthServerName string) (Manager, error) {
 }
 
 // loadOAuthEndpoints register api endpoints
-func loadOAuthEndpoints(router router.Router, repo Repository, ntf notifier.Notifier, cred config.Credentials) {
+func loadOAuthEndpoints(router router.Router, repo Repository, cred config.Credentials) {
 	log.Debug("Loading OAuth Endpoints")
 
 	guard := jwt.NewGuard(cred)
-	oAuthHandler := NewController(repo, ntf)
+	oAuthHandler := NewController(repo)
 	oauthGroup := router.Group("/oauth/servers")
 	oauthGroup.Use(jwt.NewMiddleware(guard).Handler)
 	{

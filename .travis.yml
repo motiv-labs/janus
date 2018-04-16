@@ -24,3 +24,6 @@ script:
 after_success:
   - $GOPATH/bin/overalls -project=github.com/hellofresh/janus -covermode=count
   - if [ "$TRAVIS_SECURE_ENV_VARS" == "true" ]; then bash <(curl -s https://codecov.io/bash) -f overalls.coverprofile; fi
+
+after_script:
+  - docker-compose -f assets/docker-compose.yml down -v

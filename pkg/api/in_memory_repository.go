@@ -1,6 +1,7 @@
 package api
 
 import (
+	"context"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
@@ -17,6 +18,17 @@ func NewInMemoryRepository() *InMemoryRepository {
 	return &InMemoryRepository{definitions: make(map[string]*Definition)}
 }
 
+// Close terminates the session.  It's a runtime error to use a session
+// after it has been closed.
+func (r *InMemoryRepository) Close() error {
+	return nil
+}
+
+// Watch watches for changes on the database
+func (r *InMemoryRepository) Watch(ctx context.Context, cfgChan chan<- ConfigurationChanged) {
+
+}
+
 // FindAll fetches all the api definitions available
 func (r *InMemoryRepository) FindAll() ([]*Definition, error) {
 	r.RLock()
@@ -30,30 +42,6 @@ func (r *InMemoryRepository) FindAll() ([]*Definition, error) {
 	return definitions, nil
 }
 
-// FindValidAPIHealthChecks retrieves all apis that has health check configured
-func (r *InMemoryRepository) FindValidAPIHealthChecks() ([]*Definition, error) {
-	r.RLock()
-	defer r.RUnlock()
-
-	var definitions []*Definition
-	for _, definition := range r.definitions {
-		isValid := definition.Active && definition.HealthCheck.URL != ""
-		if isValid {
-			definitions = append(definitions, definition)
-		}
-	}
-
-	return definitions, nil
-}
-
-// FindByName find an api definition by name
-func (r *InMemoryRepository) FindByName(name string) (*Definition, error) {
-	r.RLock()
-	defer r.RUnlock()
-
-	return r.findByName(name)
-}
-
 func (r *InMemoryRepository) findByName(name string) (*Definition, error) {
 	definition, ok := r.definitions[name]
 	if false == ok {
@@ -63,27 +51,8 @@ func (r *InMemoryRepository) findByName(name string) (*Definition, error) {
 	return definition, nil
 }
 
-// FindByListenPath find an API definition by proxy listen path
-func (r *InMemoryRepository) FindByListenPath(path string) (*Definition, error) {
-	r.RLock()
-	defer r.RUnlock()
-
-	for _, definition := range r.definitions {
-		if definition.Proxy.ListenPath == path {
-			return definition, nil
-		}
-	}
-
-	return nil, ErrAPIDefinitionNotFound
-}
-
-// Exists searches an existing Proxy definition by its listen_path
-func (r *InMemoryRepository) Exists(def *Definition) (bool, error) {
-	return exists(r, def)
-}
-
 // Add adds an api definition to the repository
-func (r *InMemoryRepository) Add(definition *Definition) error {
+func (r *InMemoryRepository) add(definition *Definition) error {
 	r.Lock()
 	defer r.Unlock()
 
@@ -99,7 +68,7 @@ func (r *InMemoryRepository) Add(definition *Definition) error {
 }
 
 // Remove removes an api definition from the repository
-func (r *InMemoryRepository) Remove(name string) error {
+func (r *InMemoryRepository) remove(name string) error {
 	r.Lock()
 	defer r.Unlock()
 

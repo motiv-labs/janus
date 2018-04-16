@@ -1,6 +1,7 @@
 package janus
 
 import (
+	"context"
 	"flag"
 	"net/url"
 	"os"
@@ -13,7 +14,6 @@ import (
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/mgo.v2"
 )
 
 var (
@@ -38,14 +38,7 @@ func FeatureContext(s *godog.Suite) {
 	dsnURL, err := url.Parse(c.Database.DSN)
 	switch dsnURL.Scheme {
 	case "mongodb":
-		session, err := mgo.Dial(c.Database.DSN)
-		if err != nil {
-			panic(err)
-		}
-
-		session.SetMode(mgo.Monotonic, true)
-
-		apiRepo, err = api.NewMongoAppRepository(session)
+		apiRepo, err = api.NewMongoAppRepository(c.Database.DSN, c.BackendFlushInterval)
 		if err != nil {
 			panic(err)
 		}
@@ -70,8 +63,13 @@ func FeatureContext(s *godog.Suite) {
 		panic(err)
 	}
 
+	ch := make(chan api.ConfigurationMessage, 100)
+	if listener, ok := apiRepo.(api.Listener); ok {
+		listener.Listen(context.Background(), ch)
+	}
+
 	bootstrap.RegisterRequestContext(s, c.Port, c.Web.Port, portSecondary, apiPortSecondary, c.Web.Credentials)
-	bootstrap.RegisterAPIContext(s, c.Web.ReadOnly, apiRepo)
+	bootstrap.RegisterAPIContext(s, c.Web.ReadOnly, apiRepo, ch)
 	bootstrap.RegisterMiscContext(s)
 }
 

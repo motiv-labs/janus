@@ -14,17 +14,16 @@ $ docker run -d --name janus-database \
                 mongo:3.0
 ```
 
-2. **Start your key value storage:**
+2. **Configure the update frequency**
 
-You can choose to use redis as your key value store instead of the in memory one. If you choose to do so you just start the container:
-You will also need to set the storage dsn using the `STORAGE_DNS` to something like `memory://localhost` or if you use redis `redis://janus-storage:6379`
+You should configure how frequently Janus will check for changes on your database. You can set this by changing the cluster configuration:
 
-```sh
-$ docker run -d --name janus-storage \
-                -p 6379:6379 \
-                redis:3.0
+```toml
+[cluster]
+  UpdateFrequency = "5s"
 ```
 
+You can find more information about Janus clusters in the [clustering](../clustering/clustering.md) section.
 
 3. **Start Janus:**
 
@@ -33,9 +32,7 @@ Start a Janus container and link it to your database container (if you are using
 ```sh
 $ docker run -d --name janus \
                 --link janus-database:janus-database \
-                --link janus-storage:janus-storage \
                 -e "DATABASE_DSN=mongodb://janus-database:27017/janus" \
-                -e "STORAGE_DNS=redis://janus-storage:6379" \
                 -p 8080:8080 \
                 -p 8443:8443 \
                 -p 8081:8081 \

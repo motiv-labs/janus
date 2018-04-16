@@ -19,7 +19,7 @@ port = 8080
     users = {admin = "admin"}
 
 [database]
-  dsn = "file:///etc/janus"
+   dsn = "mongodb://janus-database:27017/janus"
 
-[storage]
-  dsn = "redis://localhost:6379"
+[cluster]
+  UpdateFrequency = "5s"

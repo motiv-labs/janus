@@ -1,4 +1,4 @@
-package checker
+package web
 
 import (
 	"fmt"
@@ -13,29 +13,21 @@ import (
 )
 
 // NewOverviewHandler creates instance of all status checks handler
-func NewOverviewHandler(repo api.Repository) func(w http.ResponseWriter, r *http.Request) {
+func NewOverviewHandler(cfgs *api.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		definitions, err := repo.FindValidAPIHealthChecks()
-		if err != nil {
-			log.WithError(err).Error("Error fetching API definitions for health check registering")
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
-		}
+		defs := findValidAPIHealthChecks(cfgs.Definitions)
 
-		log.WithField("len", len(definitions)).Debug("Loading health check endpoints")
+		log.WithField("len", len(defs)).Debug("Loading health check endpoints")
 		health.Reset()
 
-		for _, definition := range definitions {
-			if definition.HealthCheck.URL != "" {
-				log.WithField("name", definition.Name).Debug("Registering health check")
-				health.Register(health.Config{
-					Name:      definition.Name,
-					Timeout:   time.Second * time.Duration(definition.HealthCheck.Timeout),
-					SkipOnErr: true,
-					Check:     check(definition),
-				})
-			}
+		for _, def := range defs {
+			log.WithField("name", def.Name).Debug("Registering health check")
+			health.Register(health.Config{
+				Name:      def.Name,
+				Timeout:   time.Second * time.Duration(def.HealthCheck.Timeout),
+				SkipOnErr: true,
+				Check:     check(def),
+			})
 		}
 
 		health.HandlerFunc(w, r)
@@ -43,20 +35,14 @@ func NewOverviewHandler(repo api.Repository) func(w http.ResponseWriter, r *http
 }
 
 // NewStatusHandler creates instance of single proxy status check handler
-func NewStatusHandler(repo api.Repository) func(w http.ResponseWriter, r *http.Request) {
+func NewStatusHandler(cfgs *api.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		definitions, err := repo.FindValidAPIHealthChecks()
-		if err != nil {
-			log.WithError(err).Error("Error fetching API definitions for health check registering")
-			w.WriteHeader(http.StatusInternalServerError)
-			w.Write([]byte(err.Error()))
-			return
-		}
+		defs := findValidAPIHealthChecks(cfgs.Definitions)
 
 		name := chi.URLParam(r, "name")
-		for _, definition := range definitions {
-			if name == definition.Name {
-				resp, err := doStatusRequest(definition, false)
+		for _, def := range defs {
+			if name == def.Name {
+				resp, err := doStatusRequest(def, false)
 				if err != nil {
 					log.WithField("name", name).WithError(err).Error("Error requesting service health status")
 					w.WriteHeader(http.StatusInternalServerError)
@@ -87,8 +73,8 @@ func NewStatusHandler(repo api.Repository) func(w http.ResponseWriter, r *http.R
 	}
 }
 
-func doStatusRequest(definition *api.Definition, closeBody bool) (*http.Response, error) {
-	req, err := http.NewRequest(http.MethodGet, definition.HealthCheck.URL, nil)
+func doStatusRequest(def *api.Definition, closeBody bool) (*http.Response, error) {
+	req, err := http.NewRequest(http.MethodGet, def.HealthCheck.URL, nil)
 	if err != nil {
 		log.WithError(err).Error("Creating the request for the health check failed")
 		return nil, err
@@ -110,21 +96,33 @@ func doStatusRequest(definition *api.Definition, closeBody bool) (*http.Response
 	return resp, err
 }
 
-func check(definition *api.Definition) func() error {
+func check(def *api.Definition) func() error {
 	return func() error {
-		resp, err := doStatusRequest(definition, true)
+		resp, err := doStatusRequest(def, true)
 		if err != nil {
-			return fmt.Errorf("%s health check endpoint %s is unreachable", definition.Name, definition.HealthCheck.URL)
+			return fmt.Errorf("%s health check endpoint %s is unreachable", def.Name, def.HealthCheck.URL)
 		}
 
 		if resp.StatusCode >= http.StatusInternalServerError {
-			return fmt.Errorf("%s is not available at the moment", definition.Name)
+			return fmt.Errorf("%s is not available at the moment", def.Name)
 		}
 
 		if resp.StatusCode >= http.StatusBadRequest {
-			return fmt.Errorf("%s is partially available at the moment", definition.Name)
+			return fmt.Errorf("%s is partially available at the moment", def.Name)
 		}
 
 		return nil
 	}
+}
+
+func findValidAPIHealthChecks(defs []*api.Definition) []*api.Definition {
+	var validDefs []*api.Definition
+
+	for _, def := range defs {
+		if def.Active && def.HealthCheck.URL != "" {
+			validDefs = append(validDefs, def)
+		}
+	}
+
+	return validDefs
 }

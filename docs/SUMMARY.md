@@ -9,6 +9,8 @@
     * [Add Plugins](quick_start/add_plugins.md)
     * [Authentication](quick_start/add_auth.md)
     * [Adding your API - File System](quick_start/file_system.md)
+* [Clustering/HA](clustering/clustering.md)
+    * 
 * [Proxy Reference](proxy/README.md)
     * [Terminology](proxy/terminology.md)
     * [Overview](proxy/overview.md)
@@ -23,7 +25,7 @@
     * [Request HTTP method](proxy/request_http_method.md)
     * [Routing priorities](proxy/routing_priorities.md)
     * [Conclusion](proxy/conclusion.md)
-* Plugins
+* [Plugins](plugins/README.md)
     * [Basic](plugins/basic.md)
     * [Body Limit](plugins/body_limit.md)
     * [Compression](plugins/compression.md)
@@ -37,7 +39,6 @@
 * Misc
     * [Health Checks](misc/health_checks.md)
     * [Monitoring](misc/monitoring.md)
-    * [Storage](misc/storage.md)
     * [Tracing](misc/tracing.md)
 * Upgrade Notes
     * [2.x to 3.x](upgrade/3x.md)
