@@ -185,7 +185,6 @@ func (s *Server) startProvider(ctx context.Context) error {
 					}
 
 					s.updateConfigurations(c)
-					s.webServer.UpdateConfigurations(s.currentConfigurations)
 					s.handleEvent(s.currentConfigurations)
 					ch <- c
 				case <-ctx.Done():
@@ -218,8 +217,7 @@ func (s *Server) listenProviders(stop chan struct{}) {
 				continue
 			}
 
-			s.currentConfigurations = configMsg.Configurations
-			s.webServer.UpdateConfigurations(configMsg.Configurations)
+			s.currentConfigurations.Definitions = configMsg.Configurations.Definitions
 			s.handleEvent(configMsg.Configurations)
 		}
 	}

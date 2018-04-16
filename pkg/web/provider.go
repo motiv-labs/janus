@@ -59,11 +59,6 @@ func (s *Server) Stop() {
 	close(s.ConfigurationChan)
 }
 
-// UpdateConfigurations updates the configurations reference held by the handler
-func (s *Server) UpdateConfigurations(cfgs *api.Configuration) {
-	s.apiHandler.Cfgs = cfgs
-}
-
 // AddRoutes adds the admin routes
 func (s *Server) AddRoutes(r router.Router) {
 	// create authentication for Janus
@@ -89,8 +84,8 @@ func (s *Server) AddRoutes(r router.Router) {
 
 func (s *Server) addInternalPublicRoutes(r router.Router) {
 	r.GET("/", Home())
-	r.GET("/status", NewOverviewHandler(s.apiHandler))
-	r.GET("/status/{name}", NewStatusHandler(s.apiHandler))
+	r.GET("/status", NewOverviewHandler(s.apiHandler.Cfgs))
+	r.GET("/status/{name}", NewStatusHandler(s.apiHandler.Cfgs))
 }
 
 func (s *Server) addInternalAuthRoutes(r router.Router, guard jwt.Guard) {
