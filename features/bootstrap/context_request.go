@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strings"
+	"time"
 
 	"github.com/DATA-DOG/godog"
 	"github.com/DATA-DOG/godog/gherkin"
@@ -110,6 +111,8 @@ func (c *requestContext) doRequest(url, method string) error {
 	if nil != err {
 		return fmt.Errorf("failed to read response body: %v", err)
 	}
+
+	time.Sleep(time.Second)
 
 	return nil
 }

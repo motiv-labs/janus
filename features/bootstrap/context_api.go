@@ -1,6 +1,8 @@
 package bootstrap
 
 import (
+	"time"
+
 	"github.com/DATA-DOG/godog"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/pkg/errors"
@@ -32,5 +34,7 @@ func (c *apiContext) clearAPI(arg interface{}) {
 				Configuration: definition,
 			}
 		}
+
+		time.Sleep(time.Second)
 	}
 }
