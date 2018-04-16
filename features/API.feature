@@ -247,6 +247,7 @@ Feature: Manage proxies wit API.
                 }
             }
             """
+        When I wait for a while    
         When I request "/apis" API path with "POST" method
         Then I should receive 409 response code
         And the response should contain "api name is already registered"
