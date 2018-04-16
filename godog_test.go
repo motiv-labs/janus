@@ -64,7 +64,6 @@ func FeatureContext(s *godog.Suite) {
 	}
 
 	ch := make(chan api.ConfigurationMessage, 100)
-
 	if listener, ok := apiRepo.(api.Listener); ok {
 		listener.Listen(context.Background(), ch)
 	}
