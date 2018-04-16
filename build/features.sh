@@ -23,7 +23,7 @@ export ADMIN_USERNAME="admin"
 export API_READONLY="false"
 export PORT_SECONDARY="3100"
 export API_PORT_SECONDARY="3101"
-export BACKEND_UPDATE_FREQUENCY="1s"
+export BACKEND_UPDATE_FREQUENCY="0.5s"
 
 "./dist/janus" > /tmp/janus.log 2>&1 &
 exit_code=$?
