@@ -4,9 +4,8 @@ import (
 	"context"
 	"net"
 	"net/http"
-	"sync"
 
-	"github.com/hellofresh/janus/pkg/response"
+	"github.com/felixge/httpsnoop"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
 	log "github.com/sirupsen/logrus"
@@ -22,37 +21,19 @@ const (
 func NewRateLimitLogger(lmt *limiter.Limiter, statsClient client.Client) func(handler http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			var (
-				lock          sync.Mutex
-				headerWritten bool
-			)
-
 			log.Debug("Starting RateLimitLogger.WriterWrapper middleware")
 
-			hooks := response.Hooks{
-				WriteHeader: func(next response.WriteHeaderFunc) response.WriteHeaderFunc {
-					return func(code int) {
-						next(code)
-						lock.Lock()
-						defer lock.Unlock()
-						if !headerWritten {
-							limiterIP := limiter.GetIP(r)
-							if code == http.StatusTooManyRequests {
-								log.WithFields(log.Fields{
-									"ip_address":  limiterIP.String(),
-									"request_uri": r.RequestURI,
-								}).Warning("Rate Limit exceded for this IP")
-							}
+			m := httpsnoop.CaptureMetrics(handler, w, r)
 
-							trackLimitState(lmt, statsClient, limiterIP, r)
-
-							headerWritten = true
-						}
-					}
-				},
+			limiterIP := limiter.GetIP(r)
+			if m.Code == http.StatusTooManyRequests {
+				log.WithFields(log.Fields{
+					"ip_address":  limiterIP.String(),
+					"request_uri": r.RequestURI,
+				}).Warning("Rate Limit exceded for this IP")
 			}
 
-			handler.ServeHTTP(response.Wrap(w, hooks), r)
+			trackLimitState(lmt, statsClient, limiterIP, r)
 		})
 	}
 }
