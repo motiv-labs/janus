@@ -28,6 +28,9 @@ func NewAPIHandler(cfgChan chan<- api.ConfigurationMessage) *APIHandler {
 // Get is the find all handler
 func (c *APIHandler) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		span := opentracing.FromContext(r.Context(), "definitions.GetAll")
+		defer span.Finish()
+
 		render.JSON(w, http.StatusOK, c.Cfgs.Definitions)
 	}
 }
@@ -70,6 +73,12 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 			return
 		}
 
+		isValid, err := cfg.Validate()
+		if false == isValid && err != nil {
+			errors.Handler(w, err)
+			return
+		}
+
 		// avoid situation when trying to update existing definition with new path
 		// that is already registered with another name
 		span = opentracing.FromContext(r.Context(), "datastore.FindByListenPath")
@@ -99,6 +108,12 @@ func (c *APIHandler) Post() http.HandlerFunc {
 
 		err := json.NewDecoder(r.Body).Decode(cfg)
 		if nil != err {
+			errors.Handler(w, err)
+			return
+		}
+
+		isValid, err := cfg.Validate()
+		if false == isValid && err != nil {
 			errors.Handler(w, err)
 			return
 		}
