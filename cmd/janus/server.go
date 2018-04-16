@@ -18,6 +18,7 @@ import (
 	_ "github.com/hellofresh/janus/pkg/plugin/rate"
 	_ "github.com/hellofresh/janus/pkg/plugin/requesttransformer"
 	_ "github.com/hellofresh/janus/pkg/plugin/responsetransformer"
+	_ "github.com/hellofresh/janus/pkg/plugin/retry"
 
 	// dynamically registered auth providers
 	_ "github.com/hellofresh/janus/pkg/jwt/basic"
