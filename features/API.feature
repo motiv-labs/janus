@@ -247,7 +247,6 @@ Feature: Manage proxies wit API.
                 }
             }
             """
-        When I wait for a while    
         When I request "/apis" API path with "POST" method
         Then I should receive 409 response code
         And the response should contain "api name is already registered"
@@ -320,10 +319,12 @@ Feature: Manage proxies wit API.
         When I request "/apis" API path with "POST" method
         Then I should receive 201 response code
 
-        When I wait for a while
         When I request "/apis/example" API path with "GET" method
         Then I should receive 200 response code
         And response JSON body has "name" path with value 'example'
+
+        When I request "/apis/example" API path with "DELETE" method
+        Then I should receive 204 response code
 
     Scenario: API must update existing routes with new path value
         Given request JWT token is valid admin token
@@ -359,7 +360,6 @@ Feature: Manage proxies wit API.
         Then I should receive 201 response code
         And header "Location" should be "/apis/example"
 
-        When I wait for a while
         When I request "/apis/example" API path with "GET" method
         Then I should receive 200 response code
         And response JSON body has "name" path with value 'example'
