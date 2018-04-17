@@ -9,7 +9,7 @@ import (
 	janusErr "github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/metrics"
 	"github.com/pkg/errors"
-	retry "github.com/rafaeljesus/retry-go"
+	"github.com/rafaeljesus/retry-go"
 	log "github.com/sirupsen/logrus"
 )
 
