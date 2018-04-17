@@ -17,7 +17,7 @@ type (
 		Predicate string   `json:"predicate"`
 	}
 
-	// Duration is a wrapper for time.Duration so we can use huma readable configs
+	// Duration is a wrapper for time.Duration so we can use human readable configs
 	Duration time.Duration
 )
 
