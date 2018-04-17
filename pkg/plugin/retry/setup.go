@@ -9,6 +9,10 @@ import (
 	"github.com/pkg/errors"
 )
 
+const (
+	strNull = "null"
+)
+
 type (
 	// Config represents the Body Limit configuration
 	Config struct {
@@ -24,7 +28,7 @@ type (
 // UnmarshalJSON is the implementation of the UnmarshalJSON interface
 func (d *Duration) UnmarshalJSON(data []byte) error {
 	s := string(data)
-	if s == "null" {
+	if s == strNull {
 		return errors.New("invalid time duration")
 	}
 
