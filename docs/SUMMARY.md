@@ -34,6 +34,7 @@
     * [Rate Limit](plugins/rate_limit.md)
     * [Request Transformer](plugins/request_transformer.md)
     * [Response Transformer](plugins/response_transformer.md)
+    * [Retry](plugins/retry.md)
 * Auth
     * [OAuth 2.0](auth/oauth.md)
 * Misc
