@@ -6,6 +6,7 @@ import (
 
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
+	"github.com/pkg/errors"
 )
 
 type (
@@ -21,24 +22,24 @@ type (
 )
 
 // UnmarshalJSON is the implementation of the UnmarshalJSON interface
-func (d *Duration) UnmarshalJSON(data []byte) (err error) {
+func (d *Duration) UnmarshalJSON(data []byte) error {
 	s := string(data)
 	if s == "null" {
-		return
+		return errors.New("invalid time duration")
 	}
 
-	s, err = strconv.Unquote(s)
+	s, err := strconv.Unquote(s)
 	if err != nil {
-		return
+		return err
 	}
 
 	t, err := time.ParseDuration(s)
 	if err != nil {
-		return
+		return err
 	}
 
 	*d = Duration(t)
-	return
+	return nil
 }
 
 func init() {
