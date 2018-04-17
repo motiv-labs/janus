@@ -23,30 +23,30 @@ func NewStats(statsClient client.Client) *Stats {
 }
 
 // Handler is the middleware function
-func (s *Stats) Handler(handler http.Handler) http.Handler {
+func (m *Stats) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.WithField("path", r.URL.Path).Debug("Starting Stats middleware")
-		r = r.WithContext(metrics.NewContext(r.Context(), s.statsClient))
+		r = r.WithContext(metrics.NewContext(r.Context(), m.statsClient))
 
-		timing := s.statsClient.BuildTimer().Start()
+		timing := m.statsClient.BuildTimer().Start()
 
 		// reverse proxy replaces original request with target request, so keep required fields of the original one
 		originalURL := &url.URL{}
 		*originalURL = *r.URL
 		originalRequest := &http.Request{Method: r.Method, URL: originalURL}
 
-		m := httpsnoop.CaptureMetrics(handler, w, r)
+		mt := httpsnoop.CaptureMetrics(handler, w, r)
 
 		log.WithFields(log.Fields{
 			"original_path": originalURL.Path,
 			"request_url":   r.URL.Path,
 		}).Debug("Track request stats")
 
-		success := m.Code < http.StatusBadRequest
-		if m.Code == http.StatusNotFound {
+		success := mt.Code < http.StatusBadRequest
+		if mt.Code == http.StatusNotFound {
 			log.WithField("path", originalURL.Path).Warn("Unknown endpoint requested")
 			originalURL.Path = notFoundPath
 		}
-		s.statsClient.TrackRequest(originalRequest, timing, success)
+		m.statsClient.TrackRequest(originalRequest, timing, success)
 	})
 }
