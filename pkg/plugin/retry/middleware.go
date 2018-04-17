@@ -7,6 +7,7 @@ import (
 	"github.com/Knetic/govaluate"
 	"github.com/felixge/httpsnoop"
 	janusErr "github.com/hellofresh/janus/pkg/errors"
+	"github.com/hellofresh/janus/pkg/metrics"
 	"github.com/pkg/errors"
 	retry "github.com/rafaeljesus/retry-go"
 	log "github.com/sirupsen/logrus"
@@ -14,6 +15,7 @@ import (
 
 const (
 	defaultPredicate = "statusCode == 0 || statusCode >= 500"
+	proxySection     = "proxy"
 )
 
 // NewRetryMiddleware creates a new retry middleware
@@ -54,6 +56,8 @@ func NewRetryMiddleware(cfg Config) func(http.Handler) http.Handler {
 
 				return nil
 			}, cfg.Attempts, time.Duration(cfg.Backoff)); err != nil {
+				statsClient := metrics.WithContext(r.Context())
+				statsClient.SetHTTPRequestSection(proxySection).TrackRequest(r, nil, false).ResetHTTPRequestSection()
 				janusErr.Handler(w, errors.Wrap(err, "request failed too many times"))
 				return
 			}
