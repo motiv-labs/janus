@@ -12,6 +12,13 @@ func Ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK\n"))
 }
 
+// FailWith is a test handler that fails
+func FailWith(statusCode int) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(statusCode)
+	})
+}
+
 // RecoveryHandler represents the recovery handler
 func RecoveryHandler(w http.ResponseWriter, r *http.Request, err interface{}) {
 	errors.Handler(w, err)

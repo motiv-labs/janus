@@ -119,3 +119,11 @@
 [[constraint]]
   name = "github.com/uber/jaeger-client-go"
   version = "2.11.2"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/rafaeljesus/retry-go"
+
+[[constraint]]
+  name = "github.com/felixge/httpsnoop"
+  version = "1.0.0"

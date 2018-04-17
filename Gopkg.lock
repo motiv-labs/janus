@@ -66,6 +66,12 @@
   version = "v3.1.0"
 
 [[projects]]
+  name = "github.com/felixge/httpsnoop"
+  packages = ["."]
+  revision = "eadd4fad6aac69ae62379194fe0219f3dbc80fd3"
+  version = "v1.0.0"
+
+[[projects]]
   branch = "master"
   name = "github.com/fiam/gounidecode"
   packages = ["unidecode"]
@@ -169,8 +175,8 @@
     "state",
     "timer"
   ]
-  revision = "0627c498c8cf525b2622b13a8c71431714a44243"
-  version = "v0.6.3"
+  revision = "fbee072d235f6e21c6153dc0e7c4e31e85f78f5d"
+  version = "v0.6.4"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -231,6 +237,12 @@
   packages = ["difflib"]
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/rafaeljesus/retry-go"
+  packages = ["."]
+  revision = "5981a380a87925ee03a78a7ff13574fabc804837"
 
 [[projects]]
   name = "github.com/rs/cors"
@@ -468,6 +480,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ac28f9bb9b90ebbadd4b791c4c9fa5c8506274748a1e4b23414fd6acf6981098"
+  inputs-digest = "24162409a71897b51bce4344dc9140cda3e5bde708d2c5e9f15a7b2970ca0331"
   solver-name = "gps-cdcl"
   solver-version = 1

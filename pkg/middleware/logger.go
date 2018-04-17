@@ -3,10 +3,9 @@ package middleware
 import (
 	"net/http"
 	"net/url"
-	"sync"
 	"time"
 
-	"github.com/hellofresh/janus/pkg/response"
+	"github.com/felixge/httpsnoop"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -21,29 +20,11 @@ func NewLogger() *Logger {
 // Handler implementation
 func (m *Logger) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-
 		log.WithFields(log.Fields{"method": r.Method, "path": r.URL.Path}).Debug("Started request")
 
 		// reverse proxy replaces original request with target request, so keep original one
 		originalURL := &url.URL{}
 		*originalURL = *r.URL
-
-		var (
-			lock         sync.Mutex
-			responseCode int
-		)
-		hooks := response.Hooks{
-			WriteHeader: func(next response.WriteHeaderFunc) response.WriteHeaderFunc {
-				return func(code int) {
-					next(code)
-					lock.Lock()
-					defer lock.Unlock()
-
-					responseCode = code
-				}
-			},
-		}
 
 		fields := log.Fields{
 			"method":      r.Method,
@@ -54,12 +35,11 @@ func (m *Logger) Handler(handler http.Handler) http.Handler {
 			"user-agent":  r.UserAgent(),
 		}
 
-		handler.ServeHTTP(response.Wrap(w, hooks), r)
-		requestDuration := time.Now().Sub(start)
+		m := httpsnoop.CaptureMetrics(handler, w, r)
 
-		fields["code"] = responseCode
-		fields["duration"] = int(requestDuration / time.Millisecond)
-		fields["duration-fmt"] = requestDuration.String()
+		fields["code"] = m.Code
+		fields["duration"] = int(m.Duration / time.Millisecond)
+		fields["duration-fmt"] = m.Duration.String()
 
 		if originalURL.String() != r.URL.String() {
 			fields["upstream-host"] = r.URL.Host
