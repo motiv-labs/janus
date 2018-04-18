@@ -1,9 +1,13 @@
 # Unreleased
 
-# 3.7.0
+## Added
+
+- New Retry plugin: you can now configure your endpoints to have a retry in case of a failed request
 
 ## Removed
 - Redis is not necessary anymore for the cluster to work
+
+# 3.7.0
 
 ## Added
 
