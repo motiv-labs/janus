@@ -1,0 +1,27 @@
+version: '3.3'
+services:
+
+  janus:
+    image: quay.io/hellofresh/janus
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    depends_on:
+      - service1
+    volumes:
+      - ./janus.toml:/etc/janus/janus.toml
+      - ./apis:/etc/janus/apis
+
+  service1:
+    image: rodolpheche/wiremock
+    ports:
+      - '9089:8080'
+    volumes:
+      - ./stubs:/home/wiremock/mappings
+
+  hystrix:
+    image: mlabouardy/hystrix-dashboard
+    depends_on:
+      - janus
+    ports:
+      - 9002:9002
