@@ -16,6 +16,7 @@ const (
 
 	ReloadEvent   string = "reload"
 	ShutdownEvent string = "shutdown"
+	SetupEvent    string = "setup"
 )
 
 // OnStartup represents a event that happens when Janus starts up on the main process
