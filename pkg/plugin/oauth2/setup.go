@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/url"
 
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/plugin"
@@ -111,7 +112,7 @@ func onStartup(event interface{}) error {
 	return nil
 }
 
-func setupOAuth2(route *proxy.Route, rawConfig plugin.Config) error {
+func setupOAuth2(def *api.Definition, route *proxy.Route, rawConfig plugin.Config) error {
 	var config Config
 	err := plugin.Decode(rawConfig, &config)
 	if err != nil {

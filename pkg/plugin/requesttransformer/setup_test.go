@@ -3,6 +3,7 @@ package requesttransformer
 import (
 	"testing"
 
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/stretchr/testify/assert"
@@ -43,8 +44,9 @@ func TestRequestTransformerPlugin(t *testing.T) {
 		},
 	}
 
-	route := proxy.NewRoute(&proxy.Definition{})
-	err := setupRequestTransformer(route, rawConfig)
+	def := api.NewDefinition()
+	route := proxy.NewRoute(def.Proxy)
+	err := setupRequestTransformer(def, route, rawConfig)
 	assert.NoError(t, err)
 
 	assert.Len(t, route.Inbound, 1)

@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -57,7 +58,7 @@ func onStartup(event interface{}) error {
 	return nil
 }
 
-func setupRateLimit(route *proxy.Route, rawConfig plugin.Config) error {
+func setupRateLimit(def *api.Definition, route *proxy.Route, rawConfig plugin.Config) error {
 	var config Config
 	err := plugin.Decode(rawConfig, &config)
 	if err != nil {

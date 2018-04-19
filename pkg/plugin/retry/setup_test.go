@@ -3,14 +3,16 @@ package retry
 import (
 	"testing"
 
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSetup(t *testing.T) {
-	route := proxy.NewRoute(&proxy.Definition{})
-	err := setupRetry(route, make(plugin.Config))
+	def := api.NewDefinition()
+	route := proxy.NewRoute(def.Proxy)
+	err := setupRetry(def, route, make(plugin.Config))
 	assert.NoError(t, err)
 
 	assert.Len(t, route.Inbound, 1)

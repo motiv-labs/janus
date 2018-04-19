@@ -3,6 +3,7 @@ package cors
 import (
 	"testing"
 
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/stretchr/testify/assert"
@@ -51,7 +52,7 @@ func TestSetup(t *testing.T) {
 		"exposed_headers": []string{"Test"},
 	}
 	route := proxy.NewRoute(&proxy.Definition{})
-	err := setupCors(route, rawConfig)
+	err := setupCors(api.NewDefinition(), route, rawConfig)
 
 	assert.NoError(t, err)
 	assert.Len(t, route.Inbound, 1)
