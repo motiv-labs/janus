@@ -24,10 +24,27 @@
   version = "v0.7.4"
 
 [[projects]]
+  name = "github.com/DataDog/datadog-go"
+  packages = ["statsd"]
+  revision = "e67964b4021ad3a334e748e8811eb3cd6becbc6e"
+  version = "2.1.0"
+
+[[projects]]
   name = "github.com/Knetic/govaluate"
   packages = ["."]
   revision = "d216395917cc49052c7c7094cf57f09657ca08a8"
   version = "v3.0.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/afex/hystrix-go"
+  packages = [
+    "hystrix",
+    "hystrix/metric_collector",
+    "hystrix/rolling",
+    "plugins"
+  ]
+  revision = "f86abeeb9f72803eb19b0d7a25159e55b80e7254"
 
 [[projects]]
   name = "github.com/apache/thrift"
@@ -46,6 +63,12 @@
   packages = ["."]
   revision = "dbc1e22735aa6ed7bd9579a407c17bc7c4a4e046"
   version = "v0.4.1"
+
+[[projects]]
+  name = "github.com/cactus/go-statsd-client"
+  packages = ["statsd"]
+  revision = "138b925ccdf617776955904ba7759fce64406cec"
+  version = "v3.1.1"
 
 [[projects]]
   branch = "master"
@@ -197,6 +220,12 @@
   version = "v1.7.4"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/mitchellh/go-homedir"
+  packages = ["."]
+  revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
+
+[[projects]]
   name = "github.com/mitchellh/mapstructure"
   packages = ["."]
   revision = "b4575eea38cca1123ec2dc90c26529b5c5acfcff"
@@ -243,6 +272,12 @@
   name = "github.com/rafaeljesus/retry-go"
   packages = ["."]
   revision = "5981a380a87925ee03a78a7ff13574fabc804837"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/rcrowley/go-metrics"
+  packages = ["."]
+  revision = "d932a24a8ccb8fcadc993e5c6c58f93dac168294"
 
 [[projects]]
   name = "github.com/rs/cors"
@@ -334,6 +369,7 @@
     "internal/baggage",
     "internal/baggage/remote",
     "internal/spanlog",
+    "internal/throttler",
     "log",
     "rpcmetrics",
     "thrift-gen/agent",
@@ -343,8 +379,8 @@
     "thrift-gen/zipkincore",
     "utils"
   ]
-  revision = "3ac96c6e679cb60a74589b0d0aa7c70a906183f7"
-  version = "v2.11.2"
+  revision = "3205d4aabc55c1a13b1e48d3db793bc8cd37bd16"
+  version = "v2.13.0"
 
 [[projects]]
   name = "github.com/uber/jaeger-lib"
@@ -480,6 +516,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "24162409a71897b51bce4344dc9140cda3e5bde708d2c5e9f15a7b2970ca0331"
+  inputs-digest = "e95d6383819d4681e4db7c69c14292335bc0ab4e40b99ae9461ffb1fb643dae7"
   solver-name = "gps-cdcl"
   solver-version = 1

@@ -127,3 +127,11 @@
 [[constraint]]
   name = "github.com/felixge/httpsnoop"
   version = "1.0.0"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/afex/hystrix-go"
+
+[[constraint]]
+  branch = "master"
+  name = "github.com/mitchellh/go-homedir"
