@@ -33,7 +33,10 @@
 	        "config" : {
 	            "timeout" : 1000,
 	            "max_concurrent_requests": 100,
-	            "error_percent_threshold": 25
+                "error_percent_threshold": 50,
+                "request_volume_threshold": 20,
+                "sleep_window": 5000,
+                "predicate": "statusCode == 0 || statusCode >= 500"
 	        }
 		}
     ]

@@ -18,11 +18,8 @@ const (
 
 // Config represents the Body Limit configuration
 type Config struct {
-	Timeout               int    `json:"timeout"`
-	MaxConcurrentRequests int    `json:"max_concurrent_requests"`
-	ErrorPercentThreshold int    `json:"error_percent_threshold"`
-	SleepWindow           int    `json:"sleep_window"`
-	Predicate             string `json:"predicate"`
+	hystrix.CommandConfig
+	Predicate string `json:"predicate"`
 }
 
 func init() {
