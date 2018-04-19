@@ -1,5 +1,5 @@
 # This file is used to run integration tests on travis
-version: '2'
+version: '3'
 services:
 
   janus-database:
@@ -40,10 +40,3 @@ services:
       JAVA_OPTS: -Dlogging.level.zipkin=DEBUG
     ports:
       - 9411:9411
-
-  hystrix:
-    image: mlabouardy/hystrix-dashboard
-    depends_on:
-      - janus
-    ports:
-      - 9002:9002
