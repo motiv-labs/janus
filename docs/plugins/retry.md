@@ -7,12 +7,12 @@ The retry plugin allows you to configure retry rules for your proxy. This enable
 The plain retry config:
 
 ```json
-"retry": {
-    "enabled": true,
-    "config": {
-        "attempts": 3,
-        "backoff": "1s",
-        "predicate": "statusCode == 0 || statusCode >= 500"
+{
+    "name" : "retry",
+    "enabled" : false,
+    "config" : {
+        "attempts" : 3,
+        "backoff": "1s"
     }
 }
 ```

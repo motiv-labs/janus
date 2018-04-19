@@ -10,7 +10,6 @@
     * [Authentication](quick_start/add_auth.md)
     * [Adding your API - File System](quick_start/file_system.md)
 * [Clustering/HA](clustering/clustering.md)
-    * 
 * [Proxy Reference](proxy/README.md)
     * [Terminology](proxy/terminology.md)
     * [Overview](proxy/overview.md)
@@ -28,6 +27,7 @@
 * [Plugins](plugins/README.md)
     * [Basic](plugins/basic.md)
     * [Body Limit](plugins/body_limit.md)
+    * [Circuit Breaker](plugins/cb.md)
     * [Compression](plugins/compression.md)
     * [CORS](plugins/cors.md)
     * [OAuth](plugins/oauth.md)
