@@ -40,3 +40,10 @@ services:
       JAVA_OPTS: -Dlogging.level.zipkin=DEBUG
     ports:
       - 9411:9411
+
+  hystrix:
+    image: mlabouardy/hystrix-dashboard
+    depends_on:
+      - janus
+    ports:
+      - 9002:9002
