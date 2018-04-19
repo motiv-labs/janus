@@ -35,3 +35,13 @@ This will force your proxy to go down and Janus won't be able to reach it.
 Start making a lot of requests to `/example` and see what's going to happen on the dashboard.
 
 For all the options on how to configure this plugin please visit the [documentation](https://hellofresh.gitbooks.io/janus/plugins/cb.html) page.
+
+## Using vegeta for failure simulation
+
+You can also use [vegeta](https://github.com/tsenart/vegeta) which is a HTTP load testing tool.
+
+Here we are going to send 10 req/s during 30s. IN this time you can easily stop `service1` and see how the circuit will react.
+
+```sh
+echo "GET http://localhost:8080/example" | vegeta attack -rate=10 -duration=30s | vegeta report
+```
