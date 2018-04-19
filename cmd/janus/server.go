@@ -45,10 +45,10 @@ func RunServer(cmd *cobra.Command, args []string) {
 	defer globalConfig.Log.Flush()
 
 	repo, err := api.BuildRepository(globalConfig.Database.DSN, globalConfig.Cluster.UpdateFrequency)
-	defer repo.Close()
 	if err != nil {
 		log.WithError(err).Fatal("Could not build a repository for the database")
 	}
+	defer repo.Close()
 
 	svr := server.New(
 		server.WithGlobalConfig(globalConfig),
