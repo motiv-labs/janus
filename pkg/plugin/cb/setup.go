@@ -84,19 +84,17 @@ func onStartup(event interface{}) error {
 		return errors.New("Could not convert event to startup type")
 	}
 
-	if e.Config.Stats.DSN != "" {
-		logger.WithField("metrics_dsn", e.Config.Stats.DSN).Debug("Statsd metrics enabled")
-		c, err := plugins.InitializeStatsdCollector(&plugins.StatsdCollectorConfig{
-			StatsdAddr: e.Config.Stats.DSN,
-			Prefix:     statsdPrefix,
-		})
-		if err != nil {
-			return errors.Wrap(err, "could not initialize statsd client")
-		}
-		metricCollector.Registry.Register(c.NewStatsdCollector)
-	} else {
-		logger.Warn("cb plugin will not report metrics to statsd. Please enable this on stats.dsn option.")
+	logger.WithField("metrics_dsn", e.Config.Stats.DSN).Debug("Statsd metrics enabled")
+	c, err := plugins.InitializeStatsdCollector(&plugins.StatsdCollectorConfig{
+		StatsdAddr: e.Config.Stats.DSN,
+		Prefix:     statsdPrefix,
+	})
+	if err != nil {
+		return errors.Wrap(err, "could not initialize statsd client")
 	}
+
+	metricCollector.Registry.Register(c.NewStatsdCollector)
+	logger.Debug("Metrics enabled")
 
 	return nil
 }
