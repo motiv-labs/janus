@@ -54,7 +54,7 @@ func (m *APILoader) RegisterAPI(def *api.Definition) {
 					continue
 				}
 
-				err = setup(route, plg.Config)
+				err = setup(def, route, plg.Config)
 				if err != nil {
 					l.WithError(err).Error("Error executing plugin")
 				}

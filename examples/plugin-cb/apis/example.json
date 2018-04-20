@@ -1,0 +1,43 @@
+{
+    "name" : "example",
+    "active" : true,
+    "proxy" : {
+        "preserve_host" : false,
+        "listen_path" : "/example/*",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://service1:8080/"}
+            ]
+        },
+        "strip_path" : false,
+        "append_path" : false,
+        "methods" : ["GET"]
+    },
+    "health_check": {
+        "url": "http://service1:8080/status",
+        "timeout": 3
+    },
+    "plugins": [
+        {
+	        "name" : "retry",
+	        "enabled" : false,
+	        "config" : {
+	            "attempts" : 3,
+	            "backoff": "1s"
+	        }
+		},
+		{
+	        "name" : "cb",
+	        "enabled" : true,
+	        "config" : {
+	            "timeout" : 1000,
+	            "max_concurrent_requests": 100,
+                "error_percent_threshold": 50,
+                "request_volume_threshold": 20,
+                "sleep_window": 5000,
+                "predicate": "statusCode == 0 || statusCode >= 500"
+	        }
+		}
+    ]
+}

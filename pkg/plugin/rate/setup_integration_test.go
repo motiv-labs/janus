@@ -5,6 +5,7 @@ package rate
 import (
 	"testing"
 
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/stretchr/testify/assert"
 )
@@ -19,8 +20,9 @@ func TestRateLimitPluginRedisPolicy(t *testing.T) {
 		},
 	}
 
-	route := proxy.NewRoute(&proxy.Definition{})
-	err := setupRateLimit(route, rawConfig)
+	def := api.NewDefinition()
+	route := proxy.NewRoute(def.Proxy)
+	err := setupRateLimit(def, route, rawConfig)
 
 	assert.Error(t, err)
 }

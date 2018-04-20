@@ -1,5 +1,5 @@
 # This file is used to run integration tests on travis
-version: '2'
+version: '3'
 services:
 
   janus-database:

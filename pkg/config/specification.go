@@ -1,11 +1,11 @@
 package config
 
 import (
-	"os/user"
 	"time"
 
 	"github.com/hellofresh/logging-go"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
@@ -158,14 +158,14 @@ func Load(configFile string) (*Specification, error) {
 	if configFile != "" {
 		viper.SetConfigFile(configFile)
 	} else {
-		usr, err := user.Current()
+		dir, err := homedir.Dir()
 		if err != nil {
 			return nil, err
 		}
 
 		viper.SetConfigName("janus")
 		viper.AddConfigPath(".")
-		viper.AddConfigPath(usr.HomeDir)
+		viper.AddConfigPath(dir)
 		viper.AddConfigPath("/etc/janus")
 	}
 

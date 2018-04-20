@@ -4,6 +4,10 @@
 
 - New Retry plugin: you can now configure your endpoints to have a retry in case of a failed request
 
+## Fixed
+
+- Fixed bug when using the configuration file in a linux/64 system
+
 ## Removed
 - Redis is not necessary anymore for the cluster to work
 
@@ -15,11 +19,11 @@
 - Support for zero weight when using the weight algorithm for balancing
 - New header `X-Request-Id` that makes sure it create a new id for each request. It also ties it up with open tracing
 
-# Fixed
+## Fixed
 
 - Fixed oauth rate limit reported on #276
 
-# Removed
+## Removed
 
 - `Upstream_URL` support is removed, see the [Upgrade Notes](docs/upgrade/3.7.x.md)
 

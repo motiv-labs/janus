@@ -12,6 +12,7 @@ import (
 	// this is needed to call the init function on each plugin
 	_ "github.com/hellofresh/janus/pkg/plugin/basic"
 	_ "github.com/hellofresh/janus/pkg/plugin/bodylmt"
+	_ "github.com/hellofresh/janus/pkg/plugin/cb"
 	_ "github.com/hellofresh/janus/pkg/plugin/compression"
 	_ "github.com/hellofresh/janus/pkg/plugin/cors"
 	_ "github.com/hellofresh/janus/pkg/plugin/oauth2"
@@ -44,10 +45,10 @@ func RunServer(cmd *cobra.Command, args []string) {
 	defer globalConfig.Log.Flush()
 
 	repo, err := api.BuildRepository(globalConfig.Database.DSN, globalConfig.Cluster.UpdateFrequency)
-	defer repo.Close()
 	if err != nil {
 		log.WithError(err).Fatal("Could not build a repository for the database")
 	}
+	defer repo.Close()
 
 	svr := server.New(
 		server.WithGlobalConfig(globalConfig),

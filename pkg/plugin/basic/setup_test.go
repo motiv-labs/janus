@@ -5,6 +5,7 @@ import (
 
 	"gopkg.in/mgo.v2"
 
+	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
@@ -12,7 +13,8 @@ import (
 )
 
 func TestSetup(t *testing.T) {
-	route := proxy.NewRoute(&proxy.Definition{})
+	def := api.NewDefinition()
+	route := proxy.NewRoute(def.Proxy)
 
 	event1 := plugin.OnAdminAPIStartup{Router: router.NewChiRouter()}
 	err := onAdminAPIStartup(event1)
@@ -22,7 +24,7 @@ func TestSetup(t *testing.T) {
 	err = onStartup(event2)
 	require.NoError(t, err)
 
-	err = setupBasicAuth(route, make(plugin.Config))
+	err = setupBasicAuth(def, route, make(plugin.Config))
 	require.NoError(t, err)
 }
 
