@@ -5,7 +5,7 @@ import (
 
 	"github.com/hellofresh/logging-go"
 	"github.com/kelseyhightower/envconfig"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
