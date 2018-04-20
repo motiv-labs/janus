@@ -40,6 +40,8 @@ This API Gateway offers powerful, yet lightweight features that allows fine gain
 * Graceful shutdown of http connections
 * [OpenTracing](http://opentracing.io/) support for Distributed tracing (Supports Google Cloud Platform and Jaeger)
 * HTTP/2 support
+* Circuit Breaker support that can be configured for each API
+* Retry mechanism to make your endpoints more resilient
 * Rate Limiting, easily rate limit your API users, rate limiting is granular and can be applied on a per-key basis
 * CORS Filter, enable cors for your API, or even for specific endpoints
 * Multiple auth protocols, out of the box, we support JWT, OAuth 2.0 and Basic Auth access methods
