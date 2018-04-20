@@ -198,8 +198,8 @@
     "state",
     "timer"
   ]
-  revision = "fbee072d235f6e21c6153dc0e7c4e31e85f78f5d"
-  version = "v0.6.4"
+  revision = "5ea5b6bcbabc419be4796756b9ae00a7b1f0d36a"
+  version = "0.7.0"
 
 [[projects]]
   name = "github.com/inconshreveable/mousetrap"
@@ -516,6 +516,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "e95d6383819d4681e4db7c69c14292335bc0ab4e40b99ae9461ffb1fb643dae7"
+  inputs-digest = "d37aad5e7c95cd15b55d3fc76ea347522b5c3542c23427448607062d5aecb7f5"
   solver-name = "gps-cdcl"
   solver-version = 1
