@@ -40,7 +40,7 @@ For all the options on how to configure this plugin please visit the [documentat
 
 You can also use [vegeta](https://github.com/tsenart/vegeta) which is a HTTP load testing tool.
 
-Here we are going to send 10 req/s during 30s. IN this time you can easily stop `service1` and see how the circuit will react.
+Here we are going to send 10 req/s during 30s. In this time you can easily stop `service1` and see how the circuit will react.
 
 ```sh
 echo "GET http://localhost:8080/example" | vegeta attack -rate=10 -duration=30s | vegeta report
