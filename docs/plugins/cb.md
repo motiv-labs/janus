@@ -23,7 +23,8 @@ The plain cb config:
 }
 ```
 
-| Configuration | Description |
+Configuration | Description
+:---|:---|
 | timeout                     | Timeout that the CB will wait till the request responds |
 | max_concurrent_requests     | How many commands of the same type can run at the same time |
 | error_percent_threshold     | Causes circuits to open once the rolling measure of errors exceeds this percent of requests |
