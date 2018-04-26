@@ -17,7 +17,8 @@ The plain retry config:
 }
 ```
 
-| Configuration | Description        |
+Configuration | Description
+:---|:---|
 | attempts      | Number of attempts |
 | backoff       | Time that we should wait to retry. This must be given in the [ParseDuration](https://golang.org/pkg/time/#ParseDuration) format. Defaults to `1s` |
 | predicate     | The rule that we will check to define if the request was successful or not. You have access to `statusCode` and all the `request` object. Defaults to `statusCode == 0 || statusCode >= 500` |
