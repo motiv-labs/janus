@@ -16,8 +16,9 @@ import (
 )
 
 const (
-	mongodb = "mongodb"
-	file    = "file"
+	mongodb  = "mongodb"
+	file     = "file"
+	postgres = "postgres"
 )
 
 var (
@@ -100,6 +101,11 @@ func onStartup(event interface{}) error {
 		repo, err = NewFileSystemRepository(authPath)
 		if err != nil {
 			return errors.Wrap(err, "Could not create a file based repository for the oauth servers")
+		}
+	case postgres:
+		repo, err = NewPostgresRepository(config.DSN)
+		if err != nil {
+			return err
 		}
 	default:
 		return errors.New("The selected scheme is not supported to load OAuth servers")
