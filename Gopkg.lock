@@ -214,6 +214,15 @@
   version = "v1.3.0"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/lib/pq"
+  packages = [
+    ".",
+    "oid"
+  ]
+  revision = "d34b9ff171c21ad295489235aec8b6626023cd04"
+
+[[projects]]
   name = "github.com/magiconair/properties"
   packages = ["."]
   revision = "d419a98cdbed11a922bf76f257b7c4be79b50e73"
@@ -513,9 +522,26 @@
   packages = ["."]
   revision = "d670f9405373e636a5a2765eea47fac0c9bc91a4"
 
+[[projects]]
+  name = "upper.io/db.v3"
+  packages = [
+    ".",
+    "internal/cache",
+    "internal/cache/hashstructure",
+    "internal/immutable",
+    "internal/sqladapter",
+    "internal/sqladapter/compat",
+    "internal/sqladapter/exql",
+    "lib/reflectx",
+    "lib/sqlbuilder",
+    "postgresql"
+  ]
+  revision = "bba00b389f7e9cfdd8988e08c2832ab39119d7cf"
+  version = "v3.5.2"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d37aad5e7c95cd15b55d3fc76ea347522b5c3542c23427448607062d5aecb7f5"
+  inputs-digest = "4a12069849052d4aa25ab935c47545c2cbc602fef2bb94199b7922dbbecaaf59"
   solver-name = "gps-cdcl"
   solver-version = 1

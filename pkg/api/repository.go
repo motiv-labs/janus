@@ -12,8 +12,9 @@ import (
 )
 
 const (
-	mongodb = "mongodb"
-	file    = "file"
+	mongodb  = "mongodb"
+	file     = "file"
+	postgres = "postgres"
 )
 
 // Repository defines the behavior of a proxy specs repository
@@ -53,6 +54,9 @@ func BuildRepository(dsn string, refreshTime time.Duration) (Repository, error) 
 			return nil, errors.Wrap(err, "could not create a file system repository")
 		}
 		return repo, nil
+	case postgres:
+		log.Debug("Postgres configuration chosen")
+		return NewPostgresRepository(dsn)
 	default:
 		return nil, errors.New("The selected scheme is not supported to load API definitions")
 	}

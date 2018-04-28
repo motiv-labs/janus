@@ -101,7 +101,7 @@ func (r *MongoRepository) Watch(ctx context.Context, cfgChan chan<- Configuratio
 
 // FindAll fetches all the API definitions available
 func (r *MongoRepository) FindAll() ([]*Definition, error) {
-	result := []*Definition{}
+	var result []*Definition
 	session, coll := r.getSession()
 	defer session.Close()
 

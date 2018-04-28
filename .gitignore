@@ -33,3 +33,5 @@ node_modules/
 # HF config files
 /dist
 debug
+
+.idea/
