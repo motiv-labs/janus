@@ -17,7 +17,7 @@ type Repository interface {
 	FindByName(name string) (*OAuth, error)
 	Add(oauth *OAuth) error
 	Save(oauth *OAuth) error
-	Remove(id string) error
+	Remove(name string) error
 }
 
 // MongoRepository represents a mongodb repository

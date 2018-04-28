@@ -3,8 +3,9 @@ package api
 import (
 	"context"
 	"encoding/json"
-	log "github.com/sirupsen/logrus"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 	"upper.io/db.v3/lib/sqlbuilder"
 	"upper.io/db.v3/postgresql"
 )
@@ -13,10 +14,12 @@ const (
 	tableName = "apis"
 )
 
+// PostgresRepository represents a postgres repository
 type PostgresRepository struct {
 	sess sqlbuilder.Database
 }
 
+// NewPostgresRepository creates a postgres API definition repo
 func NewPostgresRepository(dsn string) (*PostgresRepository, error) {
 	settings, err := postgresql.ParseURL(dsn)
 	if err != nil {
@@ -26,19 +29,22 @@ func NewPostgresRepository(dsn string) (*PostgresRepository, error) {
 	if err != nil {
 		return nil, err
 	}
-	sess.SetLogging(true)
+	//sess.SetLogging(true)
 	return &PostgresRepository{
 		sess: sess,
 	}, nil
 }
 
+// Close terminates the session.  It's a runtime error to use a session
+// after it has been closed.
 func (r PostgresRepository) Close() error {
 	return r.sess.Close()
 }
 
+// Listen watches for changes on the configuration
 func (r PostgresRepository) Listen(ctx context.Context, cfgChan <-chan ConfigurationMessage) {
 	go func() {
-		log.Println("Listen")
+		log.Debug("Listening for changes on the provider...")
 		for {
 			select {
 			case cfg := <-cfgChan:
@@ -66,6 +72,7 @@ func (r PostgresRepository) Listen(ctx context.Context, cfgChan <-chan Configura
 	}()
 }
 
+// Watch watches for changes on the database
 func (r PostgresRepository) Watch(ctx context.Context, cfgChan chan<- ConfigurationChanged) {
 	t := time.NewTicker(time.Second * 5)
 	go func(refreshTicker *time.Ticker) {
@@ -90,13 +97,12 @@ func (r PostgresRepository) Watch(ctx context.Context, cfgChan chan<- Configurat
 	}(t)
 }
 
+// FindAll fetches all the API definitions available
 func (r PostgresRepository) FindAll() ([]*Definition, error) {
 	var src []map[string]interface{}
 	if err := r.sess.SelectFrom(tableName).All(&src); err != nil {
-		log.Println(err)
 		return nil, err
 	}
-
 	var result []*Definition
 	for _, m := range src {
 		var dst map[string]interface{}
