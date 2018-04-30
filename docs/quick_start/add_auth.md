@@ -75,7 +75,7 @@ Now that we have an oauth2 available to use, lets add it to our endpoint, just c
 {
   "plugins": [
     {
-      "name": "oauth",
+      "name": "oauth2",
       "enabled": true,
       "config": {
         "server_name": "local"
