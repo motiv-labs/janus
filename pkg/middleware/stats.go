@@ -7,6 +7,7 @@ import (
 	"github.com/felixge/httpsnoop"
 	"github.com/hellofresh/janus/pkg/metrics"
 	"github.com/hellofresh/stats-go/client"
+	"github.com/hellofresh/stats-go/timer"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -28,14 +29,13 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 		log.WithField("path", r.URL.Path).Debug("Starting Stats middleware")
 		r = r.WithContext(metrics.NewContext(r.Context(), m.statsClient))
 
-		timing := m.statsClient.BuildTimer().Start()
-
 		// reverse proxy replaces original request with target request, so keep required fields of the original one
 		originalURL := &url.URL{}
 		*originalURL = *r.URL
 		originalRequest := &http.Request{Method: r.Method, URL: originalURL}
 
 		mt := httpsnoop.CaptureMetrics(handler, w, r)
+		t := timer.NewDuration(mt.Duration)
 
 		log.WithFields(log.Fields{
 			"original_path": originalURL.Path,
@@ -47,6 +47,6 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 			log.WithField("path", originalURL.Path).Warn("Unknown endpoint requested")
 			originalURL.Path = notFoundPath
 		}
-		m.statsClient.TrackRequest(originalRequest, timing, success)
+		m.statsClient.TrackRequest(originalRequest, t, success)
 	})
 }
