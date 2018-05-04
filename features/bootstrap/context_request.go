@@ -42,6 +42,7 @@ func RegisterRequestContext(s *godog.Suite, port, apiPort, portSecondary, apiPor
 	s.Step(`^header "([^"]*)" should start with "([^"]*)"$`, ctx.headerShouldStartWith)
 	s.Step(`^the response should contain "([^"]*)"$`, ctx.responseShouldContain)
 	s.Step(`^response JSON body has "([^"]*)" path with value \'([^']*)\'$`, ctx.responseJSONBodyHasPathWithValue)
+	s.Step(`^response JSON body has "([^"]*)" path and is an array of length (\d+)$`, ctx.responseJSONBodyHasPathIsAnArrayOfLenght)
 	s.Step(`^response JSON body has "([^"]*)" path`, ctx.responseJSONBodyHasPath)
 	s.Step(`^response JSON body is an array of length (\d+)$`, ctx.responseJSONBodyIsAnArrayOfLength)
 	s.Step(`^request JSON payload:$`, ctx.requestJSONPayload)
@@ -164,6 +165,29 @@ func (c *requestContext) responseJSONBodyHasPathWithValue(path, value string) er
 
 	if val.String() != value {
 		return fmt.Errorf("expected path %s in JSON response to be %s, but actual is %s; response: %s", path, value, val.String(), c.responseBody)
+	}
+
+	return nil
+}
+
+func (c *requestContext) responseJSONBodyHasPathIsAnArrayOfLenght(path string, length int) error {
+	val := gjson.GetBytes(c.responseBody, path)
+	if !val.Exists() {
+		return fmt.Errorf("expected path %s in JSON response, but not found", path)
+	}
+
+	if !val.IsArray() {
+		return fmt.Errorf("expected path %s in JSON response to be an array, but actual is %s; response: %s", path, val.String(), c.responseBody)
+	}
+
+	v, ok := val.Value().([]interface{})
+	if !ok {
+		return fmt.Errorf("could not convert array to interface")
+	}
+
+	fmt.Println(val.String())
+	if len(v) != length {
+		return fmt.Errorf("expected JSON path %s array length is %d, but actual is %d", path, length, len(v))
 	}
 
 	return nil
