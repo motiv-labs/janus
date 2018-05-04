@@ -14,6 +14,34 @@ Feature: Manage proxies wit API.
         When I request "/apis" API path with "GET" method
         Then I should receive 401 response code
 
+    Scenario: API should be created with defaults
+        Given request JSON payload:
+            """
+            {
+              "name":"example",
+              "proxy":{
+                "listen_path":"/example/*",
+                "upstreams":{
+                  "balancing":"roundrobin",
+                  "targets":[
+                    {
+                      "target":"http://localhost:9089/hello-world"
+                    }
+                  ]
+                }
+              }
+            }
+            """
+        When I request "/apis" API path with "POST" method
+        Then I should receive 201 response code
+        And header "Location" should be "/apis/example"
+
+        When I request "/apis" API path with "GET" method
+        Then I should receive 200 response code
+        And response JSON body is an array of length 1
+        And response JSON body has "0.active" path with value 'true'
+        And response JSON body has "0.proxy.methods" path and is an array of length 1
+
     Scenario: APIs list and create must be available for user with correct admin token
         Given request JWT token is valid admin token
         When I request "/apis" API path with "GET" method

@@ -36,7 +36,7 @@ type Target struct {
 // NewDefinition creates a new Proxy Definition with default values
 func NewDefinition() *Definition {
 	return &Definition{
-		Methods: make([]string, 0),
+		Methods: []string{"GET"},
 		Hosts:   make([]string, 0),
 		Upstreams: &Upstreams{
 			Targets: make([]*Target, 0),
