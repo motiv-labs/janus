@@ -6,15 +6,11 @@ WARN_COLOR=\033[33;01m
 # The import path is the unique absolute name of your repository.
 # All subpackages should always be imported as relative to it.
 # If you change this, run `make clean`.
-IMPORT_PATH := github.com/hellofresh/janus
-PKG_SRC := $(IMPORT_PATH)/cmd/janus
-
-# Space separated patterns of packages to skip in list, test, format.
-IGNORED_PACKAGES := /vendor/
+PKG_SRC := github.com/hellofresh/janus/cmd/janus
 
 .PHONY: all clean deps build
 
-all: clean deps build
+all: clean deps test build
 
 deps:
 	@echo "$(OK_COLOR)==> Installing dependencies$(NO_COLOR)"
@@ -27,29 +23,50 @@ build:
 	@echo "$(OK_COLOR)==> Building... $(NO_COLOR)"
 	@/bin/sh -c "JANUS_BUILD_ONLY_DEFAULT=$(JANUS_BUILD_ONLY_DEFAULT) PKG_SRC=$(PKG_SRC) VERSION=$(VERSION) ./build/build.sh"
 
-test:
-	@/bin/sh -c "./build/test.sh $(allpackages)"
+test: lint format vet
+	@echo "$(OK_COLOR)==> Running tests$(NO_COLOR)"
+	@go test -v -race -cover ./...
 
-test-integration:
-	@/bin/sh -c "RUN_INTEGRATION=1 ./build/test.sh $(allpackages)"
+test-integration: lint format vet
+	@echo "$(OK_COLOR)==> Running tests$(NO_COLOR)"
+	@go test -v -race -cover -tags=integration ./...
 
 test-features:
 	@/bin/sh -c "JANUS_BUILD_ONLY_DEFAULT=1 PKG_SRC=$(PKG_SRC) ./build/build.sh"
 	@/bin/sh -c "./build/features.sh"
 
-lint:
-	@echo "$(OK_COLOR)==> Linting... $(NO_COLOR)"
-	@golint $(allpackages)
+format:
+	@echo "$(OK_COLOR)==> checking code formating with 'gofmt' tool$(NO_COLOR)"
+	@gofmt -l -s cmd pkg | grep ".*\.go"; if [ "$$?" = "0" ]; then exit 1; fi
+
+vet:
+	@echo "$(OK_COLOR)==> checking code correctness with 'go vet' tool$(NO_COLOR)"
+	@go vet ./...
+
+lint: tools.golint
+	@echo "$(OK_COLOR)==> checking code style with 'golint' tool$(NO_COLOR)"
+	@go list ./... | xargs -n 1 golint -set_exit_status
 
 clean:
 	@echo "$(OK_COLOR)==> Cleaning project$(NO_COLOR)"
 	@go clean
 	@rm -rf bin $GOPATH/bin
 
-# cd into the GOPATH to workaround ./... not following symlinks
-_allpackages = $(shell ( go list ./... 2>&1 1>&3 | \
-    grep -v -e "^$$" $(addprefix -e ,$(IGNORED_PACKAGES)) 1>&2 ) 3>&1 | \
-    grep -v -e "^$$" $(addprefix -e ,$(IGNORED_PACKAGES)))
+#---------------
+#-- tools
+#---------------
 
-# memoize allpackages, so that it's executed only once and only if used
-allpackages = $(if $(__allpackages),,$(eval __allpackages := $$(_allpackages)))$(__allpackages)
+.PHONY: tools tools.dep tools.golint
+tools: tools.dep tools.golint
+
+tools.golint:
+	@command -v golint >/dev/null ; if [ $$? -ne 0 ]; then \
+		echo "--> installing golint"; \
+		go get github.com/golang/lint/golint; \
+	fi
+
+tools.dep:
+	@command -v dep >/dev/null ; if [ $$? -ne 0 ]; then \
+		echo "--> installing dep"; \
+		@go get -u github.com/golang/dep/cmd/dep; \
+	fi
