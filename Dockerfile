@@ -27,4 +27,4 @@ RUN apk add --update curl && \
 HEALTHCHECK --interval=5s --timeout=5s --retries=3 CMD curl -f http://localhost:8081/status || exit 1
 
 EXPOSE 8080 8081 8443 8444
-ENTRYPOINT ["/janus"]
+ENTRYPOINT ["/janus", "start"]
