@@ -1,9 +1,10 @@
-package main
+package cmd
 
 import (
 	"context"
 
 	"github.com/hellofresh/janus/pkg/api"
+	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/server"
 	log "github.com/sirupsen/logrus"
@@ -24,13 +25,28 @@ import (
 	// dynamically registered auth providers
 	_ "github.com/hellofresh/janus/pkg/jwt/basic"
 	_ "github.com/hellofresh/janus/pkg/jwt/github"
-
-	// internal plugins
-	_ "github.com/hellofresh/janus/pkg/web"
 )
 
-// RunServer is the run command to start Janus
-func RunServer(cmd *cobra.Command, args []string) {
+// ServerStartOptions are the command flags
+type ServerStartOptions struct{}
+
+// NewServerStartCmd creates a new http server command
+func NewServerStartCmd(ctx context.Context) *cobra.Command {
+	opts := &ServerStartOptions{}
+
+	cmd := &cobra.Command{
+		Use:   "start",
+		Short: "Starts a Janus web server",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			return RunServerStart(ctx, opts)
+		},
+	}
+
+	return cmd
+}
+
+// RunServerStart is the run command to start Janus
+func RunServerStart(ctx context.Context, opts *ServerStartOptions) error {
 	log.WithField("version", version).Info("Janus starting...")
 
 	initConfig()
@@ -46,7 +62,7 @@ func RunServer(cmd *cobra.Command, args []string) {
 
 	repo, err := api.BuildRepository(globalConfig.Database.DSN, globalConfig.Cluster.UpdateFrequency)
 	if err != nil {
-		log.WithError(err).Fatal("Could not build a repository for the database")
+		return errors.Wrap(err, "could not build a repository for the database")
 	}
 	defer repo.Close()
 
@@ -56,10 +72,11 @@ func RunServer(cmd *cobra.Command, args []string) {
 		server.WithProvider(repo),
 	)
 
-	ctx := ContextWithSignal(context.Background())
+	ctx = ContextWithSignal(ctx)
 	svr.StartWithContext(ctx)
 	defer svr.Close()
 
 	svr.Wait()
 	log.Info("Shutting down")
+	return nil
 }
