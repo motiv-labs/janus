@@ -1,4 +1,4 @@
-package janus
+package main
 
 import (
 	"context"
