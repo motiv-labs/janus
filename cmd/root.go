@@ -8,6 +8,7 @@ import (
 
 var configFile string
 
+// NewRootCmd creates a new instance of the root command
 func NewRootCmd() *cobra.Command {
 	ctx := context.Background()
 
