@@ -41,7 +41,7 @@ func TestNewFileSystemRepository(t *testing.T) {
 			Upstreams: &proxy.Upstreams{
 				Balancing: "roundrobin",
 				Targets: []*proxy.Target{
-					&proxy.Target{Target: "http://example.com/foo/bar/"},
+					{Target: "http://example.com/foo/bar/"},
 				},
 			},
 		},
