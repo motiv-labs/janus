@@ -6,7 +6,7 @@ WARN_COLOR=\033[33;01m
 # The import path is the unique absolute name of your repository.
 # All subpackages should always be imported as relative to it.
 # If you change this, run `make clean`.
-PKG_SRC := github.com/hellofresh/janus/cmd/janus
+PKG_SRC := github.com/hellofresh/janus
 
 .PHONY: all clean deps build
 
