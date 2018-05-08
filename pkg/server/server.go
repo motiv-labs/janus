@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"time"
 
+	"github.com/go-chi/chi"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/errors"
@@ -69,7 +70,7 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 		log.Info("Stopping server gracefully")
 	}()
 	go func() {
-		if err := s.startHTTPServers(); err != nil {
+		if err := s.startHTTPServers(ctx); err != nil {
 			log.WithError(err).Fatal("Could not start http servers")
 		}
 	}()
@@ -147,7 +148,7 @@ func (s *Server) Close() error {
 	return s.server.Close()
 }
 
-func (s *Server) startHTTPServers() error {
+func (s *Server) startHTTPServers(ctx context.Context) error {
 	r := s.createRouter()
 	s.register = proxy.NewRegister(r, proxy.Params{
 		StatsClient:            s.statsClient,
@@ -157,7 +158,7 @@ func (s *Server) startHTTPServers() error {
 	})
 	s.defLoader = loader.NewAPILoader(s.register)
 
-	return s.listenAndServe(r)
+	return s.listenAndServe(chi.ServerBaseContext(ctx, r))
 }
 
 func (s *Server) startProvider(ctx context.Context) error {

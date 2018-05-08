@@ -82,7 +82,7 @@ func newInMemoryRepo() *InMemoryRepository {
 				Upstreams: &proxy.Upstreams{
 					Balancing: "roundrobin",
 					Targets: []*proxy.Target{
-						&proxy.Target{Target: "http://test.com/token"},
+						{Target: "http://test.com/token"},
 					},
 				},
 			},
@@ -97,7 +97,7 @@ func newInMemoryRepo() *InMemoryRepository {
 				Upstreams: &proxy.Upstreams{
 					Balancing: "roundrobin",
 					Targets: []*proxy.Target{
-						&proxy.Target{Target: "http://test2.com/token"},
+						{Target: "http://test2.com/token"},
 					},
 				},
 			},

@@ -63,7 +63,7 @@ func testSuccessfulValidation(t *testing.T) {
 		Upstreams: &Upstreams{
 			Balancing: "roundrobin",
 			Targets: []*Target{
-				&Target{Target: "http://test.com"},
+				{Target: "http://test.com"},
 			},
 		},
 	}
@@ -87,7 +87,7 @@ func testInvalidTargetURLValidation(t *testing.T) {
 		Upstreams: &Upstreams{
 			Balancing: "roundrobin",
 			Targets: []*Target{
-				&Target{Target: "wrong"},
+				{Target: "wrong"},
 			},
 		},
 	}

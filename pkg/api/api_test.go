@@ -23,7 +23,7 @@ func TestSuccessfulValidation(t *testing.T) {
 	instance.Proxy.Upstreams = &proxy.Upstreams{
 		Balancing: "roundrobin",
 		Targets: []*proxy.Target{
-			&proxy.Target{Target: "http:/example.com"},
+			{Target: "http:/example.com"},
 		},
 	}
 

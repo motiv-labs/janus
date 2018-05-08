@@ -25,7 +25,7 @@ export PORT_SECONDARY="3100"
 export API_PORT_SECONDARY="3101"
 export BACKEND_UPDATE_FREQUENCY="0.5s"
 
-"./dist/janus" > /tmp/janus.log 2>&1 &
+"./dist/janus" start > /tmp/janus.log 2>&1 &
 exit_code=$?
 if [ ${exit_code} -ne 0 ]; then
     echo "${ERROR_COLOR}Failed to run primary janus instance${NO_COLOR}"
@@ -45,7 +45,7 @@ API_PORT_PRIMARY=${API_PORT}
 export PORT=${PORT_SECONDARY}
 export API_PORT=${API_PORT_SECONDARY}
 
-"./dist/janus" > /tmp/janus2.log 2>&1 &
+"./dist/janus" start > /tmp/janus2.log 2>&1 &
 exit_code=$?
 if [ ${exit_code} -ne 0 ]; then
     echo "${ERROR_COLOR}Failed to run secondary janus instance${NO_COLOR}"

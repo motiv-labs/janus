@@ -1,6 +1,7 @@
-package main
+package cmd
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -9,7 +10,7 @@ import (
 var version = "0.0.0-dev"
 
 // NewVersionCmd creates a new version command
-func NewVersionCmd() *cobra.Command {
+func NewVersionCmd(ctx context.Context) *cobra.Command {
 	return &cobra.Command{
 		Use:     "version",
 		Short:   "Print the version information",

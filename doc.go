@@ -5,4 +5,4 @@ users are interacting with your API and when things go wrong.
 
 For a full guide visit https://github.com/hellofresh/janus
 */
-package janus
+package main
