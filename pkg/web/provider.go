@@ -19,7 +19,6 @@ import (
 // Server represents the web server
 type Server struct {
 	Port              int
-	ReadOnly          bool
 	Credentials       config.Credentials
 	TLS               config.TLS
 	ConfigurationChan chan api.ConfigurationMessage

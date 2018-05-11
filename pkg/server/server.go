@@ -167,7 +167,6 @@ func (s *Server) startProvider(ctx context.Context) error {
 		web.WithPort(s.globalConfig.Web.Port),
 		web.WithTLS(s.globalConfig.Web.TLS),
 		web.WithCredentials(s.globalConfig.Web.Credentials),
-		web.ReadOnly(s.globalConfig.Web.ReadOnly),
 	)
 
 	if err := s.webServer.Start(); err != nil {

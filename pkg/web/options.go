@@ -29,13 +29,6 @@ func WithCredentials(cred config.Credentials) Option {
 	}
 }
 
-// ReadOnly sets the credentials for the server
-func ReadOnly(readOnly bool) Option {
-	return func(s *Server) {
-		s.ReadOnly = readOnly
-	}
-}
-
 // WithTLS sets the TLS configs for the server
 func WithTLS(tls config.TLS) Option {
 	return func(s *Server) {

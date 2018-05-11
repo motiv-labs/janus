@@ -13,7 +13,6 @@ import (
 // Specification for basic configurations
 type Specification struct {
 	Port                 int           `envconfig:"PORT"`
-	Debug                bool          `envconfig:"DEBUG"`
 	GraceTimeOut         int64         `envconfig:"GRACE_TIMEOUT"`
 	MaxIdleConnsPerHost  int           `envconfig:"MAX_IDLE_CONNS_PER_HOST"`
 	BackendFlushInterval time.Duration `envconfig:"BACKEND_FLUSH_INTERVAL"`
@@ -35,8 +34,7 @@ type Cluster struct {
 
 // Web represents the API configurations
 type Web struct {
-	Port        int  `envconfig:"API_PORT"`
-	ReadOnly    bool `envconfig:"API_READONLY"`
+	Port        int `envconfig:"API_PORT"`
 	Credentials Credentials
 	TLS         TLS
 }
@@ -140,6 +138,7 @@ func init() {
 	viper.SetDefault("web.tls.redisrect", true)
 	viper.SetDefault("web.credentials.algorithm", "HS256")
 	viper.SetDefault("web.credentials.basic.users", map[string]string{"admin": "admin"})
+	viper.SetDefault("web.credentials.github.teams", make(map[string]string))
 
 	viper.SetDefault("stats.dsn", "log://")
 	viper.SetDefault("stats.errorsSection", "error-log")
