@@ -79,11 +79,6 @@
   #   CertFile = "janus.crt"
   #   KeyFile = "janus.key"
 #
-# Set REST API to read-only mode
-#
-# Optional
-# ReadOnly = false
-#
 # Basic JWT configuration
 #
 # Required
