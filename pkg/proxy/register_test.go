@@ -137,7 +137,6 @@ func createRegisterAndRouter() router.Router {
 }
 
 func createRegister(r router.Router) *Register {
-	var routes []*Route
 	register := NewRegister(r, Params{})
 
 	definitions := createProxyDefinitions()

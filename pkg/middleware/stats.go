@@ -45,15 +45,15 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 			"request_url":   r.URL.Path,
 		}).Debug("Track request stats")
 
-		success := mt.Code < http.StatusInternalServerError
+		success := mt.Code < http.StatusBadRequest
 		if mt.Code == http.StatusNotFound {
 			log.WithField("path", originalURL.Path).Warn("Unknown endpoint requested")
 			originalURL.Path = notFoundPath
 		}
+		m.statsClient.TrackRequest(originalRequest, t, success)
 
 		m.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
-			TrackRequest(r, t, success).
+			TrackRequest(r, t, mt.Code < http.StatusInternalServerError).
 			ResetHTTPRequestSection()
-		m.statsClient.TrackRequest(originalRequest, t, success)
 	})
 }

@@ -30,14 +30,6 @@ func TestDefinition(t *testing.T) {
 			function: testInvalidTargetURLValidation,
 		},
 		{
-			scenario: "route to json",
-			function: testRouteToJSON,
-		},
-		{
-			scenario: "json to route",
-			function: testJSONToRoute,
-		},
-		{
 			scenario: "is balancer defined",
 			function: testIsBalancerDefined,
 		},
@@ -95,63 +87,6 @@ func testInvalidTargetURLValidation(t *testing.T) {
 
 	assert.Error(t, err)
 	assert.False(t, isValid)
-}
-
-func testRouteToJSON(t *testing.T) {
-	expectedJSON := `
-	{
-		"proxy":{
-			"insecure_skip_verify":false,
-			"append_path":false,
-			"enable_load_balancing":false,
-			"methods":[
-				"GET"
-			],
-			"hosts":[
-
-			],
-			"preserve_host":false,
-			"listen_path":"",
-			"strip_path":false,
-			"upstreams":{
-				"balancing":"",
-				"targets":[
-
-				]
-			}
-		}
-	}
-	`
-	definition := NewDefinition()
-	route := NewRoute(definition)
-	json, err := route.JSONMarshal()
-
-	assert.NoError(t, err)
-	assert.JSONEq(t, expectedJSON, string(json))
-}
-
-func testJSONToRoute(t *testing.T) {
-	route, err := JSONUnmarshalRoute([]byte(`
-	{
-		"proxy":{
-			"insecure_skip_verify":false,
-			"append_path":false,
-			"enable_load_balancing":false,
-			"methods":[],
-			"hosts":[],
-			"preserve_host":false,
-			"listen_path":"",
-			"strip_path":false
-		}
-	}`))
-
-	assert.NoError(t, err)
-	assert.IsType(t, &Route{}, route)
-}
-
-func testJSONToRouteError(t *testing.T) {
-	_, err := JSONUnmarshalRoute([]byte{})
-	assert.Error(t, err)
 }
 
 func testIsBalancerDefined(t *testing.T) {
