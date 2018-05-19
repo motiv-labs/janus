@@ -11,7 +11,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const notFoundPath = "/-not-found-"
+const (
+	notFoundPath          = "/-not-found-"
+	statsSectionRoundTrip = "round"
+)
 
 // Stats represents the stats middleware
 type Stats struct {
@@ -42,11 +45,15 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 			"request_url":   r.URL.Path,
 		}).Debug("Track request stats")
 
-		success := mt.Code < http.StatusBadRequest
+		success := mt.Code < http.StatusInternalServerError
 		if mt.Code == http.StatusNotFound {
 			log.WithField("path", originalURL.Path).Warn("Unknown endpoint requested")
 			originalURL.Path = notFoundPath
 		}
+
+		m.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
+			TrackRequest(r, t, success).
+			ResetHTTPRequestSection()
 		m.statsClient.TrackRequest(originalRequest, t, success)
 	})
 }
