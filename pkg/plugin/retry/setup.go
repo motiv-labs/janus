@@ -6,7 +6,6 @@ import (
 
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
-	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/pkg/errors"
 )
 
@@ -53,13 +52,13 @@ func init() {
 	})
 }
 
-func setupRetry(def *api.Definition, route *proxy.Route, rawConfig plugin.Config) error {
+func setupRetry(def *api.Definition, rawConfig plugin.Config) error {
 	var config Config
 	err := plugin.Decode(rawConfig, &config)
 	if err != nil {
 		return err
 	}
 
-	route.AddInbound(NewRetryMiddleware(config))
+	def.Proxy.AddMiddleware(NewRetryMiddleware(config))
 	return nil
 }

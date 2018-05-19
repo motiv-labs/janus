@@ -8,7 +8,6 @@ import (
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/plugin"
-	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -112,7 +111,7 @@ func onStartup(event interface{}) error {
 	return nil
 }
 
-func setupOAuth2(def *api.Definition, route *proxy.Route, rawConfig plugin.Config) error {
+func setupOAuth2(def *api.Definition, rawConfig plugin.Config) error {
 	var config Config
 	err := plugin.Decode(rawConfig, &config)
 	if err != nil {
@@ -135,8 +134,8 @@ func setupOAuth2(def *api.Definition, route *proxy.Route, rawConfig plugin.Confi
 		return err
 	}
 
-	route.AddInbound(NewKeyExistsMiddleware(manager))
-	route.AddInbound(NewRevokeRulesMiddleware(jwt.NewParser(jwt.NewParserConfig(oauthServer.TokenStrategy.Leeway, signingMethods...)), oauthServer.AccessRules))
+	def.Proxy.AddMiddleware(NewKeyExistsMiddleware(manager))
+	def.Proxy.AddMiddleware(NewRevokeRulesMiddleware(jwt.NewParser(jwt.NewParserConfig(oauthServer.TokenStrategy.Leeway, signingMethods...)), oauthServer.AccessRules))
 
 	return nil
 }

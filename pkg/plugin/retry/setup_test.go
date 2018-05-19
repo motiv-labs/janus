@@ -5,15 +5,13 @@ import (
 
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
-	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestSetup(t *testing.T) {
 	def := api.NewDefinition()
-	route := proxy.NewRoute(def.Proxy)
-	err := setupRetry(def, route, make(plugin.Config))
+	err := setupRetry(def, make(plugin.Config))
 	assert.NoError(t, err)
 
-	assert.Len(t, route.Inbound, 1)
+	assert.Len(t, def.Proxy.Middleware(), 1)
 }

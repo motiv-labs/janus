@@ -14,7 +14,6 @@ import (
 
 func TestSetup(t *testing.T) {
 	def := api.NewDefinition()
-	route := proxy.NewRoute(def.Proxy)
 
 	event1 := plugin.OnAdminAPIStartup{Router: router.NewChiRouter()}
 	err := onAdminAPIStartup(event1)
@@ -24,7 +23,7 @@ func TestSetup(t *testing.T) {
 	err = onStartup(event2)
 	require.NoError(t, err)
 
-	err = setupBasicAuth(def, route, make(plugin.Config))
+	err = setupBasicAuth(def, make(plugin.Config))
 	require.NoError(t, err)
 }
 

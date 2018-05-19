@@ -81,9 +81,8 @@ func testAdminStartupSuccess(t *testing.T) {
 
 func testSetupSuccess(t *testing.T) {
 	def := api.NewDefinition()
-	route := proxy.NewRoute(def.Proxy)
 
-	err := setupCB(def, route, make(plugin.Config))
+	err := setupCB(def, make(plugin.Config))
 	require.NoError(t, err)
 }
 

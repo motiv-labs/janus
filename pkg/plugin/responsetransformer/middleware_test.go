@@ -1,13 +1,12 @@
 package responsetransformer
 
 import (
-	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
+	"github.com/hellofresh/janus/pkg/test"
 	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 )
 
 func TestAddHeader(t *testing.T) {
@@ -19,16 +18,13 @@ func TestAddHeader(t *testing.T) {
 		},
 	}
 
-	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{"fake twitter json string"}`)
-	}))
+	req, err := http.NewRequest(http.MethodGet, "/", nil)
+	assert.NoError(t, err)
 
-	resp, err := http.Get(s.URL)
-	require.NoError(t, err)
-	NewResponseTransformer(config)(resp.Request, resp)
+	w := httptest.NewRecorder()
+	NewResponseTransformer(config)(http.HandlerFunc(test.Ping)).ServeHTTP(w, req)
 
-	assert.Equal(t, "Test", resp.Header.Get("Test"))
+	assert.Equal(t, "Test", w.Header().Get("Test"))
 }
 
 func TestReplaceHeader(t *testing.T) {
@@ -40,16 +36,13 @@ func TestReplaceHeader(t *testing.T) {
 		},
 	}
 
-	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{"fake twitter json string"}`)
-	}))
+	req, err := http.NewRequest(http.MethodGet, "/", nil)
+	assert.NoError(t, err)
 
-	resp, err := http.Get(s.URL)
-	require.NoError(t, err)
-	NewResponseTransformer(config)(resp.Request, resp)
+	w := httptest.NewRecorder()
+	NewResponseTransformer(config)(http.HandlerFunc(test.Ping)).ServeHTTP(w, req)
 
-	assert.Equal(t, "test", resp.Header.Get("Content-Type"))
+	assert.Equal(t, "test", w.Header().Get("Content-Type"))
 }
 
 func TestRemoveHeader(t *testing.T) {
@@ -61,16 +54,13 @@ func TestRemoveHeader(t *testing.T) {
 		},
 	}
 
-	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{"fake twitter json string"}`)
-	}))
+	req, err := http.NewRequest(http.MethodGet, "/", nil)
+	assert.NoError(t, err)
 
-	resp, err := http.Get(s.URL)
-	require.NoError(t, err)
-	NewResponseTransformer(config)(resp.Request, resp)
+	w := httptest.NewRecorder()
+	NewResponseTransformer(config)(http.HandlerFunc(test.Ping)).ServeHTTP(w, req)
 
-	assert.Equal(t, "", resp.Header.Get("Content-Type"))
+	assert.Equal(t, "", w.Header().Get("Content-Type"))
 }
 
 func TestAppendHeader(t *testing.T) {
@@ -82,14 +72,11 @@ func TestAppendHeader(t *testing.T) {
 		},
 	}
 
-	s := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintln(w, `{"fake twitter json string"}`)
-	}))
+	req, err := http.NewRequest(http.MethodGet, "/", nil)
+	assert.NoError(t, err)
 
-	resp, err := http.Get(s.URL)
-	require.NoError(t, err)
-	NewResponseTransformer(config)(resp.Request, resp)
+	w := httptest.NewRecorder()
+	NewResponseTransformer(config)(http.HandlerFunc(test.Ping)).ServeHTTP(w, req)
 
-	assert.Equal(t, "test", resp.Header.Get("Test"))
+	assert.Equal(t, "test", w.Header().Get("Test"))
 }
