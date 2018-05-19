@@ -151,7 +151,6 @@ func (s *Server) Close() error {
 func (s *Server) startHTTPServers(ctx context.Context) error {
 	r := s.createRouter()
 	s.register = proxy.NewRegister(r, proxy.Params{
-		StatsClient:            s.statsClient,
 		FlushInterval:          s.globalConfig.BackendFlushInterval,
 		IdleConnectionsPerHost: s.globalConfig.MaxIdleConnsPerHost,
 		CloseIdleConnsPeriod:   s.globalConfig.CloseIdleConnsPeriod,
