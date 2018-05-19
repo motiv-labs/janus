@@ -33,22 +33,8 @@ func (p *Register) UpdateRouter(router router.Router) {
 	p.Router = router
 }
 
-// AddMany registers many proxies at once
-func (p *Register) AddMany(routes []*Route) error {
-	for _, r := range routes {
-		err := p.Add(r)
-		if nil != err {
-			return err
-		}
-	}
-
-	return nil
-}
-
 // Add register a new route
-func (p *Register) Add(route *Route) error {
-	definition := route.Proxy
-
+func (p *Register) Add(definition *Definition) error {
 	log.WithField("balancing_alg", definition.Upstreams.Balancing).Debug("Using a load balancing algorithm")
 	balancer, err := NewBalancer(definition.Upstreams.Balancing)
 	if err != nil {
@@ -57,7 +43,6 @@ func (p *Register) Add(route *Route) error {
 		return errors.Wrap(err, msg)
 	}
 
-	p.params.Outbound = route.Outbound
 	p.params.InsecureSkipVerify = definition.InsecureSkipVerify
 	handler := &httputil.ReverseProxy{
 		Director:  p.createDirector(definition, balancer),
@@ -66,10 +51,10 @@ func (p *Register) Add(route *Route) error {
 
 	matcher := router.NewListenPathMatcher()
 	if matcher.Match(definition.ListenPath) {
-		p.doRegister(matcher.Extract(definition.ListenPath), handler.ServeHTTP, definition.Methods, route.Inbound)
+		p.doRegister(matcher.Extract(definition.ListenPath), handler.ServeHTTP, definition.Methods, definition.middleware)
 	}
 
-	p.doRegister(definition.ListenPath, handler.ServeHTTP, definition.Methods, route.Inbound)
+	p.doRegister(definition.ListenPath, handler.ServeHTTP, definition.Methods, definition.middleware)
 	return nil
 }
 
@@ -138,7 +123,7 @@ func (p *Register) createDirector(proxyDefinition *Definition, balancer Balancer
 	}
 }
 
-func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, methods []string, handlers InChain) {
+func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, methods []string, handlers []router.Constructor) {
 	log.WithFields(log.Fields{
 		"listen_path": listenPath,
 	}).Debug("Registering a route")

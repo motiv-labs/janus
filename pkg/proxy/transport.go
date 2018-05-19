@@ -4,16 +4,10 @@ import (
 	"crypto/tls"
 	"net"
 	"net/http"
-	"net/http/httputil"
 	"time"
-
-	"github.com/hellofresh/janus/pkg/router"
-	"github.com/hellofresh/stats-go/client"
 )
 
 const (
-	statsSectionRoundTrip = "round"
-
 	// DefaultIdleConnsPerHost the default value set for http.Transport.MaxIdleConnsPerHost.
 	DefaultIdleConnsPerHost = 64
 
@@ -24,9 +18,6 @@ const (
 
 // Params initialization options.
 type Params struct {
-	// StatsClient defines the stats client for tracing
-	StatsClient client.Client
-
 	// When set, the proxy will skip the TLS verification on outgoing requests.
 	InsecureSkipVerify bool
 
@@ -44,32 +35,10 @@ type Params struct {
 
 	// The Flush interval for copying upgraded connections
 	FlushInterval time.Duration
-
-	Outbound OutChain
-}
-
-// OutLink interface for outbound request plugins
-type OutLink func(req *http.Request, res *http.Response) (*http.Response, error)
-
-// OutChain typed array for outbound plugin sequence
-type OutChain []OutLink
-
-// InChain typed array for inbound plugin sequence, normally this is a middleware chain
-type InChain []router.Constructor
-
-// Transport construct holding plugin sequences
-type Transport struct {
-	statsClient client.Client
-	outbound    OutChain
-}
-
-// NewTransport creates a new instance of Transport
-func NewTransport(statsClient client.Client, outbound OutChain) *Transport {
-	return &Transport{statsClient, outbound}
 }
 
 // NewTransportWithParams creates a new instance of Transport with the given params
-func NewTransportWithParams(o Params) *Transport {
+func NewTransportWithParams(o Params) *http.Transport {
 	if o.IdleConnectionsPerHost <= 0 {
 		o.IdleConnectionsPerHost = DefaultIdleConnsPerHost
 	}
@@ -78,18 +47,20 @@ func NewTransportWithParams(o Params) *Transport {
 		o.CloseIdleConnsPeriod = DefaultCloseIdleConnsPeriod
 	}
 
-	tr := http.DefaultTransport.(*http.Transport)
-	tr.Proxy = http.ProxyFromEnvironment
-	tr.DialContext = (&net.Dialer{
-		Timeout:   30 * time.Second,
-		KeepAlive: 30 * time.Second,
-	}).DialContext
-	tr.MaxIdleConns = 100
-	tr.IdleConnTimeout = 90 * time.Second
-	tr.TLSHandshakeTimeout = 10 * time.Second
-	tr.ExpectContinueTimeout = 1 * time.Second
-	tr.MaxIdleConnsPerHost = o.IdleConnectionsPerHost
-	tr.TLSClientConfig = &tls.Config{InsecureSkipVerify: o.InsecureSkipVerify}
+	tr := http.Transport{
+		Proxy: http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   30 * time.Second,
+			KeepAlive: 30 * time.Second,
+			DualStack: true,
+		}).DialContext,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       90 * time.Second,
+		TLSHandshakeTimeout:   10 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
+		MaxIdleConnsPerHost:   o.IdleConnectionsPerHost,
+		TLSClientConfig:       &tls.Config{InsecureSkipVerify: o.InsecureSkipVerify},
+	}
 
 	if o.CloseIdleConnsPeriod > 0 {
 		go func() {
@@ -99,69 +70,5 @@ func NewTransportWithParams(o Params) *Transport {
 		}()
 	}
 
-	return NewTransport(o.StatsClient, o.Outbound)
-}
-
-// NewInChain variadic constructor for inbound plugin sequence
-func NewInChain(in ...router.Constructor) InChain {
-	return append(([]router.Constructor)(nil), in...)
-}
-
-// NewOutChain variadic constructor for outbound plugin sequence
-func NewOutChain(out ...OutLink) OutChain {
-	return append(([]OutLink)(nil), out...)
-}
-
-// RoundTrip provides the Transport.RoundTrip function to handle requests the proxy receives
-func (s *Transport) RoundTrip(req *http.Request) (resp *http.Response, err error) {
-	timing := s.statsClient.BuildTimer().Start()
-
-	// use default RoundTrip function handle the actual request/response
-	resp, err = http.DefaultTransport.RoundTrip(req)
-	if err != nil {
-		s.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
-			TrackRequest(req, timing, false).
-			ResetHTTPRequestSection()
-		return nil, err
-	}
-
-	// block until the entire body has been read
-	_, err = httputil.DumpResponse(resp, true)
-	if err != nil {
-		s.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
-			TrackRequest(req, timing, false).
-			ResetHTTPRequestSection()
-		return nil, err
-	}
-
-	// apply outbound response plugins (if any)
-	resp, err = s.applyOutboundLinks(req, resp)
-	if err != nil {
-		s.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
-			TrackRequest(req, timing, false).
-			ResetHTTPRequestSection()
-		return nil, err
-	}
-
-	statusCodeSuccess := resp.StatusCode < http.StatusInternalServerError
-	s.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
-		TrackRequest(req, timing, statusCodeSuccess).
-		ResetHTTPRequestSection()
-
-	// pass response back to client
-	return resp, nil
-}
-
-// applies any outbound response plugins to the given response
-func (s *Transport) applyOutboundLinks(req *http.Request, resp *http.Response) (mod *http.Response, err error) {
-	mod = resp
-
-	for o := range s.outbound {
-		mod, err = s.outbound[o](req, mod)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	return mod, nil
+	return &tr
 }

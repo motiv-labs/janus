@@ -1,7 +1,6 @@
 package proxy
 
 import (
-	"encoding/json"
 	"strings"
 
 	"github.com/asaskevich/govalidator"
@@ -19,6 +18,7 @@ type Definition struct {
 	EnableLoadBalancing bool       `bson:"enable_load_balancing" json:"enable_load_balancing" mapstructure:"enable_load_balancing"`
 	Methods             []string   `bson:"methods" json:"methods"`
 	Hosts               []string   `bson:"hosts" json:"hosts"`
+	middleware          []router.Constructor
 }
 
 // Upstreams represents a collection of targets where the requests will go to
@@ -44,6 +44,16 @@ func NewDefinition() *Definition {
 	}
 }
 
+// Middleware returns s.middleware (useful for tests).
+func (d *Definition) Middleware() []router.Constructor {
+	return d.middleware
+}
+
+// AddMiddleware adds a middleware to a site's middleware stack.
+func (d *Definition) AddMiddleware(m router.Constructor) {
+	d.middleware = append(d.middleware, m)
+}
+
 // Validate validates proxy data
 func (d *Definition) Validate() (bool, error) {
 	return govalidator.ValidateStruct(d)
@@ -52,55 +62,6 @@ func (d *Definition) Validate() (bool, error) {
 // IsBalancerDefined checks if load balancer is defined
 func (d *Definition) IsBalancerDefined() bool {
 	return d.Upstreams != nil && d.Upstreams.Targets != nil && len(d.Upstreams.Targets) > 0
-}
-
-// Route is the container for a proxy and it's handlers
-type Route struct {
-	Proxy    *Definition
-	Inbound  InChain
-	Outbound OutChain
-}
-
-type routeJSONProxy struct {
-	Proxy *Definition `json:"proxy"`
-}
-
-// NewRoute creates an instance of Route
-func NewRoute(proxy *Definition) *Route {
-	return &Route{Proxy: proxy}
-}
-
-// NewRouteWithInOut creates an instance of Route with inbound and outbound handlers
-func NewRouteWithInOut(proxy *Definition, inbound InChain, outbound OutChain) *Route {
-	return &Route{proxy, inbound, outbound}
-}
-
-// AddInbound adds inbound middlewares
-func (r *Route) AddInbound(in ...router.Constructor) {
-	for _, i := range in {
-		r.Inbound = append(r.Inbound, i)
-	}
-}
-
-// AddOutbound adds outbound middlewares
-func (r *Route) AddOutbound(out ...OutLink) {
-	for _, o := range out {
-		r.Outbound = append(r.Outbound, o)
-	}
-}
-
-// JSONMarshal encodes route struct to JSON
-func (r *Route) JSONMarshal() ([]byte, error) {
-	return json.Marshal(routeJSONProxy{r.Proxy})
-}
-
-// JSONUnmarshalRoute decodes route struct from JSON
-func JSONUnmarshalRoute(rawRoute []byte) (*Route, error) {
-	var proxyRoute routeJSONProxy
-	if err := json.Unmarshal(rawRoute, &proxyRoute); err != nil {
-		return nil, err
-	}
-	return NewRoute(proxyRoute.Proxy), nil
 }
 
 func init() {
