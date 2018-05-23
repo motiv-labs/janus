@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/hellofresh/janus/pkg/proxy/balancer"
-
+	"github.com/hellofresh/janus/pkg/proxy/transport"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -52,36 +52,37 @@ func (p *Register) Add(definition *Definition) error {
 	}
 
 	handler := NewBalancedReverseProxy(definition, balancer)
-	handler.Transport = NewTransportWithParams(Params{
-		InsecureSkipVerify:     definition.InsecureSkipVerify,
-		FlushInterval:          p.flushInterval,
-		CloseIdleConnsPeriod:   p.closeIdleConnsPeriod,
-		IdleConnectionsPerHost: p.idleConnectionsPerHost,
-	})
+	handler.FlushInterval = p.flushInterval
+	handler.Transport = transport.New(
+		transport.WithCloseIdleConnsPeriod(p.closeIdleConnsPeriod),
+		transport.WithInsecureSkipVerify(definition.InsecureSkipVerify),
+		transport.WithDialTimeout(definition.ForwardingTimeouts.DialTimeout),
+		transport.WithResponseHeaderTimeout(definition.ForwardingTimeouts.ResponseHeaderTimeout),
+	)
 
 	matcher := router.NewListenPathMatcher()
 	if matcher.Match(definition.ListenPath) {
-		p.doRegister(matcher.Extract(definition.ListenPath), handler.ServeHTTP, definition.Methods, definition.middleware)
+		definition.ListenPath = matcher.Extract(definition.ListenPath)
 	}
 
-	p.doRegister(definition.ListenPath, handler.ServeHTTP, definition.Methods, definition.middleware)
+	p.doRegister(definition, handler.ServeHTTP)
 	return nil
 }
 
-func (p *Register) doRegister(listenPath string, handler http.HandlerFunc, methods []string, handlers []router.Constructor) {
+func (p *Register) doRegister(def *Definition, handler http.HandlerFunc) {
 	log.WithFields(log.Fields{
-		"listen_path": listenPath,
+		"listen_path": def.ListenPath,
 	}).Debug("Registering a route")
 
-	if strings.Index(listenPath, "/") != 0 {
-		log.WithField("listen_path", listenPath).
+	if strings.Index(def.ListenPath, "/") != 0 {
+		log.WithField("listen_path", def.ListenPath).
 			Error("Route listen path must begin with '/'. Skipping invalid route.")
 	} else {
-		for _, method := range methods {
+		for _, method := range def.Methods {
 			if strings.ToUpper(method) == methodAll {
-				p.router.Any(listenPath, handler, handlers...)
+				p.router.Any(def.ListenPath, handler, def.middleware...)
 			} else {
-				p.router.Handle(strings.ToUpper(method), listenPath, handler, handlers...)
+				p.router.Handle(strings.ToUpper(method), def.ListenPath, handler, def.middleware...)
 			}
 		}
 	}

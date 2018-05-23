@@ -2,6 +2,7 @@ package proxy
 
 import (
 	"strings"
+	"time"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/proxy/balancer"
@@ -10,16 +11,16 @@ import (
 
 // Definition defines proxy rules for a route
 type Definition struct {
-	PreserveHost        bool       `bson:"preserve_host" json:"preserve_host" mapstructure:"preserve_host"`
-	ListenPath          string     `bson:"listen_path" json:"listen_path" mapstructure:"listen_path" valid:"required~proxy.listen_path is required,urlpath"`
-	Upstreams           *Upstreams `bson:"upstreams" json:"upstreams" mapstructure:"upstreams"`
-	InsecureSkipVerify  bool       `bson:"insecure_skip_verify" json:"insecure_skip_verify" mapstructure:"insecure_skip_verify"`
-	StripPath           bool       `bson:"strip_path" json:"strip_path" mapstructure:"strip_path"`
-	AppendPath          bool       `bson:"append_path" json:"append_path" mapstructure:"append_path"`
-	EnableLoadBalancing bool       `bson:"enable_load_balancing" json:"enable_load_balancing" mapstructure:"enable_load_balancing"`
-	Methods             []string   `bson:"methods" json:"methods"`
-	Hosts               []string   `bson:"hosts" json:"hosts"`
-	middleware          []router.Constructor
+	PreserveHost       bool       `bson:"preserve_host" json:"preserve_host" mapstructure:"preserve_host"`
+	ListenPath         string     `bson:"listen_path" json:"listen_path" mapstructure:"listen_path" valid:"required~proxy.listen_path is required,urlpath"`
+	Upstreams          *Upstreams `bson:"upstreams" json:"upstreams" mapstructure:"upstreams"`
+	InsecureSkipVerify bool       `bson:"insecure_skip_verify" json:"insecure_skip_verify" mapstructure:"insecure_skip_verify"`
+	StripPath          bool       `bson:"strip_path" json:"strip_path" mapstructure:"strip_path"`
+	AppendPath         bool       `bson:"append_path" json:"append_path" mapstructure:"append_path"`
+	Methods            []string   `bson:"methods" json:"methods"`
+	Hosts              []string   `bson:"hosts" json:"hosts"`
+	middleware         []router.Constructor
+	ForwardingTimeouts ForwardingTimeouts `bson:"forwarding_timeouts" json:"forwarding_timeouts" mapstructure:"forwarding_timeouts"`
 }
 
 // Upstreams represents a collection of targets where the requests will go to
@@ -34,7 +35,14 @@ type Target struct {
 	Weight int    `bson:"weight" json:"weight"`
 }
 
+// Targets is a set of target
 type Targets []*Target
+
+// ForwardingTimeouts contains timeout configurations for forwarding requests to the backend servers.
+type ForwardingTimeouts struct {
+	DialTimeout           time.Duration `bson:"dial_timeout" json:"dial_timeout"`
+	ResponseHeaderTimeout time.Duration `bson:"response_header_timeout" json:"response_header_timeout"`
+}
 
 // NewDefinition creates a new Proxy Definition with default values
 func NewDefinition() *Definition {
