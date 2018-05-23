@@ -22,7 +22,6 @@ Feature: Run health-check against registered proxies.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -59,7 +58,6 @@ Feature: Run health-check against registered proxies.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -97,7 +95,6 @@ Feature: Run health-check against registered proxies.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -135,7 +132,6 @@ Feature: Run health-check against registered proxies.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -174,7 +170,6 @@ Feature: Run health-check against registered proxies.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -215,7 +210,6 @@ Feature: Run health-check against registered proxies.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -254,7 +248,6 @@ Feature: Run health-check against registered proxies.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]

@@ -66,7 +66,6 @@ Feature: Manage proxies wit API.
                 },
                 "strip_path":false,
                 "append_path":false,
-                "enable_load_balancing":false,
                 "methods":[
                   "GET"
                 ]
@@ -104,7 +103,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":true,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "ALL"
                     ],
@@ -233,7 +231,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -265,7 +262,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -297,7 +293,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -334,7 +329,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -374,7 +368,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -411,7 +404,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -452,7 +444,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -484,7 +475,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":true,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                       "ALL"
                     ],
