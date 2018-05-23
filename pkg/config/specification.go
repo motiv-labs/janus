@@ -25,11 +25,19 @@ type Specification struct {
 	Tracing              Tracing
 	TLS                  TLS
 	Cluster              Cluster
+	RespondingTimeouts   RespondingTimeouts
 }
 
 // Cluster represents the cluster configuration
 type Cluster struct {
 	UpdateFrequency time.Duration `envconfig:"BACKEND_UPDATE_FREQUENCY"`
+}
+
+// RespondingTimeouts contains timeout configurations for incoming requests to the Traefik instance.
+type RespondingTimeouts struct {
+	ReadTimeout  time.Duration `envconfig:"RESPONDING_TIMEOUTS_READ_TIMEOUT"`
+	WriteTimeout time.Duration `envconfig:"RESPONDING_TIMEOUTS_WRITE_TIMEOUT"`
+	IdleTimeout  time.Duration `envconfig:"RESPONDING_TIMEOUTS_IDLE_TIMEOUT"`
 }
 
 // Web represents the API configurations
@@ -129,6 +137,8 @@ func init() {
 	viper.SetDefault("tls.redirect", true)
 	viper.SetDefault("backendFlushInterval", "20ms")
 	viper.SetDefault("requestID", true)
+
+	viper.SetDefault("respondingTimeouts.IdleTimeout", 180*time.Second)
 
 	viper.SetDefault("cluster.updateFrequency", "10s")
 	viper.SetDefault("database.dsn", "file:///etc/janus")

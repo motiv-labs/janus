@@ -226,7 +226,13 @@ func (s *Server) listenProviders(stop chan struct{}) {
 func (s *Server) listenAndServe(handler http.Handler) error {
 	address := fmt.Sprintf(":%v", s.globalConfig.Port)
 	logger := log.WithField("address", address)
-	s.server = &http.Server{Addr: address, Handler: handler}
+	s.server = &http.Server{
+		Addr:         address,
+		Handler:      handler,
+		ReadTimeout:  s.globalConfig.RespondingTimeouts.ReadTimeout,
+		WriteTimeout: s.globalConfig.RespondingTimeouts.WriteTimeout,
+		IdleTimeout:  s.globalConfig.RespondingTimeouts.IdleTimeout,
+	}
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return errors.Wrap(err, "error opening listener")
