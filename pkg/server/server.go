@@ -150,11 +150,12 @@ func (s *Server) Close() error {
 
 func (s *Server) startHTTPServers(ctx context.Context) error {
 	r := s.createRouter()
-	s.register = proxy.NewRegister(r, proxy.Params{
-		FlushInterval:          s.globalConfig.BackendFlushInterval,
-		IdleConnectionsPerHost: s.globalConfig.MaxIdleConnsPerHost,
-		CloseIdleConnsPeriod:   s.globalConfig.CloseIdleConnsPeriod,
-	})
+	s.register = proxy.NewRegister(
+		proxy.WithRouter(r),
+		proxy.WithFlushInterval(s.globalConfig.BackendFlushInterval),
+		proxy.WithIdleConnectionsPerHost(s.globalConfig.MaxIdleConnsPerHost),
+		proxy.WithCloseIdleConnsPeriod(s.globalConfig.CloseIdleConnsPeriod),
+	)
 	s.defLoader = loader.NewAPILoader(s.register)
 
 	return s.listenAndServe(chi.ServerBaseContext(ctx, r))

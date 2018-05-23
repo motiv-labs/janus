@@ -8,6 +8,7 @@ import (
 	"net/url"
 
 	"github.com/hellofresh/janus/pkg/proxy"
+	"github.com/hellofresh/janus/pkg/proxy/balancer"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -19,14 +20,14 @@ type oAuthResponse struct {
 // IntrospectionManager is responsible for using OAuth2 Introspection definition to
 // validate tokens from an authentication provider
 type IntrospectionManager struct {
-	balancer proxy.Balancer
-	urls     []*proxy.Target
+	balancer balancer.Balancer
+	urls     proxy.Targets
 	settings *IntrospectionSettings
 }
 
 // NewIntrospectionManager creates a new instance of Introspection
 func NewIntrospectionManager(def *proxy.Definition, settings *IntrospectionSettings) (*IntrospectionManager, error) {
-	balancer, err := proxy.NewBalancer(def.Upstreams.Balancing)
+	balancer, err := balancer.New(def.Upstreams.Balancing)
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not create a balancer")
 	}
@@ -60,7 +61,7 @@ func (o *IntrospectionManager) IsKeyAuthorized(ctx context.Context, accessToken 
 }
 
 func (o *IntrospectionManager) doStatusRequest(accessToken string) (*http.Response, error) {
-	upstream, err := o.balancer.Elect(o.urls)
+	upstream, err := o.balancer.Elect(o.urls.ToBalancerTargets())
 	if err != nil {
 		return nil, errors.Wrap(err, "Could not elect one upstream")
 	}
