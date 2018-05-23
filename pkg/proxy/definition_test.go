@@ -54,7 +54,7 @@ func testSuccessfulValidation(t *testing.T) {
 		ListenPath: "/*",
 		Upstreams: &Upstreams{
 			Balancing: "roundrobin",
-			Targets: []*Target{
+			Targets: Targets{
 				{Target: "http://test.com"},
 			},
 		},
@@ -78,7 +78,7 @@ func testInvalidTargetURLValidation(t *testing.T) {
 		ListenPath: " ",
 		Upstreams: &Upstreams{
 			Balancing: "roundrobin",
-			Targets: []*Target{
+			Targets: Targets{
 				{Target: "wrong"},
 			},
 		},

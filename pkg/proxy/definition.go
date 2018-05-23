@@ -4,6 +4,7 @@ import (
 	"strings"
 
 	"github.com/asaskevich/govalidator"
+	"github.com/hellofresh/janus/pkg/proxy/balancer"
 	"github.com/hellofresh/janus/pkg/router"
 )
 
@@ -23,8 +24,8 @@ type Definition struct {
 
 // Upstreams represents a collection of targets where the requests will go to
 type Upstreams struct {
-	Balancing string    `bson:"balancing" json:"balancing"`
-	Targets   []*Target `bson:"targets" json:"targets"`
+	Balancing string  `bson:"balancing" json:"balancing"`
+	Targets   Targets `bson:"targets" json:"targets"`
 }
 
 // Target is an ip address/hostname with a port that identifies an instance of a backend service
@@ -32,6 +33,8 @@ type Target struct {
 	Target string `bson:"target" json:"target" valid:"url,required"`
 	Weight int    `bson:"weight" json:"weight"`
 }
+
+type Targets []*Target
 
 // NewDefinition creates a new Proxy Definition with default values
 func NewDefinition() *Definition {
@@ -64,6 +67,18 @@ func (d *Definition) IsBalancerDefined() bool {
 	return d.Upstreams != nil && d.Upstreams.Targets != nil && len(d.Upstreams.Targets) > 0
 }
 
+// ToBalancerTargets returns the balancer expected type
+func (t Targets) ToBalancerTargets() []*balancer.Target {
+	var balancerTargets []*balancer.Target
+	for _, t := range t {
+		balancerTargets = append(balancerTargets, &balancer.Target{
+			Target: t.Target,
+			Weight: t.Weight,
+		})
+	}
+
+	return balancerTargets
+}
 func init() {
 	// initializes custom validators
 	govalidator.CustomTypeTagMap.Set("urlpath", func(i interface{}, o interface{}) bool {
