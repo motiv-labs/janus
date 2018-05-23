@@ -1,3 +1,5 @@
+// Package balancer provides a simple interface to create concrete balancer algorightms that can be used to choose
+// an upstream
 package balancer
 
 import (
@@ -30,6 +32,7 @@ type (
 
 func init() {
 	typeRegistry["roundrobin"] = reflect.TypeOf(RoundrobinBalancer{})
+	typeRegistry["rr"] = reflect.TypeOf(RoundrobinBalancer{})
 	typeRegistry["weight"] = reflect.TypeOf(WeightBalancer{})
 }
 
