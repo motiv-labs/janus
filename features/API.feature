@@ -16,7 +16,7 @@ Feature: Manage proxies wit API.
 
     Scenario: API should be created with defaults
         Given request JWT token is valid admin token
-        When I request JSON payload:
+        And request JSON payload:
             """
             {
               "name":"example",
