@@ -48,6 +48,28 @@
 # Default: true
 # RequestID = true
 
+#[respondingTimeouts]
+# readTimeout is the maximum duration for reading the entire request, including the body.
+#
+# Optional
+# Default: "0s"
+#
+# readTimeout = "5s"
+
+# writeTimeout is the maximum duration before timing out writes of the response.
+#
+# Optional
+# Default: "0s"
+#
+# writeTimeout = "5s"
+
+# idleTimeout is the maximum duration an idle (keep-alive) connection will remain idle before closing itself.
+#
+# Optional
+# Default: "180s"
+#
+# idleTimeout = "360s"
+
 ################################################################
 # Clustering
 ################################################################
