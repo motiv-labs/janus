@@ -15,7 +15,8 @@ Feature: Manage proxies wit API.
         Then I should receive 401 response code
 
     Scenario: API should be created with defaults
-        Given request JSON payload:
+        Given request JWT token is valid admin token
+        When I request JSON payload:
             """
             {
               "name":"example",

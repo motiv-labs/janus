@@ -62,15 +62,14 @@ func (p *Register) Add(definition *Definition) error {
 
 	matcher := router.NewListenPathMatcher()
 	if matcher.Match(definition.ListenPath) {
-		p.doRegister(definition, handler.ServeHTTP)
-		definition.ListenPath = matcher.Extract(definition.ListenPath)
+		p.doRegister(matcher.Extract(definition.ListenPath), definition, handler.ServeHTTP)
 	}
 
-	p.doRegister(definition, handler.ServeHTTP)
+	p.doRegister(definition.ListenPath, definition, handler.ServeHTTP)
 	return nil
 }
 
-func (p *Register) doRegister(def *Definition, handler http.HandlerFunc) {
+func (p *Register) doRegister(listenPath string, def *Definition, handler http.HandlerFunc) {
 	log.WithFields(log.Fields{
 		"listen_path": def.ListenPath,
 	}).Debug("Registering a route")
