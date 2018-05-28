@@ -71,18 +71,18 @@ func (p *Register) Add(definition *Definition) error {
 
 func (p *Register) doRegister(listenPath string, def *Definition, handler http.HandlerFunc) {
 	log.WithFields(log.Fields{
-		"listen_path": def.ListenPath,
+		"listen_path": listenPath,
 	}).Debug("Registering a route")
 
-	if strings.Index(def.ListenPath, "/") != 0 {
-		log.WithField("listen_path", def.ListenPath).
+	if strings.Index(listenPath, "/") != 0 {
+		log.WithField("listen_path", listenPath).
 			Error("Route listen path must begin with '/'. Skipping invalid route.")
 	} else {
 		for _, method := range def.Methods {
 			if strings.ToUpper(method) == methodAll {
-				p.router.Any(def.ListenPath, handler, def.middleware...)
+				p.router.Any(listenPath, handler, def.middleware...)
 			} else {
-				p.router.Handle(strings.ToUpper(method), def.ListenPath, handler, def.middleware...)
+				p.router.Handle(strings.ToUpper(method), listenPath, handler, def.middleware...)
 			}
 		}
 	}
