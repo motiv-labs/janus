@@ -62,6 +62,7 @@ func (p *Register) Add(definition *Definition) error {
 
 	matcher := router.NewListenPathMatcher()
 	if matcher.Match(definition.ListenPath) {
+		p.doRegister(definition, handler.ServeHTTP)
 		definition.ListenPath = matcher.Extract(definition.ListenPath)
 	}
 
