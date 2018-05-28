@@ -137,7 +137,7 @@ func createRegisterAndRouter() router.Router {
 }
 
 func createRegister(r router.Router) *Register {
-	register := NewRegister(r, Params{})
+	register := NewRegister(WithRouter(r))
 
 	definitions := createProxyDefinitions()
 	for _, def := range definitions {
