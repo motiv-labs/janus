@@ -3,6 +3,7 @@ package proxy
 import (
 	"testing"
 
+	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -32,6 +33,10 @@ func TestDefinition(t *testing.T) {
 		{
 			scenario: "is balancer defined",
 			function: testIsBalancerDefined,
+		},
+		{
+			scenario: "add middleware",
+			function: testAddMiddlewares,
 		},
 	}
 
@@ -96,4 +101,12 @@ func testIsBalancerDefined(t *testing.T) {
 	target := &Target{Target: "http://localhost:8080/api-name"}
 	definition.Upstreams.Targets = append(definition.Upstreams.Targets, target)
 	assert.True(t, definition.IsBalancerDefined())
+	assert.Len(t, definition.Upstreams.Targets.ToBalancerTargets(), 1)
+}
+
+func testAddMiddlewares(t *testing.T) {
+	definition := NewDefinition()
+	definition.AddMiddleware(middleware.NewLogger().Handler)
+
+	assert.Len(t, definition.Middleware(), 1)
 }
