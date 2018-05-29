@@ -1,5 +1,6 @@
 sudo: required
 language: go
+
 services:
   - docker
 
@@ -7,6 +8,7 @@ go:
   - 1.x
 
 env:
+  - MAKE_TASK=test
   - MAKE_TASK=test-integration
   - MAKE_TASK=test-features
 
