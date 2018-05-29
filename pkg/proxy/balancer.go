@@ -4,6 +4,7 @@ import (
 	"errors"
 	"math/rand"
 	"sync"
+	"time"
 )
 
 var (
@@ -30,6 +31,10 @@ type (
 	// WeightBalancer balancer
 	WeightBalancer struct{}
 )
+
+func init() {
+	rand.Seed(time.Now().UnixNano())
+}
 
 // NewRoundrobinBalancer creates a new instance of Roundrobin
 func NewRoundrobinBalancer() *RoundrobinBalancer {
@@ -60,7 +65,7 @@ func NewWeightBalancer() *WeightBalancer {
 	return &WeightBalancer{}
 }
 
-// Elect backend using roundrobin strategy
+// Elect backend using Weight strategy
 func (b *WeightBalancer) Elect(hosts []*Target) (*Target, error) {
 	if len(hosts) == 0 {
 		return nil, ErrEmptyBackendList
