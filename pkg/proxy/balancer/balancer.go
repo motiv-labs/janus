@@ -4,7 +4,9 @@ package balancer
 
 import (
 	"errors"
+	"math/rand"
 	"reflect"
+	"time"
 )
 
 var (
@@ -31,6 +33,7 @@ type (
 )
 
 func init() {
+	rand.Seed(time.Now().UnixNano())
 	typeRegistry["roundrobin"] = reflect.TypeOf(RoundrobinBalancer{})
 	typeRegistry["rr"] = reflect.TypeOf(RoundrobinBalancer{})
 	typeRegistry["weight"] = reflect.TypeOf(WeightBalancer{})
