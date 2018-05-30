@@ -36,6 +36,7 @@ func Test_LoadEnv(t *testing.T) {
 }
 
 func TestDefaults(t *testing.T) {
+	os.Clearenv()
 	globalConfig, err := LoadEnv()
 	require.NoError(t, err)
 
