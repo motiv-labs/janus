@@ -145,7 +145,7 @@ func init() {
 
 	viper.SetDefault("web.port", "8081")
 	viper.SetDefault("web.tls.port", "8444")
-	viper.SetDefault("web.tls.redisrect", true)
+	viper.SetDefault("web.tls.redirect", true)
 	viper.SetDefault("web.credentials.algorithm", "HS256")
 	viper.SetDefault("web.credentials.basic.users", map[string]string{"admin": "admin"})
 	viper.SetDefault("web.credentials.github.teams", make(map[string]string))

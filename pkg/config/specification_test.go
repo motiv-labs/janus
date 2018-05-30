@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -31,4 +32,34 @@ func Test_LoadEnv(t *testing.T) {
 	assert.Equal(t, []string{"hellofresh", "tests"}, globalConfig.Web.Credentials.Github.Organizations)
 	assert.Equal(t, "janus-owners", globalConfig.Web.Credentials.JanusAdminTeam)
 	assert.True(t, globalConfig.Web.Credentials.Github.IsConfigured())
+
+}
+
+func TestDefaults(t *testing.T) {
+	globalConfig, err := LoadEnv()
+	require.NoError(t, err)
+
+	assert.Equal(t, 8080, globalConfig.Port)
+	assert.Equal(t, 8081, globalConfig.Web.Port)
+	assert.Equal(t, 8433, globalConfig.TLS.Port)
+	assert.Equal(t, 8444, globalConfig.Web.TLS.Port)
+	assert.True(t, globalConfig.Web.TLS.Redirect)
+	assert.Equal(t, 20*time.Millisecond, globalConfig.BackendFlushInterval)
+	assert.Equal(t, 180*time.Second, globalConfig.RespondingTimeouts.IdleTimeout)
+	assert.True(t, globalConfig.TLS.Redirect)
+	assert.True(t, globalConfig.RequestID)
+	assert.Equal(t, 10*time.Second, globalConfig.Cluster.UpdateFrequency)
+	assert.Equal(t, "file:///etc/janus", globalConfig.Database.DSN)
+
+	assert.Equal(t, "HS256", globalConfig.Web.Credentials.Algorithm)
+	assert.Equal(t, map[string]string{"admin": "admin"}, globalConfig.Web.Credentials.Basic.Users)
+
+	assert.Equal(t, "log://", globalConfig.Stats.DSN)
+	assert.Equal(t, "error-log", globalConfig.Stats.ErrorsSection)
+
+	assert.Equal(t, "janus", globalConfig.Tracing.ServiceName)
+	assert.Equal(t, 1.0, globalConfig.Tracing.JaegerTracing.SamplingParam)
+	assert.Equal(t, "const", globalConfig.Tracing.JaegerTracing.SamplingType)
+	assert.Equal(t, 1*time.Second, globalConfig.Tracing.JaegerTracing.BufferFlushInterval)
+	assert.False(t, globalConfig.Tracing.JaegerTracing.LogSpans)
 }
