@@ -15,12 +15,12 @@ var (
 	ErrZeroWeight = errors.New("invalid backend, weight 0 given")
 )
 
-// NewWeightBalancer creates a new instance of Roundrobin
+// NewWeightBalancer creates a new instance of WeightBalancer
 func NewWeightBalancer() *WeightBalancer {
 	return &WeightBalancer{}
 }
 
-// Elect backend using roundrobin strategy
+// Elect backend using weight strategy
 func (b *WeightBalancer) Elect(hosts []*Target) (*Target, error) {
 	if len(hosts) == 0 {
 		return nil, ErrEmptyBackendList
