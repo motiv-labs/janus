@@ -24,6 +24,6 @@ func RunCheck(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	cmd.Printf("The configuration file is valid\n")
+	cmd.Println("The configuration file is valid")
 	return nil
 }
