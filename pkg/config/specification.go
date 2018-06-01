@@ -33,7 +33,7 @@ type Cluster struct {
 	UpdateFrequency time.Duration `envconfig:"BACKEND_UPDATE_FREQUENCY"`
 }
 
-// RespondingTimeouts contains timeout configurations for incoming requests to the Traefik instance.
+// RespondingTimeouts contains timeout configurations for incoming requests to the Janus instance.
 type RespondingTimeouts struct {
 	ReadTimeout  time.Duration `envconfig:"RESPONDING_TIMEOUTS_READ_TIMEOUT"`
 	WriteTimeout time.Duration `envconfig:"RESPONDING_TIMEOUTS_WRITE_TIMEOUT"`
