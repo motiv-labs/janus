@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"github.com/hellofresh/janus/pkg/proxy"
+	"github.com/hellofresh/janus/pkg/router"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
 	"github.com/ulule/limiter"
@@ -30,7 +31,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*Spec, repo Repository
 	log.Debug("Loading OAuth servers configurations")
 
 	for _, oauthServer := range oauthServers {
-		var inChain proxy.InChain
+		var mw []router.Constructor
 
 		logger := log.WithField("name", oauthServer.Name)
 		logger.Debug("Registering OAuth server")
@@ -43,7 +44,7 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*Spec, repo Repository
 			AllowCredentials: true,
 		}).Handler
 
-		inChain = append(inChain, corsHandler)
+		mw = append(mw, corsHandler)
 
 		if oauthServer.RateLimit.Enabled {
 			rate, err := limiter.NewRateFromFormatted(oauthServer.RateLimit.Limit)
@@ -55,16 +56,16 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*Spec, repo Repository
 			limiterInstance := limiter.New(limiterStore, rate)
 			rateLimitHandler := stdlib.NewMiddleware(limiterInstance).Handler
 
-			inChain = append(inChain, rateLimitHandler)
+			mw = append(mw, rateLimitHandler)
 		}
 
-		endpoints := map[*proxy.Definition]proxy.InChain{
-			oauthServer.Endpoints.Authorize:    inChain,
-			oauthServer.Endpoints.Token:        append(inChain, NewSecretMiddleware(oauthServer).Handler),
-			oauthServer.Endpoints.Introspect:   inChain,
-			oauthServer.Endpoints.Revoke:       inChain,
-			oauthServer.ClientEndpoints.Create: inChain,
-			oauthServer.ClientEndpoints.Remove: inChain,
+		endpoints := map[*proxy.Definition][]router.Constructor{
+			oauthServer.Endpoints.Authorize:    mw,
+			oauthServer.Endpoints.Token:        append(mw, NewSecretMiddleware(oauthServer).Handler),
+			oauthServer.Endpoints.Introspect:   mw,
+			oauthServer.Endpoints.Revoke:       mw,
+			oauthServer.ClientEndpoints.Create: mw,
+			oauthServer.ClientEndpoints.Remove: mw,
 		}
 
 		m.registerRoutes(endpoints)
@@ -105,17 +106,21 @@ func (m *OAuthLoader) getManager(oauthServer *OAuth) (Manager, error) {
 	return NewManagerFactory(oauthServer).Build(managerType)
 }
 
-func (m *OAuthLoader) registerRoutes(endpoints map[*proxy.Definition]proxy.InChain) {
+func (m *OAuthLoader) registerRoutes(endpoints map[*proxy.Definition][]router.Constructor) {
 	for endpoint, middleware := range endpoints {
 		if endpoint == nil {
 			log.Debug("Endpoint not registered")
 			continue
 		}
 
+		for _, mw := range middleware {
+			endpoint.AddMiddleware(mw)
+		}
+
 		l := log.WithField("listen_path", endpoint.ListenPath)
 		l.Debug("Registering OAuth endpoint")
 		if isValid, err := endpoint.Validate(); isValid && err == nil {
-			m.register.Add(proxy.NewRouteWithInOut(endpoint, middleware, nil))
+			m.register.Add(endpoint)
 			l.Debug("Endpoint registered")
 		} else {
 			l.WithError(err).Error("Error when registering endpoint")

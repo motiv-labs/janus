@@ -2,8 +2,6 @@ package responsetransformer
 
 import (
 	"net/http"
-
-	"github.com/hellofresh/janus/pkg/proxy"
 )
 
 type headerFn func(headerName string, headerValue string)
@@ -22,45 +20,47 @@ type Config struct {
 }
 
 // NewResponseTransformer creates a new instance of RequestTransformer
-func NewResponseTransformer(config Config) proxy.OutLink {
-	return func(req *http.Request, res *http.Response) (*http.Response, error) {
-		transform(config.Remove.Headers, removeHeaders(res))
-		transform(config.Replace.Headers, replaceHeaders(res))
-		transform(config.Add.Headers, addHeaders(res))
-		transform(config.Append.Headers, appendHeaders(res))
+func NewResponseTransformer(config Config) func(http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			next.ServeHTTP(w, r)
 
-		return res, nil
+			transform(config.Remove.Headers, removeHeaders(w))
+			transform(config.Replace.Headers, replaceHeaders(w))
+			transform(config.Add.Headers, addHeaders(w))
+			transform(config.Append.Headers, appendHeaders(w))
+		})
 	}
 }
 
 // If and only if the header is not already set, set a new header with the given value. Ignored if the header is already set.
-func addHeaders(res *http.Response) headerFn {
+func addHeaders(w http.ResponseWriter) headerFn {
 	return func(headerName string, headerValue string) {
-		if res.Header.Get(headerName) == "" {
-			res.Header.Add(headerName, headerValue)
+		if w.Header().Get(headerName) == "" {
+			w.Header().Add(headerName, headerValue)
 		}
 	}
 }
 
 // If the header is not set, set it with the given value. If it is already set, a new header with the same name and the new value will be set.
-func appendHeaders(res *http.Response) headerFn {
+func appendHeaders(w http.ResponseWriter) headerFn {
 	return func(headerName string, headerValue string) {
-		res.Header.Add(headerName, headerValue)
+		w.Header().Add(headerName, headerValue)
 	}
 }
 
 // Unset the headers with the given name.
-func removeHeaders(res *http.Response) headerFn {
+func removeHeaders(w http.ResponseWriter) headerFn {
 	return func(headerName string, headerValue string) {
-		res.Header.Del(headerName)
+		w.Header().Del(headerName)
 	}
 }
 
 // If and only if the header is already set, replace its old value with the new one. Ignored if the header is not already set.
-func replaceHeaders(res *http.Response) headerFn {
+func replaceHeaders(w http.ResponseWriter) headerFn {
 	return func(headerName string, headerValue string) {
-		if res.Header.Get(headerName) != "" {
-			res.Header.Set(headerName, headerValue)
+		if w.Header().Get(headerName) != "" {
+			w.Header().Set(headerName, headerValue)
 		}
 	}
 }

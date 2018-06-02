@@ -53,7 +53,7 @@ func TestCbPlugin(t *testing.T) {
 
 func testStartupNoSuccess(t *testing.T) {
 	event2 := plugin.OnStartup{
-		Register: proxy.NewRegister(router.NewChiRouter(), proxy.Params{}),
+		Register: proxy.NewRegister(proxy.WithRouter(router.NewChiRouter())),
 		Config: &config.Specification{
 			Stats: config.Stats{
 				DSN: "statsd:8080",
@@ -66,7 +66,7 @@ func testStartupNoSuccess(t *testing.T) {
 
 func testStartupSuccess(t *testing.T) {
 	event2 := plugin.OnStartup{
-		Register: proxy.NewRegister(router.NewChiRouter(), proxy.Params{}),
+		Register: proxy.NewRegister(proxy.WithRouter(router.NewChiRouter())),
 		Config:   &config.Specification{},
 	}
 	err := onStartup(event2)
@@ -81,9 +81,8 @@ func testAdminStartupSuccess(t *testing.T) {
 
 func testSetupSuccess(t *testing.T) {
 	def := api.NewDefinition()
-	route := proxy.NewRoute(def.Proxy)
 
-	err := setupCB(def, route, make(plugin.Config))
+	err := setupCB(def, make(plugin.Config))
 	require.NoError(t, err)
 }
 

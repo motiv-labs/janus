@@ -5,7 +5,6 @@ import (
 
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
-	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 )
 
@@ -23,12 +22,12 @@ func init() {
 	})
 }
 
-func setupBasicAuth(def *api.Definition, route *proxy.Route, rawConfig plugin.Config) error {
+func setupBasicAuth(def *api.Definition, rawConfig plugin.Config) error {
 	if repo == nil {
 		return errors.New("The repository was not set by onStartup event")
 	}
 
-	route.AddInbound(NewBasicAuth(repo))
+	def.Proxy.AddMiddleware(NewBasicAuth(repo))
 	return nil
 }
 

@@ -11,7 +11,10 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-const notFoundPath = "/-not-found-"
+const (
+	notFoundPath          = "/-not-found-"
+	statsSectionRoundTrip = "round"
+)
 
 // Stats represents the stats middleware
 type Stats struct {
@@ -48,5 +51,9 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 			originalURL.Path = notFoundPath
 		}
 		m.statsClient.TrackRequest(originalRequest, t, success)
+
+		m.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
+			TrackRequest(r, t, mt.Code < http.StatusInternalServerError).
+			ResetHTTPRequestSection()
 	})
 }

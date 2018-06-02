@@ -22,7 +22,6 @@ Feature: Apply proxy changes to all instances, when changing via API on single i
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -73,7 +72,6 @@ Feature: Apply proxy changes to all instances, when changing via API on single i
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -124,7 +122,6 @@ Feature: Apply proxy changes to all instances, when changing via API on single i
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -188,7 +185,6 @@ Feature: Apply proxy changes to all instances, when changing via API on single i
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]

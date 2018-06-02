@@ -1,4 +1,4 @@
-package proxy
+package balancer
 
 import (
 	"fmt"
@@ -8,12 +8,12 @@ import (
 	"github.com/stretchr/testify/suite"
 )
 
-type BalancerTestSuite struct {
+type WeightBalancerTestSuite struct {
 	suite.Suite
 	hosts []*Target
 }
 
-func (suite *BalancerTestSuite) SetupTest() {
+func (suite *WeightBalancerTestSuite) SetupTest() {
 	suite.hosts = []*Target{
 		{Target: "127.0.0.1", Weight: 5},
 		{Target: "http://test.com", Weight: 10},
@@ -21,34 +21,7 @@ func (suite *BalancerTestSuite) SetupTest() {
 	}
 }
 
-func (suite *BalancerTestSuite) TestRoundRobinBalancerSuccessfulBalance() {
-	balancer := NewRoundrobinBalancer()
-
-	electedHost, err := balancer.Elect(suite.hosts)
-	suite.NoError(err)
-	suite.Equal(suite.hosts[0], electedHost)
-
-	electedHost, err = balancer.Elect(suite.hosts)
-	suite.NoError(err)
-	suite.Equal(suite.hosts[1], electedHost)
-
-	electedHost, err = balancer.Elect(suite.hosts)
-	suite.NoError(err)
-	suite.Equal(suite.hosts[2], electedHost)
-
-	electedHost, err = balancer.Elect(suite.hosts)
-	suite.NoError(err)
-	suite.Equal(suite.hosts[0], electedHost)
-}
-
-func (suite *BalancerTestSuite) TestRoundRobinBalancerEmptyList() {
-	balancer := NewRoundrobinBalancer()
-
-	_, err := balancer.Elect([]*Target{})
-	suite.Error(err)
-}
-
-func (suite *BalancerTestSuite) TestWeightBalancer() {
+func (suite *WeightBalancerTestSuite) TestWeightBalancer() {
 	balancer := NewWeightBalancer()
 
 	electedHost, err := balancer.Elect(suite.hosts)
@@ -56,21 +29,21 @@ func (suite *BalancerTestSuite) TestWeightBalancer() {
 	suite.NotNil(electedHost)
 }
 
-func (suite *BalancerTestSuite) TestWeightBalancerEmptyList() {
+func (suite *WeightBalancerTestSuite) TestWeightBalancerEmptyList() {
 	balancer := NewWeightBalancer()
 
 	_, err := balancer.Elect([]*Target{})
 	suite.Error(err)
 }
 
-func (suite *BalancerTestSuite) TestWeightBalancerZeroWeight() {
+func (suite *WeightBalancerTestSuite) TestWeightBalancerZeroWeight() {
 	balancer := NewWeightBalancer()
 
 	_, err := balancer.Elect([]*Target{{Target: "", Weight: 0}})
 	suite.Error(err)
 }
 
-func (suite *BalancerTestSuite) TestWeightBalancerZeroWeightForOneTarget() {
+func (suite *WeightBalancerTestSuite) TestWeightBalancerZeroWeightForOneTarget() {
 	balancer := NewWeightBalancer()
 
 	hosts := []*Target{
@@ -83,7 +56,7 @@ func (suite *BalancerTestSuite) TestWeightBalancerZeroWeightForOneTarget() {
 	suite.Equal(hosts[1], electedHost)
 }
 
-func (suite *BalancerTestSuite) TestWeightBalancerWeight() {
+func (suite *WeightBalancerTestSuite) TestWeightBalancerWeight() {
 	balancer := NewWeightBalancer()
 
 	totalSteps := 10000
@@ -138,6 +111,6 @@ func (suite *BalancerTestSuite) TestWeightBalancerWeight() {
 
 // In order for 'go test' to run this suite, we need to create
 // a normal test function and pass our suite to suite.Run
-func TestBalancerTestSuite(t *testing.T) {
-	suite.Run(t, new(BalancerTestSuite))
+func TestWeightBalancerTestSuiteTestSuite(t *testing.T) {
+	suite.Run(t, new(WeightBalancerTestSuite))
 }

@@ -13,7 +13,6 @@ import (
 // Specification for basic configurations
 type Specification struct {
 	Port                 int           `envconfig:"PORT"`
-	Debug                bool          `envconfig:"DEBUG"`
 	GraceTimeOut         int64         `envconfig:"GRACE_TIMEOUT"`
 	MaxIdleConnsPerHost  int           `envconfig:"MAX_IDLE_CONNS_PER_HOST"`
 	BackendFlushInterval time.Duration `envconfig:"BACKEND_FLUSH_INTERVAL"`
@@ -26,6 +25,7 @@ type Specification struct {
 	Tracing              Tracing
 	TLS                  TLS
 	Cluster              Cluster
+	RespondingTimeouts   RespondingTimeouts
 }
 
 // Cluster represents the cluster configuration
@@ -33,10 +33,16 @@ type Cluster struct {
 	UpdateFrequency time.Duration `envconfig:"BACKEND_UPDATE_FREQUENCY"`
 }
 
+// RespondingTimeouts contains timeout configurations for incoming requests to the Janus instance.
+type RespondingTimeouts struct {
+	ReadTimeout  time.Duration `envconfig:"RESPONDING_TIMEOUTS_READ_TIMEOUT"`
+	WriteTimeout time.Duration `envconfig:"RESPONDING_TIMEOUTS_WRITE_TIMEOUT"`
+	IdleTimeout  time.Duration `envconfig:"RESPONDING_TIMEOUTS_IDLE_TIMEOUT"`
+}
+
 // Web represents the API configurations
 type Web struct {
-	Port        int  `envconfig:"API_PORT"`
-	ReadOnly    bool `envconfig:"API_READONLY"`
+	Port        int `envconfig:"API_PORT"`
 	Credentials Credentials
 	TLS         TLS
 }
@@ -132,14 +138,17 @@ func init() {
 	viper.SetDefault("backendFlushInterval", "20ms")
 	viper.SetDefault("requestID", true)
 
+	viper.SetDefault("respondingTimeouts.IdleTimeout", 180*time.Second)
+
 	viper.SetDefault("cluster.updateFrequency", "10s")
 	viper.SetDefault("database.dsn", "file:///etc/janus")
 
 	viper.SetDefault("web.port", "8081")
 	viper.SetDefault("web.tls.port", "8444")
-	viper.SetDefault("web.tls.redisrect", true)
+	viper.SetDefault("web.tls.redirect", true)
 	viper.SetDefault("web.credentials.algorithm", "HS256")
 	viper.SetDefault("web.credentials.basic.users", map[string]string{"admin": "admin"})
+	viper.SetDefault("web.credentials.github.teams", make(map[string]string))
 
 	viper.SetDefault("stats.dsn", "log://")
 	viper.SetDefault("stats.errorsSection", "error-log")

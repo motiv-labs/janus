@@ -3,7 +3,6 @@ package cors
 import (
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
-	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/rs/cors"
 )
 
@@ -21,7 +20,7 @@ func init() {
 	})
 }
 
-func setupCors(def *api.Definition, route *proxy.Route, rawConfig plugin.Config) error {
+func setupCors(def *api.Definition, rawConfig plugin.Config) error {
 	var config Config
 
 	err := plugin.Decode(rawConfig, &config)
@@ -37,6 +36,6 @@ func setupCors(def *api.Definition, route *proxy.Route, rawConfig plugin.Config)
 		AllowCredentials: true,
 	})
 
-	route.AddInbound(mw.Handler)
+	def.Proxy.AddMiddleware(mw.Handler)
 	return nil
 }

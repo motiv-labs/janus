@@ -1,6 +1,6 @@
 ### Load Balancing
 
-Janus provides multiple ways of load balancing requests to multiple backend services: a `roundrobin` method,
+Janus provides multiple ways of load balancing requests to multiple backend services: a `roundrobin` (or just `rr`) method,
  and a `weight` method.
 
 #### Round Robin
@@ -11,7 +11,7 @@ Janus provides multiple ways of load balancing requests to multiple backend serv
     "proxy": {
         "listen_path": "/foo/*",
         "upstreams" : {
-            "balancing": "roundrobin",
+            "balancing": "rr",
             "targets": [
                 {"target": "http://my-api1.com"},
                 {"target": "http://my-api2.com"},

@@ -1,15 +1,17 @@
 # Unreleased
 
 ## Added
-
 - New Retry plugin: you can now configure your endpoints to have a retry in case of a failed request
+- New `read`, `write` and `idle` timeouts for Janus server global configurations
+- New `dial` and `response_header` timeouts that can be set per endpoint
+- Alias `rr` for roundrobin balancer
 
 ## Fixed
-
 - Fixed bug when using the configuration file in a linux/64 system
 
 ## Removed
 - Redis is not necessary anymore for the cluster to work
+- Removed proxy definition property `enable_load_balancing` as it was not being used
 
 # 3.7.0
 

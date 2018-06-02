@@ -32,10 +32,10 @@ func TestSuccessfulStats(t *testing.T) {
 	require.IsType(t, &client.Memory{}, statsClient)
 	memoryClient := statsClient.(*client.Memory)
 
-	require.Equal(t, 1, len(memoryClient.TimerMetrics), 1)
+	require.Equal(t, 2, len(memoryClient.TimerMetrics))
 	assert.Equal(t, "request.get.-.-", memoryClient.TimerMetrics[0].Bucket)
 
-	require.Equal(t, 4, len(memoryClient.CountMetrics))
+	require.Equal(t, 8, len(memoryClient.CountMetrics))
 	assert.Equal(t, 1, memoryClient.CountMetrics["request.get.-.-"])
 	assert.Equal(t, 1, memoryClient.CountMetrics["request-ok.get.-.-"])
 	assert.Equal(t, 1, memoryClient.CountMetrics["total.request"])
@@ -65,11 +65,11 @@ func TestUnknownPath(t *testing.T) {
 	require.IsType(t, &client.Memory{}, statsClient)
 	memoryClient := statsClient.(*client.Memory)
 
-	require.Equal(t, 1, len(memoryClient.TimerMetrics), 1)
+	require.Equal(t, 2, len(memoryClient.TimerMetrics))
 	assert.Equal(t, "request.get.-not-found-.-", memoryClient.TimerMetrics[0].Bucket)
 
-	require.Equal(t, 4, len(memoryClient.CountMetrics))
-	require.Equal(t, 4, len(memoryClient.CountMetrics))
+	require.Equal(t, 8, len(memoryClient.CountMetrics))
+	require.Equal(t, 8, len(memoryClient.CountMetrics))
 	assert.Equal(t, 1, memoryClient.CountMetrics["request.get.-not-found-.-"])
 	assert.Equal(t, 1, memoryClient.CountMetrics["request-fail.get.-not-found-.-"])
 	assert.Equal(t, 1, memoryClient.CountMetrics["total.request"])

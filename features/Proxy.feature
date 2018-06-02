@@ -22,7 +22,6 @@ Feature: Proxy requests to upstream.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -54,7 +53,6 @@ Feature: Proxy requests to upstream.
                     },
                     "strip_path":true,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "ALL"
                     ],
@@ -132,7 +130,6 @@ Feature: Proxy requests to upstream.
                     },
                     "strip_path":true,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "ALL"
                     ]
@@ -226,7 +223,6 @@ Feature: Proxy requests to upstream.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -261,7 +257,6 @@ Feature: Proxy requests to upstream.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]

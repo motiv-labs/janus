@@ -150,12 +150,12 @@ func (s *Server) Close() error {
 
 func (s *Server) startHTTPServers(ctx context.Context) error {
 	r := s.createRouter()
-	s.register = proxy.NewRegister(r, proxy.Params{
-		StatsClient:            s.statsClient,
-		FlushInterval:          s.globalConfig.BackendFlushInterval,
-		IdleConnectionsPerHost: s.globalConfig.MaxIdleConnsPerHost,
-		CloseIdleConnsPeriod:   s.globalConfig.CloseIdleConnsPeriod,
-	})
+	s.register = proxy.NewRegister(
+		proxy.WithRouter(r),
+		proxy.WithFlushInterval(s.globalConfig.BackendFlushInterval),
+		proxy.WithIdleConnectionsPerHost(s.globalConfig.MaxIdleConnsPerHost),
+		proxy.WithCloseIdleConnsPeriod(s.globalConfig.CloseIdleConnsPeriod),
+	)
 	s.defLoader = loader.NewAPILoader(s.register)
 
 	return s.listenAndServe(chi.ServerBaseContext(ctx, r))
@@ -167,7 +167,6 @@ func (s *Server) startProvider(ctx context.Context) error {
 		web.WithPort(s.globalConfig.Web.Port),
 		web.WithTLS(s.globalConfig.Web.TLS),
 		web.WithCredentials(s.globalConfig.Web.Credentials),
-		web.ReadOnly(s.globalConfig.Web.ReadOnly),
 	)
 
 	if err := s.webServer.Start(); err != nil {
@@ -227,7 +226,13 @@ func (s *Server) listenProviders(stop chan struct{}) {
 func (s *Server) listenAndServe(handler http.Handler) error {
 	address := fmt.Sprintf(":%v", s.globalConfig.Port)
 	logger := log.WithField("address", address)
-	s.server = &http.Server{Addr: address, Handler: handler}
+	s.server = &http.Server{
+		Addr:         address,
+		Handler:      handler,
+		ReadTimeout:  s.globalConfig.RespondingTimeouts.ReadTimeout,
+		WriteTimeout: s.globalConfig.RespondingTimeouts.WriteTimeout,
+		IdleTimeout:  s.globalConfig.RespondingTimeouts.IdleTimeout,
+	}
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
 		return errors.Wrap(err, "error opening listener")

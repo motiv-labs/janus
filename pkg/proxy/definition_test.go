@@ -3,6 +3,7 @@ package proxy
 import (
 	"testing"
 
+	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,16 +31,12 @@ func TestDefinition(t *testing.T) {
 			function: testInvalidTargetURLValidation,
 		},
 		{
-			scenario: "route to json",
-			function: testRouteToJSON,
-		},
-		{
-			scenario: "json to route",
-			function: testJSONToRoute,
-		},
-		{
 			scenario: "is balancer defined",
 			function: testIsBalancerDefined,
+		},
+		{
+			scenario: "add middleware",
+			function: testAddMiddlewares,
 		},
 	}
 
@@ -62,7 +59,7 @@ func testSuccessfulValidation(t *testing.T) {
 		ListenPath: "/*",
 		Upstreams: &Upstreams{
 			Balancing: "roundrobin",
-			Targets: []*Target{
+			Targets: Targets{
 				{Target: "http://test.com"},
 			},
 		},
@@ -86,7 +83,7 @@ func testInvalidTargetURLValidation(t *testing.T) {
 		ListenPath: " ",
 		Upstreams: &Upstreams{
 			Balancing: "roundrobin",
-			Targets: []*Target{
+			Targets: Targets{
 				{Target: "wrong"},
 			},
 		},
@@ -97,63 +94,6 @@ func testInvalidTargetURLValidation(t *testing.T) {
 	assert.False(t, isValid)
 }
 
-func testRouteToJSON(t *testing.T) {
-	expectedJSON := `
-	{
-		"proxy":{
-			"insecure_skip_verify":false,
-			"append_path":false,
-			"enable_load_balancing":false,
-			"methods":[
-				"GET"
-			],
-			"hosts":[
-
-			],
-			"preserve_host":false,
-			"listen_path":"",
-			"strip_path":false,
-			"upstreams":{
-				"balancing":"",
-				"targets":[
-
-				]
-			}
-		}
-	}
-	`
-	definition := NewDefinition()
-	route := NewRoute(definition)
-	json, err := route.JSONMarshal()
-
-	assert.NoError(t, err)
-	assert.JSONEq(t, expectedJSON, string(json))
-}
-
-func testJSONToRoute(t *testing.T) {
-	route, err := JSONUnmarshalRoute([]byte(`
-	{
-		"proxy":{
-			"insecure_skip_verify":false,
-			"append_path":false,
-			"enable_load_balancing":false,
-			"methods":[],
-			"hosts":[],
-			"preserve_host":false,
-			"listen_path":"",
-			"strip_path":false
-		}
-	}`))
-
-	assert.NoError(t, err)
-	assert.IsType(t, &Route{}, route)
-}
-
-func testJSONToRouteError(t *testing.T) {
-	_, err := JSONUnmarshalRoute([]byte{})
-	assert.Error(t, err)
-}
-
 func testIsBalancerDefined(t *testing.T) {
 	definition := NewDefinition()
 	assert.False(t, definition.IsBalancerDefined())
@@ -161,4 +101,12 @@ func testIsBalancerDefined(t *testing.T) {
 	target := &Target{Target: "http://localhost:8080/api-name"}
 	definition.Upstreams.Targets = append(definition.Upstreams.Targets, target)
 	assert.True(t, definition.IsBalancerDefined())
+	assert.Len(t, definition.Upstreams.Targets.ToBalancerTargets(), 1)
+}
+
+func testAddMiddlewares(t *testing.T) {
+	definition := NewDefinition()
+	definition.AddMiddleware(middleware.NewLogger().Handler)
+
+	assert.Len(t, definition.Middleware(), 1)
 }

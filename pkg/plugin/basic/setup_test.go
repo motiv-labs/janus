@@ -14,22 +14,21 @@ import (
 
 func TestSetup(t *testing.T) {
 	def := api.NewDefinition()
-	route := proxy.NewRoute(def.Proxy)
 
 	event1 := plugin.OnAdminAPIStartup{Router: router.NewChiRouter()}
 	err := onAdminAPIStartup(event1)
 	require.NoError(t, err)
 
-	event2 := plugin.OnStartup{Register: proxy.NewRegister(router.NewChiRouter(), proxy.Params{}), MongoSession: &mgo.Session{}}
+	event2 := plugin.OnStartup{Register: proxy.NewRegister(proxy.WithRouter(router.NewChiRouter())), MongoSession: &mgo.Session{}}
 	err = onStartup(event2)
 	require.NoError(t, err)
 
-	err = setupBasicAuth(def, route, make(plugin.Config))
+	err = setupBasicAuth(def, make(plugin.Config))
 	require.NoError(t, err)
 }
 
 func TestOnStartupMissingMongoSession(t *testing.T) {
-	event := plugin.OnStartup{Register: proxy.NewRegister(router.NewChiRouter(), proxy.Params{})}
+	event := plugin.OnStartup{Register: proxy.NewRegister(proxy.WithRouter(router.NewChiRouter()))}
 	err := onStartup(event)
 	require.Error(t, err)
 	require.IsType(t, ErrInvalidMongoDBSession, err)

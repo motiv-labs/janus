@@ -6,7 +6,6 @@ import (
 	"github.com/afex/hystrix-go/plugins"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
-	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -30,7 +29,7 @@ func init() {
 	})
 }
 
-func setupCB(def *api.Definition, route *proxy.Route, rawConfig plugin.Config) error {
+func setupCB(def *api.Definition, rawConfig plugin.Config) error {
 	logger := log.WithFields(log.Fields{
 		"plugin_event": plugin.SetupEvent,
 		"plugin":       pluginName,
@@ -50,7 +49,7 @@ func setupCB(def *api.Definition, route *proxy.Route, rawConfig plugin.Config) e
 		SleepWindow:           c.SleepWindow,
 	})
 
-	route.AddInbound(NewCBMiddleware(c, def))
+	def.Proxy.AddMiddleware(NewCBMiddleware(c, def))
 	return nil
 }
 

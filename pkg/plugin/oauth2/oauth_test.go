@@ -116,7 +116,6 @@ const (
             "upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:8080/token"}]},
             "strip_path" : true,
             "append_path" : false,
-            "enable_load_balancing" : false,
             "methods" : [
                 "GET",
                 "POST"
@@ -137,7 +136,6 @@ const (
             "upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:8080/token"}]},
             "strip_path" : true,
             "append_path" : false,
-            "enable_load_balancing" : false,
             "methods" : [
                 "GET",
                 "POST"
@@ -161,7 +159,6 @@ const (
             "upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:8080/token"}]},
             "strip_path" : true,
             "append_path" : false,
-            "enable_load_balancing" : false,
             "methods" : [
                 "GET",
                 "POST"
@@ -182,7 +179,6 @@ const (
             "upstreams": {"balancing": "roundrobin", "targets": [{"target": "http://localhost:8080/token"}]},
             "strip_path" : true,
             "append_path" : false,
-            "enable_load_balancing" : false,
             "methods" : [
                 "GET",
                 "POST"

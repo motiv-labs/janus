@@ -69,7 +69,7 @@ func FeatureContext(s *godog.Suite) {
 	}
 
 	bootstrap.RegisterRequestContext(s, c.Port, c.Web.Port, portSecondary, apiPortSecondary, c.Web.Credentials)
-	bootstrap.RegisterAPIContext(s, c.Web.ReadOnly, apiRepo, ch)
+	bootstrap.RegisterAPIContext(s, apiRepo, ch)
 	bootstrap.RegisterMiscContext(s)
 }
 

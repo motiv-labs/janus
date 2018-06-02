@@ -9,7 +9,6 @@ import (
 
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/test"
-	"github.com/hellofresh/stats-go"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
@@ -138,16 +137,12 @@ func createRegisterAndRouter() router.Router {
 }
 
 func createRegister(r router.Router) *Register {
-	var routes []*Route
+	register := NewRegister(WithRouter(r))
 
 	definitions := createProxyDefinitions()
 	for _, def := range definitions {
-		routes = append(routes, NewRoute(def))
+		register.Add(def)
 	}
-
-	statsClient, _ := stats.NewClient("noop://")
-	register := NewRegister(r, Params{StatsClient: statsClient})
-	register.AddMany(routes)
 
 	return register
 }

@@ -15,7 +15,8 @@ Feature: Manage proxies wit API.
         Then I should receive 401 response code
 
     Scenario: API should be created with defaults
-        Given request JSON payload:
+        Given request JWT token is valid admin token
+        And request JSON payload:
             """
             {
               "name":"example",
@@ -66,7 +67,6 @@ Feature: Manage proxies wit API.
                 },
                 "strip_path":false,
                 "append_path":false,
-                "enable_load_balancing":false,
                 "methods":[
                   "GET"
                 ]
@@ -104,7 +104,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":true,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "ALL"
                     ],
@@ -233,7 +232,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -265,7 +263,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -297,7 +294,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -334,7 +330,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -374,7 +369,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -411,7 +405,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -452,7 +445,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":false,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                         "GET"
                     ]
@@ -484,7 +476,6 @@ Feature: Manage proxies wit API.
                     },
                     "strip_path":true,
                     "append_path":false,
-                    "enable_load_balancing":false,
                     "methods":[
                       "ALL"
                     ],
