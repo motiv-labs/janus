@@ -42,7 +42,7 @@
 
 [[constraint]]
   name = "github.com/go-chi/chi"
-  version = "3.0.0"
+  version = "3.3.2"
 
 [[constraint]]
   name = "github.com/google/go-github"
