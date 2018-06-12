@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"net/http"
-	"net/url"
 
 	"github.com/felixge/httpsnoop"
 	"github.com/hellofresh/janus/pkg/metrics"
@@ -32,25 +31,15 @@ func (m *Stats) Handler(handler http.Handler) http.Handler {
 		log.WithField("path", r.URL.Path).Debug("Starting Stats middleware")
 		r = r.WithContext(metrics.NewContext(r.Context(), m.statsClient))
 
-		// reverse proxy replaces original request with target request, so keep required fields of the original one
-		originalURL := &url.URL{}
-		*originalURL = *r.URL
-		originalRequest := &http.Request{Method: r.Method, URL: originalURL}
-
 		mt := httpsnoop.CaptureMetrics(handler, w, r)
 		t := timer.NewDuration(mt.Duration)
 
-		log.WithFields(log.Fields{
-			"original_path": originalURL.Path,
-			"request_url":   r.URL.Path,
-		}).Debug("Track request stats")
-
 		success := mt.Code < http.StatusBadRequest
 		if mt.Code == http.StatusNotFound {
-			log.WithField("path", originalURL.Path).Warn("Unknown endpoint requested")
-			originalURL.Path = notFoundPath
+			log.WithField("path", r.URL.Path).Warn("Unknown endpoint requested")
+			r.URL.Path = notFoundPath
 		}
-		m.statsClient.TrackRequest(originalRequest, t, success)
+		m.statsClient.TrackRequest(r, t, success)
 
 		m.statsClient.SetHTTPRequestSection(statsSectionRoundTrip).
 			TrackRequest(r, t, mt.Code < http.StatusInternalServerError).

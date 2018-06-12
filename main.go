@@ -8,9 +8,9 @@ import (
 )
 
 func main() {
-	cmd := cmd.NewRootCmd()
+	rootCmd := cmd.NewRootCmd()
 
-	if err := cmd.Execute(); err != nil {
+	if err := rootCmd.Execute(); err != nil {
 		log.WithError(err).Error(err.Error())
 		os.Exit(1)
 	}

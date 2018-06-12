@@ -12,7 +12,6 @@ import (
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/errors"
-	httpErrors "github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/loader"
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/plugin"
@@ -155,6 +154,7 @@ func (s *Server) startHTTPServers(ctx context.Context) error {
 		proxy.WithFlushInterval(s.globalConfig.BackendFlushInterval),
 		proxy.WithIdleConnectionsPerHost(s.globalConfig.MaxIdleConnsPerHost),
 		proxy.WithCloseIdleConnsPeriod(s.globalConfig.CloseIdleConnsPeriod),
+		proxy.WithStatsClient(s.statsClient),
 	)
 	s.defLoader = loader.NewAPILoader(s.register)
 
@@ -260,6 +260,12 @@ func (s *Server) createRouter() router.Router {
 	// create router with a custom not found handler
 	router.DefaultOptions.NotFoundHandler = errors.NotFound
 	r := router.NewChiRouterWithOptions(router.DefaultOptions)
+
+	// Add RequestID middleware first if enabled, so we could use it in other middlewares, e.g. logger
+	if s.globalConfig.RequestID {
+		r.Use(middleware.RequestID)
+	}
+
 	r.Use(
 		middleware.NewStats(s.statsClient).Handler,
 		middleware.NewLogger().Handler,
@@ -267,13 +273,9 @@ func (s *Server) createRouter() router.Router {
 		middleware.NewOpenTracing(s.globalConfig.TLS.IsHTTPS()).Handler,
 	)
 
-	if s.globalConfig.RequestID {
-		r.Use(middleware.RequestID)
-	}
-
 	// some routers may panic when have empty routes list, so add one dummy 404 route to avoid this
 	if r.RoutesCount() < 1 {
-		r.Any("/", httpErrors.NotFound)
+		r.Any("/", errors.NotFound)
 	}
 
 	return r

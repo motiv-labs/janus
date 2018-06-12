@@ -8,6 +8,7 @@ import (
 	"github.com/hellofresh/janus/pkg/proxy/balancer"
 	"github.com/hellofresh/janus/pkg/proxy/transport"
 	"github.com/hellofresh/janus/pkg/router"
+	"github.com/hellofresh/stats-go/client"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -23,6 +24,7 @@ type Register struct {
 	idleConnectionsPerHost int
 	closeIdleConnsPeriod   time.Duration
 	flushInterval          time.Duration
+	statsClient            client.Client
 }
 
 // NewRegister creates a new instance of Register
@@ -44,14 +46,14 @@ func (p *Register) UpdateRouter(router router.Router) {
 // Add register a new route
 func (p *Register) Add(definition *Definition) error {
 	log.WithField("balancing_alg", definition.Upstreams.Balancing).Debug("Using a load balancing algorithm")
-	balancer, err := balancer.New(definition.Upstreams.Balancing)
+	balancerInstance, err := balancer.New(definition.Upstreams.Balancing)
 	if err != nil {
 		msg := "Could not create a balancer"
 		log.WithError(err).Error(msg)
 		return errors.Wrap(err, msg)
 	}
 
-	handler := NewBalancedReverseProxy(definition, balancer)
+	handler := NewBalancedReverseProxy(definition, balancerInstance, p.statsClient)
 	handler.FlushInterval = p.flushInterval
 	handler.Transport = transport.New(
 		transport.WithCloseIdleConnsPeriod(p.closeIdleConnsPeriod),

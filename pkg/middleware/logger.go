@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"net/http"
-	"net/url"
 	"time"
 
 	"github.com/felixge/httpsnoop"
@@ -22,11 +21,8 @@ func (m *Logger) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.WithFields(log.Fields{"method": r.Method, "path": r.URL.Path}).Debug("Started request")
 
-		// reverse proxy replaces original request with target request, so keep original one
-		originalURL := &url.URL{}
-		*originalURL = *r.URL
-
 		fields := log.Fields{
+			"request-id":  RequestIDFromContext(r.Context()),
 			"method":      r.Method,
 			"host":        r.Host,
 			"request":     r.RequestURI,
@@ -40,11 +36,6 @@ func (m *Logger) Handler(handler http.Handler) http.Handler {
 		fields["code"] = m.Code
 		fields["duration"] = int(m.Duration / time.Millisecond)
 		fields["duration-fmt"] = m.Duration.String()
-
-		if originalURL.String() != r.URL.String() {
-			fields["upstream-host"] = r.URL.Host
-			fields["upstream-request"] = r.URL.RequestURI()
-		}
 
 		log.WithFields(fields).Info("Completed handling request")
 	})

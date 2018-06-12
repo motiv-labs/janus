@@ -31,3 +31,16 @@ func RequestID(handler http.Handler) http.Handler {
 		handler.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
+
+// RequestIDFromContext tries to extract request ID from context if present, otherwise returns empty string
+func RequestIDFromContext(ctx context.Context) string {
+	if ctx == nil {
+		panic("Can not get request ID from empty context")
+	}
+
+	if requestID, ok := ctx.Value(reqIDKey).(string); ok {
+		return requestID
+	}
+
+	return ""
+}
