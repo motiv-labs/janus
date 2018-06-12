@@ -8,20 +8,27 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi"
+	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/hellofresh/janus/pkg/proxy/balancer"
 	"github.com/hellofresh/janus/pkg/router"
+	"github.com/hellofresh/stats-go/bucket"
+	"github.com/hellofresh/stats-go/client"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
+const (
+	statsSection = "upstream"
+)
+
 // NewBalancedReverseProxy creates a reverse proxy that is load balanced
-func NewBalancedReverseProxy(def *Definition, balancer balancer.Balancer) *httputil.ReverseProxy {
+func NewBalancedReverseProxy(def *Definition, balancer balancer.Balancer, statsClient client.Client) *httputil.ReverseProxy {
 	return &httputil.ReverseProxy{
-		Director: createDirector(def, balancer),
+		Director: createDirector(def, balancer, statsClient),
 	}
 }
 
-func createDirector(proxyDefinition *Definition, balancer balancer.Balancer) func(req *http.Request) {
+func createDirector(proxyDefinition *Definition, balancer balancer.Balancer, statsClient client.Client) func(req *http.Request) {
 	paramNameExtractor := router.NewListenPathParamNameExtractor()
 	matcher := router.NewListenPathMatcher()
 
@@ -39,6 +46,7 @@ func createDirector(proxyDefinition *Definition, balancer balancer.Balancer) fun
 			return
 		}
 
+		originalURI := req.RequestURI
 		targetQuery := target.RawQuery
 		req.URL.Scheme = target.Scheme
 		req.URL.Host = target.Host
@@ -83,6 +91,18 @@ func createDirector(proxyDefinition *Definition, balancer balancer.Balancer) fun
 		} else {
 			req.URL.RawQuery = targetQuery + "&" + req.URL.RawQuery
 		}
+
+		// Since director modifies cloned request there is no way (or I just did not find one)
+		// to get upstream from logger middleware, so we're logging original request and upstream here
+		// with the same logging level. Original request is here to match two log messages in case
+		// RequestID is not enabled.
+		log.WithFields(log.Fields{
+			"request":          originalURI,
+			"request-id":       middleware.RequestIDFromContext(req.Context()),
+			"upstream-host":    req.URL.Host,
+			"upstream-request": req.URL.RequestURI(),
+		}).Info("Proxying request to the following upstream")
+		statsClient.TrackMetric(statsSection, bucket.MetricOperation{req.Host})
 	}
 }
 

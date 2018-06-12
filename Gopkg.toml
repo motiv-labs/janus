@@ -26,7 +26,7 @@
 
 [[constraint]]
   name = "github.com/DATA-DOG/godog"
-  version = "0.7.2"
+  version = "0.7.6"
 
 [[constraint]]
   name = "github.com/Knetic/govaluate"
@@ -38,11 +38,11 @@
 
 [[constraint]]
   name = "github.com/dgrijalva/jwt-go"
-  version = "3.0.0"
+  version = "3.2.0"
 
 [[constraint]]
   name = "github.com/go-chi/chi"
-  version = "3.0.0"
+  version = "3.3.2"
 
 [[constraint]]
   name = "github.com/google/go-github"
@@ -54,7 +54,7 @@
 
 [[constraint]]
   name = "github.com/hellofresh/health-go"
-  version = "1.0.0"
+  version = "1.2.6"
 
 [[constraint]]
   name = "github.com/hellofresh/logging-go"
@@ -82,11 +82,11 @@
 
 [[constraint]]
   name = "github.com/rs/cors"
-  version = "1.2.0"
+  version = "1.4.0"
 
 [[constraint]]
   name = "github.com/sirupsen/logrus"
-  version = "1.0.3"
+  version = "1.0.5"
 
 [[constraint]]
   name = "github.com/spf13/cobra"
@@ -98,11 +98,11 @@
 
 [[constraint]]
   name = "github.com/stretchr/testify"
-  version = "1.1.4"
+  version = "1.2.2"
 
 [[constraint]]
   name = "github.com/tidwall/gjson"
-  version = "1.0.6"
+  version = "1.1.0"
 
 [[constraint]]
   name = "github.com/ulule/limiter"
@@ -114,7 +114,7 @@
 
 [[constraint]]
   name = "github.com/go-redis/redis"
-  version = "6.7.2"
+  version = "6.12.0"
 
 [[constraint]]
   name = "github.com/uber/jaeger-client-go"

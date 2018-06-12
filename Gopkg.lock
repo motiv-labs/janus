@@ -20,8 +20,8 @@
     "colors",
     "gherkin"
   ]
-  revision = "4dc98b0e2b130c3c9d06868a050320e5b310d3e7"
-  version = "v0.7.4"
+  revision = "0371765570d36374bef4ab9f62ed0491f0862a3c"
+  version = "v0.7.6"
 
 [[projects]]
   name = "github.com/DataDog/datadog-go"
@@ -85,8 +85,8 @@
 [[projects]]
   name = "github.com/dgrijalva/jwt-go"
   packages = ["."]
-  revision = "dbeaa9332f19a944acb5736b4456cfcc02140e29"
-  version = "v3.1.0"
+  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
+  version = "v3.2.0"
 
 [[projects]]
   name = "github.com/felixge/httpsnoop"
@@ -123,10 +123,12 @@
     "internal/consistenthash",
     "internal/hashtag",
     "internal/pool",
-    "internal/proto"
+    "internal/proto",
+    "internal/singleflight",
+    "internal/util"
   ]
-  revision = "4021ace05686f632ff17fd824bbed229fc474cf8"
-  version = "v6.8.2"
+  revision = "83fb42932f6145ce52df09860384a4653d2d332a"
+  version = "v6.12.0"
 
 [[projects]]
   name = "github.com/gogo/protobuf"
@@ -177,8 +179,8 @@
 [[projects]]
   name = "github.com/hellofresh/health-go"
   packages = ["."]
-  revision = "d22affbbf2b693a3fcb67f55d242f910e0a8944a"
-  version = "v1.2.2"
+  revision = "f29ba41aa29366310c9304dba1f8dff71cf833e6"
+  version = "v1.2.6"
 
 [[projects]]
   name = "github.com/hellofresh/logging-go"
@@ -282,8 +284,8 @@
 [[projects]]
   name = "github.com/rs/cors"
   packages = ["."]
-  revision = "7af7a1e09ba336d2ea14b1ce73bf693c6837dbf6"
-  version = "v1.2"
+  revision = "ca016a06a5753f8ba03029c0aa5e54afb1bf713f"
+  version = "v1.4.0"
 
 [[projects]]
   name = "github.com/satori/go.uuid"
@@ -297,8 +299,8 @@
     ".",
     "hooks/syslog"
   ]
-  revision = "d682213848ed68c0a260ca37d6dd5ace8423f5ba"
-  version = "v1.0.4"
+  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
+  version = "v1.0.5"
 
 [[projects]]
   name = "github.com/spf13/afero"
@@ -346,14 +348,14 @@
     "require",
     "suite"
   ]
-  revision = "b91bfb9ebec76498946beb6af7c0230c7cc7ba6c"
-  version = "v1.2.0"
+  revision = "f35b8ab0b5a2cef36673838d662e249dd9c94686"
+  version = "v1.2.2"
 
 [[projects]]
   name = "github.com/tidwall/gjson"
   packages = ["."]
-  revision = "87033efcaec6215741137e8ca61952c53ef2685d"
-  version = "v1.0.6"
+  revision = "01f00f129617a6fe98941fb920d6c760241b54d2"
+  version = "v1.1.0"
 
 [[projects]]
   branch = "master"
@@ -411,7 +413,11 @@
   name = "golang.org/x/net"
   packages = [
     "context",
-    "context/ctxhttp"
+    "context/ctxhttp",
+    "http2",
+    "http2/hpack",
+    "idna",
+    "lex/httplex"
   ]
   revision = "0ed95abb35c445290478a5348a7b38bb154135fd"
 
@@ -446,12 +452,20 @@
   branch = "master"
   name = "golang.org/x/text"
   packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
     "internal/gen",
+    "internal/tag",
     "internal/triegen",
     "internal/ucd",
+    "language",
+    "secure/bidirule",
     "transform",
+    "unicode/bidi",
     "unicode/cldr",
-    "unicode/norm"
+    "unicode/norm",
+    "unicode/rangetable"
   ]
   revision = "e19ae1496984b1c655b8044a65c0300a3c878dd3"
 
@@ -516,6 +530,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "d37aad5e7c95cd15b55d3fc76ea347522b5c3542c23427448607062d5aecb7f5"
+  inputs-digest = "10ee438f57e6509fc7355235feb9fd3238138313f35ba7386a9ec8f901ebd22c"
   solver-name = "gps-cdcl"
   solver-version = 1

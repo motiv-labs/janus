@@ -9,6 +9,7 @@ import (
 
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/test"
+	"github.com/hellofresh/stats-go/client"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
@@ -137,7 +138,7 @@ func createRegisterAndRouter() router.Router {
 }
 
 func createRegister(r router.Router) *Register {
-	register := NewRegister(WithRouter(r))
+	register := NewRegister(WithRouter(r), WithStatsClient(client.NewNoop(false)))
 
 	definitions := createProxyDefinitions()
 	for _, def := range definitions {

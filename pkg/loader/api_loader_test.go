@@ -13,6 +13,7 @@ import (
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/test"
+	"github.com/hellofresh/stats-go/client"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
@@ -71,7 +72,7 @@ func createRegisterAndRouter() (router.Router, error) {
 	r := createRouter()
 	r.Use(middleware.NewRecovery(errors.RecoveryHandler))
 
-	register := proxy.NewRegister(proxy.WithRouter(r))
+	register := proxy.NewRegister(proxy.WithRouter(r), proxy.WithStatsClient(client.NewNoop(false)))
 	proxyRepo, err := api.NewFileSystemRepository("../../assets/apis")
 	if err != nil {
 		return nil, err
