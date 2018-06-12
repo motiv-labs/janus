@@ -6,7 +6,7 @@ services:
       image: mongo:3
       ports:
           - "27017:27017"
-          
+
   service1:
     image: rodolpheche/wiremock:2.6.0-alpine
     ports:
