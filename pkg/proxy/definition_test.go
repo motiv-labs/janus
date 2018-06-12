@@ -1,10 +1,13 @@
 package proxy
 
 import (
+	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/hellofresh/janus/pkg/middleware"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDefinition(t *testing.T) {
@@ -37,6 +40,10 @@ func TestDefinition(t *testing.T) {
 		{
 			scenario: "add middleware",
 			function: testAddMiddlewares,
+		},
+		{
+			scenario: "unmarshal forwarding_timeouts from json",
+			function: testUnmarshalForwardingTimeoutsFromJSON,
 		},
 	}
 
@@ -109,4 +116,36 @@ func testAddMiddlewares(t *testing.T) {
 	definition.AddMiddleware(middleware.NewLogger().Handler)
 
 	assert.Len(t, definition.Middleware(), 1)
+}
+
+func testUnmarshalForwardingTimeoutsFromJSON(t *testing.T) {
+	rawDefinition := []byte(`
+  {
+    "preserve_host":false,
+    "listen_path":"/example/*",
+    "upstreams":{
+      "balancing":"roundrobin",
+      "targets":[
+        {
+          "target":"http://localhost:9089/hello-world"
+        }
+      ]
+    },
+    "strip_path":false,
+    "append_path":false,
+    "methods":[
+      "GET"
+    ],
+    "forwarding_timeouts": {
+      "dial_timeout": "30s",
+      "response_header_timeout": "31s"
+    }
+  }
+`)
+	definition := NewDefinition()
+	err := json.Unmarshal(rawDefinition, &definition)
+	require.NoError(t, err)
+
+	assert.Equal(t, 30*time.Second, time.Duration(definition.ForwardingTimeouts.DialTimeout))
+	assert.Equal(t, 31*time.Second, time.Duration(definition.ForwardingTimeouts.ResponseHeaderTimeout))
 }
