@@ -58,8 +58,8 @@ func (p *Register) Add(definition *Definition) error {
 	handler.Transport = transport.New(
 		transport.WithCloseIdleConnsPeriod(p.closeIdleConnsPeriod),
 		transport.WithInsecureSkipVerify(definition.InsecureSkipVerify),
-		transport.WithDialTimeout(definition.ForwardingTimeouts.DialTimeout),
-		transport.WithResponseHeaderTimeout(definition.ForwardingTimeouts.ResponseHeaderTimeout),
+		transport.WithDialTimeout(time.Duration(definition.ForwardingTimeouts.DialTimeout)),
+		transport.WithResponseHeaderTimeout(time.Duration(definition.ForwardingTimeouts.ResponseHeaderTimeout)),
 	)
 
 	matcher := router.NewListenPathMatcher()
