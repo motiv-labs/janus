@@ -1,9 +1,9 @@
 package basic
 
 import (
+	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
 const (
@@ -36,11 +36,11 @@ func NewMongoRepository(session *mgo.Session) (*MongoRepository, error) {
 
 // FindAll fetches all the API definitions available
 func (r *MongoRepository) FindAll() ([]*User, error) {
-	result := []*User{}
+	var result []*User
 	session, coll := r.getSession()
 	defer session.Close()
 
-	err := coll.Find(nil).All(&result)
+	err := coll.Find(nil).Sort("username").All(&result)
 	if err != nil {
 		return nil, err
 	}

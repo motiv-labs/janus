@@ -107,6 +107,18 @@
   version = "v1.4.7"
 
 [[projects]]
+  branch = "master"
+  name = "github.com/globalsign/mgo"
+  packages = [
+    ".",
+    "bson",
+    "internal/json",
+    "internal/sasl",
+    "internal/scram"
+  ]
+  revision = "efe0945164a7e582241f37ae8983c075f8f2e870"
+
+[[projects]]
   name = "github.com/go-chi/chi"
   packages = [
     ".",
@@ -511,17 +523,6 @@
   version = "v2.0.6"
 
 [[projects]]
-  name = "gopkg.in/mgo.v2"
-  packages = [
-    ".",
-    "bson",
-    "internal/json",
-    "internal/sasl",
-    "internal/scram"
-  ]
-  revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
-
-[[projects]]
   branch = "v2"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
@@ -530,6 +531,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "10ee438f57e6509fc7355235feb9fd3238138313f35ba7386a9ec8f901ebd22c"
+  inputs-digest = "d86b50911a00b11aac39b88fb4d013fc2b810abe1fbe13f7f2faf1a3bfc8e852"
   solver-name = "gps-cdcl"
   solver-version = 1

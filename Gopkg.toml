@@ -109,10 +109,6 @@
   version = "2.0.0"
 
 [[constraint]]
-  name = "gopkg.in/mgo.v2"
-  revision = "3f83fa5005286a7fe593b055f0d7771a7dce4655"
-
-[[constraint]]
   name = "github.com/go-redis/redis"
   version = "6.12.0"
 
@@ -135,3 +131,7 @@
 [[constraint]]
   branch = "master"
   name = "github.com/mitchellh/go-homedir"
+
+[[constraint]]
+  name = "github.com/globalsign/mgo"
+  version = "r2018.04.23"
