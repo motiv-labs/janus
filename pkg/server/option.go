@@ -29,3 +29,11 @@ func WithProvider(provider api.Repository) Option {
 		s.provider = provider
 	}
 }
+
+// WithProfiler enables or disables profiler
+func WithProfiler(enabled, public bool) Option {
+	return func(s *Server) {
+		s.profilingEnabled = enabled
+		s.profilingPublic = public
+	}
+}

@@ -3,6 +3,7 @@ package web
 import (
 	"fmt"
 	"net/http"
+	"net/http/pprof"
 
 	chimiddleware "github.com/go-chi/chi/middleware"
 	"github.com/hellofresh/janus/pkg/api"
@@ -23,6 +24,8 @@ type Server struct {
 	TLS               config.TLS
 	ConfigurationChan chan api.ConfigurationMessage
 	apiHandler        *APIHandler
+	profilingEnabled  bool
+	profilingPublic   bool
 }
 
 // New creates a new web server
@@ -99,15 +102,29 @@ func (s *Server) addInternalAuthRoutes(r router.Router, guard jwt.Guard) {
 func (s *Server) addInternalRoutes(r router.Router, guard jwt.Guard) {
 	log.Debug("Loading API Endpoints")
 
-	// Apis endpoints
-	group := r.Group("/apis")
-	group.Use(jwt.NewMiddleware(guard).Handler)
+	// APIs endpoints
+	groupAPI := r.Group("/apis")
+	groupAPI.Use(jwt.NewMiddleware(guard).Handler)
 	{
-		group.GET("/", s.apiHandler.Get())
-		group.GET("/{name}", s.apiHandler.GetBy())
-		group.POST("/", s.apiHandler.Post())
-		group.PUT("/{name}", s.apiHandler.PutBy())
-		group.DELETE("/{name}", s.apiHandler.DeleteBy())
+		groupAPI.GET("/", s.apiHandler.Get())
+		groupAPI.GET("/{name}", s.apiHandler.GetBy())
+		groupAPI.POST("/", s.apiHandler.Post())
+		groupAPI.PUT("/{name}", s.apiHandler.PutBy())
+		groupAPI.DELETE("/{name}", s.apiHandler.DeleteBy())
+	}
+
+	if s.profilingEnabled {
+		groupProfiler := r.Group("/debug/pprof")
+		if !s.profilingPublic {
+			groupProfiler.Use(jwt.NewMiddleware(guard).Handler)
+		}
+		{
+			groupProfiler.GET("/*", pprof.Index)
+			groupProfiler.GET("/cmdline", pprof.Cmdline)
+			groupProfiler.GET("/profile", pprof.Profile)
+			groupProfiler.GET("/symbol", pprof.Symbol)
+			groupProfiler.GET("/trace", pprof.Trace)
+		}
 	}
 }
 

@@ -23,7 +23,7 @@ with your API and when things go wrong.
 Complete documentation is available at https://hellofresh.gitbooks.io/janus`,
 	}
 
-	cmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "config file (default is $PWD/janus.toml)")
+	cmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "Config file (default is $PWD/janus.toml)")
 
 	cmd.AddCommand(NewCheckCmd(ctx))
 	cmd.AddCommand(NewVersionCmd(ctx))
