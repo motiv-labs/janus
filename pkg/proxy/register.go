@@ -25,11 +25,14 @@ type Register struct {
 	closeIdleConnsPeriod   time.Duration
 	flushInterval          time.Duration
 	statsClient            client.Client
+	matcher                *router.ListenPathMatcher
 }
 
 // NewRegister creates a new instance of Register
 func NewRegister(opts ...RegisterOption) *Register {
-	r := Register{}
+	r := Register{
+		matcher: router.NewListenPathMatcher(),
+	}
 
 	for _, opt := range opts {
 		opt(&r)
@@ -62,9 +65,8 @@ func (p *Register) Add(definition *Definition) error {
 		transport.WithResponseHeaderTimeout(time.Duration(definition.ForwardingTimeouts.ResponseHeaderTimeout)),
 	)
 
-	matcher := router.NewListenPathMatcher()
-	if matcher.Match(definition.ListenPath) {
-		p.doRegister(matcher.Extract(definition.ListenPath), definition, handler.ServeHTTP)
+	if p.matcher.Match(definition.ListenPath) {
+		p.doRegister(p.matcher.Extract(definition.ListenPath), definition, handler.ServeHTTP)
 	}
 
 	p.doRegister(definition.ListenPath, definition, handler.ServeHTTP)
