@@ -16,7 +16,7 @@ type Specification struct {
 	GraceTimeOut         int64         `envconfig:"GRACE_TIMEOUT"`
 	MaxIdleConnsPerHost  int           `envconfig:"MAX_IDLE_CONNS_PER_HOST"`
 	BackendFlushInterval time.Duration `envconfig:"BACKEND_FLUSH_INTERVAL"`
-	CloseIdleConnsPeriod time.Duration `envconfig:"CLOSE_IDLE_CONNS_PERIOD"`
+	IdleConnTimeout      time.Duration `envconfig:"IDLE_CONN_TIMEOUT"`
 	RequestID            bool          `envconfig:"REQUEST_ID_ENABLED"`
 	Log                  logging.LogConfig
 	Web                  Web

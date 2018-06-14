@@ -39,9 +39,11 @@
 # Optional
 # BackendFlushInterval = 0
 #
-# Defines the time period of how often the idle connections maintained by the proxy are closed.
+# Defines the maximum amount of time an idle (keep-alive) connection will remain idle before closing itself.
 # Optional
-# CloseIdleConnsPeriod = 0
+# Default: "90s"
+#
+# IdleConnTimeout = "90s"
 #
 # Defines if Janus should create a X-Request-Id
 # Optional
@@ -188,7 +190,7 @@
 
     # BufferFlushInterval controls how often the buffer is force-flushed, even if it's not full.
     # It is generally not useful, as it only matters for very low traffic services.
-    # 
+    #
     # Default: 1s
     #
     # BufferFlushInterval = "1s"
@@ -196,7 +198,7 @@
     # LogSpans, when true, enables LoggingReporter that runs in parallel with the main reporter
     # and logs all submitted spans. Main Configuration.Logger must be initialized in the code
     # for this option to have any effect.
-    # 
+    #
     # Default: false
     #
     # LogSpans = false
@@ -204,7 +206,7 @@
     # QueueSize controls how many spans the reporter can keep in memory before it starts dropping
 	  # new spans. The queue is continuously drained by a background go-routine, as fast as spans
 	  # can be sent out of process.
-    # 
+    #
     # Default: 0
     #
     # QueueSize = 0

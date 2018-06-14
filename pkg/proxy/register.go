@@ -22,7 +22,7 @@ const (
 type Register struct {
 	router                 router.Router
 	idleConnectionsPerHost int
-	closeIdleConnsPeriod   time.Duration
+	idleConnTimeout        time.Duration
 	flushInterval          time.Duration
 	statsClient            client.Client
 	matcher                *router.ListenPathMatcher
@@ -59,7 +59,7 @@ func (p *Register) Add(definition *Definition) error {
 	handler := NewBalancedReverseProxy(definition, balancerInstance, p.statsClient)
 	handler.FlushInterval = p.flushInterval
 	handler.Transport = transport.New(
-		transport.WithCloseIdleConnsPeriod(p.closeIdleConnsPeriod),
+		transport.WithIdleConnTimeout(p.idleConnTimeout),
 		transport.WithInsecureSkipVerify(definition.InsecureSkipVerify),
 		transport.WithDialTimeout(time.Duration(definition.ForwardingTimeouts.DialTimeout)),
 		transport.WithResponseHeaderTimeout(time.Duration(definition.ForwardingTimeouts.ResponseHeaderTimeout)),

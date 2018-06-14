@@ -16,9 +16,9 @@ const (
 	// DefaultIdleConnsPerHost the default value set for http.Transport.MaxIdleConnsPerHost.
 	DefaultIdleConnsPerHost = 64
 
-	// DefaultCloseIdleConnsPeriod the default period at which the idle connections are forcibly
-	// closed.
-	DefaultCloseIdleConnsPeriod = 20 * time.Second
+	// DefaultIdleConnTimeout is the default value for the the maximum amount of time an idle
+	// (keep-alive) connection will remain idle before closing itself.
+	DefaultIdleConnTimeout = 90 * time.Second
 )
 
 type transport struct {
@@ -31,10 +31,7 @@ type transport struct {
 	insecureSkipVerify     bool
 	dialTimeout            time.Duration
 	responseHeaderTimeout  time.Duration
-	// Defines the time period of how often the idle connections are
-	// forcibly closed. The default is 12 seconds. When set to less than
-	// 0, the proxy doesn't force closing the idle connections.
-	closeIdleConnsPeriod time.Duration
+	idleConnTimeout        time.Duration
 }
 
 // New creates a new instance of Transport with the given params
@@ -53,8 +50,8 @@ func New(opts ...Option) *http.Transport {
 		t.idleConnectionsPerHost = DefaultIdleConnsPerHost
 	}
 
-	if t.closeIdleConnsPeriod == 0 {
-		t.closeIdleConnsPeriod = DefaultCloseIdleConnsPeriod
+	if t.idleConnTimeout == 0 {
+		t.idleConnTimeout = DefaultIdleConnTimeout
 	}
 
 	tr := &http.Transport{
@@ -65,20 +62,12 @@ func New(opts ...Option) *http.Transport {
 			DualStack: true,
 		}).DialContext,
 		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
+		IdleConnTimeout:       t.idleConnTimeout,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
 		ResponseHeaderTimeout: t.responseHeaderTimeout,
 		MaxIdleConnsPerHost:   t.idleConnectionsPerHost,
 		TLSClientConfig:       &tls.Config{InsecureSkipVerify: t.insecureSkipVerify},
-	}
-
-	if t.closeIdleConnsPeriod > 0 {
-		go func() {
-			for range time.After(t.closeIdleConnsPeriod) {
-				tr.CloseIdleConnections()
-			}
-		}()
 	}
 
 	http2.ConfigureTransport(tr)

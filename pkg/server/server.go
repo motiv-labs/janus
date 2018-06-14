@@ -155,7 +155,7 @@ func (s *Server) startHTTPServers(ctx context.Context) error {
 		proxy.WithRouter(r),
 		proxy.WithFlushInterval(s.globalConfig.BackendFlushInterval),
 		proxy.WithIdleConnectionsPerHost(s.globalConfig.MaxIdleConnsPerHost),
-		proxy.WithCloseIdleConnsPeriod(s.globalConfig.CloseIdleConnsPeriod),
+		proxy.WithIdleConnTimeout(s.globalConfig.IdleConnTimeout),
 		proxy.WithStatsClient(s.statsClient),
 	)
 	s.defLoader = loader.NewAPILoader(s.register)
