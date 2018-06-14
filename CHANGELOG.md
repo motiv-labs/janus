@@ -4,6 +4,7 @@
 - New Retry plugin: you can now configure your endpoints to have a retry in case of a failed request
 - New `read`, `write` and `idle` timeouts for Janus server global configurations
 - New `dial` and `response_header` timeouts that can be set per endpoint
+- New `/debug/pprof` endpoint (handlers from `net/http/pprof`) on API port for debugging and profiling (can be enabled with `start` command flags)
 - Alias `rr` for roundrobin balancer
 
 ## Fixed
