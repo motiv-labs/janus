@@ -2,8 +2,10 @@ package transport
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"golang.org/x/net/http2"
@@ -34,6 +36,22 @@ type transport struct {
 	idleConnTimeout        time.Duration
 }
 
+func (t transport) hash() string {
+	return strings.Join([]string{
+		fmt.Sprintf("idleConnectionsPerHost:%v;", t.idleConnectionsPerHost),
+		fmt.Sprintf("insecureSkipVerify:%v;", t.insecureSkipVerify),
+		fmt.Sprintf("dialTimeout:%v", t.dialTimeout),
+		fmt.Sprintf("responseHeaderTimeout:%v", t.responseHeaderTimeout),
+		fmt.Sprintf("idleConnTimeout:%v", t.idleConnTimeout),
+	}, ";")
+}
+
+var registry map[string]*http.Transport
+
+func init() {
+	registry = make(map[string]*http.Transport)
+}
+
 // New creates a new instance of Transport with the given params
 func New(opts ...Option) *http.Transport {
 	t := transport{}
@@ -54,6 +72,13 @@ func New(opts ...Option) *http.Transport {
 		t.idleConnTimeout = DefaultIdleConnTimeout
 	}
 
+	// let's try to get the cached transport from registry, since there is no need to create lots of
+	// transports with the same configuration
+	hash := t.hash()
+	if tr, ok := registry[hash]; ok {
+		return tr
+	}
+
 	tr := &http.Transport{
 		Proxy: http.ProxyFromEnvironment,
 		DialContext: (&net.Dialer{
@@ -71,6 +96,9 @@ func New(opts ...Option) *http.Transport {
 	}
 
 	http2.ConfigureTransport(tr)
+
+	// save newly created transport in registry, to try to reuse it in the future
+	registry[hash] = tr
 
 	return tr
 }
