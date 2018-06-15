@@ -34,6 +34,8 @@ type Server struct {
 	globalConfig          *config.Specification
 	statsClient           client.Client
 	webServer             *web.Server
+	profilingEnabled      bool
+	profilingPublic       bool
 }
 
 // New creates a new instance of Server
@@ -105,7 +107,7 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 	return nil
 }
 
-// Wait blocks until server is shutted down.
+// Wait blocks until server is shut down.
 func (s *Server) Wait() {
 	<-s.stopChan
 }
@@ -153,7 +155,7 @@ func (s *Server) startHTTPServers(ctx context.Context) error {
 		proxy.WithRouter(r),
 		proxy.WithFlushInterval(s.globalConfig.BackendFlushInterval),
 		proxy.WithIdleConnectionsPerHost(s.globalConfig.MaxIdleConnsPerHost),
-		proxy.WithCloseIdleConnsPeriod(s.globalConfig.CloseIdleConnsPeriod),
+		proxy.WithIdleConnTimeout(s.globalConfig.IdleConnTimeout),
 		proxy.WithStatsClient(s.statsClient),
 	)
 	s.defLoader = loader.NewAPILoader(s.register)
@@ -167,6 +169,7 @@ func (s *Server) startProvider(ctx context.Context) error {
 		web.WithPort(s.globalConfig.Web.Port),
 		web.WithTLS(s.globalConfig.Web.TLS),
 		web.WithCredentials(s.globalConfig.Web.Credentials),
+		web.WithProfiler(s.profilingEnabled, s.profilingPublic),
 	)
 
 	if err := s.webServer.Start(); err != nil {

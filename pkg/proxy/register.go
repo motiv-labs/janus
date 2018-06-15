@@ -22,14 +22,17 @@ const (
 type Register struct {
 	router                 router.Router
 	idleConnectionsPerHost int
-	closeIdleConnsPeriod   time.Duration
+	idleConnTimeout        time.Duration
 	flushInterval          time.Duration
 	statsClient            client.Client
+	matcher                *router.ListenPathMatcher
 }
 
 // NewRegister creates a new instance of Register
 func NewRegister(opts ...RegisterOption) *Register {
-	r := Register{}
+	r := Register{
+		matcher: router.NewListenPathMatcher(),
+	}
 
 	for _, opt := range opts {
 		opt(&r)
@@ -56,15 +59,14 @@ func (p *Register) Add(definition *Definition) error {
 	handler := NewBalancedReverseProxy(definition, balancerInstance, p.statsClient)
 	handler.FlushInterval = p.flushInterval
 	handler.Transport = transport.New(
-		transport.WithCloseIdleConnsPeriod(p.closeIdleConnsPeriod),
+		transport.WithIdleConnTimeout(p.idleConnTimeout),
 		transport.WithInsecureSkipVerify(definition.InsecureSkipVerify),
 		transport.WithDialTimeout(time.Duration(definition.ForwardingTimeouts.DialTimeout)),
 		transport.WithResponseHeaderTimeout(time.Duration(definition.ForwardingTimeouts.ResponseHeaderTimeout)),
 	)
 
-	matcher := router.NewListenPathMatcher()
-	if matcher.Match(definition.ListenPath) {
-		p.doRegister(matcher.Extract(definition.ListenPath), definition, handler.ServeHTTP)
+	if p.matcher.Match(definition.ListenPath) {
+		p.doRegister(p.matcher.Extract(definition.ListenPath), definition, handler.ServeHTTP)
 	}
 
 	p.doRegister(definition.ListenPath, definition, handler.ServeHTTP)

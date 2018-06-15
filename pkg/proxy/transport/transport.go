@@ -2,8 +2,10 @@ package transport
 
 import (
 	"crypto/tls"
+	"fmt"
 	"net"
 	"net/http"
+	"strings"
 	"time"
 
 	"golang.org/x/net/http2"
@@ -16,9 +18,9 @@ const (
 	// DefaultIdleConnsPerHost the default value set for http.Transport.MaxIdleConnsPerHost.
 	DefaultIdleConnsPerHost = 64
 
-	// DefaultCloseIdleConnsPeriod the default period at which the idle connections are forcibly
-	// closed.
-	DefaultCloseIdleConnsPeriod = 20 * time.Second
+	// DefaultIdleConnTimeout is the default value for the the maximum amount of time an idle
+	// (keep-alive) connection will remain idle before closing itself.
+	DefaultIdleConnTimeout = 90 * time.Second
 )
 
 type transport struct {
@@ -31,10 +33,23 @@ type transport struct {
 	insecureSkipVerify     bool
 	dialTimeout            time.Duration
 	responseHeaderTimeout  time.Duration
-	// Defines the time period of how often the idle connections are
-	// forcibly closed. The default is 12 seconds. When set to less than
-	// 0, the proxy doesn't force closing the idle connections.
-	closeIdleConnsPeriod time.Duration
+	idleConnTimeout        time.Duration
+}
+
+func (t transport) hash() string {
+	return strings.Join([]string{
+		fmt.Sprintf("idleConnectionsPerHost:%v;", t.idleConnectionsPerHost),
+		fmt.Sprintf("insecureSkipVerify:%v;", t.insecureSkipVerify),
+		fmt.Sprintf("dialTimeout:%v", t.dialTimeout),
+		fmt.Sprintf("responseHeaderTimeout:%v", t.responseHeaderTimeout),
+		fmt.Sprintf("idleConnTimeout:%v", t.idleConnTimeout),
+	}, ";")
+}
+
+var registryInstance *registry
+
+func init() {
+	registryInstance = newRegistry()
 }
 
 // New creates a new instance of Transport with the given params
@@ -53,8 +68,15 @@ func New(opts ...Option) *http.Transport {
 		t.idleConnectionsPerHost = DefaultIdleConnsPerHost
 	}
 
-	if t.closeIdleConnsPeriod == 0 {
-		t.closeIdleConnsPeriod = DefaultCloseIdleConnsPeriod
+	if t.idleConnTimeout == 0 {
+		t.idleConnTimeout = DefaultIdleConnTimeout
+	}
+
+	// let's try to get the cached transport from registry, since there is no need to create lots of
+	// transports with the same configuration
+	hash := t.hash()
+	if tr, ok := registryInstance.get(hash); ok {
+		return tr
 	}
 
 	tr := &http.Transport{
@@ -65,7 +87,7 @@ func New(opts ...Option) *http.Transport {
 			DualStack: true,
 		}).DialContext,
 		MaxIdleConns:          100,
-		IdleConnTimeout:       90 * time.Second,
+		IdleConnTimeout:       t.idleConnTimeout,
 		TLSHandshakeTimeout:   10 * time.Second,
 		ExpectContinueTimeout: 1 * time.Second,
 		ResponseHeaderTimeout: t.responseHeaderTimeout,
@@ -73,15 +95,10 @@ func New(opts ...Option) *http.Transport {
 		TLSClientConfig:       &tls.Config{InsecureSkipVerify: t.insecureSkipVerify},
 	}
 
-	if t.closeIdleConnsPeriod > 0 {
-		go func() {
-			for range time.After(t.closeIdleConnsPeriod) {
-				tr.CloseIdleConnections()
-			}
-		}()
-	}
-
 	http2.ConfigureTransport(tr)
+
+	// save newly created transport in registry, to try to reuse it in the future
+	registryInstance.put(hash, tr)
 
 	return tr
 }

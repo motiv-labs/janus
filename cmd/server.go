@@ -28,7 +28,10 @@ import (
 )
 
 // ServerStartOptions are the command flags
-type ServerStartOptions struct{}
+type ServerStartOptions struct {
+	profilingEnabled bool
+	profilingPublic  bool
+}
 
 // NewServerStartCmd creates a new http server command
 func NewServerStartCmd(ctx context.Context) *cobra.Command {
@@ -41,6 +44,9 @@ func NewServerStartCmd(ctx context.Context) *cobra.Command {
 			return RunServerStart(ctx, opts)
 		},
 	}
+
+	cmd.PersistentFlags().BoolVarP(&opts.profilingEnabled, "profiling-enabled", "", false, "Enable profiler, will be available on API port at /debug/pprof path")
+	cmd.PersistentFlags().BoolVarP(&opts.profilingPublic, "profiling-public", "", false, "Allow accessing profiler endpoint w/out authentication")
 
 	return cmd
 }
@@ -70,6 +76,7 @@ func RunServerStart(ctx context.Context, opts *ServerStartOptions) error {
 		server.WithGlobalConfig(globalConfig),
 		server.WithMetricsClient(statsClient),
 		server.WithProvider(repo),
+		server.WithProfiler(opts.profilingEnabled, opts.profilingPublic),
 	)
 
 	ctx = ContextWithSignal(ctx)
@@ -78,5 +85,6 @@ func RunServerStart(ctx context.Context, opts *ServerStartOptions) error {
 
 	svr.Wait()
 	log.Info("Shutting down")
+
 	return nil
 }

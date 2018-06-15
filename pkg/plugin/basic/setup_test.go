@@ -3,7 +3,7 @@ package basic
 import (
 	"testing"
 
-	"gopkg.in/mgo.v2"
+	"github.com/globalsign/mgo"
 
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"

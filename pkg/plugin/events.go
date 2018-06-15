@@ -1,22 +1,22 @@
 package plugin
 
 import (
+	"github.com/globalsign/mgo"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/stats-go/client"
-	"gopkg.in/mgo.v2"
 )
 
 // Define the event names for the startup and shutdown events
 const (
-	StartupEvent         string = "startup"
-	AdminAPIStartupEvent string = "admin_startup"
+	StartupEvent         = "startup"
+	AdminAPIStartupEvent = "admin_startup"
 
-	ReloadEvent   string = "reload"
-	ShutdownEvent string = "shutdown"
-	SetupEvent    string = "setup"
+	ReloadEvent   = "reload"
+	ShutdownEvent = "shutdown"
+	SetupEvent    = "setup"
 )
 
 // OnStartup represents a event that happens when Janus starts up on the main process

@@ -7,14 +7,6 @@ import (
 // Option represents the transport options
 type Option func(*transport)
 
-// WithCloseIdleConnsPeriod sets the time period of how often the idle connections are
-// forcibly closed
-func WithCloseIdleConnsPeriod(d time.Duration) Option {
-	return func(t *transport) {
-		t.closeIdleConnsPeriod = d
-	}
-}
-
 // WithInsecureSkipVerify sets tls config insecure skip verify
 func WithInsecureSkipVerify(value bool) Option {
 	return func(t *transport) {
@@ -33,5 +25,14 @@ func WithDialTimeout(d time.Duration) Option {
 func WithResponseHeaderTimeout(d time.Duration) Option {
 	return func(t *transport) {
 		t.responseHeaderTimeout = d
+	}
+}
+
+// WithIdleConnTimeout sets the maximum amount of time an idle
+// (keep-alive) connection will remain idle before closing
+// itself.
+func WithIdleConnTimeout(d time.Duration) Option {
+	return func(t *transport) {
+		t.idleConnTimeout = d
 	}
 }

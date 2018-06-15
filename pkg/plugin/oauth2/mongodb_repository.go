@@ -2,13 +2,13 @@ package oauth2
 
 import (
 	"github.com/asaskevich/govalidator"
+	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
 const (
-	collectionName string = "oauth_servers"
+	collectionName = "oauth_servers"
 )
 
 // Repository defines the behavior of a OAuth Server repo

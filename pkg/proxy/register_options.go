@@ -24,14 +24,6 @@ func WithFlushInterval(d time.Duration) RegisterOption {
 	}
 }
 
-// WithCloseIdleConnsPeriod sets the time period of how often the idle connections are
-// forcibly closed
-func WithCloseIdleConnsPeriod(d time.Duration) RegisterOption {
-	return func(r *Register) {
-		r.closeIdleConnsPeriod = d
-	}
-}
-
 // WithIdleConnectionsPerHost sets idle connections per host option
 func WithIdleConnectionsPerHost(value int) RegisterOption {
 	return func(r *Register) {
@@ -43,5 +35,14 @@ func WithIdleConnectionsPerHost(value int) RegisterOption {
 func WithStatsClient(statsClient client.Client) RegisterOption {
 	return func(r *Register) {
 		r.statsClient = statsClient
+	}
+}
+
+// WithIdleConnTimeout sets the maximum amount of time an idle
+// (keep-alive) connection will remain idle before closing
+// itself.
+func WithIdleConnTimeout(d time.Duration) RegisterOption {
+	return func(r *Register) {
+		r.idleConnTimeout = d
 	}
 }

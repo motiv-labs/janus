@@ -4,14 +4,14 @@ import (
 	"context"
 	"time"
 
+	"github.com/globalsign/mgo"
+	"github.com/globalsign/mgo/bson"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
 )
 
 const (
-	collectionName string = "api_specs"
+	collectionName = "api_specs"
 )
 
 // MongoRepository represents a mongodb repository
@@ -101,11 +101,12 @@ func (r *MongoRepository) Watch(ctx context.Context, cfgChan chan<- Configuratio
 
 // FindAll fetches all the API definitions available
 func (r *MongoRepository) FindAll() ([]*Definition, error) {
-	result := []*Definition{}
+	var result []*Definition
 	session, coll := r.getSession()
 	defer session.Close()
 
-	err := coll.Find(nil).All(&result)
+	// sort by name to have the same order all the time - for easier comparison
+	err := coll.Find(nil).Sort("name").All(&result)
 	if err != nil {
 		return nil, err
 	}

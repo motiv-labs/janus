@@ -118,6 +118,7 @@ func Decode(rawConfig map[string]interface{}, obj interface{}) error {
 	if nil != err {
 		return err
 	}
+
 	err = json.Unmarshal(valJSON, obj)
 	if nil != err {
 		return err
