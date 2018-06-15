@@ -46,10 +46,10 @@ func (t transport) hash() string {
 	}, ";")
 }
 
-var registry map[string]*http.Transport
+var registryInstance *registry
 
 func init() {
-	registry = make(map[string]*http.Transport)
+	registryInstance = newRegistry()
 }
 
 // New creates a new instance of Transport with the given params
@@ -75,7 +75,7 @@ func New(opts ...Option) *http.Transport {
 	// let's try to get the cached transport from registry, since there is no need to create lots of
 	// transports with the same configuration
 	hash := t.hash()
-	if tr, ok := registry[hash]; ok {
+	if tr, ok := registryInstance.get(hash); ok {
 		return tr
 	}
 
@@ -98,7 +98,7 @@ func New(opts ...Option) *http.Transport {
 	http2.ConfigureTransport(tr)
 
 	// save newly created transport in registry, to try to reuse it in the future
-	registry[hash] = tr
+	registryInstance.put(hash, tr)
 
 	return tr
 }
