@@ -2,6 +2,7 @@ package api
 
 import (
 	"encoding/json"
+	"reflect"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -14,7 +15,7 @@ type Plugin struct {
 	Config  map[string]interface{} `bson:"config" json:"config"`
 }
 
-// Definition Represents an API that you want to proxy
+// Definition represents an API that you want to proxy
 type Definition struct {
 	Name        string            `bson:"name" json:"name" valid:"required~name is required,matches(^[A-Za-z0-9]+(?:-[A-Za-z0-9]+)*$)~name cannot contain non-URL friendly characters"`
 	Active      bool              `bson:"active" json:"active"`
@@ -32,6 +33,11 @@ type HealthCheck struct {
 // Configuration represents all the api definitions
 type Configuration struct {
 	Definitions []*Definition
+}
+
+// EqualsTo compares two configurations and determines if they are the same
+func (c *Configuration) EqualsTo(c1 *Configuration) bool {
+	return reflect.DeepEqual(c, c1)
 }
 
 // ConfigurationChanged is the message that is sent when a database configuration has changed

@@ -5,22 +5,20 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
-	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/plugin"
+	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/stats-go/client"
 	"github.com/ulule/limiter"
 	"github.com/ulule/limiter/drivers/middleware/stdlib"
-	smemory "github.com/ulule/limiter/drivers/store/memory"
-	sredis "github.com/ulule/limiter/drivers/store/redis"
+	storeMemory "github.com/ulule/limiter/drivers/store/memory"
+	storeRedis "github.com/ulule/limiter/drivers/store/redis"
 )
 
 var (
 	statsClient client.Client
 	// ErrInvalidPolicy is used when an invalid policy was provided
 	ErrInvalidPolicy = errors.New(http.StatusBadRequest, "policy is not supported")
-	// ErrInvalidStorage is used when an invalid storage was provided
-	ErrInvalidStorage = errors.New(http.StatusBadRequest, "the storage that you are using is not supported for this feature")
 )
 
 const (
@@ -57,7 +55,7 @@ func onStartup(event interface{}) error {
 	return nil
 }
 
-func setupRateLimit(def *api.Definition, rawConfig plugin.Config) error {
+func setupRateLimit(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
 	var config Config
 	err := plugin.Decode(rawConfig, &config)
 	if err != nil {
@@ -75,8 +73,8 @@ func setupRateLimit(def *api.Definition, rawConfig plugin.Config) error {
 	}
 
 	limiterInstance := limiter.New(limiterStore, rate)
-	def.Proxy.AddMiddleware(NewRateLimitLogger(limiterInstance, statsClient))
-	def.Proxy.AddMiddleware(stdlib.NewMiddleware(limiterInstance).Handler)
+	def.AddMiddleware(NewRateLimitLogger(limiterInstance, statsClient))
+	def.AddMiddleware(stdlib.NewMiddleware(limiterInstance).Handler)
 
 	return nil
 }
@@ -90,18 +88,20 @@ func getLimiterStore(policy string, config redisConfig) (limiter.Store, error) {
 		}
 		option.PoolSize = 3
 		option.IdleTimeout = 240 * time.Second
-		client := redis.NewClient(option)
+		redisClient := redis.NewClient(option)
 
 		if config.Prefix == "" {
 			config.Prefix = DefaultPrefix
 		}
 
-		return sredis.NewStoreWithOptions(client, limiter.StoreOptions{
+		return storeRedis.NewStoreWithOptions(redisClient, limiter.StoreOptions{
 			Prefix:   config.Prefix,
 			MaxRetry: limiter.DefaultMaxRetry,
 		})
+
 	case "local":
-		return smemory.NewStore(), nil
+		return storeMemory.NewStore(), nil
+
 	default:
 		return nil, ErrInvalidPolicy
 	}

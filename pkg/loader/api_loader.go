@@ -41,6 +41,8 @@ func (m *APILoader) RegisterAPI(def *api.Definition) {
 	}
 
 	if active {
+		routerDefinition := proxy.NewRouterDefinition(def.Proxy)
+
 		for _, plg := range def.Plugins {
 			l := logger.WithField("name", plg.Name)
 			if plg.Enabled {
@@ -52,7 +54,7 @@ func (m *APILoader) RegisterAPI(def *api.Definition) {
 					continue
 				}
 
-				err = setup(def, plg.Config)
+				err = setup(routerDefinition, plg.Config)
 				if err != nil {
 					l.WithError(err).Error("Error executing plugin")
 				}
@@ -62,10 +64,10 @@ func (m *APILoader) RegisterAPI(def *api.Definition) {
 		}
 
 		if len(def.Proxy.Hosts) > 0 {
-			def.Proxy.AddMiddleware(middleware.NewHostMatcher(def.Proxy.Hosts).Handler)
+			routerDefinition.AddMiddleware(middleware.NewHostMatcher(def.Proxy.Hosts).Handler)
 		}
 
-		m.register.Add(def.Proxy)
+		m.register.Add(routerDefinition)
 		logger.Debug("API registered")
 	} else {
 		logger.WithError(err).Warn("API URI is invalid or not active, skipping...")

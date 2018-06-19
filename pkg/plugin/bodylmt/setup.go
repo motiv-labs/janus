@@ -1,8 +1,8 @@
 package bodylmt
 
 import (
-	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
+	"github.com/hellofresh/janus/pkg/proxy"
 )
 
 // Config represents the Body Limit configuration
@@ -16,13 +16,13 @@ func init() {
 	})
 }
 
-func setupBodyLimit(def *api.Definition, rawConfig plugin.Config) error {
+func setupBodyLimit(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
 	var config Config
 	err := plugin.Decode(rawConfig, &config)
 	if err != nil {
 		return err
 	}
 
-	def.Proxy.AddMiddleware(NewBodyLimitMiddleware(config.Limit))
+	def.AddMiddleware(NewBodyLimitMiddleware(config.Limit))
 	return nil
 }

@@ -3,7 +3,6 @@ package cb
 import (
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -80,7 +79,7 @@ func testAdminStartupSuccess(t *testing.T) {
 }
 
 func testSetupSuccess(t *testing.T) {
-	def := api.NewDefinition()
+	def := proxy.NewRouterDefinition(proxy.NewDefinition())
 
 	err := setupCB(def, make(plugin.Config))
 	require.NoError(t, err)

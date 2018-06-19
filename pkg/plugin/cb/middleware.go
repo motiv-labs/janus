@@ -6,7 +6,6 @@ import (
 	"github.com/Knetic/govaluate"
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/felixge/httpsnoop"
-	"github.com/hellofresh/janus/pkg/api"
 	janusErr "github.com/hellofresh/janus/pkg/errors"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -17,11 +16,11 @@ const (
 )
 
 // NewCBMiddleware creates a new cb middleware
-func NewCBMiddleware(cfg Config, def *api.Definition) func(http.Handler) http.Handler {
+func NewCBMiddleware(cfg Config) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			logger := log.WithFields(log.Fields{
-				"name":                    def.Name,
+				"name":                    cfg.Name,
 				"timeout":                 cfg.Timeout,
 				"max_concurrent_requests": cfg.MaxConcurrentRequests,
 				"error_percent_threshold": cfg.ErrorPercentThreshold,
@@ -39,7 +38,7 @@ func NewCBMiddleware(cfg Config, def *api.Definition) func(http.Handler) http.Ha
 				return
 			}
 
-			err = hystrix.Do(def.Name, func() error {
+			err = hystrix.Do(cfg.Name, func() error {
 				m := httpsnoop.CaptureMetrics(handler, w, r)
 				params := make(map[string]interface{}, 8)
 				params["statusCode"] = m.Code

@@ -3,8 +3,8 @@ package basic
 import (
 	"errors"
 
-	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
+	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 )
 
@@ -22,19 +22,19 @@ func init() {
 	})
 }
 
-func setupBasicAuth(def *api.Definition, rawConfig plugin.Config) error {
+func setupBasicAuth(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
 	if repo == nil {
-		return errors.New("The repository was not set by onStartup event")
+		return errors.New("the repository was not set by onStartup event")
 	}
 
-	def.Proxy.AddMiddleware(NewBasicAuth(repo))
+	def.AddMiddleware(NewBasicAuth(repo))
 	return nil
 }
 
 func onAdminAPIStartup(event interface{}) error {
 	e, ok := event.(plugin.OnAdminAPIStartup)
 	if !ok {
-		return errors.New("Could not convert event to admin startup type")
+		return errors.New("could not convert event to admin startup type")
 	}
 
 	adminRouter = e.Router
@@ -46,7 +46,7 @@ func onStartup(event interface{}) error {
 
 	e, ok := event.(plugin.OnStartup)
 	if !ok {
-		return errors.New("Could not convert event to startup type")
+		return errors.New("could not convert event to startup type")
 	}
 
 	if e.MongoSession == nil {

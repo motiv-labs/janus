@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 
-	"github.com/hellofresh/janus/pkg/api"
+	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -24,7 +24,7 @@ var (
 // SetupFunc is used to set up a plugin, or in other words,
 // execute a directive. It will be called once per key for
 // each server block it appears in.
-type SetupFunc func(def *api.Definition, rawConfig Config) error
+type SetupFunc func(def *proxy.RouterDefinition, rawConfig Config) error
 
 // Config initialization options.
 type Config map[string]interface{}
