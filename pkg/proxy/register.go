@@ -47,7 +47,7 @@ func (p *Register) UpdateRouter(router router.Router) {
 }
 
 // Add register a new route
-func (p *Register) Add(definition *Definition) error {
+func (p *Register) Add(definition *RouterDefinition) error {
 	log.WithField("balancing_alg", definition.Upstreams.Balancing).Debug("Using a load balancing algorithm")
 	balancerInstance, err := balancer.New(definition.Upstreams.Balancing)
 	if err != nil {
@@ -56,7 +56,7 @@ func (p *Register) Add(definition *Definition) error {
 		return errors.Wrap(err, msg)
 	}
 
-	handler := NewBalancedReverseProxy(definition, balancerInstance, p.statsClient)
+	handler := NewBalancedReverseProxy(definition.Definition, balancerInstance, p.statsClient)
 	handler.FlushInterval = p.flushInterval
 	handler.Transport = transport.New(
 		transport.WithIdleConnTimeout(p.idleConnTimeout),
@@ -73,7 +73,7 @@ func (p *Register) Add(definition *Definition) error {
 	return nil
 }
 
-func (p *Register) doRegister(listenPath string, def *Definition, handler http.HandlerFunc) {
+func (p *Register) doRegister(listenPath string, def *RouterDefinition, handler http.HandlerFunc) {
 	log.WithFields(log.Fields{
 		"listen_path": listenPath,
 	}).Debug("Registering a route")

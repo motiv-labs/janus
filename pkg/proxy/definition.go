@@ -21,7 +21,11 @@ type Definition struct {
 	Methods            []string           `bson:"methods" json:"methods"`
 	Hosts              []string           `bson:"hosts" json:"hosts"`
 	ForwardingTimeouts ForwardingTimeouts `bson:"forwarding_timeouts" json:"forwarding_timeouts" mapstructure:"forwarding_timeouts"`
+}
 
+// RouterDefinition represents an API that you want to proxy with internal router routines
+type RouterDefinition struct {
+	*Definition
 	middleware []router.Constructor
 }
 
@@ -81,13 +85,18 @@ func NewDefinition() *Definition {
 	}
 }
 
+// NewRouterDefinition creates a new Proxy RouterDefinition from Proxy Definition
+func NewRouterDefinition(def *Definition) *RouterDefinition {
+	return &RouterDefinition{Definition: def}
+}
+
 // Middleware returns s.middleware (useful for tests).
-func (d *Definition) Middleware() []router.Constructor {
+func (d *RouterDefinition) Middleware() []router.Constructor {
 	return d.middleware
 }
 
 // AddMiddleware adds a middleware to a site's middleware stack.
-func (d *Definition) AddMiddleware(m router.Constructor) {
+func (d *RouterDefinition) AddMiddleware(m router.Constructor) {
 	d.middleware = append(d.middleware, m)
 }
 

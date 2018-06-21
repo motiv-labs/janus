@@ -1,8 +1,8 @@
 package responsetransformer
 
 import (
-	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
+	"github.com/hellofresh/janus/pkg/proxy"
 )
 
 func init() {
@@ -11,13 +11,13 @@ func init() {
 	})
 }
 
-func setupResponseTransformer(def *api.Definition, rawConfig plugin.Config) error {
+func setupResponseTransformer(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
 	var config Config
 	err := plugin.Decode(rawConfig, &config)
 	if err != nil {
 		return err
 	}
 
-	def.Proxy.AddMiddleware(NewResponseTransformer(config))
+	def.AddMiddleware(NewResponseTransformer(config))
 	return nil
 }

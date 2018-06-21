@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net"
 	"net/http"
-	"reflect"
 	"time"
 
 	"github.com/go-chi/chi"
@@ -215,7 +214,7 @@ func (s *Server) listenProviders(stop chan struct{}) {
 				return
 			}
 
-			if reflect.DeepEqual(s.currentConfigurations, configMsg.Configurations) {
+			if s.currentConfigurations.EqualsTo(configMsg.Configurations) {
 				log.Debug("Skipping same configuration")
 				continue
 			}

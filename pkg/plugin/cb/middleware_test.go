@@ -5,7 +5,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/test"
 	"github.com/stretchr/testify/assert"
 )
@@ -42,12 +41,10 @@ func TestMiddleware(t *testing.T) {
 
 func testWrongPredicate(t *testing.T, r *http.Request, w *httptest.ResponseRecorder) {
 	cfg := Config{
+		Name:      "example",
 		Predicate: "this is wrong",
 	}
-	d := api.Definition{
-		Name: "example",
-	}
-	mw := NewCBMiddleware(cfg, &d)
+	mw := NewCBMiddleware(cfg)
 
 	mw(http.HandlerFunc(test.Ping)).ServeHTTP(w, r)
 
@@ -55,10 +52,7 @@ func testWrongPredicate(t *testing.T, r *http.Request, w *httptest.ResponseRecor
 }
 
 func testSuccessfulUpstreamRetry(t *testing.T, r *http.Request, w *httptest.ResponseRecorder) {
-	d := api.Definition{
-		Name: "example",
-	}
-	mw := NewCBMiddleware(Config{}, &d)
+	mw := NewCBMiddleware(Config{Name: "example"})
 
 	mw(http.HandlerFunc(test.Ping)).ServeHTTP(w, r)
 
@@ -66,10 +60,7 @@ func testSuccessfulUpstreamRetry(t *testing.T, r *http.Request, w *httptest.Resp
 }
 
 func testFailedUpstreamRetry(t *testing.T, r *http.Request, w *httptest.ResponseRecorder) {
-	d := api.Definition{
-		Name: "example",
-	}
-	mw := NewCBMiddleware(Config{}, &d)
+	mw := NewCBMiddleware(Config{Name: "example"})
 
 	mw(test.FailWith(http.StatusBadGateway)).ServeHTTP(w, r)
 

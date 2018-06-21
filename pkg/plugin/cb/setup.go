@@ -4,8 +4,8 @@ import (
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/afex/hystrix-go/hystrix/metric_collector"
 	"github.com/afex/hystrix-go/plugins"
-	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
+	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -18,6 +18,7 @@ const (
 // Config represents the Body Limit configuration
 type Config struct {
 	hystrix.CommandConfig
+	Name      string `json:"name"`
 	Predicate string `json:"predicate"`
 }
 
@@ -29,27 +30,27 @@ func init() {
 	})
 }
 
-func setupCB(def *api.Definition, rawConfig plugin.Config) error {
-	logger := log.WithFields(log.Fields{
-		"plugin_event": plugin.SetupEvent,
-		"plugin":       pluginName,
-	})
-
+func setupCB(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
 	var c Config
 	err := plugin.Decode(rawConfig, &c)
 	if err != nil {
 		return err
 	}
 
-	logger.WithField("name", def.Name).Debug("Configuring cb plugin")
-	hystrix.ConfigureCommand(def.Name, hystrix.CommandConfig{
+	log.WithFields(log.Fields{
+		"plugin_event": plugin.SetupEvent,
+		"plugin":       pluginName,
+		"name":         c.Name,
+	}).Debug("Configuring cb plugin")
+
+	hystrix.ConfigureCommand(c.Name, hystrix.CommandConfig{
 		Timeout:               c.Timeout,
 		MaxConcurrentRequests: c.MaxConcurrentRequests,
 		ErrorPercentThreshold: c.ErrorPercentThreshold,
 		SleepWindow:           c.SleepWindow,
 	})
 
-	def.Proxy.AddMiddleware(NewCBMiddleware(c, def))
+	def.AddMiddleware(NewCBMiddleware(c))
 	return nil
 }
 
@@ -64,7 +65,7 @@ func onAdminAPIStartup(event interface{}) error {
 		return errors.New("Could not convert event to admin startup type")
 	}
 
-	logger.Debug("Registring hystrix stream endpoint")
+	logger.Debug("Registering hystrix stream endpoint")
 	hystrixStreamHandler := hystrix.NewStreamHandler()
 	hystrixStreamHandler.Start()
 

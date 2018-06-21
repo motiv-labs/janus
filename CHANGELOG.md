@@ -14,6 +14,9 @@
 - Redis is not necessary anymore for the cluster to work
 - Removed proxy definition property `enable_load_balancing` as it was not being used
 
+## Updated
+- Added `name` parameter for `cb` (Circuit Breaker) plugin to set group explicitly
+
 # 3.7.0
 
 ## Added

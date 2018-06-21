@@ -112,10 +112,10 @@ func testIsBalancerDefined(t *testing.T) {
 }
 
 func testAddMiddlewares(t *testing.T) {
-	definition := NewDefinition()
-	definition.AddMiddleware(middleware.NewLogger().Handler)
+	routerDefinition := NewRouterDefinition(NewDefinition())
+	routerDefinition.AddMiddleware(middleware.NewLogger().Handler)
 
-	assert.Len(t, definition.Middleware(), 1)
+	assert.Len(t, routerDefinition.Middleware(), 1)
 }
 
 func testUnmarshalForwardingTimeoutsFromJSON(t *testing.T) {

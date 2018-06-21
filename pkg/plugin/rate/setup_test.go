@@ -3,8 +3,8 @@ package rate
 import (
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
+	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,11 +38,11 @@ func TestRateLimitPluginLocalPolicy(t *testing.T) {
 		"policy": "local",
 	}
 
-	def := api.NewDefinition()
+	def := proxy.NewRouterDefinition(proxy.NewDefinition())
 	err := setupRateLimit(def, rawConfig)
 
 	assert.NoError(t, err)
-	assert.Len(t, def.Proxy.Middleware(), 2)
+	assert.Len(t, def.Middleware(), 2)
 }
 
 func TestRateLimitPluginRedisPolicyWithInvalidStorage(t *testing.T) {
@@ -51,7 +51,7 @@ func TestRateLimitPluginRedisPolicyWithInvalidStorage(t *testing.T) {
 		"policy": "redis",
 	}
 
-	def := api.NewDefinition()
+	def := proxy.NewRouterDefinition(proxy.NewDefinition())
 	err := setupRateLimit(def, rawConfig)
 
 	assert.Error(t, err)
@@ -63,7 +63,7 @@ func TestRateLimitPluginInvalidPolicy(t *testing.T) {
 		"policy": "wrong",
 	}
 
-	def := api.NewDefinition()
+	def := proxy.NewRouterDefinition(proxy.NewDefinition())
 	err := setupRateLimit(def, rawConfig)
 
 	assert.Error(t, err)

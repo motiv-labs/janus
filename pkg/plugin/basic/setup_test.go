@@ -5,7 +5,6 @@ import (
 
 	"github.com/globalsign/mgo"
 
-	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
@@ -13,7 +12,7 @@ import (
 )
 
 func TestSetup(t *testing.T) {
-	def := api.NewDefinition()
+	def := proxy.NewRouterDefinition(proxy.NewDefinition())
 
 	event1 := plugin.OnAdminAPIStartup{Router: router.NewChiRouter()}
 	err := onAdminAPIStartup(event1)
