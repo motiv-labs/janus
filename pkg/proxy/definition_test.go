@@ -138,8 +138,8 @@ func testMarshalForwardingTimeoutsToJSON(t *testing.T) {
 	}
 	jsonDefinition, err := json.Marshal(&definition)
 	require.NoError(t, err)
-	assert.Contains(t, string(jsonDefinition), "30s")
-	assert.Contains(t, string(jsonDefinition), "31s")
+	assert.Contains(t, string(jsonDefinition), `"dial_timeout":"30s"`)
+	assert.Contains(t, string(jsonDefinition), `"response_header_timeout":"31s"`)
 }
 
 func testUnmarshalForwardingTimeoutsFromJSON(t *testing.T) {
