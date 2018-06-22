@@ -47,6 +47,14 @@ type Targets []*Target
 // Duration is the time.Duration that can be unmarshalled from JSON
 type Duration time.Duration
 
+// MarshalJSON implements marshalling from JSON
+func (d *Duration) MarshalJSON() ([]byte, error) {
+	s := (*time.Duration)(d).String()
+	s = strconv.Quote(s)
+
+	return []byte(s), nil
+}
+
 // UnmarshalJSON implements unmarshalling from JSON
 func (d *Duration) UnmarshalJSON(data []byte) (err error) {
 	s := string(data)
