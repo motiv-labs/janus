@@ -25,6 +25,14 @@ type (
 	Duration time.Duration
 )
 
+// MarshalJSON is the implementation of the MarshalJSON interface
+func (d *Duration) MarshalJSON() ([]byte, error) {
+	s := (*time.Duration)(d).String()
+	s = strconv.Quote(s)
+
+	return []byte(s), nil
+}
+
 // UnmarshalJSON is the implementation of the UnmarshalJSON interface
 func (d *Duration) UnmarshalJSON(data []byte) error {
 	s := string(data)

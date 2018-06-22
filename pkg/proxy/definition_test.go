@@ -42,6 +42,10 @@ func TestDefinition(t *testing.T) {
 			function: testAddMiddlewares,
 		},
 		{
+			scenario: "marshal forwarding_timeouts to json",
+			function: testMarshalForwardingTimeoutsToJSON,
+		},
+		{
 			scenario: "unmarshal forwarding_timeouts from json",
 			function: testUnmarshalForwardingTimeoutsFromJSON,
 		},
@@ -116,6 +120,26 @@ func testAddMiddlewares(t *testing.T) {
 	routerDefinition.AddMiddleware(middleware.NewLogger().Handler)
 
 	assert.Len(t, routerDefinition.Middleware(), 1)
+}
+
+func testMarshalForwardingTimeoutsToJSON(t *testing.T) {
+	definition := Definition{
+		ListenPath: "/*",
+		Upstreams: &Upstreams{
+			Balancing: "roundrobin",
+			Targets: Targets{
+				{Target: "http://test.com"},
+			},
+		},
+		ForwardingTimeouts: ForwardingTimeouts{
+			DialTimeout:           Duration(30 * time.Second),
+			ResponseHeaderTimeout: Duration(31 * time.Second),
+		},
+	}
+	jsonDefinition, err := json.Marshal(&definition)
+	require.NoError(t, err)
+	assert.Contains(t, string(jsonDefinition), `"dial_timeout":"30s"`)
+	assert.Contains(t, string(jsonDefinition), `"response_header_timeout":"31s"`)
 }
 
 func testUnmarshalForwardingTimeoutsFromJSON(t *testing.T) {
