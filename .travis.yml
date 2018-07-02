@@ -5,7 +5,7 @@ services:
   - docker
 
 go:
-  - 1.x
+  - stable
 
 env:
   - MAKE_TASK=test
