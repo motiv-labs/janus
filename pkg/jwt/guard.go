@@ -31,7 +31,7 @@ func NewGuard(cred config.Credentials) Guard {
 			TokenLookup:    "header:Authorization",
 		},
 		SigningMethod: SigningMethod{Alg: cred.Algorithm, Key: cred.Secret},
-		Timeout:       time.Hour,
+		Timeout:       cred.Timeout,
 		MaxRefresh:    time.Hour * 24,
 	}
 }

@@ -79,9 +79,10 @@ type Stats struct {
 type Credentials struct {
 	// Algorithm defines admin JWT signing algorithm.
 	// Currently the following algorithms are supported: HS256, HS384, HS512.
-	Algorithm      string `envconfig:"ALGORITHM"`
-	Secret         string `envconfig:"SECRET"`
-	JanusAdminTeam string `envconfig:"JANUS_ADMIN_TEAM"`
+	Algorithm      string        `envconfig:"ALGORITHM"`
+	Secret         string        `envconfig:"SECRET"`
+	JanusAdminTeam string        `envconfig:"JANUS_ADMIN_TEAM"`
+	Timeout        time.Duration `envconfig:"TOKEN_TIMEOUT"`
 	Github         Github
 	Basic          Basic
 }
@@ -147,6 +148,7 @@ func init() {
 	viper.SetDefault("web.tls.port", "8444")
 	viper.SetDefault("web.tls.redirect", true)
 	viper.SetDefault("web.credentials.algorithm", "HS256")
+	viper.SetDefault("web.credentials.timeout", time.Hour)
 	viper.SetDefault("web.credentials.basic.users", map[string]string{"admin": "admin"})
 	viper.SetDefault("web.credentials.github.teams", make(map[string]string))
 
