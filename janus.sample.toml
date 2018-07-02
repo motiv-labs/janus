@@ -112,6 +112,8 @@
     algorithm = "HS256"
     # This is the secret that you will use to encrypt your JWT
     secret = "secret key"
+    # This is the duration before the issued administration token expires
+    # timeout = "1h"
 
     # [web.credentials.github]
     # organizations = ["yourOrganization"]
