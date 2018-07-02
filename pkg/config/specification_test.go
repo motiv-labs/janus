@@ -16,6 +16,7 @@ func Test_LoadEnv(t *testing.T) {
 	os.Setenv("GITHUB_ORGANIZATIONS", "hellofresh,tests")
 	os.Setenv("GITHUB_TEAMS", "hellofresh:tests,tests:devs")
 	os.Setenv("JANUS_ADMIN_TEAM", "janus-owners")
+	os.Setenv("TOKEN_TIMEOUT", "2h")
 
 	globalConfig, err := LoadEnv()
 	require.NoError(t, err)
@@ -31,6 +32,7 @@ func Test_LoadEnv(t *testing.T) {
 	assert.Equal(t, map[string]string{"hellofresh": "tests", "tests": "devs"}, globalConfig.Web.Credentials.Github.Teams)
 	assert.Equal(t, []string{"hellofresh", "tests"}, globalConfig.Web.Credentials.Github.Organizations)
 	assert.Equal(t, "janus-owners", globalConfig.Web.Credentials.JanusAdminTeam)
+	assert.Equal(t, 2*time.Hour, globalConfig.Web.Credentials.Timeout)
 	assert.True(t, globalConfig.Web.Credentials.Github.IsConfigured())
 
 }
