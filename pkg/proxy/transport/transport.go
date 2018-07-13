@@ -38,8 +38,8 @@ type transport struct {
 
 func (t transport) hash() string {
 	return strings.Join([]string{
-		fmt.Sprintf("idleConnectionsPerHost:%v;", t.idleConnectionsPerHost),
-		fmt.Sprintf("insecureSkipVerify:%v;", t.insecureSkipVerify),
+		fmt.Sprintf("idleConnectionsPerHost:%v", t.idleConnectionsPerHost),
+		fmt.Sprintf("insecureSkipVerify:%v", t.insecureSkipVerify),
 		fmt.Sprintf("dialTimeout:%v", t.dialTimeout),
 		fmt.Sprintf("responseHeaderTimeout:%v", t.responseHeaderTimeout),
 		fmt.Sprintf("idleConnTimeout:%v", t.idleConnTimeout),

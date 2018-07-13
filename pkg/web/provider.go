@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"net/http/pprof"
 
-	chimiddleware "github.com/go-chi/chi/middleware"
+	chiMiddleware "github.com/go-chi/chi/middleware"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	httpErrors "github.com/hellofresh/janus/pkg/errors"
@@ -66,8 +66,8 @@ func (s *Server) AddRoutes(r router.Router) {
 	// create authentication for Janus
 	guard := jwt.NewGuard(s.Credentials)
 	r.Use(
-		chimiddleware.StripSlashes,
-		chimiddleware.DefaultCompress,
+		chiMiddleware.StripSlashes,
+		chiMiddleware.DefaultCompress,
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(httpErrors.RecoveryHandler),
 		middleware.NewOpenTracing(s.TLS.IsHTTPS()).Handler,
