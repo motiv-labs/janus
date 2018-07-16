@@ -78,6 +78,11 @@ func (d *Duration) UnmarshalJSON(data []byte) (err error) {
 	return
 }
 
+// GetBSON implements marshalling to BSON
+func (d Duration) GetBSON() (interface{}, error) {
+	return time.Duration(d).String(), nil
+}
+
 // SetBSON implements unmarshalling from BSON
 func (d *Duration) SetBSON(raw bson.Raw) error {
 	// took BSON string parsing logic from BSON decoder

@@ -425,6 +425,87 @@ Feature: Manage proxies wit API.
         When I request "/apis/foo-bar" API path with "GET" method
         Then I should receive 404 response code
 
+    Scenario: API must update existing routes with new forwarding timeouts
+        Given request JWT token is valid admin token
+        And request JSON payload:
+            """
+            {
+                "name":"example",
+                "active":true,
+                "proxy":{
+                    "preserve_host":false,
+                    "listen_path":"/example/*",
+                    "upstreams":{
+                        "balancing":"roundrobin",
+                        "targets":[
+                            {
+                                "target":"http://localhost:9089/hello-world"
+                            }
+                        ]
+                    },
+                    "strip_path":false,
+                    "append_path":false,
+                    "methods":[
+                        "GET"
+                    ],
+                    "forwarding_timeouts": {
+                        "dial_timeout": "5s",
+                        "response_header_timeout": "7s"
+                    }
+                },
+                "health_check":{
+                    "url":"https://example.com/status"
+                }
+            }
+            """
+        When I request "/apis" API path with "POST" method
+        Then I should receive 201 response code
+        And header "Location" should be "/apis/example"
+
+        When I request "/apis/example" API path with "GET" method
+        Then I should receive 200 response code
+        And response JSON body has "proxy.forwarding_timeouts.dial_timeout" path with value '5s'
+        And response JSON body has "proxy.forwarding_timeouts.response_header_timeout" path with value '7s'
+
+        Given request JSON payload:
+            """
+            {
+                "name":"example",
+                "active":true,
+                "proxy":{
+                    "preserve_host":false,
+                    "listen_path":"/example/*",
+                    "upstreams":{
+                        "balancing":"roundrobin",
+                        "targets":[
+                            {
+                                "target":"http://localhost:9089/hello-world"
+                            }
+                        ]
+                    },
+                    "strip_path":false,
+                    "append_path":false,
+                    "methods":[
+                        "GET"
+                    ],
+                    "forwarding_timeouts": {
+                        "dial_timeout": "15s",
+                        "response_header_timeout": "17s"
+                    }
+                },
+                "health_check":{
+                    "url":"https://example.com/status"
+                }
+            }
+            """
+        When I request "/apis/example" API path with "PUT" method
+        Then I should receive 200 response code
+
+        When I request "/apis/example" API path with "GET" method
+        Then I should receive 200 response code
+        And response JSON body has "proxy.forwarding_timeouts.dial_timeout" path with value '15s'
+        And response JSON body has "proxy.forwarding_timeouts.response_header_timeout" path with value '17s'
+
     Scenario: API must delete existing routes
         Given request JWT token is valid admin token
         And request JSON payload:
