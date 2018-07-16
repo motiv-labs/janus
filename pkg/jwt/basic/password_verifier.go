@@ -51,29 +51,29 @@ func (v *PasswordVerifier) Verify(r *http.Request, httpClient *http.Client) (boo
 func (v *PasswordVerifier) getUserFromRequest(r *http.Request) (*user, error) {
 	var u *user
 
-	//checks basic auth
+	// checks basic auth
 	username, password, ok := r.BasicAuth()
-	if ok {
-		u = &user{
-			Username: username,
-			Password: password,
-		}
+	u = &user{
+		Username: username,
+		Password: password,
 	}
 
 	// checks if the content is json otherwise just get from the form params
-	contentType := filterFlags(r.Header.Get("Content-Type"))
-	switch contentType {
-	case contentTypeJSON:
-		err := json.NewDecoder(r.Body).Decode(&u)
-		if err != nil {
-			return u, errors.Wrap(err, "could not parse the json body")
-		}
-	default:
-		r.ParseForm()
+	if !ok {
+		contentType := filterFlags(r.Header.Get("Content-Type"))
+		switch contentType {
+		case contentTypeJSON:
+			err := json.NewDecoder(r.Body).Decode(&u)
+			if err != nil {
+				return u, errors.Wrap(err, "could not parse the json body")
+			}
+		default:
+			r.ParseForm()
 
-		u = &user{
-			Username: r.Form.Get("username"),
-			Password: r.Form.Get("password"),
+			u = &user{
+				Username: r.Form.Get("username"),
+				Password: r.Form.Get("password"),
+			}
 		}
 	}
 
