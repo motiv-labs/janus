@@ -38,7 +38,7 @@ func initLog() {
 	}
 }
 
-func initStatsd() {
+func initStatsClient() {
 	// FIXME: this causes application hang because we're in the locked log already
 	//statsLog.SetHandler(func(msg string, fields map[string]interface{}, err error) {
 	//	entry := log.WithFields(log.Fields(fields))
@@ -61,7 +61,7 @@ func initStatsd() {
 
 	statsClient, err = stats.NewClient(globalConfig.Stats.DSN)
 	if err != nil {
-		log.WithError(err).Fatal("Error initializing statsd client")
+		log.WithError(err).Fatal("Error initializing stats client")
 	}
 
 	statsClient.SetHTTPMetricCallback(bucket.NewHasIDAtSecondLevelCallback(&bucket.SecondLevelIDConfig{

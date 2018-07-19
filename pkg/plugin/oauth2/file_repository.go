@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"io/ioutil"
 	"path/filepath"
-	"strings"
 	"sync"
 
 	log "github.com/sirupsen/logrus"
@@ -27,7 +26,7 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 	}
 
 	for _, f := range files {
-		if strings.Contains(f.Name(), ".json") {
+		if filepath.Ext(f.Name()) == ".json" {
 			filePath := filepath.Join(dir, f.Name())
 			oauthServerRaw, err := ioutil.ReadFile(filePath)
 			if err != nil {

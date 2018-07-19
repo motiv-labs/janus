@@ -37,7 +37,7 @@ func TestCollector(t *testing.T) {
 }
 
 func testCollectorCreated(t *testing.T) {
-	metricsClient := client.NewNoop(false)
+	metricsClient := client.NewNoop()
 	_, err := NewStatsCollector("test", metricsClient)
 
 	require.NoError(t, err)
@@ -50,7 +50,7 @@ func testCollectorNotCreated(t *testing.T) {
 }
 
 func testCollectorRegistry(t *testing.T) {
-	c := NewCollectorRegistry(client.NewNoop(false))
+	c := NewCollectorRegistry(client.NewNoop())
 	require.NotNil(t, c)
 
 	c = NewCollectorRegistry(nil)

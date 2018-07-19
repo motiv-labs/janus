@@ -17,7 +17,7 @@ deps:
 	@go get -u github.com/golang/dep/cmd/dep
 	@go get -u github.com/golang/lint/golint
 	@go get -u github.com/DATA-DOG/godog/cmd/godog
-	@dep ensure -vendor-only
+	@dep ensure -v -vendor-only
 
 build:
 	@echo "$(OK_COLOR)==> Building... $(NO_COLOR)"
