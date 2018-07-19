@@ -47,7 +47,7 @@ func BuildRepository(dsn string, refreshTime time.Duration) (Repository, error) 
 		log.Debug("File system based configuration chosen")
 		apiPath := fmt.Sprintf("%s/apis", dsnURL.Path)
 
-		log.WithField("api_path", apiPath).Debug("Trying to load configuration files")
+		log.WithField("path", apiPath).Debug("Trying to load API configuration files")
 		repo, err := NewFileSystemRepository(apiPath)
 		if err != nil {
 			return nil, errors.Wrap(err, "could not create a file system repository")

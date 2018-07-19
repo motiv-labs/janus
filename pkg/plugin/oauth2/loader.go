@@ -108,7 +108,7 @@ func (m *OAuthLoader) getManager(oauthServer *OAuth) (Manager, error) {
 
 func (m *OAuthLoader) registerRoutes(endpoints map[*proxy.RouterDefinition][]router.Constructor) {
 	for endpoint, middleware := range endpoints {
-		if endpoint.Definition == nil {
+		if endpoint.Definition == nil || endpoint.Definition.ListenPath == "" {
 			log.Debug("Endpoint not registered")
 			continue
 		}

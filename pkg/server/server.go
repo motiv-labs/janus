@@ -69,8 +69,19 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 		}
 		log.Info("Stopping server gracefully")
 	}()
+
+	// Register must be initialised synchronously to avoid race condition
+	r := s.createRouter()
+	s.register = proxy.NewRegister(
+		proxy.WithRouter(r),
+		proxy.WithFlushInterval(s.globalConfig.BackendFlushInterval),
+		proxy.WithIdleConnectionsPerHost(s.globalConfig.MaxIdleConnsPerHost),
+		proxy.WithIdleConnTimeout(s.globalConfig.IdleConnTimeout),
+		proxy.WithStatsClient(s.statsClient),
+	)
+
 	go func() {
-		if err := s.startHTTPServers(ctx); err != nil {
+		if err := s.startHTTPServers(ctx, r); err != nil {
 			log.WithError(err).Fatal("Could not start http servers")
 		}
 	}()
@@ -148,15 +159,7 @@ func (s *Server) Close() error {
 	return s.server.Close()
 }
 
-func (s *Server) startHTTPServers(ctx context.Context) error {
-	r := s.createRouter()
-	s.register = proxy.NewRegister(
-		proxy.WithRouter(r),
-		proxy.WithFlushInterval(s.globalConfig.BackendFlushInterval),
-		proxy.WithIdleConnectionsPerHost(s.globalConfig.MaxIdleConnsPerHost),
-		proxy.WithIdleConnTimeout(s.globalConfig.IdleConnTimeout),
-		proxy.WithStatsClient(s.statsClient),
-	)
+func (s *Server) startHTTPServers(ctx context.Context, r router.Router) error {
 	s.defLoader = loader.NewAPILoader(s.register)
 
 	return s.listenAndServe(chi.ServerBaseContext(ctx, r))

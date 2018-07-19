@@ -94,7 +94,7 @@ func onStartup(event interface{}) error {
 		}
 	case file:
 		authPath := fmt.Sprintf("%s/auth", dsnURL.Path)
-		log.WithField("auth_path", authPath).Debug("Trying to load configuration files")
+		log.WithField("path", authPath).Debug("Trying to load Auth configuration files")
 
 		repo, err = NewFileSystemRepository(authPath)
 		if err != nil {
