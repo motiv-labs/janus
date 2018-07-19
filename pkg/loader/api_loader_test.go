@@ -72,7 +72,7 @@ func createRegisterAndRouter() (router.Router, error) {
 	r := createRouter()
 	r.Use(middleware.NewRecovery(errors.RecoveryHandler))
 
-	register := proxy.NewRegister(proxy.WithRouter(r), proxy.WithStatsClient(client.NewNoop(false)))
+	register := proxy.NewRegister(proxy.WithRouter(r), proxy.WithStatsClient(client.NewNoop()))
 	proxyRepo, err := api.NewFileSystemRepository("../../assets/apis")
 	if err != nil {
 		return nil, err
