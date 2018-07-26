@@ -12,7 +12,7 @@ fi
 echo "Building application version $VERSION"
 
 echo "Building default binary"
-CGO_ENABLED=0 go build -ldflags "-s -w" -ldflags "-X main.version=${VERSION}" -o "dist/janus" $PKG_SRC
+CGO_ENABLED=0 go build -ldflags "-s -w" -ldflags "-X github.com/hellofresh/janus/cmd.version=${VERSION}" -o "dist/janus" $PKG_SRC
 
 if [ ! -z "${JANUS_BUILD_ONLY_DEFAULT}" ]; then
     echo "Only default binary was requested to build"
@@ -25,7 +25,7 @@ OS_ARCH_ARG=(386 amd64)
 for OS in ${OS_PLATFORM_ARG[@]}; do
   for ARCH in ${OS_ARCH_ARG[@]}; do
     echo "Building binary for $OS/$ARCH..."
-    GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w" -ldflags "-X main.version=${VERSION}" -o "dist/janus_$OS-$ARCH" $PKG_SRC
+    GOARCH=$ARCH GOOS=$OS CGO_ENABLED=0 go build -ldflags "-s -w" -ldflags "-X github.com/hellofresh/janus/cmd.version=${VERSION}" -o "dist/janus_$OS-$ARCH" $PKG_SRC
   done
 done
 
