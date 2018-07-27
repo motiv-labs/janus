@@ -14,6 +14,12 @@ Feature: Manage proxies wit API.
         When I request "/apis" API path with "GET" method
         Then I should receive 401 response code
 
+    Scenario: API list must return empty list when no endpoints set
+        Given request JWT token is valid admin token
+        When I request "/apis" API path with "GET" method
+        Then I should receive 200 response code
+        And response JSON body is an array of length 0
+
     Scenario: API should be created with defaults
         Given request JWT token is valid admin token
         And request JSON payload:

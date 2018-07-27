@@ -31,6 +31,12 @@ func (c *APIHandler) Get() http.HandlerFunc {
 		span := opentracing.FromContext(r.Context(), "definitions.GetAll")
 		defer span.Finish()
 
+		if c.Cfgs.Definitions == nil {
+			// id definitions list is empty - fake it with simple slice to get the empty JSON array in the output
+			render.JSON(w, http.StatusOK, []int{})
+			return
+		}
+
 		render.JSON(w, http.StatusOK, c.Cfgs.Definitions)
 	}
 }
