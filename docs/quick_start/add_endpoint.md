@@ -2,7 +2,7 @@
 
 The main feature of an API Gateway is to proxy requests to different services, so let's do this.
 
-## Adding a new endpoint
+## 1. Adding a new endpoint
 
 Now that you are authenticated, you can send a request to `/apis` to create a proxy.
 
@@ -61,4 +61,4 @@ curl -vX "GET" http://localhost:8080/example
 
 A successful response means Janus is now forwarding requests made to `http://localhost:8080` to the elected upstream target (chosen by the load balancer) that we configured in step #1, and is forwarding the response back to us.
 
-[Next](add_plugins.md) we'll learn how to add plugins to our endpoint.
+[Next](modify_endpoint.md) we'll learn how to modify existing endpoint.
