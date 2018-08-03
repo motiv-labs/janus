@@ -6,6 +6,7 @@
 * [Quick Start](quick_start/README.md)
     * [Authenticating](quick_start/authenticating.md)
     * [Add an endpoint](quick_start/add_endpoint.md)
+    * [Modify (Update/Delete) an endpoint](quick_start/modify_endpoint.md)
     * [Add Plugins](quick_start/add_plugins.md)
     * [Authentication](quick_start/add_auth.md)
     * [Adding your API - File System](quick_start/file_system.md)
