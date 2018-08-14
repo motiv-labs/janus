@@ -13,6 +13,26 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var healthChecks = [...]string{
+	"/",
+	"/status",
+	"/metrics",
+	"/health",
+	"/healthz",
+	"/health_check",
+	"/healthcheck",
+}
+
+type statusCodeTracker struct {
+	http.ResponseWriter
+	status int
+}
+
+func (w *statusCodeTracker) WriteHeader(status int) {
+	w.status = status
+	w.ResponseWriter.WriteHeader(status)
+}
+
 // OpenTracing is a middleware that traces the request latency
 type OpenTracing struct {
 	https bool
@@ -26,6 +46,11 @@ func NewOpenTracing(https bool) *OpenTracing {
 // Handler is the middleware function for OpenTracing
 func (h *OpenTracing) Handler(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if isHealthCheck(r.URL.Path) {
+			handler.ServeHTTP(w, r)
+			return
+		}
+
 		var span opentracing.Span
 		var err error
 
@@ -42,8 +67,9 @@ func (h *OpenTracing) Handler(handler http.Handler) http.Handler {
 		defer span.Finish()
 
 		host, err := os.Hostname()
-		if err != nil {
-			log.WithError(err).Error("Failed to get host name")
+		if host == "" || err != nil {
+			log.WithError(err).Debug("Failed to get host name")
+			host = "unknown"
 		}
 
 		ext.HTTPMethod.Set(span, r.Method)
@@ -54,8 +80,11 @@ func (h *OpenTracing) Handler(handler http.Handler) http.Handler {
 		ext.Component.Set(span, "janus")
 		ext.SpanKind.Set(span, "server")
 
+		span.SetTag("user.agent", r.UserAgent())
 		span.SetTag("peer.address", r.RemoteAddr)
 		span.SetTag("host.name", host)
+		span.SetTag("referer", r.Referer())
+		span.SetTag("request.id", RequestIDFromContext(r.Context()))
 
 		// Add information on the peer service we're about to contact.
 		if host, portString, err := net.SplitHostPort(r.URL.Host); err == nil {
@@ -75,6 +104,20 @@ func (h *OpenTracing) Handler(handler http.Handler) http.Handler {
 			log.WithError(err).Error("Could not inject span context into header")
 		}
 
+		w = &statusCodeTracker{w, http.StatusOK}
 		handler.ServeHTTP(w, base.ToContext(r, span))
+		code := uint16(w.(*statusCodeTracker).status)
+		if code > http.StatusInternalServerError {
+			ext.HTTPStatusCode.Set(span, code)
+		}
 	})
+}
+
+func isHealthCheck(path string) bool {
+	for _, hc := range healthChecks {
+		if hc == path {
+			return true
+		}
+	}
+	return false
 }
