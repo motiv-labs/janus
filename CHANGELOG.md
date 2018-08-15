@@ -6,6 +6,7 @@
 - New `dial` and `response_header` timeouts that can be set per endpoint
 - New `/debug/pprof` endpoint (handlers from `net/http/pprof`) on API port for debugging and profiling (can be enabled with `start` command flags)
 - Alias `rr` for roundrobin balancer
+- Add request id as a tag into tracing for seamlessly correlation in tracing UI
 
 ## Fixed
 - Fixed bug when using the configuration file in a linux/64 system
