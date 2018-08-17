@@ -11,10 +11,11 @@ import (
 func TestConfig(t *testing.T) {
 	var config Config
 	rawConfig := map[string]interface{}{
-		"domains":         []string{"*"},
-		"methods":         []string{"GET"},
-		"request_headers": []string{"Content-Type", "Authorization"},
-		"exposed_headers": []string{"Test"},
+		"domains":             []string{"*"},
+		"methods":             []string{"GET"},
+		"request_headers":     []string{"Content-Type", "Authorization"},
+		"exposed_headers":     []string{"Test"},
+		"options_passthrough": true,
 	}
 
 	err := plugin.Decode(rawConfig, &config)
@@ -31,6 +32,8 @@ func TestConfig(t *testing.T) {
 
 	assert.IsType(t, []string{}, config.ExposedHeaders)
 	assert.Equal(t, []string{"Test"}, config.ExposedHeaders)
+
+	assert.True(t, config.OptionsPassthrough)
 }
 
 func TestInvalidConfig(t *testing.T) {
@@ -43,12 +46,28 @@ func TestInvalidConfig(t *testing.T) {
 	assert.Error(t, err)
 }
 
-func TestSetup(t *testing.T) {
+func TestEmptyPassthrough(t *testing.T) {
+	var config Config
 	rawConfig := map[string]interface{}{
 		"domains":         []string{"*"},
 		"methods":         []string{"GET"},
 		"request_headers": []string{"Content-Type", "Authorization"},
 		"exposed_headers": []string{"Test"},
+	}
+
+	err := plugin.Decode(rawConfig, &config)
+	assert.NoError(t, err)
+
+	assert.False(t, config.OptionsPassthrough)
+}
+
+func TestSetup(t *testing.T) {
+	rawConfig := map[string]interface{}{
+		"domains":             []string{"*"},
+		"methods":             []string{"GET"},
+		"request_headers":     []string{"Content-Type", "Authorization"},
+		"exposed_headers":     []string{"Test"},
+		"options_passthrough": true,
 	}
 	def := proxy.NewRouterDefinition(proxy.NewDefinition())
 	err := setupCors(def, rawConfig)
