@@ -1,5 +1,7 @@
 # Unreleased
 
+# 3.8.0
+
 ## Added
 - New Retry plugin: you can now configure your endpoints to have a retry in case of a failed request
 - New `read`, `write` and `idle` timeouts for Janus server global configurations
@@ -11,12 +13,12 @@
 ## Fixed
 - Fixed bug when using the configuration file in a linux/64 system
 
+## Updated
+- Added `name` parameter for `cb` (Circuit Breaker) plugin to set group explicitly
+
 ## Removed
 - Redis is not necessary anymore for the cluster to work
 - Removed proxy definition property `enable_load_balancing` as it was not being used
-
-## Updated
-- Added `name` parameter for `cb` (Circuit Breaker) plugin to set group explicitly
 
 # 3.7.0
 
@@ -41,13 +43,13 @@
 - Extra JWT metrics for token validation success and error
 
 ## Fixed
- 
+
 - Fixed a bug for the `oauth servers` when rows were empty it was returning `null` on the json response
 
 ## Updated
 
 - Bumped [stats-go](https://github.com/hellofresh/stats-go) to current latest stable version (0.6.3) - this changes stats DSN config value format, see [`stats-go`](https://github.com/hellofresh/stats-go#instance-creation) docs for details
- 
+
 # 3.5.0
 
 ## Added
