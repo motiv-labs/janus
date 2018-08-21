@@ -107,8 +107,9 @@ func (h *OpenTracing) Handler(handler http.Handler) http.Handler {
 		w = &statusCodeTracker{w, http.StatusOK}
 		handler.ServeHTTP(w, base.ToContext(r, span))
 		code := uint16(w.(*statusCodeTracker).status)
-		if code > http.StatusInternalServerError {
-			ext.HTTPStatusCode.Set(span, code)
+		ext.HTTPStatusCode.Set(span, code)
+		if code >= http.StatusInternalServerError {
+			ext.Error.Set(span, true)
 		}
 	})
 }
