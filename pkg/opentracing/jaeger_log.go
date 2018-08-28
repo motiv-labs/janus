@@ -12,5 +12,5 @@ func (l jaegerLoggerAdapter) Error(msg string) {
 
 // Infof adapts infof messages to logrus
 func (l jaegerLoggerAdapter) Infof(msg string, args ...interface{}) {
-	l.log.Infof(msg, args)
+	l.log.Infof(msg, args...)
 }

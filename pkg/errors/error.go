@@ -9,6 +9,7 @@ package errors
 
 import (
 	"net/http"
+	"runtime/debug"
 
 	"github.com/hellofresh/janus/pkg/render"
 	baseErrors "github.com/pkg/errors"
@@ -54,14 +55,19 @@ func RecoveryHandler(w http.ResponseWriter, r *http.Request, err interface{}) {
 func Handler(w http.ResponseWriter, err interface{}) {
 	switch internalErr := err.(type) {
 	case *Error:
-		log.WithFields(log.Fields{"code": internalErr.Code, log.ErrorKey: internalErr.Error()}).
-			Info("Internal error handled")
+		log.WithFields(log.Fields{
+			"code":       internalErr.Code,
+			log.ErrorKey: internalErr.Error(),
+		}).Info("Internal error handled")
 		render.JSON(w, internalErr.Code, internalErr)
 	case error:
-		log.WithError(internalErr).Error("Internal server error handled")
+		log.WithError(internalErr).WithField("stack", string(debug.Stack())).Error("Internal server error handled")
 		render.JSON(w, http.StatusInternalServerError, internalErr.Error())
 	default:
-		log.WithField(log.ErrorKey, err).Error("Internal server error handled")
+		log.WithFields(log.Fields{
+			log.ErrorKey: err,
+			"stack":      string(debug.Stack()),
+		}).Error("Internal server error handled")
 		render.JSON(w, http.StatusInternalServerError, err)
 	}
 }
