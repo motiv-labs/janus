@@ -26,7 +26,7 @@ type Server struct {
 	server                *http.Server
 	provider              api.Repository
 	register              *proxy.Register
-	defLoader             *loader.APILoader
+	apiLoader             *loader.APILoader
 	currentConfigurations *api.Configuration
 	configurationChan     chan api.ConfigurationChanged
 	stopChan              chan struct{}
@@ -80,6 +80,9 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 		proxy.WithStatsClient(s.statsClient),
 	)
 
+	// API Loader must be initialised synchronously as well to avoid race condition
+	s.apiLoader = loader.NewAPILoader(s.register)
+
 	go func() {
 		if err := s.startHTTPServers(ctx, r); err != nil {
 			log.WithError(err).Fatal("Could not start http servers")
@@ -88,12 +91,12 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 
 	go s.listenProviders(s.stopChan)
 
-	defs, err := s.provider.FindAll()
+	definitions, err := s.provider.FindAll()
 	if err != nil {
 		return errors.Wrap(err, "could not find all configurations from the provider")
 	}
 
-	s.currentConfigurations = &api.Configuration{Definitions: defs}
+	s.currentConfigurations = &api.Configuration{Definitions: definitions}
 	if err := s.startProvider(ctx); err != nil {
 		log.WithError(err).Fatal("Could not start providers")
 	}
@@ -102,7 +105,7 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 		StatsClient:   s.statsClient,
 		Register:      s.register,
 		Config:        s.globalConfig,
-		Configuration: defs,
+		Configuration: definitions,
 	}
 
 	if mgoRepo, ok := s.provider.(*api.MongoRepository); ok {
@@ -110,7 +113,7 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 	}
 
 	plugin.EmitEvent(plugin.StartupEvent, event)
-	s.defLoader.RegisterAPIs(defs)
+	s.apiLoader.RegisterAPIs(definitions)
 
 	log.Info("Janus started")
 
@@ -160,8 +163,6 @@ func (s *Server) Close() error {
 }
 
 func (s *Server) startHTTPServers(ctx context.Context, r router.Router) error {
-	s.defLoader = loader.NewAPILoader(s.register)
-
 	return s.listenAndServe(chi.ServerBaseContext(ctx, r))
 }
 
@@ -316,7 +317,7 @@ func (s *Server) handleEvent(cfg *api.Configuration) {
 	newRouter := s.createRouter()
 
 	s.register.UpdateRouter(newRouter)
-	s.defLoader.RegisterAPIs(cfg.Definitions)
+	s.apiLoader.RegisterAPIs(cfg.Definitions)
 
 	plugin.EmitEvent(plugin.ReloadEvent, plugin.OnReload{Configurations: cfg.Definitions})
 
