@@ -1,6 +1,15 @@
 # Unreleased
 
 ## Fixed
+- Race condition on application start. Reported on #348
+
+## Updated
+- Added more debug information to recovery handler to track application errors
+- New `options_passthrough` parameter for CORS plugin. Thanks to @locker1776
+
+# 3.8.1
+
+## Fixed
 - Open tracing error and http status code tags were not being set during tracing
 
 # 3.8.0

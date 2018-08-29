@@ -60,7 +60,7 @@ func (suite *WeightBalancerTestSuite) TestWeightBalancerWeight() {
 	balancer := NewWeightBalancer()
 
 	totalSteps := 10000
-	percentDiffMax := 10
+	percentDiffMax := 15
 
 	for _, weights := range []struct {
 		weight0 int
