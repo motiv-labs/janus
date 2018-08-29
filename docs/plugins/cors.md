@@ -13,14 +13,16 @@ The plain cors config:
         "domains": ["*"],
         "methods": ["GET", "POST"],
         "request_headers": ["X-Custom-Header", "X-Foobar"],
-        "exposed_headers": ["X-Something-Special"]
+        "exposed_headers": ["X-Something-Special"],
+        "options_passthrough": true
     }
 }
 ```
 
-| Configuration   | Description                                                                                                                                                                  |
-|-----------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| domains         | A comma-separated list of allowed domains for the Access-Control-Allow-Origin header. If you wish to allow all origins, add * as a single value to this configuration field. |
-| methods         | Value for the Access-Control-Allow-Methods header, expects a comma delimited string (e.g. GET,POST).                                                                         |
-| request_headers | Value for the Access-Control-Allow-Headers header, expects a comma delimited string (e.g. Origin, Authorization).                                                            |
-| exposed_headers | Value for the Access-Control-Expose-Headers header, expects a comma delimited string (e.g. Origin, Authorization). If not specified, no custom headers are exposed.          |
+| Configuration       | Description                                                                                                                                                                  |
+|---------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| domains             | A comma-separated list of allowed domains for the Access-Control-Allow-Origin header. If you wish to allow all origins, add * as a single value to this configuration field. |
+| methods             | Value for the Access-Control-Allow-Methods header, expects a comma delimited string (e.g. GET,POST).                                                                         |
+| request_headers     | Value for the Access-Control-Allow-Headers header, expects a comma delimited string (e.g. Origin, Authorization).                                                            |
+| exposed_headers     | Value for the Access-Control-Expose-Headers header, expects a comma delimited string (e.g. Origin, Authorization). If not specified, no custom headers are exposed.          |
+| options_passthrough | Instructs preflight to let other potential next handlers to process the OPTIONS method.                                                                                      |

@@ -37,11 +37,12 @@ func (m *OAuthLoader) RegisterOAuthServers(oauthServers []*Spec, repo Repository
 		logger.Debug("Registering OAuth server")
 
 		corsHandler := cors.New(cors.Options{
-			AllowedOrigins:   oauthServer.CorsMeta.Domains,
-			AllowedMethods:   oauthServer.CorsMeta.Methods,
-			AllowedHeaders:   oauthServer.CorsMeta.RequestHeaders,
-			ExposedHeaders:   oauthServer.CorsMeta.ExposedHeaders,
-			AllowCredentials: true,
+			AllowedOrigins:     oauthServer.CorsMeta.Domains,
+			AllowedMethods:     oauthServer.CorsMeta.Methods,
+			AllowedHeaders:     oauthServer.CorsMeta.RequestHeaders,
+			ExposedHeaders:     oauthServer.CorsMeta.ExposedHeaders,
+			OptionsPassthrough: oauthServer.CorsMeta.OptionsPassthrough,
+			AllowCredentials:   true,
 		}).Handler
 
 		mw = append(mw, corsHandler)

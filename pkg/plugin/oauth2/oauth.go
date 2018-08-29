@@ -57,11 +57,12 @@ type rateLimitMeta struct {
 }
 
 type corsMeta struct {
-	Domains        []string `mapstructure:"domains" bson:"domains" json:"domains"`
-	Methods        []string `mapstructure:"methods" bson:"methods" json:"methods"`
-	RequestHeaders []string `mapstructure:"request_headers" bson:"request_headers" json:"request_headers"`
-	ExposedHeaders []string `mapstructure:"exposed_headers" bson:"exposed_headers" json:"exposed_headers"`
-	Enabled        bool     `bson:"enabled" json:"enabled"`
+	Domains            []string `mapstructure:"domains" bson:"domains" json:"domains"`
+	Methods            []string `mapstructure:"methods" bson:"methods" json:"methods"`
+	RequestHeaders     []string `mapstructure:"request_headers" bson:"request_headers" json:"request_headers"`
+	ExposedHeaders     []string `mapstructure:"exposed_headers" bson:"exposed_headers" json:"exposed_headers"`
+	OptionsPassthrough bool     `mapstructure:"options_passthrough" bson:"options_passthrough" json:"options_passthrough"`
+	Enabled            bool     `bson:"enabled" json:"enabled"`
 }
 
 // IntrospectionSettings represents the settings for introspection

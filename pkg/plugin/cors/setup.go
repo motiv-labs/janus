@@ -8,10 +8,11 @@ import (
 
 // Config represents the CORS configuration
 type Config struct {
-	AllowedOrigins []string `json:"domains"`
-	AllowedMethods []string `json:"methods"`
-	AllowedHeaders []string `json:"request_headers"`
-	ExposedHeaders []string `json:"exposed_headers"`
+	AllowedOrigins     []string `json:"domains"`
+	AllowedMethods     []string `json:"methods"`
+	AllowedHeaders     []string `json:"request_headers"`
+	ExposedHeaders     []string `json:"exposed_headers"`
+	OptionsPassthrough bool     `json:"options_passthrough"`
 }
 
 func init() {
@@ -29,11 +30,12 @@ func setupCors(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
 	}
 
 	mw := cors.New(cors.Options{
-		AllowedOrigins:   config.AllowedOrigins,
-		AllowedMethods:   config.AllowedMethods,
-		AllowedHeaders:   config.AllowedHeaders,
-		ExposedHeaders:   config.ExposedHeaders,
-		AllowCredentials: true,
+		AllowedOrigins:     config.AllowedOrigins,
+		AllowedMethods:     config.AllowedMethods,
+		AllowedHeaders:     config.AllowedHeaders,
+		ExposedHeaders:     config.ExposedHeaders,
+		OptionsPassthrough: config.OptionsPassthrough,
+		AllowCredentials:   true,
 	})
 
 	def.AddMiddleware(mw.Handler)
