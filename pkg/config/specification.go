@@ -120,6 +120,7 @@ type JaegerTracing struct {
 	BufferFlushInterval time.Duration `envconfig:"TRACING_JAEGER_BUFFER_FLUSH_INTERVAL"`
 	LogSpans            bool          `envconfig:"TRACING_JAEGER_LOG_SPANS"`
 	QueueSize           int           `envconfig:"TRACING_JAEGER_QUEUE_SIZE"`
+	PropagationFormat   string        `envconfig:"TRACING_JAEGER_PROPAGATION_FORMAT"`
 }
 
 // Tracing represents the distributed tracing configuration
