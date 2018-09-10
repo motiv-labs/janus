@@ -11,13 +11,13 @@ import (
 	log "github.com/sirupsen/logrus"
 	jaeger "github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
-	"github.com/uber/jaeger-client-go/zipkin"
 	"github.com/uber/jaeger-lib/metrics"
 )
 
 const (
 	gcloudTracing = "googleCloud"
 	jaegerTracing = "jaeger"
+	zipkin        = "zipkin"
 )
 
 // Tracing is the tracing functionality
@@ -115,7 +115,7 @@ func (t *Tracing) buildJaeger(componentName string, c config.JaegerTracing) (ope
 	)
 
 	switch c.PropagationFormat {
-	case "zipkin":
+	case zipkin:
 		log.Debug("Using zipkin b3 http propagation format")
 		zipkinPropagator := zipkin.NewZipkinB3HTTPHeaderPropagator()
 		tracer, closer = jaeger.NewTracer(componentName, sampler, reporter,
