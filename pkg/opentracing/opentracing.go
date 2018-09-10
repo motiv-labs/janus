@@ -101,12 +101,12 @@ func (t *Tracing) buildJaeger(componentName string, c config.JaegerTracing) (ope
 	tracerLogger := jaegerLoggerAdapter{log.StandardLogger()}
 	sampler, err := cfg.Sampler.NewSampler(componentName, tracerMetrics)
 	if err != nil {
-		log.WithError(err).Error("failed to create jaeger sampler")
+		return nil, nil, err
 	}
 
 	reporter, err := cfg.Reporter.NewReporter(componentName, tracerMetrics, tracerLogger)
 	if err != nil {
-		log.WithError(err).Error("failed to create jaeger reporter")
+		return nil, nil, err
 	}
 
 	var (
