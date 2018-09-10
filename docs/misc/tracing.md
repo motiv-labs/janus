@@ -81,6 +81,11 @@ You can define that you want to use Jaeger on your configuration file under the 
     #
     # QueueSize = 0
 
+    # PropagationFormat is the propagation format jaeger will use.
+    # Leave it blank to use jaeger default propagation mechanism
+    # 
+    # PropagationFormat = "zipkin"
+
 ```
 
 ### Google Cloud Platform - Tracing
