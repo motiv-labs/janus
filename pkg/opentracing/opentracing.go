@@ -9,13 +9,16 @@ import (
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
+	jaeger "github.com/uber/jaeger-client-go"
 	jaegercfg "github.com/uber/jaeger-client-go/config"
+	"github.com/uber/jaeger-client-go/zipkin"
 	"github.com/uber/jaeger-lib/metrics"
 )
 
 const (
-	gcloudTracing = "googleCloud"
-	jaegerTracing = "jaeger"
+	gcloudTracing     = "googleCloud"
+	jaegerTracing     = "jaeger"
+	zipkinPropagation = "zipkin"
 )
 
 // Tracing is the tracing functionality
@@ -95,11 +98,43 @@ func (t *Tracing) buildJaeger(componentName string, c config.JaegerTracing) (ope
 		},
 	}
 
-	return cfg.New(
-		componentName,
-		jaegercfg.Logger(jaegerLoggerAdapter{log.StandardLogger()}),
-		jaegercfg.Metrics(metrics.NullFactory),
+	tracerMetrics := jaeger.NewMetrics(metrics.NullFactory, nil)
+	tracerLogger := jaegerLoggerAdapter{log.StandardLogger()}
+	sampler, err := cfg.Sampler.NewSampler(componentName, tracerMetrics)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	reporter, err := cfg.Reporter.NewReporter(componentName, tracerMetrics, tracerLogger)
+	if err != nil {
+		return nil, nil, err
+	}
+
+	var (
+		tracer opentracing.Tracer
+		closer io.Closer
 	)
+
+	switch c.PropagationFormat {
+	case zipkinPropagation:
+		log.Debug("Using zipkin b3 http propagation format")
+		zipkinPropagator := zipkin.NewZipkinB3HTTPHeaderPropagator()
+		tracer, closer = jaeger.NewTracer(componentName, sampler, reporter,
+			jaeger.TracerOptions.Metrics(tracerMetrics),
+			jaeger.TracerOptions.Logger(tracerLogger),
+			jaeger.TracerOptions.Injector(opentracing.HTTPHeaders, zipkinPropagator),
+			jaeger.TracerOptions.Extractor(opentracing.HTTPHeaders, zipkinPropagator),
+			jaeger.TracerOptions.ZipkinSharedRPCSpan(true),
+		)
+	default:
+		log.Debug("Using jaeger propagation format")
+		tracer, closer = jaeger.NewTracer(componentName, sampler, reporter,
+			jaeger.TracerOptions.Metrics(tracerMetrics),
+			jaeger.TracerOptions.Logger(tracerLogger),
+		)
+	}
+
+	return tracer, closer, nil
 }
 
 // FromContext creates a span from a context that contains a parent span

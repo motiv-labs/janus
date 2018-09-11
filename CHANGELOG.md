@@ -1,5 +1,8 @@
 # Unreleased
 
+## Added
+- Support b3 http propagation format for jaeger
+
 ## Fixed
 - Race condition on application start. Reported on #348
 
