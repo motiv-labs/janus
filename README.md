@@ -32,7 +32,7 @@ integrating an API gateway is a faster, more secure route than writing your own 
 
 ## Key Features
 
-This API Gateway offers powerful, yet lightweight features that allows fine gained control over your API ecosystem.
+This API Gateway offers powerful, yet lightweight features that allows fine-grained control over your API ecosystem.
 
 * No dependency hell, single binary made with go
 * REST API, full programatic access to the internals makes it easy to manage your API users, keys and API Configuration from within your systems
