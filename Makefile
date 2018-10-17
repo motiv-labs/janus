@@ -15,7 +15,7 @@ all: clean deps test build
 deps:
 	@echo "$(OK_COLOR)==> Installing dependencies$(NO_COLOR)"
 	@go get -u github.com/golang/dep/cmd/dep
-	@go get -u github.com/golang/lint/golint
+	@go get -u golang.org/x/lint/golint
 	@go get -u github.com/DATA-DOG/godog/cmd/godog
 	@dep ensure -v -vendor-only
 
