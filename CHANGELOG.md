@@ -1,5 +1,12 @@
 # Unreleased
 
+# 3.8.4
+
+## Fixed
+- Fixed configuration listener that made API stuck
+
+# 3.8.3
+
 ## Added
 - Support b3 http propagation format for jaeger
 
