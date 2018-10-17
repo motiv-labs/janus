@@ -179,27 +179,35 @@ func (s *Server) startProvider(ctx context.Context) error {
 		return errors.Wrap(err, "could not start Janus web API")
 	}
 
-	if listener, ok := s.provider.(api.Listener); ok {
-		go func() {
-			ch := make(chan api.ConfigurationMessage)
+	// We're listening to the configuration changes in any case, even if provider does not implement Listener,
+	// so we can use "file" storage as memory - all the persistent definitions are loaded on startup,
+	// but then API allows to manipulate proxies in memory. Otherwise api calls just stuck because channel is busy.
+	go func() {
+		ch := make(chan api.ConfigurationMessage)
+		listener, providerIsListener := s.provider.(api.Listener)
+		if providerIsListener {
 			listener.Listen(ctx, ch)
-			for {
-				select {
-				case c, more := <-s.webServer.ConfigurationChan:
-					if !more {
-						return
-					}
+		}
 
-					s.updateConfigurations(c)
-					s.handleEvent(s.currentConfigurations)
-					ch <- c
-				case <-ctx.Done():
-					close(ch)
+		for {
+			select {
+			case c, more := <-s.webServer.ConfigurationChan:
+				if !more {
 					return
 				}
+
+				s.updateConfigurations(c)
+				s.handleEvent(s.currentConfigurations)
+
+				if providerIsListener {
+					ch <- c
+				}
+			case <-ctx.Done():
+				close(ch)
+				return
 			}
-		}()
-	}
+		}
+	}()
 
 	if watcher, ok := s.provider.(api.Watcher); ok {
 		watcher.Watch(ctx, s.configurationChan)
