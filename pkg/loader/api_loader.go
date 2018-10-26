@@ -45,6 +45,12 @@ func (m *APILoader) RegisterAPI(def *api.Definition) {
 
 		for _, plg := range def.Plugins {
 			l := logger.WithField("name", plg.Name)
+
+			isValid, err := plugin.ValidateConfig(plg.Name, plg.Config)
+			if !isValid || err != nil {
+				l.WithError(err).Error("Plugin configuration is invalid")
+			}
+
 			if plg.Enabled {
 				l.Debug("Plugin enabled")
 
