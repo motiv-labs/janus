@@ -1,5 +1,7 @@
 # Unreleased
 
+- Fixed plugin configuration not being validated
+
 # 3.8.4
 
 ## Fixed
