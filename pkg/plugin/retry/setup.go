@@ -4,6 +4,8 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/asaskevich/govalidator"
+
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/pkg/errors"
@@ -56,7 +58,8 @@ func (d *Duration) UnmarshalJSON(data []byte) error {
 
 func init() {
 	plugin.RegisterPlugin("retry", plugin.Plugin{
-		Action: setupRetry,
+		Action:   setupRetry,
+		Validate: validateConfig,
 	})
 }
 
@@ -69,4 +72,14 @@ func setupRetry(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
 
 	def.AddMiddleware(NewRetryMiddleware(config))
 	return nil
+}
+
+func validateConfig(rawConfig plugin.Config) (bool, error) {
+	var config Config
+	err := plugin.Decode(rawConfig, &config)
+	if err != nil {
+		return false, err
+	}
+
+	return govalidator.ValidateStruct(config)
 }

@@ -26,12 +26,16 @@ var (
 // each server block it appears in.
 type SetupFunc func(def *proxy.RouterDefinition, rawConfig Config) error
 
+// ValidateFunc validates configuration data against the plugin struct
+type ValidateFunc func(rawConfig Config) (bool, error)
+
 // Config initialization options.
 type Config map[string]interface{}
 
 // Plugin defines basic methods for plugins
 type Plugin struct {
-	Action SetupFunc
+	Action   SetupFunc
+	Validate ValidateFunc
 }
 
 // RegisterPlugin plugs in plugin. All plugins should register
@@ -99,6 +103,14 @@ func EmitEvent(name string, event interface{}) error {
 	}
 
 	return nil
+}
+
+// ValidateConfig validates the plugin configuration data
+func ValidateConfig(name string, rawConfig Config) (bool, error) {
+	if plugin, ok := plugins[name]; ok {
+		return plugin.Validate(rawConfig)
+	}
+	return false, fmt.Errorf("no validate function found for plugin '%s'", name)
 }
 
 // DirectiveAction gets the action for a plugin

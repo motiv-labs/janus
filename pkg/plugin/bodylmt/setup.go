@@ -1,6 +1,7 @@
 package bodylmt
 
 import (
+	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 )
@@ -12,7 +13,8 @@ type Config struct {
 
 func init() {
 	plugin.RegisterPlugin("body_limit", plugin.Plugin{
-		Action: setupBodyLimit,
+		Action:   setupBodyLimit,
+		Validate: validateConfig,
 	})
 }
 
@@ -25,4 +27,14 @@ func setupBodyLimit(def *proxy.RouterDefinition, rawConfig plugin.Config) error 
 
 	def.AddMiddleware(NewBodyLimitMiddleware(config.Limit))
 	return nil
+}
+
+func validateConfig(rawConfig plugin.Config) (bool, error) {
+	var config Config
+	err := plugin.Decode(rawConfig, &config)
+	if err != nil {
+		return false, err
+	}
+
+	return govalidator.ValidateStruct(config)
 }

@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/asaskevich/govalidator"
+
 	"github.com/go-redis/redis"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/plugin"
@@ -41,7 +43,8 @@ type redisConfig struct {
 func init() {
 	plugin.RegisterEventHook(plugin.StartupEvent, onStartup)
 	plugin.RegisterPlugin("rate_limit", plugin.Plugin{
-		Action: setupRateLimit,
+		Action:   setupRateLimit,
+		Validate: validateConfig,
 	})
 }
 
@@ -53,6 +56,16 @@ func onStartup(event interface{}) error {
 
 	statsClient = e.StatsClient
 	return nil
+}
+
+func validateConfig(rawConfig plugin.Config) (bool, error) {
+	var config Config
+	err := plugin.Decode(rawConfig, &config)
+	if err != nil {
+		return false, err
+	}
+
+	return govalidator.ValidateStruct(config)
 }
 
 func setupRateLimit(def *proxy.RouterDefinition, rawConfig plugin.Config) error {

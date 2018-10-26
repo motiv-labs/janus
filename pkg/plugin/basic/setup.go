@@ -18,7 +18,8 @@ func init() {
 	plugin.RegisterEventHook(plugin.AdminAPIStartupEvent, onAdminAPIStartup)
 
 	plugin.RegisterPlugin("basic_auth", plugin.Plugin{
-		Action: setupBasicAuth,
+		Action:   setupBasicAuth,
+		Validate: validateConfig,
 	})
 }
 
@@ -29,6 +30,10 @@ func setupBasicAuth(def *proxy.RouterDefinition, rawConfig plugin.Config) error 
 
 	def.AddMiddleware(NewBasicAuth(repo))
 	return nil
+}
+
+func validateConfig(rawConfig plugin.Config) (bool, error) {
+	return true, nil // This plugin does not have any configuration
 }
 
 func onAdminAPIStartup(event interface{}) error {
