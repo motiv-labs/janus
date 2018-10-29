@@ -107,23 +107,36 @@ func EmitEvent(name string, event interface{}) error {
 
 // ValidateConfig validates the plugin configuration data
 func ValidateConfig(name string, rawConfig Config) (bool, error) {
+	logger := log.WithField("plugin_name", name)
+
 	if plugin, ok := plugins[name]; ok {
 		if plugin.Validate == nil {
+			logger.Debug("Validation function undefined; assuming valid configuration")
 			return true, nil
 		}
 
 		result, err := plugin.Validate(rawConfig)
+		if !result || err != nil {
+			logger.WithField("config", rawConfig).Info("Invalid plugin configuration")
+		}
+
 		return result, err
 	}
-	return false, fmt.Errorf("no validate function found for plugin '%s'", name)
+
+	return false, fmt.Errorf("Plugin %q not found", name)
 }
 
 // DirectiveAction gets the action for a plugin
 func DirectiveAction(name string) (SetupFunc, error) {
 	if plugin, ok := plugins[name]; ok {
+		if plugin.Action == nil {
+			return nil, fmt.Errorf("Action function undefined for plugin %q", name)
+		}
+
 		return plugin.Action, nil
 	}
-	return nil, fmt.Errorf("no action found for plugin '%s' (missing a plugin?)", name)
+
+	return nil, fmt.Errorf("Plugin %q not found", name)
 }
 
 // Decode decodes a map string interface into a struct
