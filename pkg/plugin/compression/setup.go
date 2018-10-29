@@ -8,16 +8,11 @@ import (
 
 func init() {
 	plugin.RegisterPlugin("compression", plugin.Plugin{
-		Action:   setupCompression,
-		Validate: validateConfig,
+		Action: setupCompression,
 	})
 }
 
 func setupCompression(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
 	def.AddMiddleware(middleware.DefaultCompress)
 	return nil
-}
-
-func validateConfig(rawConfig plugin.Config) (bool, error) {
-	return true, nil // This plugin does not have any configuration
 }

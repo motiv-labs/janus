@@ -108,7 +108,12 @@ func EmitEvent(name string, event interface{}) error {
 // ValidateConfig validates the plugin configuration data
 func ValidateConfig(name string, rawConfig Config) (bool, error) {
 	if plugin, ok := plugins[name]; ok {
-		return plugin.Validate(rawConfig)
+		if plugin.Validate == nil {
+			return true, nil
+		}
+
+		result, err := plugin.Validate(rawConfig)
+		return result, err
 	}
 	return false, fmt.Errorf("no validate function found for plugin '%s'", name)
 }

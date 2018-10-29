@@ -7,8 +7,7 @@ import (
 
 func init() {
 	plugin.RegisterPlugin("request_transformer", plugin.Plugin{
-		Action:   setupRequestTransformer,
-		Validate: validateConfig,
+		Action: setupRequestTransformer,
 	})
 }
 
@@ -21,8 +20,4 @@ func setupRequestTransformer(def *proxy.RouterDefinition, rawConfig plugin.Confi
 
 	def.AddMiddleware(NewRequestTransformer(config))
 	return nil
-}
-
-func validateConfig(rawConfig plugin.Config) (bool, error) {
-	return true, nil // This plugin does not have any configuration
 }
