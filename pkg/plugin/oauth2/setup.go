@@ -5,7 +5,6 @@ import (
 	"net/url"
 
 	"github.com/asaskevich/govalidator"
-
 	"github.com/globalsign/mgo"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt"

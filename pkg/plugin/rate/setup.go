@@ -5,7 +5,6 @@ import (
 	"time"
 
 	"github.com/asaskevich/govalidator"
-
 	"github.com/go-redis/redis"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/plugin"
