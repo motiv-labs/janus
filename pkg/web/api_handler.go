@@ -8,6 +8,7 @@ import (
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/opentracing"
+	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/render"
 	"github.com/hellofresh/janus/pkg/router"
 )
@@ -85,6 +86,15 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 			return
 		}
 
+		// Additionally validate plugin configuration
+		for _, plg := range cfg.Plugins {
+			isValid, err := plugin.ValidateConfig(plg.Name, plg.Config)
+			if !isValid || err != nil {
+				errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
+				return
+			}
+		}
+
 		// avoid situation when trying to update existing definition with new path
 		// that is already registered with another name
 		span = opentracing.FromContext(r.Context(), "datastore.FindByListenPath")
@@ -122,6 +132,15 @@ func (c *APIHandler) Post() http.HandlerFunc {
 		if false == isValid && err != nil {
 			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
 			return
+		}
+
+		// Additionally validate plugin configuration
+		for _, plg := range cfg.Plugins {
+			isValid, err := plugin.ValidateConfig(plg.Name, plg.Config)
+			if !isValid || err != nil {
+				errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
+				return
+			}
 		}
 
 		span := opentracing.FromContext(r.Context(), "datastore.Exists")

@@ -1,6 +1,7 @@
 package cors
 
 import (
+	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/rs/cors"
@@ -17,7 +18,8 @@ type Config struct {
 
 func init() {
 	plugin.RegisterPlugin("cors", plugin.Plugin{
-		Action: setupCors,
+		Action:   setupCors,
+		Validate: validateConfig,
 	})
 }
 
@@ -40,4 +42,14 @@ func setupCors(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
 
 	def.AddMiddleware(mw.Handler)
 	return nil
+}
+
+func validateConfig(rawConfig plugin.Config) (bool, error) {
+	var config Config
+	err := plugin.Decode(rawConfig, &config)
+	if err != nil {
+		return false, err
+	}
+
+	return govalidator.ValidateStruct(config)
 }

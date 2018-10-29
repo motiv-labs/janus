@@ -4,6 +4,7 @@ import (
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/afex/hystrix-go/hystrix/metric_collector"
 	"github.com/afex/hystrix-go/plugins"
+	"github.com/asaskevich/govalidator"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/pkg/errors"
@@ -26,7 +27,8 @@ func init() {
 	plugin.RegisterEventHook(plugin.StartupEvent, onStartup)
 	plugin.RegisterEventHook(plugin.AdminAPIStartupEvent, onAdminAPIStartup)
 	plugin.RegisterPlugin(pluginName, plugin.Plugin{
-		Action: setupCB,
+		Action:   setupCB,
+		Validate: validateConfig,
 	})
 }
 
@@ -52,6 +54,16 @@ func setupCB(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
 
 	def.AddMiddleware(NewCBMiddleware(c))
 	return nil
+}
+
+func validateConfig(rawConfig plugin.Config) (bool, error) {
+	var config Config
+	err := plugin.Decode(rawConfig, &config)
+	if err != nil {
+		return false, err
+	}
+
+	return govalidator.ValidateStruct(config)
 }
 
 func onAdminAPIStartup(event interface{}) error {
