@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"net/http"
 
+	"go.opencensus.io/trace"
+
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/render"
@@ -26,8 +28,10 @@ func NewHandler(repo Repository) *Handler {
 func (c *Handler) Index() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		span := opentracing.FromContext(r.Context(), "datastore.user.FindAll")
+		_, ocSpan := trace.StartSpan(r.Context(), "datastore.user.FindAll")
 		data, err := c.repo.FindAll()
 		span.Finish()
+		ocSpan.End()
 
 		if err != nil {
 			errors.Handler(w, err)
@@ -43,8 +47,10 @@ func (c *Handler) Show() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		username := router.URLParam(r, "username")
 		span := opentracing.FromContext(r.Context(), "datastore.user.FindByUsername")
+		_, ocSpan := trace.StartSpan(r.Context(), "datastore.user.FindByUsername")
 		data, err := c.repo.FindByUsername(username)
 		span.Finish()
+		ocSpan.End()
 
 		if err != nil {
 			errors.Handler(w, err)
@@ -62,8 +68,10 @@ func (c *Handler) Update() http.HandlerFunc {
 
 		username := router.URLParam(r, "username")
 		span := opentracing.FromContext(r.Context(), "datastore.user.FindByUsername")
+		_, ocSpan := trace.StartSpan(r.Context(), "datastore.user.FindByUsername")
 		user, err := c.repo.FindByUsername(username)
 		span.Finish()
+		ocSpan.End()
 
 		if user == nil {
 			errors.Handler(w, ErrUserNotFound)
@@ -82,8 +90,10 @@ func (c *Handler) Update() http.HandlerFunc {
 		}
 
 		span = opentracing.FromContext(r.Context(), "datastore.user.Add")
+		_, ocSpan = trace.StartSpan(r.Context(), "datastore.user.Add")
 		err = c.repo.Add(user)
 		span.Finish()
+		ocSpan.End()
 
 		if err != nil {
 			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
@@ -106,8 +116,10 @@ func (c *Handler) Create() http.HandlerFunc {
 		}
 
 		span := opentracing.FromContext(r.Context(), "datastore.users.Exists")
+		_, ocSpan := trace.StartSpan(r.Context(), "datastore.user.Exists")
 		_, err = c.repo.FindByUsername(user.Username)
 		span.Finish()
+		ocSpan.End()
 
 		if err != ErrUserNotFound {
 			log.WithError(err).Warn("An error occurrend when looking for an user")
@@ -116,8 +128,10 @@ func (c *Handler) Create() http.HandlerFunc {
 		}
 
 		span = opentracing.FromContext(r.Context(), "datastore.users.Add")
+		_, ocSpan = trace.StartSpan(r.Context(), "datastore.user.Add")
 		err = c.repo.Add(user)
 		span.Finish()
+		ocSpan.End()
 
 		if err != nil {
 			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
@@ -135,8 +149,10 @@ func (c *Handler) Delete() http.HandlerFunc {
 		username := router.URLParam(r, "username")
 
 		span := opentracing.FromContext(r.Context(), "datastore.users.Remove")
+		_, ocSpan := trace.StartSpan(r.Context(), "datastore.user.Remove")
 		err := c.repo.Remove(username)
 		span.Finish()
+		ocSpan.End()
 
 		if err != nil {
 			errors.Handler(w, err)

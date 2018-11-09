@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 
+	"go.opencensus.io/trace"
+
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/render"
@@ -24,8 +26,10 @@ func NewController(repo Repository) *Controller {
 func (c *Controller) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		span := opentracing.FromContext(r.Context(), "datastore.FindAll")
+		_, ocSpan := trace.StartSpan(r.Context(), "datastore.FindAll")
 		data, err := c.repo.FindAll()
 		span.Finish()
+		ocSpan.End()
 
 		if err != nil {
 			errors.Handler(w, err)
@@ -41,8 +45,10 @@ func (c *Controller) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.URLParam(r, "name")
 		span := opentracing.FromContext(r.Context(), "datastore.FindByName")
+		_, ocSpan := trace.StartSpan(r.Context(), "datastore.FindByName")
 		data, err := c.repo.FindByName(name)
 		span.Finish()
+		ocSpan.End()
 
 		if err != nil {
 			errors.Handler(w, err)
@@ -60,8 +66,10 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		name := router.URLParam(r, "name")
 
 		span := opentracing.FromContext(r.Context(), "datastore.FindByName")
+		_, ocSpan := trace.StartSpan(r.Context(), "datastore.FindByName")
 		oauth, err := c.repo.FindByName(name)
 		span.Finish()
+		ocSpan.End()
 
 		if oauth.Name == "" {
 			errors.Handler(w, ErrOauthServerNotFound)
@@ -80,8 +88,10 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		}
 
 		span = opentracing.FromContext(r.Context(), "datastore.Save")
+		_, ocSpan = trace.StartSpan(r.Context(), "datastore.Save")
 		err = c.repo.Save(oauth)
 		span.Finish()
+		ocSpan.End()
 
 		if err != nil {
 			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
@@ -103,8 +113,10 @@ func (c *Controller) Post() http.HandlerFunc {
 		}
 
 		span := opentracing.FromContext(r.Context(), "datastore.Add")
+		_, ocSpan := trace.StartSpan(r.Context(), "datastore.Add")
 		err = c.repo.Add(oauth)
 		span.Finish()
+		ocSpan.End()
 
 		if nil != err {
 			errors.Handler(w, err)
@@ -121,8 +133,10 @@ func (c *Controller) DeleteBy() http.HandlerFunc {
 		name := router.URLParam(r, "name")
 
 		span := opentracing.FromContext(r.Context(), "datastore.Remove")
+		_, ocSpan := trace.StartSpan(r.Context(), "datastore.Remove")
 		err := c.repo.Remove(name)
 		span.Finish()
+		ocSpan.End()
 
 		if err != nil {
 			errors.Handler(w, err)
