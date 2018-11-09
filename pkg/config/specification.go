@@ -73,6 +73,7 @@ type Stats struct {
 	AutoDiscoverWhiteList []string `envconfig:"STATS_AUTO_DISCOVER_WHITE_LIST"`
 	ErrorsSection         string   `envconfig:"STATS_ERRORS_SECTION"`
 	Exporter              string   `envconfig:"STATS_EXPORTER"`
+	Namespace             string   `envconfig:"STATS_NAMESPACE"`
 }
 
 // Credentials represents the credentials that are going to be
@@ -157,6 +158,7 @@ func init() {
 
 	viper.SetDefault("stats.dsn", "log://")
 	viper.SetDefault("stats.errorsSection", "error-log")
+	viper.SetDefault("stats.namespace", serviceName)
 
 	viper.SetDefault("tracing.serviceName", serviceName)
 	viper.SetDefault("tracing.jaeger.samplingParam", 1.0)
