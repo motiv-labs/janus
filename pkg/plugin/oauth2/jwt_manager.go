@@ -3,9 +3,13 @@ package oauth2
 import (
 	"context"
 
+	"go.opencensus.io/stats"
+	"go.opencensus.io/tag"
+
 	jwtBase "github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/metrics"
+	obs "github.com/hellofresh/janus/pkg/observability"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
 	log "github.com/sirupsen/logrus"
@@ -37,17 +41,17 @@ func (m *JWTManager) IsKeyAuthorized(ctx context.Context, accessToken string) bo
 
 		switch jwtErr := err.(type) {
 		case *jwtBase.ValidationError:
-			shouldReport(stats, jwtErr.Errors&jwtBase.ValidationErrorExpired != 0, "ValidationErrorExpired")
-			shouldReport(stats, jwtErr.Errors&jwtBase.ValidationErrorClaimsInvalid != 0, "ValidationErrorClaimsInvalid")
-			shouldReport(stats, jwtErr.Errors&jwtBase.ValidationErrorIssuedAt != 0, "ValidationErrorIssuedAt")
-			shouldReport(stats, jwtErr.Errors&jwtBase.ValidationErrorNotValidYet != 0, "ValidationErrorNotValidYet")
-			shouldReport(stats, jwtErr.Errors&jwtBase.ValidationErrorIssuer != 0, "ValidationErrorIssuer")
-			shouldReport(stats, jwtErr.Errors&jwtBase.ValidationErrorMalformed != 0, "ValidationErrorMalformed")
-			shouldReport(stats, jwtErr.Errors&jwtBase.ValidationErrorSignatureInvalid != 0, "ValidationErrorSignatureInvalid")
-			shouldReport(stats, jwtErr.Errors&jwtBase.ValidationErrorUnverifiable != 0, "ValidationErrorUnverifiable")
+			shouldReport(ctx, stats, jwtErr.Errors&jwtBase.ValidationErrorExpired != 0, "ValidationErrorExpired")
+			shouldReport(ctx, stats, jwtErr.Errors&jwtBase.ValidationErrorClaimsInvalid != 0, "ValidationErrorClaimsInvalid")
+			shouldReport(ctx, stats, jwtErr.Errors&jwtBase.ValidationErrorIssuedAt != 0, "ValidationErrorIssuedAt")
+			shouldReport(ctx, stats, jwtErr.Errors&jwtBase.ValidationErrorNotValidYet != 0, "ValidationErrorNotValidYet")
+			shouldReport(ctx, stats, jwtErr.Errors&jwtBase.ValidationErrorIssuer != 0, "ValidationErrorIssuer")
+			shouldReport(ctx, stats, jwtErr.Errors&jwtBase.ValidationErrorMalformed != 0, "ValidationErrorMalformed")
+			shouldReport(ctx, stats, jwtErr.Errors&jwtBase.ValidationErrorSignatureInvalid != 0, "ValidationErrorSignatureInvalid")
+			shouldReport(ctx, stats, jwtErr.Errors&jwtBase.ValidationErrorUnverifiable != 0, "ValidationErrorUnverifiable")
 			return false
 		default:
-			stats.TrackMetric("tokens", bucket.MetricOperation{"jwt-manager", "parse-error", "ErrFailedToParse"})
+			shouldReport(ctx, stats, true, "ErrFailedToParse")
 			return false
 		}
 	}
@@ -55,8 +59,13 @@ func (m *JWTManager) IsKeyAuthorized(ctx context.Context, accessToken string) bo
 	return true
 }
 
-func shouldReport(client client.Client, typeCheck bool, operation string) {
+func shouldReport(ctx context.Context, client client.Client, typeCheck bool, operation string) {
 	if typeCheck {
 		client.TrackMetric("tokens", bucket.MetricOperation{"jwt-manager", "parse-error", operation})
+
+		// OpenCensus stats
+		ctx, _ := tag.New(ctx, tag.Insert(obs.KeyJWTValidationErrorType, operation))
+		stats.Record(ctx, obs.MJWTManagerValidationErrors.M(1))
+
 	}
 }
