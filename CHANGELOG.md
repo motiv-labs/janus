@@ -1,6 +1,6 @@
 # Unreleased
-
 - Fixed plugin configuration not being validated
+- Added stats and tracing support with opencensus
 
 # 3.8.4
 
