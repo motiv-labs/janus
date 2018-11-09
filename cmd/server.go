@@ -58,6 +58,8 @@ func RunServerStart(ctx context.Context, opts *ServerStartOptions) error {
 	initConfig()
 	initLog()
 	initStatsClient()
+	initStatsExporter()
+	initTracingExporter()
 
 	tracingFactory := opentracing.New(globalConfig.Tracing)
 	tracingFactory.Setup()

@@ -72,6 +72,7 @@ type Stats struct {
 	AutoDiscoverThreshold uint     `envconfig:"STATS_AUTO_DISCOVER_THRESHOLD"`
 	AutoDiscoverWhiteList []string `envconfig:"STATS_AUTO_DISCOVER_WHITE_LIST"`
 	ErrorsSection         string   `envconfig:"STATS_ERRORS_SECTION"`
+	Exporter              string   `envconfig:"STATS_EXPORTER"`
 }
 
 // Credentials represents the credentials that are going to be
@@ -129,6 +130,7 @@ type Tracing struct {
 	ServiceName        string             `envconfig:"TRACING_SERVICE_NAME"`
 	GoogleCloudTracing GoogleCloudTracing `mapstructure:"googleCloud"`
 	JaegerTracing      JaegerTracing      `mapstructure:"jaeger"`
+	Exporter           string             `envconfig:"TRACING_EXPORTER"`
 }
 
 func init() {
