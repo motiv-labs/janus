@@ -18,6 +18,15 @@
   revision = "b31f603f5e1e047fdb38584e1a922dcc5c4de5c8"
 
 [[projects]]
+  branch = "master"
+  digest = "1:11c864aa90241e85d3b3f46985c100e86da83ae4f7d6d179e7531a0d33f7c5d9"
+  name = "git.apache.org/thrift.git"
+  packages = ["lib/go/thrift"]
+  pruneopts = ""
+  revision = "f7d43ce0aa58cc7e33af425140e5a063e3f3a75f"
+  source = "github.com/apache/thrift"
+
+[[projects]]
   digest = "1:a459138af96862200653189d419131a8c6ec34f13b7f296a8ac64e9cf0d95d2d"
   name = "github.com/DATA-DOG/godog"
   packages = [
@@ -73,6 +82,14 @@
   pruneopts = ""
   revision = "521b25f4b05fd26bec69d9dedeb8f9c9a83939a8"
   version = "v8"
+
+[[projects]]
+  branch = "master"
+  digest = "1:c0bec5f9b98d0bc872ff5e834fac186b807b656683bd29cb82fb207a1513fabb"
+  name = "github.com/beorn7/perks"
+  packages = ["quantile"]
+  pruneopts = ""
+  revision = "3a771d992973f24aa725d07868b467d1ddfceafb"
 
 [[projects]]
   digest = "1:4193e2871b655bdfc423d23d309bf45a97ff75399c2fe923e79cb15eefb985d7"
@@ -189,12 +206,12 @@
   version = "v0.5"
 
 [[projects]]
-  branch = "master"
-  digest = "1:54859951ba785c9f5c7a0e665a9fe9fb6b1afeef112c62eaad77081d3d5916cc"
+  digest = "1:3dd078fda7500c341bc26cfbc6c6a34614f295a2457149fc1045cab767cbcf18"
   name = "github.com/golang/protobuf"
   packages = ["proto"]
   pruneopts = ""
-  revision = "c65a0412e71e8b9b3bfd22925720d23c0f054237"
+  revision = "aa810b61a9c79d51363740d207bb46cf8e620ed5"
+  version = "v1.2.0"
 
 [[projects]]
   branch = "master"
@@ -296,6 +313,14 @@
   version = "v1.7.4"
 
 [[projects]]
+  digest = "1:63722a4b1e1717be7b98fc686e0b30d5e7f734b9e93d7dee86293b6deab7ea28"
+  name = "github.com/matttproud/golang_protobuf_extensions"
+  packages = ["pbutil"]
+  pruneopts = ""
+  revision = "c12348ce28de40eed0136aa2b644d0ee0650e56c"
+  version = "v1.0.1"
+
+[[projects]]
   branch = "master"
   digest = "1:59d11e81d6fdd12a771321696bb22abdd9a94d26ac864787e98c9b419e428734"
   name = "github.com/mitchellh/go-homedir"
@@ -356,6 +381,51 @@
   pruneopts = ""
   revision = "792786c7400a136282c1664665ae0a8db921c6c2"
   version = "v1.0.0"
+
+[[projects]]
+  digest = "1:8b2082f564fe20dbb43a621ee0d57ae2777656ab14111d100d3d92d1b5b958b9"
+  name = "github.com/prometheus/client_golang"
+  packages = [
+    "prometheus",
+    "prometheus/internal",
+    "prometheus/promhttp",
+  ]
+  pruneopts = ""
+  revision = "abad2d1bd44235a26707c172eab6bca5bf2dbad3"
+  version = "v0.9.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:185cf55b1f44a1bf243558901c3f06efa5c64ba62cfdcbb1bf7bbe8c3fb68561"
+  name = "github.com/prometheus/client_model"
+  packages = ["go"]
+  pruneopts = ""
+  revision = "5c3871d89910bfb32f5fcab2aa4b9ec68e65a99f"
+
+[[projects]]
+  branch = "master"
+  digest = "1:ec33e022d27019d9ef386bf1d952df0fb24427ad2d2731e77c013f6ab228a445"
+  name = "github.com/prometheus/common"
+  packages = [
+    "expfmt",
+    "internal/bitbucket.org/ww/goautoneg",
+    "model",
+  ]
+  pruneopts = ""
+  revision = "0b1957f9d949dfa3084171a6ec5642b38055276a"
+
+[[projects]]
+  branch = "master"
+  digest = "1:1f62ed2c173c42c1edad2e94e127318ea11b0d28c62590c82a8d2d3cde189afe"
+  name = "github.com/prometheus/procfs"
+  packages = [
+    ".",
+    "internal/util",
+    "nfs",
+    "xfs",
+  ]
+  pruneopts = ""
+  revision = "185b4288413d2a0dd0806f78c90dde719829e5ae"
 
 [[projects]]
   branch = "master"
@@ -524,6 +594,32 @@
   pruneopts = ""
   revision = "0d25c13867d07314999d01525f9d69d40c6bf235"
   version = "v2.1.0"
+
+[[projects]]
+  digest = "1:ad67dfd3799a2c58f6c65871dd141d8b53f61f600aec48ce8d7fa16a4d5476f8"
+  name = "go.opencensus.io"
+  packages = [
+    ".",
+    "exemplar",
+    "exporter/jaeger",
+    "exporter/jaeger/internal/gen-go/jaeger",
+    "exporter/prometheus",
+    "internal",
+    "internal/tagencoding",
+    "plugin/ochttp",
+    "plugin/ochttp/propagation/b3",
+    "stats",
+    "stats/internal",
+    "stats/view",
+    "tag",
+    "trace",
+    "trace/internal",
+    "trace/propagation",
+    "trace/tracestate",
+  ]
+  pruneopts = ""
+  revision = "b7bf3cdb64150a8c8c53b769fdeb2ba581bd4d4b"
+  version = "v0.18.0"
 
 [[projects]]
   branch = "master"
@@ -714,6 +810,13 @@
     "github.com/ulule/limiter/drivers/middleware/stdlib",
     "github.com/ulule/limiter/drivers/store/memory",
     "github.com/ulule/limiter/drivers/store/redis",
+    "go.opencensus.io/exporter/jaeger",
+    "go.opencensus.io/exporter/prometheus",
+    "go.opencensus.io/plugin/ochttp",
+    "go.opencensus.io/stats",
+    "go.opencensus.io/stats/view",
+    "go.opencensus.io/tag",
+    "go.opencensus.io/trace",
     "golang.org/x/net/http2",
     "golang.org/x/oauth2",
   ]
