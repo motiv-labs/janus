@@ -107,7 +107,7 @@ func initStatsExporter() {
 	}
 
 	if err != nil {
-		logger.Warn("Failed initialising stats exporter")
+		logger.WithError(err).Error("Failed initialising stats exporter")
 		return
 	}
 
@@ -134,6 +134,7 @@ func initPrometheusExporter() (err error) {
 }
 
 func initTracingExporter() {
+	var err error
 	logger := log.WithField("tracing.exporter", globalConfig.Tracing.Exporter)
 
 	switch globalConfig.Tracing.Exporter {
@@ -144,11 +145,15 @@ func initTracingExporter() {
 		logger.Warn("Not implemented!")
 		return
 	case "jaeger":
-		initJaegerExporter()
+		err := initJaegerExporter()
 		break
 	default:
-		logger.Warn("Unsupported or invalid tracing exporter was specified")
+		logger.Info("Unsupported or invalid tracing exporter was specified")
 		return
+	}
+
+	if err != nil {
+		logger.WithError(err).Error("Failed initialising tracing exporter")
 	}
 }
 
