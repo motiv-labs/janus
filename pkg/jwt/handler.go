@@ -6,8 +6,6 @@ import (
 	"strings"
 	"time"
 
-	"go.opencensus.io/trace"
-
 	"github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt/provider"
@@ -15,6 +13,7 @@ import (
 	"github.com/hellofresh/janus/pkg/render"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/trace"
 	"golang.org/x/oauth2"
 )
 

@@ -5,13 +5,12 @@ import (
 	"fmt"
 	"net/http"
 
-	"go.opencensus.io/trace"
-
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/render"
 	"github.com/hellofresh/janus/pkg/router"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/trace"
 )
 
 // Handler is the api rest handlers

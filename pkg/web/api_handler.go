@@ -5,14 +5,13 @@ import (
 	"fmt"
 	"net/http"
 
-	"go.opencensus.io/trace"
-
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/render"
 	"github.com/hellofresh/janus/pkg/router"
+	"go.opencensus.io/trace"
 )
 
 // APIHandler is the api rest controller

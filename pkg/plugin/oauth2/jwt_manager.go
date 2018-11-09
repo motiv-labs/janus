@@ -3,9 +3,6 @@ package oauth2
 import (
 	"context"
 
-	"go.opencensus.io/stats"
-	"go.opencensus.io/tag"
-
 	jwtBase "github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/metrics"
@@ -13,6 +10,8 @@ import (
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/stats"
+	"go.opencensus.io/tag"
 )
 
 // JWTManager is responsible for managing the JWT tokens

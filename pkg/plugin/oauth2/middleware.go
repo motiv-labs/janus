@@ -5,13 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	"go.opencensus.io/stats"
-
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/metrics"
 	obs "github.com/hellofresh/janus/pkg/observability"
 	"github.com/hellofresh/stats-go/bucket"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/stats"
 )
 
 const (

@@ -4,12 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"go.opencensus.io/trace"
-
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/render"
 	"github.com/hellofresh/janus/pkg/router"
+	"go.opencensus.io/trace"
 )
 
 // Controller is the api rest controller

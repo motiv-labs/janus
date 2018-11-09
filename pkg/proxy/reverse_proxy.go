@@ -7,9 +7,6 @@ import (
 	"net/url"
 	"strings"
 
-	"go.opencensus.io/stats"
-	"go.opencensus.io/tag"
-
 	"github.com/go-chi/chi"
 	"github.com/hellofresh/janus/pkg/middleware"
 	obs "github.com/hellofresh/janus/pkg/observability"
@@ -19,6 +16,8 @@ import (
 	"github.com/hellofresh/stats-go/client"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/stats"
+	"go.opencensus.io/tag"
 )
 
 const (
