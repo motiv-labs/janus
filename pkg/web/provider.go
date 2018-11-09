@@ -11,6 +11,7 @@ import (
 	httpErrors "github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/middleware"
+	obs "github.com/hellofresh/janus/pkg/observability"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/rs/cors"
@@ -88,6 +89,9 @@ func (s *Server) addInternalPublicRoutes(r router.Router) {
 	r.GET("/", Home())
 	r.GET("/status", NewOverviewHandler(s.apiHandler.Cfgs))
 	r.GET("/status/{name}", NewStatusHandler(s.apiHandler.Cfgs))
+	if obs.PromExporter != nil {
+		r.Any("/metrics", obs.PromExporter.ServeHTTP)
+	}
 }
 
 func (s *Server) addInternalAuthRoutes(r router.Router, guard jwt.Guard) {
