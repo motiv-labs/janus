@@ -71,7 +71,6 @@ func (s *Server) AddRoutes(r router.Router) {
 		chiMiddleware.DefaultCompress,
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(httpErrors.RecoveryHandler),
-		middleware.NewOpenTracing(s.TLS.IsHTTPS()).Handler,
 		cors.New(cors.Options{
 			AllowedOrigins:   []string{"*"},
 			AllowedHeaders:   []string{"*"},

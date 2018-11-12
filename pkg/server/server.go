@@ -284,7 +284,6 @@ func (s *Server) createRouter() router.Router {
 		middleware.NewStats(s.statsClient).Handler,
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(errors.RecoveryHandler),
-		middleware.NewOpenTracing(s.globalConfig.TLS.IsHTTPS()).Handler,
 	)
 
 	// some routers may panic when have empty routes list, so add one dummy 404 route to avoid this

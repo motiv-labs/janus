@@ -106,32 +106,18 @@ func (auth *Github) IsConfigured() bool {
 		len(auth.Teams) > 0
 }
 
-// GoogleCloudTracing holds the Google Application Default Credentials
-type GoogleCloudTracing struct {
-	ProjectID    string `envconfig:"TRACING_GC_PROJECT_ID"`
-	Email        string `envconfig:"TRACING_GC_EMAIL"`
-	PrivateKey   string `envconfig:"TRACING_GC_PRIVATE_KEY"`
-	PrivateKeyID string `envconfig:"TRACING_GC_PRIVATE_ID"`
+// Tracing represents the distributed tracing configuration
+type Tracing struct {
+	Exporter         string        `envconfig:"TRACING_EXPORTER"`
+	ServiceName      string        `envconfig:"TRACING_SERVICE_NAME"`
+	SamplingStrategy string        `envconfig:"TRACING_SAMPLING_STRATEGY"`
+	SamplingParam    float64       `envconfig:"TRACING_SAMPLING_PARAM"`
+	JaegerTracing    JaegerTracing `mapstructure:"jaeger"`
 }
 
 // JaegerTracing holds the Jaeger tracing configuration
 type JaegerTracing struct {
-	SamplingServerURL   string        `envconfig:"TRACING_JAEGER_SAMPLING_SERVER_URL"`
-	SamplingParam       float64       `envconfig:"TRACING_JAEGER_SAMPLING_PARAM"`
-	SamplingType        string        `envconfig:"TRACING_JAEGER_SAMPLING_TYPE"`
-	BufferFlushInterval time.Duration `envconfig:"TRACING_JAEGER_BUFFER_FLUSH_INTERVAL"`
-	LogSpans            bool          `envconfig:"TRACING_JAEGER_LOG_SPANS"`
-	QueueSize           int           `envconfig:"TRACING_JAEGER_QUEUE_SIZE"`
-	PropagationFormat   string        `envconfig:"TRACING_JAEGER_PROPAGATION_FORMAT"`
-}
-
-// Tracing represents the distributed tracing configuration
-type Tracing struct {
-	Provider           string             `envconfig:"TRACING_PROVIDER"`
-	ServiceName        string             `envconfig:"TRACING_SERVICE_NAME"`
-	GoogleCloudTracing GoogleCloudTracing `mapstructure:"googleCloud"`
-	JaegerTracing      JaegerTracing      `mapstructure:"jaeger"`
-	Exporter           string             `envconfig:"TRACING_EXPORTER"`
+	SamplingServerURL string `envconfig:"TRACING_JAEGER_SAMPLING_SERVER_URL"`
 }
 
 func init() {
@@ -161,10 +147,8 @@ func init() {
 	viper.SetDefault("stats.namespace", serviceName)
 
 	viper.SetDefault("tracing.serviceName", serviceName)
-	viper.SetDefault("tracing.jaeger.samplingParam", 1.0)
-	viper.SetDefault("tracing.jaeger.samplingType", "const")
-	viper.SetDefault("tracing.jaeger.bufferFlushInterval", "1s")
-	viper.SetDefault("tracing.jaeger.logSpans", false)
+	viper.SetDefault("tracing.samplingStrategy", "always")
+	viper.SetDefault("tracing.samplingParam", 0.15)
 
 	logging.InitDefaults(viper.GetViper(), "log")
 }

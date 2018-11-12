@@ -61,8 +61,6 @@ func TestDefaults(t *testing.T) {
 	assert.Equal(t, "error-log", globalConfig.Stats.ErrorsSection)
 
 	assert.Equal(t, "janus", globalConfig.Tracing.ServiceName)
-	assert.Equal(t, 1.0, globalConfig.Tracing.JaegerTracing.SamplingParam)
-	assert.Equal(t, "const", globalConfig.Tracing.JaegerTracing.SamplingType)
-	assert.Equal(t, 1*time.Second, globalConfig.Tracing.JaegerTracing.BufferFlushInterval)
-	assert.False(t, globalConfig.Tracing.JaegerTracing.LogSpans)
+	assert.Equal(t, "always", globalConfig.Tracing.SamplingStrategy)
+	assert.Equal(t, 0.15, globalConfig.Tracing.SamplingParam)
 }

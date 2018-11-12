@@ -9,7 +9,6 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt/provider"
-	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/render"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -31,11 +30,9 @@ type Handler struct {
 // Reply will be of the form {"token": "<TOKEN>"}.
 func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		span := opentracing.FromContext(r.Context(), "token.extract")
-		_, ocSpan := trace.StartSpan(r.Context(), "token.extract")
+		_, span := trace.StartSpan(r.Context(), "token.extract")
 		accessToken, err := extractAccessToken(r)
-		span.Finish()
-		ocSpan.End()
+		span.End()
 
 		if err != nil {
 			log.WithError(err).Debug("failed to extract access token")
@@ -45,11 +42,9 @@ func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 		factory := provider.Factory{}
 		p := factory.Build(r.URL.Query().Get("provider"), config)
 
-		span = opentracing.FromContext(r.Context(), "token.verify")
-		_, ocSpan = trace.StartSpan(r.Context(), "token.verify")
+		_, span = trace.StartSpan(r.Context(), "token.verify")
 		verified, err := p.Verify(r, httpClient)
-		span.Finish()
-		ocSpan.End()
+		span.End()
 
 		if err != nil || !verified {
 			log.WithError(err).Debug(err.Error())
@@ -67,11 +62,9 @@ func (j *Handler) Login(config config.Credentials) http.HandlerFunc {
 			return
 		}
 
-		span = opentracing.FromContext(r.Context(), "token.issue_admin")
-		_, ocSpan = trace.StartSpan(r.Context(), "token.issue_admin")
+		_, span = trace.StartSpan(r.Context(), "token.issue_admin")
 		token, err := IssueAdminToken(j.Guard.SigningMethod, claims, j.Guard.Timeout)
-		span.Finish()
-		ocSpan.End()
+		span.End()
 
 		if err != nil {
 			render.JSON(w, http.StatusUnauthorized, "problem issuing JWT")
