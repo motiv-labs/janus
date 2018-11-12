@@ -25,7 +25,7 @@ func NewHandler(repo Repository) *Handler {
 // Index is the find all handler
 func (c *Handler) Index() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, span := trace.StartSpan(r.Context(), "datastore.user.FindAll")
+		_, span := trace.StartSpan(r.Context(), "datastore.basic_auth.FindAll")
 		data, err := c.repo.FindAll()
 		span.End()
 
@@ -42,7 +42,7 @@ func (c *Handler) Index() http.HandlerFunc {
 func (c *Handler) Show() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		username := router.URLParam(r, "username")
-		_, span := trace.StartSpan(r.Context(), "datastore.user.FindByUsername")
+		_, span := trace.StartSpan(r.Context(), "datastore.basic_auth.FindByUsername")
 		data, err := c.repo.FindByUsername(username)
 		span.End()
 
@@ -61,7 +61,7 @@ func (c *Handler) Update() http.HandlerFunc {
 		var err error
 
 		username := router.URLParam(r, "username")
-		_, span := trace.StartSpan(r.Context(), "datastore.user.FindByUsername")
+		_, span := trace.StartSpan(r.Context(), "datastore.basic_auth.FindByUsername")
 		user, err := c.repo.FindByUsername(username)
 		span.End()
 
@@ -81,7 +81,7 @@ func (c *Handler) Update() http.HandlerFunc {
 			return
 		}
 
-		_, span = trace.StartSpan(r.Context(), "datastore.user.Add")
+		_, span = trace.StartSpan(r.Context(), "datastore.basic_auth.Add")
 		err = c.repo.Add(user)
 		span.End()
 
@@ -105,7 +105,7 @@ func (c *Handler) Create() http.HandlerFunc {
 			return
 		}
 
-		_, span := trace.StartSpan(r.Context(), "datastore.user.Exists")
+		_, span := trace.StartSpan(r.Context(), "datastore.basic_auth.Exists")
 		_, err = c.repo.FindByUsername(user.Username)
 		span.End()
 
@@ -115,7 +115,7 @@ func (c *Handler) Create() http.HandlerFunc {
 			return
 		}
 
-		_, span = trace.StartSpan(r.Context(), "datastore.user.Add")
+		_, span = trace.StartSpan(r.Context(), "datastore.basic_auth.Add")
 		err = c.repo.Add(user)
 		span.End()
 
@@ -134,7 +134,7 @@ func (c *Handler) Delete() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		username := router.URLParam(r, "username")
 
-		_, span := trace.StartSpan(r.Context(), "datastore.user.Remove")
+		_, span := trace.StartSpan(r.Context(), "datastore.basic_auth.Remove")
 		err := c.repo.Remove(username)
 		span.End()
 

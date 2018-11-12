@@ -46,7 +46,7 @@ func (c *APIHandler) Get() http.HandlerFunc {
 func (c *APIHandler) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.URLParam(r, "name")
-		_, span := trace.StartSpan(r.Context(), "datastore.FindByName")
+		_, span := trace.StartSpan(r.Context(), "datastore.configuration.FindByName")
 		cfg := c.findByName(name)
 		span.End()
 
@@ -65,7 +65,7 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 		var err error
 
 		name := router.URLParam(r, "name")
-		_, span := trace.StartSpan(r.Context(), "datastore.FindByName")
+		_, span := trace.StartSpan(r.Context(), "datastore.configuration.FindByName")
 		cfg := c.findByName(name)
 		span.End()
 
@@ -97,7 +97,7 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 
 		// avoid situation when trying to update existing definition with new path
 		// that is already registered with another name
-		_, span = trace.StartSpan(r.Context(), "datastore.FindByListenPath")
+		_, span = trace.StartSpan(r.Context(), "datastore.configuration.FindByListenPath")
 		existingCfg := c.findByListenPath(cfg.Proxy.ListenPath)
 		span.End()
 
@@ -106,7 +106,7 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 			return
 		}
 
-		_, span = trace.StartSpan(r.Context(), "datastore.Update")
+		_, span = trace.StartSpan(r.Context(), "datastore.configuration.Update")
 		c.configurationChan <- api.ConfigurationMessage{
 			Operation:     api.UpdatedOperation,
 			Configuration: cfg,
@@ -143,7 +143,7 @@ func (c *APIHandler) Post() http.HandlerFunc {
 			}
 		}
 
-		_, span := trace.StartSpan(r.Context(), "datastore.Exists")
+		_, span := trace.StartSpan(r.Context(), "datastore.configuration.Exists")
 		exists, err := c.exists(cfg)
 		span.End()
 
@@ -152,7 +152,7 @@ func (c *APIHandler) Post() http.HandlerFunc {
 			return
 		}
 
-		_, span = trace.StartSpan(r.Context(), "datastore.Add")
+		_, span = trace.StartSpan(r.Context(), "datastore.configuration.Add")
 		c.configurationChan <- api.ConfigurationMessage{
 			Operation:     api.AddedOperation,
 			Configuration: cfg,
@@ -167,7 +167,7 @@ func (c *APIHandler) Post() http.HandlerFunc {
 // DeleteBy is the delete handler
 func (c *APIHandler) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, span := trace.StartSpan(r.Context(), "datastore.Remove")
+		_, span := trace.StartSpan(r.Context(), "datastore.configuration.Remove")
 		defer span.End()
 
 		name := router.URLParam(r, "name")

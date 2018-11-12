@@ -23,7 +23,7 @@ func NewController(repo Repository) *Controller {
 // Get is the find all handler
 func (c *Controller) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		_, span := trace.StartSpan(r.Context(), "datastore.FindAll")
+		_, span := trace.StartSpan(r.Context(), "datastore.oauth_servers.FindAll")
 		data, err := c.repo.FindAll()
 		span.End()
 
@@ -40,7 +40,7 @@ func (c *Controller) Get() http.HandlerFunc {
 func (c *Controller) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.URLParam(r, "name")
-		_, span := trace.StartSpan(r.Context(), "datastore.FindByName")
+		_, span := trace.StartSpan(r.Context(), "datastore.oauth_servers.FindByName")
 		data, err := c.repo.FindByName(name)
 		span.End()
 
@@ -59,7 +59,7 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		var err error
 		name := router.URLParam(r, "name")
 
-		_, span := trace.StartSpan(r.Context(), "datastore.FindByName")
+		_, span := trace.StartSpan(r.Context(), "datastore.oauth_servers.FindByName")
 		oauth, err := c.repo.FindByName(name)
 		span.End()
 
@@ -79,7 +79,7 @@ func (c *Controller) PutBy() http.HandlerFunc {
 			return
 		}
 
-		_, span = trace.StartSpan(r.Context(), "datastore.Save")
+		_, span = trace.StartSpan(r.Context(), "datastore.oauth_servers.Save")
 		err = c.repo.Save(oauth)
 		span.End()
 
@@ -102,7 +102,7 @@ func (c *Controller) Post() http.HandlerFunc {
 			return
 		}
 
-		_, span := trace.StartSpan(r.Context(), "datastore.Add")
+		_, span := trace.StartSpan(r.Context(), "datastore.oauth_servers.Add")
 		err = c.repo.Add(oauth)
 		span.End()
 
@@ -120,7 +120,7 @@ func (c *Controller) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.URLParam(r, "name")
 
-		_, span := trace.StartSpan(r.Context(), "datastore.Remove")
+		_, span := trace.StartSpan(r.Context(), "datastore.oauth_servers.Remove")
 		err := c.repo.Remove(name)
 		span.End()
 
