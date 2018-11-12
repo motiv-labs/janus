@@ -147,7 +147,7 @@ func init() {
 	viper.SetDefault("stats.namespace", serviceName)
 
 	viper.SetDefault("tracing.serviceName", serviceName)
-	viper.SetDefault("tracing.samplingStrategy", "always")
+	viper.SetDefault("tracing.samplingStrategy", "probabilistic")
 	viper.SetDefault("tracing.samplingParam", 0.15)
 
 	logging.InitDefaults(viper.GetViper(), "log")
