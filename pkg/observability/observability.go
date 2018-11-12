@@ -13,6 +13,16 @@ const (
 	dimensionless = "1"
 )
 
+// Known exporters
+const (
+	AzureMonitor = "azure_monitor"
+	Datadog      = "datadog"
+	Jaeger       = "jaeger"
+	Prometheus   = "prometheus"
+	Stackdriver  = "stackdriver"
+	Zipkin       = "zipkin"
+)
+
 // PromExporter is the prometheus exporter containing HTTP handler for "/metrics"
 var PromExporter *prometheus.Exporter
 

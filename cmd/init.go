@@ -94,11 +94,11 @@ func initStatsExporter() {
 
 	// Register stats exporter according to config
 	switch globalConfig.Stats.Exporter {
-	case "datadog":
-	case "stackdriver":
+	case obs.Datadog:
+	case obs.Stackdriver:
 		logger.Warn("Not implemented!")
 		return
-	case "prometheus":
+	case obs.Prometheus:
 		err = initPrometheusExporter()
 		break
 	default:
@@ -138,13 +138,13 @@ func initTracingExporter() {
 	logger := log.WithField("tracing.exporter", globalConfig.Tracing.Exporter)
 
 	switch globalConfig.Tracing.Exporter {
-	case "azure_monitor":
-	case "datadog":
-	case "stackdriver":
-	case "zipkin":
+	case obs.AzureMonitor:
+	case obs.Datadog:
+	case obs.Stackdriver:
+	case obs.Zipkin:
 		logger.Warn("Not implemented!")
 		return
-	case "jaeger":
+	case obs.Jaeger:
 		err = initJaegerExporter()
 		break
 	default:
