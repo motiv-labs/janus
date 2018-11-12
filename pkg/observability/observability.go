@@ -36,39 +36,33 @@ var (
 var AllViews = []*view.View{
 	{
 		Name:        "opencensus.io/http/proxy/request_total_by_host",
-		Description: "Number of proxied requests by target hostname",
 		TagKeys:     []tag.Key{KeyHostname},
 		Measure:     MRequestsByHostname,
 		Aggregation: view.Count(),
 	},
 	{
 		Name:        "opencensus.io/plugin/jwt_manager/validation_error_total",
-		Description: "Number of validation errors by error type",
 		TagKeys:     []tag.Key{KeyJWTValidationErrorType},
 		Measure:     MJWTManagerValidationErrors,
 		Aggregation: view.Count(),
 	},
 	{
 		Name:        "opencensus.io/plugin/oauth2/missing_header_total",
-		Description: "Number of failed oauth2 authentication due to missing header",
 		Measure:     MOAuth2MissingHeader,
 		Aggregation: view.Count(),
 	},
 	{
 		Name:        "opencensus.io/plugin/oauth2/malformed_header_total",
-		Description: "Number of failed oauth2 authentication due to malformed bearer header",
 		Measure:     MOAuth2MalformedHeader,
 		Aggregation: view.Count(),
 	},
 	{
 		Name:        "opencensus.io/plugin/oauth2/authorized_request_total",
-		Description: "Number of successful and authorized oauth2 authentication",
 		Measure:     MOAuth2Authorized,
 		Aggregation: view.Count(),
 	},
 	{
 		Name:        "opencensus.io/plugin/oauth2/unauthorized_request_total",
-		Description: "Number of successful but unauthorized oauth2 authentication",
 		Measure:     MOAuth2Unauthorized,
 		Aggregation: view.Count(),
 	},
