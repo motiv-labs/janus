@@ -102,7 +102,7 @@ func initStatsExporter() {
 		err = initPrometheusExporter()
 		break
 	default:
-		logger.Info("Unsupported or invalid stats exporter was specified")
+		logger.Info("Invalid or no stats exporter was specified")
 		return
 	}
 
@@ -148,7 +148,7 @@ func initTracingExporter() {
 		err = initJaegerExporter()
 		break
 	default:
-		logger.Info("Unsupported or invalid tracing exporter was specified")
+		logger.Info("Invalid or no tracing exporter was specified")
 		return
 	}
 
