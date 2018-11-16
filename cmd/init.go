@@ -154,27 +154,28 @@ func initTracingExporter() {
 
 	if err != nil {
 		logger.WithError(err).Error("Failed initialising tracing exporter")
-	} else {
-		var traceConfig trace.Config
-		logger = logger.WithField("tracing.samplingStrategy", globalConfig.Tracing.SamplingStrategy)
-
-		switch globalConfig.Tracing.SamplingStrategy {
-		case "always":
-			traceConfig.DefaultSampler = trace.AlwaysSample()
-			break
-		case "never":
-			traceConfig.DefaultSampler = trace.NeverSample()
-			break
-		case "probabilistic":
-			traceConfig.DefaultSampler = trace.ProbabilitySampler(globalConfig.Tracing.SamplingParam)
-			break
-		default:
-			logger.Warn("Invalid tracing sampling strategy specified")
-			return
-		}
-
-		trace.ApplyConfig(traceConfig)
+		return
 	}
+
+	var traceConfig trace.Config
+	logger = logger.WithField("tracing.samplingStrategy", globalConfig.Tracing.SamplingStrategy)
+
+	switch globalConfig.Tracing.SamplingStrategy {
+	case "always":
+		traceConfig.DefaultSampler = trace.AlwaysSample()
+		break
+	case "never":
+		traceConfig.DefaultSampler = trace.NeverSample()
+		break
+	case "probabilistic":
+		traceConfig.DefaultSampler = trace.ProbabilitySampler(globalConfig.Tracing.SamplingParam)
+		break
+	default:
+		logger.Warn("Invalid tracing sampling strategy specified")
+		return
+	}
+
+	trace.ApplyConfig(traceConfig)
 }
 
 func initJaegerExporter() (err error) {
