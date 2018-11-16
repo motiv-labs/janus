@@ -122,13 +122,13 @@ func initStatsExporter() {
 }
 
 func initPrometheusExporter() (err error) {
-	obs.PromExporter, err = prometheus.NewExporter(prometheus.Options{
+	obs.PrometheusExporter, err = prometheus.NewExporter(prometheus.Options{
 		Namespace: globalConfig.Stats.Namespace,
 	})
 	if err != nil {
 		log.WithError(err).Warn("Failed to create prometheus exporter")
 	} else {
-		view.RegisterExporter(obs.PromExporter)
+		view.RegisterExporter(obs.PrometheusExporter)
 	}
 	return err
 }

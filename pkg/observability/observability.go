@@ -23,8 +23,8 @@ const (
 	Zipkin       = "zipkin"
 )
 
-// PromExporter is the prometheus exporter containing HTTP handler for "/metrics"
-var PromExporter *prometheus.Exporter
+// PrometheusExporter is the prometheus exporter containing HTTP handler for "/metrics"
+var PrometheusExporter *prometheus.Exporter
 
 // Tags
 var (
