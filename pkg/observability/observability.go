@@ -33,38 +33,38 @@ var (
 
 // Metrics
 var (
-	MJWTManagerValidationErrors = stats.Int64("opencensus.io/plugin/jwt_manager/validation_error_total", "Number of validation errors by error type", dimensionless)
-	MOAuth2MissingHeader        = stats.Int64("opencensus.io/plugin/oauth2/missing_header_total", "Number of failed oauth2 authentication due to missing header", dimensionless)
-	MOAuth2MalformedHeader      = stats.Int64("opencensus.io/plugin/oauth2/malformed_header_total", "Number of failed oauth2 authentication due to malformed bearer header", dimensionless)
-	MOAuth2Authorized           = stats.Int64("opencensus.io/plugin/oauth2/authorized_request_total", "Number of successful and authorized oauth2 authentication", dimensionless)
-	MOAuth2Unauthorized         = stats.Int64("opencensus.io/plugin/oauth2/unauthorized_request_total", "Number of successful but unauthorized oauth2 authentication", dimensionless)
+	MJWTManagerValidationErrors = stats.Int64("plugin_jwt_manager_validation_error_total", "Number of validation errors by error type", dimensionless)
+	MOAuth2MissingHeader        = stats.Int64("plugin_oauth2_missing_header_total", "Number of failed oauth2 authentication due to missing header", dimensionless)
+	MOAuth2MalformedHeader      = stats.Int64("plugin_oauth2_malformed_header_total", "Number of failed oauth2 authentication due to malformed bearer header", dimensionless)
+	MOAuth2Authorized           = stats.Int64("plugin_oauth2_authorized_request_total", "Number of successful and authorized oauth2 authentication", dimensionless)
+	MOAuth2Unauthorized         = stats.Int64("plugin_oauth2_unauthorized_request_total", "Number of successful but unauthorized oauth2 authentication", dimensionless)
 )
 
 // AllViews aggregates the metrics
 var AllViews = []*view.View{
 	{
-		Name:        "opencensus.io/plugin/jwt_manager/validation_error_total",
+		Name:        "plugin_jwt_manager_validation_error_total",
 		TagKeys:     []tag.Key{KeyJWTValidationErrorType},
 		Measure:     MJWTManagerValidationErrors,
 		Aggregation: view.Count(),
 	},
 	{
-		Name:        "opencensus.io/plugin/oauth2/missing_header_total",
+		Name:        "plugin_oauth2_missing_header_total",
 		Measure:     MOAuth2MissingHeader,
 		Aggregation: view.Count(),
 	},
 	{
-		Name:        "opencensus.io/plugin/oauth2/malformed_header_total",
+		Name:        "plugin_oauth2_malformed_header_total",
 		Measure:     MOAuth2MalformedHeader,
 		Aggregation: view.Count(),
 	},
 	{
-		Name:        "opencensus.io/plugin/oauth2/authorized_request_total",
+		Name:        "plugin_oauth2_authorized_request_total",
 		Measure:     MOAuth2Authorized,
 		Aggregation: view.Count(),
 	},
 	{
-		Name:        "opencensus.io/plugin/oauth2/unauthorized_request_total",
+		Name:        "plugin_oauth2_unauthorized_request_total",
 		Measure:     MOAuth2Unauthorized,
 		Aggregation: view.Count(),
 	},

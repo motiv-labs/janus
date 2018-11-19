@@ -16,7 +16,6 @@ import (
 	"github.com/hellofresh/stats-go/client"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	"go.opencensus.io/stats"
 	"go.opencensus.io/tag"
 )
 
@@ -106,8 +105,6 @@ func createDirector(proxyDefinition *Definition, balancer balancer.Balancer, sta
 			"upstream-request": req.URL.RequestURI(),
 		}).Info("Proxying request to the following upstream")
 		statsClient.TrackMetric(statsSection, bucket.MetricOperation{req.Host})
-		ctx, _ := tag.New(req.Context(), tag.Insert(obs.KeyHostname, req.Host))
-		stats.Record(ctx, obs.MRequestsByHostname.M(1))
 	}
 }
 
