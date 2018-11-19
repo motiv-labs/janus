@@ -59,12 +59,14 @@ func (p *Register) Add(definition *RouterDefinition) error {
 
 	handler := NewBalancedReverseProxy(definition.Definition, balancerInstance, p.statsClient)
 	handler.FlushInterval = p.flushInterval
-	handler.Transport = transport.New(
-		transport.WithIdleConnTimeout(p.idleConnTimeout),
-		transport.WithInsecureSkipVerify(definition.InsecureSkipVerify),
-		transport.WithDialTimeout(time.Duration(definition.ForwardingTimeouts.DialTimeout)),
-		transport.WithResponseHeaderTimeout(time.Duration(definition.ForwardingTimeouts.ResponseHeaderTimeout)),
-	)
+	handler.Transport = &ochttp.Transport{
+		Base: transport.New(
+			transport.WithIdleConnTimeout(p.idleConnTimeout),
+			transport.WithInsecureSkipVerify(definition.InsecureSkipVerify),
+			transport.WithDialTimeout(time.Duration(definition.ForwardingTimeouts.DialTimeout)),
+			transport.WithResponseHeaderTimeout(time.Duration(definition.ForwardingTimeouts.ResponseHeaderTimeout)),
+		),
+	}
 
 	if p.matcher.Match(definition.ListenPath) {
 		p.doRegister(p.matcher.Extract(definition.ListenPath), definition, &ochttp.Handler{Handler: handler, IsPublicEndpoint: true})
