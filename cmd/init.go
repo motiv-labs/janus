@@ -114,7 +114,23 @@ func initStatsExporter() {
 	// Configure/Register stats views
 	view.SetReportingPeriod(time.Second)
 
-	vv := append(ochttp.DefaultServerViews, obs.AllViews...)
+	vv := append(
+		[]*view.View{
+			ochttp.ClientRequestCountView,
+			ochttp.ClientRequestBytesView,
+			ochttp.ClientResponseBytesView,
+			ochttp.ClientLatencyView,
+			ochttp.ClientRequestCountByMethod,
+			ochttp.ClientResponseCountByStatusCode,
+			ochttp.ServerRequestCountView,
+			ochttp.ServerRequestBytesView,
+			ochttp.ServerResponseBytesView,
+			ochttp.ServerLatencyView,
+			ochttp.ServerRequestCountByMethod,
+			ochttp.ServerResponseCountByStatusCode,
+		},
+		obs.AllViews...,
+	)
 
 	if err := view.Register(vv...); err != nil {
 		log.WithError(err).Warn("Failed to register server views")
