@@ -72,16 +72,48 @@ var AllViews = []*view.View{
 		Aggregation: view.Count(),
 	},
 	{
+		Name:        "http_server_request_count",
+		Measure:     ochttp.ServerRequestCount,
+		Aggregation: view.Count(),
+	},
+	{
+		Name:        "http_server_request_count_by_method",
+		TagKeys:     []tag.Key{ochttp.Method},
+		Measure:     ochttp.ServerRequestCount,
+		Aggregation: view.Count(),
+	},
+	{
 		Name:        "http_server_request_count_by_path",
 		TagKeys:     []tag.Key{KeyListenPath},
 		Measure:     ochttp.ServerRequestCount,
 		Aggregation: view.Count(),
 	},
 	{
-		Name:        "http_server_latency_by_path",
+		Name:        "http_server_response_count_by_code",
+		TagKeys:     []tag.Key{ochttp.StatusCode},
+		Measure:     ochttp.ServerLatency,
+		Aggregation: view.Count(),
+	},
+	{
+		Name:        "http_server_request_latency",
+		Measure:     ochttp.ServerLatency,
+		Aggregation: ochttp.DefaultLatencyDistribution,
+	},
+	{
+		Name:        "http_server_request_latency_by_path",
 		TagKeys:     []tag.Key{KeyListenPath},
 		Measure:     ochttp.ServerLatency,
 		Aggregation: ochttp.DefaultLatencyDistribution,
+	},
+	{
+		Name:        "http_server_request_size",
+		Measure:     ochttp.ServerRequestBytes,
+		Aggregation: ochttp.DefaultSizeDistribution,
+	},
+	{
+		Name:        "http_client_request_count",
+		Measure:     ochttp.ClientRequestCount,
+		Aggregation: view.Count(),
 	},
 	{
 		Name:        "http_client_request_count_by_path",
@@ -90,7 +122,12 @@ var AllViews = []*view.View{
 		Aggregation: view.Count(),
 	},
 	{
-		Name:        "http_client_latency_by_path",
+		Name:        "http_client_request_latency",
+		Measure:     ochttp.ClientLatency,
+		Aggregation: ochttp.DefaultLatencyDistribution,
+	},
+	{
+		Name:        "http_client_request_latency_by_path",
 		TagKeys:     []tag.Key{KeyUpstreamPath},
 		Measure:     ochttp.ClientLatency,
 		Aggregation: ochttp.DefaultLatencyDistribution,

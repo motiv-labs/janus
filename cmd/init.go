@@ -14,7 +14,6 @@ import (
 	log "github.com/sirupsen/logrus"
 	"go.opencensus.io/exporter/jaeger"
 	"go.opencensus.io/exporter/prometheus"
-	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 )
@@ -114,23 +113,7 @@ func initStatsExporter() {
 	// Configure/Register stats views
 	view.SetReportingPeriod(time.Second)
 
-	vv := append(
-		[]*view.View{
-			ochttp.ClientRequestCountView,
-			ochttp.ClientRequestBytesView,
-			ochttp.ClientResponseBytesView,
-			ochttp.ClientLatencyView,
-			ochttp.ClientRequestCountByMethod,
-			ochttp.ClientResponseCountByStatusCode,
-			ochttp.ServerRequestCountView,
-			ochttp.ServerRequestBytesView,
-			ochttp.ServerResponseBytesView,
-			ochttp.ServerLatencyView,
-			ochttp.ServerRequestCountByMethod,
-			ochttp.ServerResponseCountByStatusCode,
-		},
-		obs.AllViews...,
-	)
+	vv := append(obs.AllViews)
 
 	if err := view.Register(vv...); err != nil {
 		log.WithError(err).Warn("Failed to register server views")
