@@ -2,6 +2,7 @@ package observability
 
 import (
 	"go.opencensus.io/exporter/prometheus"
+	"go.opencensus.io/plugin/ochttp"
 	"go.opencensus.io/stats"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/tag"
@@ -28,6 +29,8 @@ var PrometheusExporter *prometheus.Exporter
 
 // Tags
 var (
+	KeyListenPath, _             = tag.NewKey("path")
+	KeyUpstreamPath, _           = tag.NewKey("upstream_path")
 	KeyJWTValidationErrorType, _ = tag.NewKey("error")
 )
 
@@ -67,5 +70,29 @@ var AllViews = []*view.View{
 		Name:        "plugin_oauth2_unauthorized_request_total",
 		Measure:     MOAuth2Unauthorized,
 		Aggregation: view.Count(),
+	},
+	{
+		Name:        "http_server_request_count_by_path",
+		TagKeys:     []tag.Key{KeyListenPath},
+		Measure:     ochttp.ServerRequestCount,
+		Aggregation: view.Count(),
+	},
+	{
+		Name:        "http_server_latency_by_path",
+		TagKeys:     []tag.Key{KeyListenPath},
+		Measure:     ochttp.ServerLatency,
+		Aggregation: ochttp.DefaultLatencyDistribution,
+	},
+	{
+		Name:        "http_client_request_count_by_path",
+		TagKeys:     []tag.Key{KeyUpstreamPath},
+		Measure:     ochttp.ClientRequestCount,
+		Aggregation: view.Count(),
+	},
+	{
+		Name:        "http_client_latency_by_path",
+		TagKeys:     []tag.Key{KeyUpstreamPath},
+		Measure:     ochttp.ClientLatency,
+		Aggregation: ochttp.DefaultLatencyDistribution,
 	},
 }
