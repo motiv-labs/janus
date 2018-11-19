@@ -28,13 +28,11 @@ var PrometheusExporter *prometheus.Exporter
 
 // Tags
 var (
-	KeyHostname, _               = tag.NewKey("hostname")
 	KeyJWTValidationErrorType, _ = tag.NewKey("error")
 )
 
 // Metrics
 var (
-	MRequestsByHostname         = stats.Int64("opencensus.io/http/proxy/request_total_by_host", "Number of proxied requests by target hostname", dimensionless)
 	MJWTManagerValidationErrors = stats.Int64("opencensus.io/plugin/jwt_manager/validation_error_total", "Number of validation errors by error type", dimensionless)
 	MOAuth2MissingHeader        = stats.Int64("opencensus.io/plugin/oauth2/missing_header_total", "Number of failed oauth2 authentication due to missing header", dimensionless)
 	MOAuth2MalformedHeader      = stats.Int64("opencensus.io/plugin/oauth2/malformed_header_total", "Number of failed oauth2 authentication due to malformed bearer header", dimensionless)
@@ -44,12 +42,6 @@ var (
 
 // AllViews aggregates the metrics
 var AllViews = []*view.View{
-	{
-		Name:        "opencensus.io/http/proxy/request_total_by_host",
-		TagKeys:     []tag.Key{KeyHostname},
-		Measure:     MRequestsByHostname,
-		Aggregation: view.Count(),
-	},
 	{
 		Name:        "opencensus.io/plugin/jwt_manager/validation_error_total",
 		TagKeys:     []tag.Key{KeyJWTValidationErrorType},
