@@ -104,7 +104,10 @@ func createDirector(proxyDefinition *Definition, balancer balancer.Balancer, sta
 			"upstream-host":    req.URL.Host,
 			"upstream-request": req.URL.RequestURI(),
 		}).Info("Proxying request to the following upstream")
+
 		statsClient.TrackMetric(statsSection, bucket.MetricOperation{req.Host})
+		ctx, _ := tag.New(req.Context(), tag.Insert(obs.KeyUpstreamPath, upstream.Target))
+		*req = *req.WithContext(ctx)
 	}
 }
 
