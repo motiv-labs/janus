@@ -134,12 +134,6 @@
   #
   # Exporter: "prometheus"
 
-  # Namespace used for metric collection
-  #
-  # Default: "janus"
-  #
-  # Namespace = "janus"
-
   # To enable Janus to export internal metrics to Statsd
   # dsn = "statsd:8125"
   # prefix = "sandbox.janus."

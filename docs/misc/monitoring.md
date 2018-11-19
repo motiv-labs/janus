@@ -20,12 +20,6 @@ This can be configured via the configuration file or environment variable:
   # Default: None
   #
   Exporter: "prometheus"
-
-  # Namespace used for metric collection
-  #
-  # Default: "janus" 
-  #
-  Namespace = "janus"
 ```
 
 ---
