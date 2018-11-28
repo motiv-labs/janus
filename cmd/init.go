@@ -21,11 +21,11 @@ func initConfig() {
 	var err error
 	globalConfig, err = config.Load(configFile)
 	if nil != err {
-		log.WithError(err).Error("Could not load configurations from file - trying environment configurations instead.")
+		log.WithError(err).Info("Could not load configurations from file - trying environment configurations instead.")
 
 		globalConfig, err = config.LoadEnv()
 		if nil != err {
-			log.WithError(err).Error("Could not load configurations from environment")
+			log.WithError(err).Error("Could not load configurations from environment variables")
 		}
 	}
 }
