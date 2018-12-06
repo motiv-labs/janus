@@ -7,10 +7,10 @@ import (
 
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/errors"
-	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/render"
 	"github.com/hellofresh/janus/pkg/router"
+	"go.opencensus.io/trace"
 )
 
 // APIHandler is the api rest controller
@@ -29,8 +29,8 @@ func NewAPIHandler(cfgChan chan<- api.ConfigurationMessage) *APIHandler {
 // Get is the find all handler
 func (c *APIHandler) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		span := opentracing.FromContext(r.Context(), "definitions.GetAll")
-		defer span.Finish()
+		_, span := trace.StartSpan(r.Context(), "definitions.GetAll")
+		defer span.End()
 
 		if c.Cfgs.Definitions == nil {
 			// id definitions list is empty - fake it with simple slice to get the empty JSON array in the output
@@ -46,9 +46,9 @@ func (c *APIHandler) Get() http.HandlerFunc {
 func (c *APIHandler) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.URLParam(r, "name")
-		span := opentracing.FromContext(r.Context(), "datastore.FindByName")
+		_, span := trace.StartSpan(r.Context(), "definition.FindByName")
 		cfg := c.findByName(name)
-		span.Finish()
+		span.End()
 
 		if cfg == nil {
 			errors.Handler(w, api.ErrAPIDefinitionNotFound)
@@ -65,9 +65,9 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 		var err error
 
 		name := router.URLParam(r, "name")
-		span := opentracing.FromContext(r.Context(), "datastore.FindByName")
+		_, span := trace.StartSpan(r.Context(), "definition.FindByName")
 		cfg := c.findByName(name)
-		span.Finish()
+		span.End()
 
 		if cfg == nil {
 			errors.Handler(w, api.ErrAPIDefinitionNotFound)
@@ -97,21 +97,21 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 
 		// avoid situation when trying to update existing definition with new path
 		// that is already registered with another name
-		span = opentracing.FromContext(r.Context(), "datastore.FindByListenPath")
+		_, span = trace.StartSpan(r.Context(), "repo.FindByListenPath")
 		existingCfg := c.findByListenPath(cfg.Proxy.ListenPath)
-		span.Finish()
+		span.End()
 
 		if existingCfg != nil && existingCfg.Name != cfg.Name {
 			errors.Handler(w, api.ErrAPIListenPathExists)
 			return
 		}
 
-		span = opentracing.FromContext(r.Context(), "datastore.Update")
+		_, span = trace.StartSpan(r.Context(), "repo.Update")
 		c.configurationChan <- api.ConfigurationMessage{
 			Operation:     api.UpdatedOperation,
 			Configuration: cfg,
 		}
-		span.Finish()
+		span.End()
 
 		w.WriteHeader(http.StatusOK)
 	}
@@ -143,21 +143,21 @@ func (c *APIHandler) Post() http.HandlerFunc {
 			}
 		}
 
-		span := opentracing.FromContext(r.Context(), "datastore.Exists")
+		_, span := trace.StartSpan(r.Context(), "definition.Exists")
 		exists, err := c.exists(cfg)
-		span.Finish()
+		span.End()
 
 		if err != nil || exists {
 			errors.Handler(w, err)
 			return
 		}
 
-		span = opentracing.FromContext(r.Context(), "datastore.Add")
+		_, span = trace.StartSpan(r.Context(), "repo.Add")
 		c.configurationChan <- api.ConfigurationMessage{
 			Operation:     api.AddedOperation,
 			Configuration: cfg,
 		}
-		span.Finish()
+		span.End()
 
 		w.Header().Add("Location", fmt.Sprintf("/apis/%s", cfg.Name))
 		w.WriteHeader(http.StatusCreated)
@@ -167,8 +167,8 @@ func (c *APIHandler) Post() http.HandlerFunc {
 // DeleteBy is the delete handler
 func (c *APIHandler) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		span := opentracing.FromContext(r.Context(), "datastore.Remove")
-		defer span.Finish()
+		_, span := trace.StartSpan(r.Context(), "repo.Remove")
+		defer span.End()
 
 		name := router.URLParam(r, "name")
 		cfg := c.findByName(name)

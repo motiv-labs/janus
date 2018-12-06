@@ -11,6 +11,7 @@ import (
 	"github.com/hellofresh/stats-go/client"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/plugin/ochttp"
 )
 
 const (
@@ -58,22 +59,24 @@ func (p *Register) Add(definition *RouterDefinition) error {
 
 	handler := NewBalancedReverseProxy(definition.Definition, balancerInstance, p.statsClient)
 	handler.FlushInterval = p.flushInterval
-	handler.Transport = transport.New(
-		transport.WithIdleConnTimeout(p.idleConnTimeout),
-		transport.WithInsecureSkipVerify(definition.InsecureSkipVerify),
-		transport.WithDialTimeout(time.Duration(definition.ForwardingTimeouts.DialTimeout)),
-		transport.WithResponseHeaderTimeout(time.Duration(definition.ForwardingTimeouts.ResponseHeaderTimeout)),
-	)
-
-	if p.matcher.Match(definition.ListenPath) {
-		p.doRegister(p.matcher.Extract(definition.ListenPath), definition, handler.ServeHTTP)
+	handler.Transport = &ochttp.Transport{
+		Base: transport.New(
+			transport.WithIdleConnTimeout(p.idleConnTimeout),
+			transport.WithInsecureSkipVerify(definition.InsecureSkipVerify),
+			transport.WithDialTimeout(time.Duration(definition.ForwardingTimeouts.DialTimeout)),
+			transport.WithResponseHeaderTimeout(time.Duration(definition.ForwardingTimeouts.ResponseHeaderTimeout)),
+		),
 	}
 
-	p.doRegister(definition.ListenPath, definition, handler.ServeHTTP)
+	if p.matcher.Match(definition.ListenPath) {
+		p.doRegister(p.matcher.Extract(definition.ListenPath), definition, &ochttp.Handler{Handler: handler, IsPublicEndpoint: true})
+	}
+
+	p.doRegister(definition.ListenPath, definition, &ochttp.Handler{Handler: handler, IsPublicEndpoint: true})
 	return nil
 }
 
-func (p *Register) doRegister(listenPath string, def *RouterDefinition, handler http.HandlerFunc) {
+func (p *Register) doRegister(listenPath string, def *RouterDefinition, handler http.Handler) {
 	log.WithFields(log.Fields{
 		"listen_path": listenPath,
 	}).Debug("Registering a route")
@@ -84,9 +87,9 @@ func (p *Register) doRegister(listenPath string, def *RouterDefinition, handler 
 	} else {
 		for _, method := range def.Methods {
 			if strings.ToUpper(method) == methodAll {
-				p.router.Any(listenPath, handler, def.middleware...)
+				p.router.Any(listenPath, handler.ServeHTTP, def.middleware...)
 			} else {
-				p.router.Handle(strings.ToUpper(method), listenPath, handler, def.middleware...)
+				p.router.Handle(strings.ToUpper(method), listenPath, handler.ServeHTTP, def.middleware...)
 			}
 		}
 	}

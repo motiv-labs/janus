@@ -49,10 +49,6 @@
   branch = "master"
 
 [[constraint]]
-  name = "github.com/hellofresh/gcloud-opentracing"
-  version = "1.0.1"
-
-[[constraint]]
   name = "github.com/hellofresh/health-go"
   version = "1.2.6"
 
@@ -71,10 +67,6 @@
 [[constraint]]
   name = "github.com/mitchellh/mapstructure"
   revision = "b4575eea38cca1123ec2dc90c26529b5c5acfcff"
-
-[[constraint]]
-  name = "github.com/opentracing/opentracing-go"
-  version = "1.0.1"
 
 [[constraint]]
   name = "github.com/pkg/errors"
@@ -111,10 +103,6 @@
 [[constraint]]
   name = "github.com/go-redis/redis"
   version = "6.12.0"
-
-[[constraint]]
-  name = "github.com/uber/jaeger-client-go"
-  version = "2.11.2"
 
 [[constraint]]
   branch = "master"

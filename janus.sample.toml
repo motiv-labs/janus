@@ -125,10 +125,18 @@
 ################################################################
 # Metrics
 ################################################################
-# To enable Janus to export internal metrics to Statsd
-#[stats]
-#    dsn = "statsd:8125"
-#    prefix = "sandbox.janus."
+[stats]
+  # Backend system used to export collected metrics
+  #
+  # Valid Values: "datadog", "prometheus", or "stackdriver"
+  #
+  # Default: None
+  #
+  # Exporter: "prometheus"
+
+  # To enable Janus to export internal metrics to Statsd
+  # dsn = "statsd:8125"
+  # prefix = "sandbox.janus."
 
 ################################################################
 # Proxy Definition Database
@@ -156,59 +164,40 @@
 ################################################################
 # Distributed Tracing
 ################################################################
-#
-# [tracing]
-# provider = "jaeger"
-# Google Clooud Platform - Stackdriver Trace
-  # [tracing.googleCloud]
-  #   projectID = ""
-  #   email = ""
-  #   privateKey = ""
-  #   privateKeyID = ""
+[tracing]
+  # Backend system to export traces to
+  #
+  # Default: None
+  #
+  Exporter: "jaeger"
 
-# Jeager Distributed Tracing
-  # [tracing.jaeger]
-    # SamplingServerURL is the address of jaeger-agent's HTTP sampling server
-    #
-    # Default: "http://localhost:5778/sampling"
-    #
-    # SamplingServerURL = "localhost:6832"
+  # Service name used in the backend
+  #
+  # Default: "janus"
+  #
+  ServiceName: "janus"
 
-    # Sampling Type specifies the type of the sampler: const, probabilistic, rateLimiting
-    #
-    # Default: "const"
-    #
-    # SamplingType = "const"
+  # SamplingStrategy specifies the sampling strategy
+  #
+  # Valid Values: "probabilistic", "always", "never"
+  #
+  # Default: "probabilistic"
+  #
+  SamplingStrategy: "probabilistic"
 
-    # SamplingParam Param is a value passed to the sampler.
-    # Valid values for Param field are:
-    #   - for "const" sampler, 0 or 1 for always false/true respectively
-    #   - for "probabilistic" sampler, a probability between 0 and 1
-    #   - for "rateLimiting" sampler, the number of spans per second
-    #
-    # Default: 1.0
-    #
-    # SamplingParam = 1.0
+  # SamplingParam is an additional value passed to the sampler.
+  #
+  # Valid Values:
+  #   - for "always" and "never" sampler, this value is unused
+  #   - for "probabilistic" sampler, a probability between 0 and 1
+  #
+  # Default: "0.15"
+  #
+  SamplingParam: "0.15"
 
-    # BufferFlushInterval controls how often the buffer is force-flushed, even if it's not full.
-    # It is generally not useful, as it only matters for very low traffic services.
+  [tracing.jaeger]
+    # SamplingServerURL is the address to the sampling server
     #
-    # Default: 1s
+    # Default: None
     #
-    # BufferFlushInterval = "1s"
-
-    # LogSpans, when true, enables LoggingReporter that runs in parallel with the main reporter
-    # and logs all submitted spans. Main Configuration.Logger must be initialized in the code
-    # for this option to have any effect.
-    #
-    # Default: false
-    #
-    # LogSpans = false
-
-    # QueueSize controls how many spans the reporter can keep in memory before it starts dropping
-	  # new spans. The queue is continuously drained by a background go-routine, as fast as spans
-	  # can be sent out of process.
-    #
-    # Default: 0
-    #
-    # QueueSize = 0
+    SamplingServerURL: "localhost:6832"

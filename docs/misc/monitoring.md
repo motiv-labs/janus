@@ -1,5 +1,33 @@
 # Monitoring
 
+`Janus` uses [OpenCensus](https://opencensus.io) to collect and export metrics. OpenCensus supports several exporters, which are:
+- Datadog
+- Prometheus
+- Stackdriver
+
+Currently only Prometheus exporter is available in `Janus`.
+
+This can be configured via the configuration file or environment variable:
+
+```toml
+# Stats / Metric Collection
+
+[stats]
+  # Backend system used to export collected metrics
+  #
+  # Valid Values: "datadog", "prometheus", or "stackdriver"
+  #
+  # Default: None
+  #
+  Exporter: "prometheus"
+```
+
+---
+
+###### The following feature is deprecated and it is planned for removal.
+
+---
+
 `Janus` monitoring is built on top of [`hellofresh/stats-go`](https://github.com/hellofresh/stats-go) library.
 You can configure it with the following env variables:
 

@@ -3,9 +3,11 @@ package loader
 import (
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/middleware"
+	obs "github.com/hellofresh/janus/pkg/observability"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/tag"
 )
 
 // APILoader is responsible for loading all apis form a datastore and configure them in a register
@@ -72,6 +74,12 @@ func (m *APILoader) RegisterAPI(def *api.Definition) {
 		if len(def.Proxy.Hosts) > 0 {
 			routerDefinition.AddMiddleware(middleware.NewHostMatcher(def.Proxy.Hosts).Handler)
 		}
+
+		// Add middleware to insert tags to context
+		tags := []tag.Mutator{
+			tag.Insert(obs.KeyListenPath, def.Proxy.ListenPath),
+		}
+		routerDefinition.AddMiddleware(middleware.NewStatsTagger(tags).Handler)
 
 		m.register.Add(routerDefinition)
 		logger.Debug("API registered")

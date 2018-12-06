@@ -7,6 +7,7 @@ import (
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -86,7 +87,6 @@ func testSetupSuccess(t *testing.T) {
 }
 
 func testSetupWithCorrectConfig(t *testing.T) {
-	var config Config
 	rawConfig := map[string]interface{}{
 		"timeout":                 1000,
 		"max_concurrent_requests": 100,
@@ -95,16 +95,17 @@ func testSetupWithCorrectConfig(t *testing.T) {
 		"predicate":               "statusCode => 500",
 	}
 
-	err := plugin.Decode(rawConfig, &config)
+	result, err := validateConfig(rawConfig)
+	assert.True(t, result)
 	require.NoError(t, err)
 }
 
 func testSetupWithIncorrectConfig(t *testing.T) {
-	var config Config
 	rawConfig := map[string]interface{}{
 		"timeout": "wrong",
 	}
 
-	err := plugin.Decode(rawConfig, &config)
+	result, err := validateConfig(rawConfig)
+	assert.False(t, result)
 	require.Error(t, err)
 }

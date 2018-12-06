@@ -9,12 +9,14 @@ import (
 
 	"github.com/go-chi/chi"
 	"github.com/hellofresh/janus/pkg/middleware"
+	obs "github.com/hellofresh/janus/pkg/observability"
 	"github.com/hellofresh/janus/pkg/proxy/balancer"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/tag"
 )
 
 const (
@@ -102,7 +104,10 @@ func createDirector(proxyDefinition *Definition, balancer balancer.Balancer, sta
 			"upstream-host":    req.URL.Host,
 			"upstream-request": req.URL.RequestURI(),
 		}).Info("Proxying request to the following upstream")
+
 		statsClient.TrackMetric(statsSection, bucket.MetricOperation{req.Host})
+		ctx, _ := tag.New(req.Context(), tag.Insert(obs.KeyUpstreamPath, upstream.Target))
+		*req = *req.WithContext(ctx)
 	}
 }
 

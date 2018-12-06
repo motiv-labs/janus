@@ -5,9 +5,9 @@ import (
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/errors"
-	"github.com/hellofresh/janus/pkg/opentracing"
 	"github.com/hellofresh/janus/pkg/render"
 	"github.com/hellofresh/janus/pkg/router"
+	"go.opencensus.io/trace"
 )
 
 // Controller is the api rest controller
@@ -23,9 +23,9 @@ func NewController(repo Repository) *Controller {
 // Get is the find all handler
 func (c *Controller) Get() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		span := opentracing.FromContext(r.Context(), "datastore.FindAll")
+		_, span := trace.StartSpan(r.Context(), "repo.FindAll")
 		data, err := c.repo.FindAll()
-		span.Finish()
+		span.End()
 
 		if err != nil {
 			errors.Handler(w, err)
@@ -40,9 +40,9 @@ func (c *Controller) Get() http.HandlerFunc {
 func (c *Controller) GetBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.URLParam(r, "name")
-		span := opentracing.FromContext(r.Context(), "datastore.FindByName")
+		_, span := trace.StartSpan(r.Context(), "repo.FindByName")
 		data, err := c.repo.FindByName(name)
-		span.Finish()
+		span.End()
 
 		if err != nil {
 			errors.Handler(w, err)
@@ -59,9 +59,9 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		var err error
 		name := router.URLParam(r, "name")
 
-		span := opentracing.FromContext(r.Context(), "datastore.FindByName")
+		_, span := trace.StartSpan(r.Context(), "repo.FindByName")
 		oauth, err := c.repo.FindByName(name)
-		span.Finish()
+		span.End()
 
 		if oauth.Name == "" {
 			errors.Handler(w, ErrOauthServerNotFound)
@@ -79,9 +79,9 @@ func (c *Controller) PutBy() http.HandlerFunc {
 			return
 		}
 
-		span = opentracing.FromContext(r.Context(), "datastore.Save")
+		_, span = trace.StartSpan(r.Context(), "repo.Save")
 		err = c.repo.Save(oauth)
-		span.Finish()
+		span.End()
 
 		if err != nil {
 			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
@@ -102,9 +102,9 @@ func (c *Controller) Post() http.HandlerFunc {
 			return
 		}
 
-		span := opentracing.FromContext(r.Context(), "datastore.Add")
+		_, span := trace.StartSpan(r.Context(), "repo.Add")
 		err = c.repo.Add(oauth)
-		span.Finish()
+		span.End()
 
 		if nil != err {
 			errors.Handler(w, err)
@@ -120,9 +120,9 @@ func (c *Controller) DeleteBy() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		name := router.URLParam(r, "name")
 
-		span := opentracing.FromContext(r.Context(), "datastore.Remove")
+		_, span := trace.StartSpan(r.Context(), "repo.Remove")
 		err := c.repo.Remove(name)
-		span.Finish()
+		span.End()
 
 		if err != nil {
 			errors.Handler(w, err)

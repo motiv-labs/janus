@@ -3,13 +3,19 @@ package cmd
 import (
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/hellofresh/janus/pkg/config"
+	obs "github.com/hellofresh/janus/pkg/observability"
 	"github.com/hellofresh/stats-go"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
 	"github.com/hellofresh/stats-go/hooks"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/exporter/jaeger"
+	"go.opencensus.io/exporter/prometheus"
+	"go.opencensus.io/stats/view"
+	"go.opencensus.io/trace"
 )
 
 var (
@@ -79,4 +85,105 @@ func initStatsClient() {
 	statsClient.TrackMetric("app", bucket.MetricOperation{"init", host, appFile})
 
 	log.AddHook(hooks.NewLogrusHook(statsClient, globalConfig.Stats.ErrorsSection))
+}
+
+func initStatsExporter() {
+	var err error
+	logger := log.WithField("stats.exporter", globalConfig.Stats.Exporter)
+
+	// Register stats exporter according to config
+	switch globalConfig.Stats.Exporter {
+	case obs.Datadog:
+	case obs.Stackdriver:
+		logger.Warn("Not implemented!")
+		return
+	case obs.Prometheus:
+		err = initPrometheusExporter()
+		break
+	default:
+		logger.Info("Invalid or no stats exporter was specified")
+		return
+	}
+
+	if err != nil {
+		logger.WithError(err).Error("Failed initialising stats exporter")
+		return
+	}
+
+	// Configure/Register stats views
+	view.SetReportingPeriod(time.Second)
+
+	vv := append(obs.AllViews)
+
+	if err := view.Register(vv...); err != nil {
+		log.WithError(err).Warn("Failed to register server views")
+	}
+}
+
+func initPrometheusExporter() (err error) {
+	obs.PrometheusExporter, err = prometheus.NewExporter(prometheus.Options{})
+	if err != nil {
+		log.WithError(err).Warn("Failed to create prometheus exporter")
+	} else {
+		view.RegisterExporter(obs.PrometheusExporter)
+	}
+	return err
+}
+
+func initTracingExporter() {
+	var err error
+	logger := log.WithField("tracing.exporter", globalConfig.Tracing.Exporter)
+
+	switch globalConfig.Tracing.Exporter {
+	case obs.AzureMonitor:
+	case obs.Datadog:
+	case obs.Stackdriver:
+	case obs.Zipkin:
+		logger.Warn("Not implemented!")
+		return
+	case obs.Jaeger:
+		err = initJaegerExporter()
+		break
+	default:
+		logger.Info("Invalid or no tracing exporter was specified")
+		return
+	}
+
+	if err != nil {
+		logger.WithError(err).Error("Failed initialising tracing exporter")
+		return
+	}
+
+	var traceConfig trace.Config
+	logger = logger.WithField("tracing.samplingStrategy", globalConfig.Tracing.SamplingStrategy)
+
+	switch globalConfig.Tracing.SamplingStrategy {
+	case "always":
+		traceConfig.DefaultSampler = trace.AlwaysSample()
+		break
+	case "never":
+		traceConfig.DefaultSampler = trace.NeverSample()
+		break
+	case "probabilistic":
+		traceConfig.DefaultSampler = trace.ProbabilitySampler(globalConfig.Tracing.SamplingParam)
+		break
+	default:
+		logger.Warn("Invalid tracing sampling strategy specified")
+		return
+	}
+
+	trace.ApplyConfig(traceConfig)
+}
+
+func initJaegerExporter() (err error) {
+	jaegerExporter, err := jaeger.NewExporter(jaeger.Options{
+		AgentEndpoint: globalConfig.Tracing.JaegerTracing.SamplingServerURL,
+		ServiceName:   globalConfig.Tracing.ServiceName,
+	})
+	if err != nil {
+		log.WithError(err).Warn("Failed to create jaeger exporter")
+	} else {
+		trace.RegisterExporter(jaegerExporter)
+	}
+	return err
 }

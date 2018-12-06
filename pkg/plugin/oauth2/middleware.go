@@ -5,11 +5,12 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/hellofresh/stats-go/bucket"
-
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/metrics"
+	obs "github.com/hellofresh/janus/pkg/observability"
+	"github.com/hellofresh/stats-go/bucket"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/stats"
 )
 
 const (
@@ -41,7 +42,7 @@ func NewKeyExistsMiddleware(manager Manager) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Debug("Starting Oauth2KeyExists middleware")
-			stats := metrics.WithContext(r.Context())
+			statsClient := metrics.WithContext(r.Context())
 
 			logger := log.WithFields(log.Fields{
 				"path":   r.RequestURI,
@@ -53,23 +54,30 @@ func NewKeyExistsMiddleware(manager Manager) func(http.Handler) http.Handler {
 			parts := strings.Split(authHeaderValue, " ")
 			if len(parts) < 2 {
 				logger.Warn("Attempted access with malformed header, no auth header found.")
-				stats.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "header"}, nil, false)
+				statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "header"}, nil, false)
+				stats.Record(r.Context(), obs.MOAuth2MissingHeader.M(1))
 				errors.Handler(w, ErrAuthorizationFieldNotFound)
 				return
 			}
-			stats.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "header"}, nil, true)
+			statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "header"}, nil, true)
 
 			if strings.ToLower(parts[0]) != "bearer" {
 				logger.Warn("Bearer token malformed")
-				stats.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "malformed"}, nil, false)
+				statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "malformed"}, nil, false)
+				stats.Record(r.Context(), obs.MOAuth2MalformedHeader.M(1))
 				errors.Handler(w, ErrBearerMalformed)
 				return
 			}
-			stats.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "malformed"}, nil, true)
+			statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "malformed"}, nil, true)
 
 			accessToken := parts[1]
 			keyExists := manager.IsKeyAuthorized(r.Context(), accessToken)
-			stats.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "authorized"}, nil, keyExists)
+			statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "authorized"}, nil, keyExists)
+			if keyExists {
+				stats.Record(r.Context(), obs.MOAuth2Authorized.M(1))
+			} else {
+				stats.Record(r.Context(), obs.MOAuth2Unauthorized.M(1))
+			}
 
 			if !keyExists {
 				log.WithFields(log.Fields{

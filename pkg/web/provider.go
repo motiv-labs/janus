@@ -11,6 +11,7 @@ import (
 	httpErrors "github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/middleware"
+	obs "github.com/hellofresh/janus/pkg/observability"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/rs/cors"
@@ -70,7 +71,6 @@ func (s *Server) AddRoutes(r router.Router) {
 		chiMiddleware.DefaultCompress,
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(httpErrors.RecoveryHandler),
-		middleware.NewOpenTracing(s.TLS.IsHTTPS()).Handler,
 		cors.New(cors.Options{
 			AllowedOrigins:   []string{"*"},
 			AllowedHeaders:   []string{"*"},
@@ -88,6 +88,9 @@ func (s *Server) addInternalPublicRoutes(r router.Router) {
 	r.GET("/", Home())
 	r.GET("/status", NewOverviewHandler(s.apiHandler.Cfgs))
 	r.GET("/status/{name}", NewStatusHandler(s.apiHandler.Cfgs))
+	if obs.PrometheusExporter != nil {
+		r.Any("/metrics", obs.PrometheusExporter.ServeHTTP)
+	}
 }
 
 func (s *Server) addInternalAuthRoutes(r router.Router, guard jwt.Guard) {
