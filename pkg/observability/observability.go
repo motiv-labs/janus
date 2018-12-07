@@ -73,7 +73,7 @@ var AllViews = []*view.View{
 	},
 	{
 		Name:        "http_server_response_count_by_path_code_and_method",
-		TagKeys:     []tag.Key{KeyListenPath, ochttp.StatusCode, ochttp.Method, KeyUpstreamPath},
+		TagKeys:     []tag.Key{KeyListenPath, ochttp.StatusCode, ochttp.Method},
 		Measure:     ochttp.ServerLatency,
 		Aggregation: view.Count(),
 	},
