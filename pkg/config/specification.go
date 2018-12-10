@@ -7,6 +7,7 @@ import (
 	"github.com/kelseyhightower/envconfig"
 	"github.com/mitchellh/go-homedir"
 	"github.com/pkg/errors"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
@@ -183,16 +184,14 @@ func Load(configFile string) (*Specification, error) {
 //LoadEnv loads configuration from environment variables
 func LoadEnv() (*Specification, error) {
 	var config Specification
+	var err error
 
 	// ensure the defaults are loaded
-	if err := viper.Unmarshal(&config); err != nil {
-		return nil, err
-	}
-
-	err := envconfig.Process("", &config)
+	err = viper.Unmarshal(&config)
 	if err != nil {
-		return nil, err
+		log.WithError(err).Warn("Failed unmarshaling config")
 	}
 
-	return &config, nil
+	err = envconfig.Process("", &config)
+	return &config, err
 }
