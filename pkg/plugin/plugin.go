@@ -123,20 +123,20 @@ func ValidateConfig(name string, rawConfig Config) (bool, error) {
 		return result, err
 	}
 
-	return false, fmt.Errorf("Plugin %q not found", name)
+	return false, fmt.Errorf("plugin %q not found", name)
 }
 
 // DirectiveAction gets the action for a plugin
 func DirectiveAction(name string) (SetupFunc, error) {
 	if plugin, ok := plugins[name]; ok {
 		if plugin.Action == nil {
-			return nil, fmt.Errorf("Action function undefined for plugin %q", name)
+			return nil, fmt.Errorf("action function undefined for plugin %q", name)
 		}
 
 		return plugin.Action, nil
 	}
 
-	return nil, fmt.Errorf("Plugin %q not found", name)
+	return nil, fmt.Errorf("plugin %q not found", name)
 }
 
 // Decode decodes a map string interface into a struct
