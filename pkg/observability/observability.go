@@ -78,8 +78,8 @@ var AllViews = []*view.View{
 		Aggregation: view.Count(),
 	},
 	{
-		Name:        "http_server_request_latency_by_path",
-		TagKeys:     []tag.Key{KeyListenPath},
+		Name:        "http_server_request_latency_by_path_and_method",
+		TagKeys:     []tag.Key{KeyListenPath, ochttp.Method},
 		Measure:     ochttp.ServerLatency,
 		Aggregation: ochttp.DefaultLatencyDistribution,
 	},
