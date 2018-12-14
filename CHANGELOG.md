@@ -1,6 +1,22 @@
 # Unreleased
+- None
+
+# 3.8.6
+
+## Updated
+
+- `http_server_request_latency` to include HTTP method key
+
+# 3.8.5
+
+## Fixed
 - Fixed plugin configuration not being validated
+
+## Updated
 - Added stats and tracing support with opencensus
+
+## Removed
+- Tracing support via opentracing.io
 
 # 3.8.4
 
