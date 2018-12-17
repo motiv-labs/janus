@@ -1,5 +1,5 @@
 # Unreleased
-- None
+- Added additional attributes to ochttp spans
 
 # 3.8.6
 
