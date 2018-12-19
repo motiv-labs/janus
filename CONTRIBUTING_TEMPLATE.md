@@ -69,41 +69,7 @@ Happy Coding from the HelloFresh Engineering team!
 ## Code Review Comments and Effective Go Guidelines
 [CodeLingo](https://codelingo.io) automatically checks every pull request against the following guidelines from [Effective Go](https://golang.org/doc/effective_go.html) and [Code Review Comments](https://github.com/golang/go/wiki/CodeReviewComments).
 
-
-### Avoid Renaming Imports
-Avoid renaming imports except to avoid a name collision; good package names
-should not require renaming. In the event of collision, prefer to rename the
-most local or project-specific import.
-
-
-### Context as First Argument
-Values of the context.Context type carry security credentials, tracing information, 
-deadlines, and cancellation signals across API and process boundaries. Go programs 
-pass Contexts explicitly along the entire function call chain from incoming RPCs 
-and HTTP requests to outgoing requests.
-
-Most functions that use a Context should accept it as their first parameter.
-
-
-### Do Not Discard Errors
-Do not discard errors using _ variables. If a function returns an error, 
-check it to make sure the function succeeded. Handle the error, return it, or, 
-in truly exceptional situations, panic.
-
-
-### Go Error Format
-Error strings should not be capitalized (unless beginning with proper nouns 
-or acronyms) or end with punctuation, since they are usually printed following
-other context. That is, use fmt.Errorf("something bad") not fmt.Errorf("Something bad"),
-so that log.Printf("Reading %s: %v", filename, err) formats without a spurious 
-capital letter mid-message. This does not apply to logging, which is implicitly
-line-oriented and not combined inside other messages.
-
-
-### Use Crypto Rand
-Do not use package math/rand to generate keys, even 
-throwaway ones. Unseeded, the generator is completely predictable. 
-Seeded with time.Nanoseconds(), there are just a few bits of entropy. 
-Instead, use crypto/rand's Reader, and if you need text, print to 
-hexadecimal or base64
-
+{{range .}}
+### {{.title}}
+{{.body}}
+{{end}}
