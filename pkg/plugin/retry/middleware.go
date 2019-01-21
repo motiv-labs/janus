@@ -58,7 +58,7 @@ func NewRetryMiddleware(cfg Config) func(http.Handler) http.Handler {
 			}, cfg.Attempts, time.Duration(cfg.Backoff)); err != nil {
 				statsClient := metrics.WithContext(r.Context())
 				statsClient.SetHTTPRequestSection(proxySection).TrackRequest(r, nil, false).ResetHTTPRequestSection()
-				janusErr.Handler(w, errors.Wrap(err, "request failed too many times"))
+				janusErr.Handler(w, r, errors.Wrap(err, "request failed too many times"))
 			}
 		})
 	}

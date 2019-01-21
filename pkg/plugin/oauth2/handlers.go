@@ -28,7 +28,7 @@ func (c *Controller) Get() http.HandlerFunc {
 		span.End()
 
 		if err != nil {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
@@ -45,7 +45,7 @@ func (c *Controller) GetBy() http.HandlerFunc {
 		span.End()
 
 		if err != nil {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
@@ -64,18 +64,18 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		span.End()
 
 		if oauth.Name == "" {
-			errors.Handler(w, ErrOauthServerNotFound)
+			errors.Handler(w, r, ErrOauthServerNotFound)
 			return
 		}
 
 		if err != nil {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
 		err = json.NewDecoder(r.Body).Decode(oauth)
 		if err != nil {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
@@ -84,7 +84,7 @@ func (c *Controller) PutBy() http.HandlerFunc {
 		span.End()
 
 		if err != nil {
-			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
+			errors.Handler(w, r, errors.New(http.StatusBadRequest, err.Error()))
 			return
 		}
 
@@ -98,7 +98,7 @@ func (c *Controller) Post() http.HandlerFunc {
 		oauth := NewOAuth()
 		err := json.NewDecoder(r.Body).Decode(oauth)
 		if nil != err {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
@@ -107,7 +107,7 @@ func (c *Controller) Post() http.HandlerFunc {
 		span.End()
 
 		if nil != err {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
@@ -125,7 +125,7 @@ func (c *Controller) DeleteBy() http.HandlerFunc {
 		span.End()
 
 		if err != nil {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 

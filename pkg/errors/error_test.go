@@ -12,7 +12,8 @@ import (
 
 func TestErrorWithCustomError(t *testing.T) {
 	w := httptest.NewRecorder()
-	Handler(w, New(http.StatusBadRequest, http.StatusText(http.StatusBadRequest)))
+	r, _ := http.NewRequest(http.MethodGet, "/hello/test", nil)
+	Handler(w, r, New(http.StatusBadRequest, http.StatusText(http.StatusBadRequest)))
 
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 	assert.Equal(t, http.StatusBadRequest, w.Code)
@@ -20,7 +21,8 @@ func TestErrorWithCustomError(t *testing.T) {
 
 func TestErrorWithDefaultError(t *testing.T) {
 	w := httptest.NewRecorder()
-	Handler(w, errorsBase.New(http.StatusText(http.StatusBadRequest)))
+	r, _ := http.NewRequest(http.MethodGet, "/hello/test", nil)
+	Handler(w, r, errorsBase.New(http.StatusText(http.StatusBadRequest)))
 
 	assert.Equal(t, "application/json", w.Header().Get("Content-Type"))
 	assert.Equal(t, http.StatusInternalServerError, w.Code)

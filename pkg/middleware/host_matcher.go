@@ -46,7 +46,7 @@ func (h *HostMatcher) Handler(handler http.Handler) http.Handler {
 
 		err := errors.ErrRouteNotFound
 		log.WithError(err).Error("The host didn't match any of the provided hosts")
-		errors.Handler(w, err)
+		errors.Handler(w, r, err)
 	})
 }
 

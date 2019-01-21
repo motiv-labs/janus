@@ -51,7 +51,7 @@ func (c *APIHandler) GetBy() http.HandlerFunc {
 		span.End()
 
 		if cfg == nil {
-			errors.Handler(w, api.ErrAPIDefinitionNotFound)
+			errors.Handler(w, r, api.ErrAPIDefinitionNotFound)
 			return
 		}
 
@@ -70,19 +70,19 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 		span.End()
 
 		if cfg == nil {
-			errors.Handler(w, api.ErrAPIDefinitionNotFound)
+			errors.Handler(w, r, api.ErrAPIDefinitionNotFound)
 			return
 		}
 
 		err = json.NewDecoder(r.Body).Decode(cfg)
 		if err != nil {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
 		isValid, err := cfg.Validate()
 		if false == isValid && err != nil {
-			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
+			errors.Handler(w, r, errors.New(http.StatusBadRequest, err.Error()))
 			return
 		}
 
@@ -90,7 +90,7 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 		for _, plg := range cfg.Plugins {
 			isValid, err := plugin.ValidateConfig(plg.Name, plg.Config)
 			if !isValid || err != nil {
-				errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
+				errors.Handler(w, r, errors.New(http.StatusBadRequest, err.Error()))
 				return
 			}
 		}
@@ -102,7 +102,7 @@ func (c *APIHandler) PutBy() http.HandlerFunc {
 		span.End()
 
 		if existingCfg != nil && existingCfg.Name != cfg.Name {
-			errors.Handler(w, api.ErrAPIListenPathExists)
+			errors.Handler(w, r, api.ErrAPIListenPathExists)
 			return
 		}
 
@@ -124,13 +124,13 @@ func (c *APIHandler) Post() http.HandlerFunc {
 
 		err := json.NewDecoder(r.Body).Decode(cfg)
 		if nil != err {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
 		isValid, err := cfg.Validate()
 		if false == isValid && err != nil {
-			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
+			errors.Handler(w, r, errors.New(http.StatusBadRequest, err.Error()))
 			return
 		}
 
@@ -138,7 +138,7 @@ func (c *APIHandler) Post() http.HandlerFunc {
 		for _, plg := range cfg.Plugins {
 			isValid, err := plugin.ValidateConfig(plg.Name, plg.Config)
 			if !isValid || err != nil {
-				errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
+				errors.Handler(w, r, errors.New(http.StatusBadRequest, err.Error()))
 				return
 			}
 		}
@@ -148,7 +148,7 @@ func (c *APIHandler) Post() http.HandlerFunc {
 		span.End()
 
 		if err != nil || exists {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
@@ -173,7 +173,7 @@ func (c *APIHandler) DeleteBy() http.HandlerFunc {
 		name := router.URLParam(r, "name")
 		cfg := c.findByName(name)
 		if cfg == nil {
-			errors.Handler(w, api.ErrAPIDefinitionNotFound)
+			errors.Handler(w, r, api.ErrAPIDefinitionNotFound)
 			return
 		}
 
