@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/felixge/httpsnoop"
+	"github.com/hellofresh/janus/pkg/observability"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -22,7 +23,7 @@ func (m *Logger) Handler(handler http.Handler) http.Handler {
 		log.WithFields(log.Fields{"method": r.Method, "path": r.URL.Path}).Debug("Started request")
 
 		fields := log.Fields{
-			"request-id":  RequestIDFromContext(r.Context()),
+			"request-id":  observability.RequestIDFromContext(r.Context()),
 			"method":      r.Method,
 			"host":        r.Host,
 			"request":     r.RequestURI,

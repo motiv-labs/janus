@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"runtime/debug"
 
+	"github.com/hellofresh/janus/pkg/observability"
 	"github.com/hellofresh/janus/pkg/render"
 	baseErrors "github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -42,29 +43,31 @@ func (e *Error) Error() string {
 
 // NotFound handler is called when no route is matched
 func NotFound(w http.ResponseWriter, r *http.Request) {
-	Handler(w, ErrRouteNotFound)
+	Handler(w, r, ErrRouteNotFound)
 }
 
 // RecoveryHandler handler is used when a panic happens
 func RecoveryHandler(w http.ResponseWriter, r *http.Request, err interface{}) {
-	Handler(w, err)
+	Handler(w, r, err)
 }
 
 // Handler marshals an error to JSON, automatically escaping HTML and setting the
 // Content-Type as application/json.
-func Handler(w http.ResponseWriter, err interface{}) {
+func Handler(w http.ResponseWriter, r *http.Request, err interface{}) {
+	entry := log.WithField("request-id", observability.RequestIDFromContext(r.Context()))
+
 	switch internalErr := err.(type) {
 	case *Error:
-		log.WithFields(log.Fields{
+		entry.WithFields(log.Fields{
 			"code":       internalErr.Code,
 			log.ErrorKey: internalErr.Error(),
 		}).Info("Internal error handled")
 		render.JSON(w, internalErr.Code, internalErr)
 	case error:
-		log.WithError(internalErr).WithField("stack", string(debug.Stack())).Error("Internal server error handled")
+		entry.WithError(internalErr).WithField("stack", string(debug.Stack())).Error("Internal server error handled")
 		render.JSON(w, http.StatusInternalServerError, internalErr.Error())
 	default:
-		log.WithFields(log.Fields{
+		entry.WithFields(log.Fields{
 			log.ErrorKey: err,
 			"stack":      string(debug.Stack()),
 		}).Error("Internal server error handled")

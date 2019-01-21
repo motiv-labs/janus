@@ -30,7 +30,7 @@ func (c *Handler) Index() http.HandlerFunc {
 		span.End()
 
 		if err != nil {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
@@ -47,7 +47,7 @@ func (c *Handler) Show() http.HandlerFunc {
 		span.End()
 
 		if err != nil {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
@@ -66,18 +66,18 @@ func (c *Handler) Update() http.HandlerFunc {
 		span.End()
 
 		if user == nil {
-			errors.Handler(w, ErrUserNotFound)
+			errors.Handler(w, r, ErrUserNotFound)
 			return
 		}
 
 		if err != nil {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
 		err = json.NewDecoder(r.Body).Decode(user)
 		if err != nil {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
@@ -86,7 +86,7 @@ func (c *Handler) Update() http.HandlerFunc {
 		span.End()
 
 		if err != nil {
-			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
+			errors.Handler(w, r, errors.New(http.StatusBadRequest, err.Error()))
 			return
 		}
 
@@ -101,7 +101,7 @@ func (c *Handler) Create() http.HandlerFunc {
 
 		err := json.NewDecoder(r.Body).Decode(user)
 		if nil != err {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 
@@ -110,8 +110,8 @@ func (c *Handler) Create() http.HandlerFunc {
 		span.End()
 
 		if err != ErrUserNotFound {
-			log.WithError(err).Warn("An error occurrend when looking for an user")
-			errors.Handler(w, ErrUserExists)
+			log.WithError(err).Warn("An error occurred when looking for an user")
+			errors.Handler(w, r, ErrUserExists)
 			return
 		}
 
@@ -120,7 +120,7 @@ func (c *Handler) Create() http.HandlerFunc {
 		span.End()
 
 		if err != nil {
-			errors.Handler(w, errors.New(http.StatusBadRequest, err.Error()))
+			errors.Handler(w, r, errors.New(http.StatusBadRequest, err.Error()))
 			return
 		}
 
@@ -139,7 +139,7 @@ func (c *Handler) Delete() http.HandlerFunc {
 		span.End()
 
 		if err != nil {
-			errors.Handler(w, err)
+			errors.Handler(w, r, err)
 			return
 		}
 

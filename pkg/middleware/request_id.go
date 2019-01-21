@@ -1,9 +1,9 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 
+	"github.com/hellofresh/janus/pkg/observability"
 	"github.com/satori/go.uuid"
 )
 
@@ -25,22 +25,6 @@ func RequestID(handler http.Handler) http.Handler {
 		r.Header.Set(requestIDHeader, requestID)
 		w.Header().Set(requestIDHeader, requestID)
 
-		ctx := r.Context()
-		ctx = context.WithValue(ctx, reqIDKey, requestID)
-
-		handler.ServeHTTP(w, r.WithContext(ctx))
+		handler.ServeHTTP(w, r.WithContext(observability.RequestIDToContext(r.Context(), requestID)))
 	})
-}
-
-// RequestIDFromContext tries to extract request ID from context if present, otherwise returns empty string
-func RequestIDFromContext(ctx context.Context) string {
-	if ctx == nil {
-		panic("Can not get request ID from empty context")
-	}
-
-	if requestID, ok := ctx.Value(reqIDKey).(string); ok {
-		return requestID
-	}
-
-	return ""
 }

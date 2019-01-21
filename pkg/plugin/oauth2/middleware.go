@@ -56,7 +56,7 @@ func NewKeyExistsMiddleware(manager Manager) func(http.Handler) http.Handler {
 				logger.Warn("Attempted access with malformed header, no auth header found.")
 				statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "header"}, nil, false)
 				stats.Record(r.Context(), obs.MOAuth2MissingHeader.M(1))
-				errors.Handler(w, ErrAuthorizationFieldNotFound)
+				errors.Handler(w, r, ErrAuthorizationFieldNotFound)
 				return
 			}
 			statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "header"}, nil, true)
@@ -65,7 +65,7 @@ func NewKeyExistsMiddleware(manager Manager) func(http.Handler) http.Handler {
 				logger.Warn("Bearer token malformed")
 				statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "malformed"}, nil, false)
 				stats.Record(r.Context(), obs.MOAuth2MalformedHeader.M(1))
-				errors.Handler(w, ErrBearerMalformed)
+				errors.Handler(w, r, ErrBearerMalformed)
 				return
 			}
 			statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "malformed"}, nil, true)
@@ -85,7 +85,7 @@ func NewKeyExistsMiddleware(manager Manager) func(http.Handler) http.Handler {
 					"origin": r.RemoteAddr,
 					"key":    accessToken,
 				}).Debug("Attempted access with invalid key.")
-				errors.Handler(w, ErrAccessTokenNotAuthorized)
+				errors.Handler(w, r, ErrAccessTokenNotAuthorized)
 				return
 			}
 

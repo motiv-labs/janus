@@ -21,5 +21,5 @@ func FailWith(statusCode int) http.Handler {
 
 // RecoveryHandler represents the recovery handler
 func RecoveryHandler(w http.ResponseWriter, r *http.Request, err interface{}) {
-	errors.Handler(w, err)
+	errors.Handler(w, r, err)
 }

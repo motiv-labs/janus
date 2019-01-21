@@ -9,8 +9,7 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi"
-	"github.com/hellofresh/janus/pkg/middleware"
-	obs "github.com/hellofresh/janus/pkg/observability"
+	"github.com/hellofresh/janus/pkg/observability"
 	"github.com/hellofresh/janus/pkg/proxy/balancer"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/stats-go/bucket"
@@ -102,7 +101,7 @@ func createDirector(proxyDefinition *Definition, balancer balancer.Balancer, sta
 		// RequestID is not enabled.
 		log.WithFields(log.Fields{
 			"request":          originalURI,
-			"request-id":       middleware.RequestIDFromContext(req.Context()),
+			"request-id":       observability.RequestIDFromContext(req.Context()),
 			"upstream-host":    req.URL.Host,
 			"upstream-request": req.URL.RequestURI(),
 		}).Info("Proxying request to the following upstream")
@@ -113,7 +112,7 @@ func createDirector(proxyDefinition *Definition, balancer balancer.Balancer, sta
 		addTraceAttributes(req)
 
 		// Insert additional tags
-		ctx, _ := tag.New(req.Context(), tag.Insert(obs.KeyUpstreamPath, upstream.Target))
+		ctx, _ := tag.New(req.Context(), tag.Insert(observability.KeyUpstreamPath, upstream.Target))
 		*req = *req.WithContext(ctx)
 	}
 }
@@ -135,7 +134,7 @@ func addTraceAttributes(req *http.Request) {
 		trace.StringAttribute("http.host", host),
 		trace.StringAttribute("http.referrer", req.Referer()),
 		trace.StringAttribute("http.remote_address", req.RemoteAddr),
-		trace.StringAttribute("request.id", middleware.RequestIDFromContext(ctx)),
+		trace.StringAttribute("request.id", observability.RequestIDFromContext(ctx)),
 	)
 }
 

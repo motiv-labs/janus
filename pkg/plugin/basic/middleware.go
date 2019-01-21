@@ -20,7 +20,7 @@ func NewBasicAuth(repo Repository) func(http.Handler) http.Handler {
 
 			username, password, authOK := r.BasicAuth()
 			if !authOK {
-				errors.Handler(w, ErrNotAuthorized)
+				errors.Handler(w, r, ErrNotAuthorized)
 				return
 			}
 
@@ -28,7 +28,7 @@ func NewBasicAuth(repo Repository) func(http.Handler) http.Handler {
 			users, err := repo.FindAll()
 			if err != nil {
 				log.WithError(err).Error("Error when getting all users")
-				errors.Handler(w, errors.New(http.StatusInternalServerError, "there was an error when looking for users"))
+				errors.Handler(w, r, errors.New(http.StatusInternalServerError, "there was an error when looking for users"))
 				return
 			}
 
@@ -41,7 +41,7 @@ func NewBasicAuth(repo Repository) func(http.Handler) http.Handler {
 
 			if !found {
 				logger.Debug("Invalid user/password provided.")
-				errors.Handler(w, ErrNotAuthorized)
+				errors.Handler(w, r, ErrNotAuthorized)
 				return
 			}
 

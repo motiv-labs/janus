@@ -58,7 +58,7 @@ func NewCBMiddleware(cfg Config) func(http.Handler) http.Handler {
 
 			if err != nil {
 				logger.WithError(err).Error("Request failed on the cb middleware")
-				janusErr.Handler(w, errors.Wrap(err, "request failed"))
+				janusErr.Handler(w, r, errors.Wrap(err, "request failed"))
 			}
 		})
 	}

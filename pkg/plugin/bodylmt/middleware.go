@@ -25,7 +25,7 @@ func NewBodyLimitMiddleware(limit string) func(http.Handler) http.Handler {
 
 			// Based on content length
 			if r.ContentLength > int64(limit) {
-				errors.Handler(w, ErrRequestEntityTooLarge)
+				errors.Handler(w, r, ErrRequestEntityTooLarge)
 				return
 			}
 
