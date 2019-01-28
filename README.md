@@ -8,6 +8,12 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/hellofresh/janus)](https://goreportcard.com/report/github.com/hellofresh/janus)
 [![Join us on slack](https://janus-slack.herokuapp.com/badge.svg)](https://janus-slack.herokuapp.com/)
 
+---
+
+**Note:** This project is in maintenance mode. There will be bug fixes, but no feature development.
+
+---
+
 > An API Gateway written in Go
 
 This is a lightweight API Gateway and Management Platform that enables you to control who accesses your API, when they access it and how they access it. Janus will also record detailed analytics on how your users are interacting with your API and when things go wrong.
