@@ -11,16 +11,28 @@ Let's create a file called `rate_limit.json` with our new additions to the API d
 
 ```json
 {
-  "plugins": [
-    {
-      "name": "rate_limit",
-      "enabled": true,
-      "config": {
-        "limit": "5-M",
-        "policy": "local"
-      }
-    }
-  ]
+    "name" : "my-endpoint",
+    "active" : true,
+    "proxy" : {
+        "listen_path" : "/example/*",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://www.mocky.io/v2/595625d22900008702cd71e8"}
+            ]
+        },
+        "methods" : ["GET"]
+    },
+	"plugins": [
+        {
+            "name": "rate_limit",
+            "enabled": true,
+            "config": {
+                "limit": "5-M",
+                "policy": "local"
+            }
+        }
+	]
 }
 ```
 
