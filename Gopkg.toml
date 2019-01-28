@@ -123,3 +123,7 @@
 [[constraint]]
   name = "github.com/globalsign/mgo"
   version = "r2018.04.23"
+
+[[constraint]]
+  name = "github.com/gofrs/uuid"
+  version = "3.2.0"

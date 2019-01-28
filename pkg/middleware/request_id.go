@@ -3,8 +3,8 @@ package middleware
 import (
 	"net/http"
 
+	"github.com/gofrs/uuid"
 	"github.com/hellofresh/janus/pkg/observability"
-	"github.com/satori/go.uuid"
 )
 
 type reqIDKeyType int
@@ -19,7 +19,7 @@ func RequestID(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		requestID := r.Header.Get(requestIDHeader)
 		if requestID == "" {
-			requestID = uuid.NewV4().String()
+			requestID = uuid.Must(uuid.NewV4()).String()
 		}
 
 		r.Header.Set(requestIDHeader, requestID)
