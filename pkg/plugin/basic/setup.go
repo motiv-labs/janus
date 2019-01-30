@@ -6,6 +6,7 @@ import (
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
+	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -49,17 +50,22 @@ func onStartup(event interface{}) error {
 		return errors.New("could not convert event to startup type")
 	}
 
+	var repo Repository
 	if e.MongoSession == nil {
-		return ErrInvalidMongoDBSession
+		log.Debug("Mongo session is not set, using memory repository for basic auth plugin")
+
+		repo = NewInMemoryRepository()
+	} else {
+		log.Debug("Mongo session is set, using mongo repository for basic auth plugin")
+
+		repo, err = NewMongoRepository(e.MongoSession)
+		if err != nil {
+			return err
+		}
 	}
 
 	if adminRouter == nil {
 		return ErrInvalidAdminRouter
-	}
-
-	repo, err = NewMongoRepository(e.MongoSession)
-	if err != nil {
-		return err
 	}
 
 	handlers := NewHandler(repo)
