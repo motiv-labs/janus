@@ -6,7 +6,7 @@
 [![codecov](https://codecov.io/gh/hellofresh/janus/branch/master/graph/badge.svg)](https://codecov.io/gh/hellofresh/janus)
 [![GoDoc](https://godoc.org/github.com/hellofresh/janus?status.svg)](https://godoc.org/github.com/hellofresh/janus)
 [![Go Report Card](https://goreportcard.com/badge/github.com/hellofresh/janus)](https://goreportcard.com/report/github.com/hellofresh/janus)
-[![Join us on slack](https://janus-slack.herokuapp.com/badge.svg)](https://janus-slack.herokuapp.com/)
+[![Join us on slack](https://img.shields.io/badge/chat-on%20slack-brightgreen.svg)](https://join.slack.com/t/janus-gw/shared_invite/enQtNTM1MDE3Mjg0ODIxLTVhNmQwODBmYTE1MmI5MDZiY2ZhN2ZmOGFiMGZmZTZmMzMxMTQ1MzA0NzY4ODA5Zjg1YzczNzg0ZjcwYjQwMjA)
 
 ---
 
