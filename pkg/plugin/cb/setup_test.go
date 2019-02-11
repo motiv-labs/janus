@@ -56,7 +56,7 @@ func testStartupNoSuccess(t *testing.T) {
 		Register: proxy.NewRegister(proxy.WithRouter(router.NewChiRouter())),
 		Config: &config.Specification{
 			Stats: config.Stats{
-				DSN: "statsd:8080",
+				DSN: "statsd://statsd:8080",
 			},
 		},
 	}
