@@ -15,8 +15,7 @@ import (
 )
 
 const (
-	statsdPrefix = "hystrix"
-	pluginName   = "cb"
+	pluginName = "cb"
 )
 
 // Config represents the Body Limit configuration
