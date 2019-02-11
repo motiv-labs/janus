@@ -26,10 +26,6 @@ func (b *WeightBalancer) Elect(hosts []*Target) (*Target, error) {
 		return nil, ErrEmptyBackendList
 	}
 
-	if len(hosts) == 1 {
-		return hosts[0], nil
-	}
-
 	totalWeight := 0
 	for _, host := range hosts {
 		totalWeight += host.Weight
@@ -37,6 +33,10 @@ func (b *WeightBalancer) Elect(hosts []*Target) (*Target, error) {
 
 	if totalWeight <= 0 {
 		return nil, ErrZeroWeight
+	}
+
+	if len(hosts) == 1 {
+		return hosts[0], nil
 	}
 
 	r := rand.Intn(totalWeight)
