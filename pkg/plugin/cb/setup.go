@@ -1,6 +1,9 @@
 package cb
 
 import (
+	"net/url"
+	"strings"
+
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/afex/hystrix-go/hystrix/metric_collector"
 	"github.com/afex/hystrix-go/plugins"
@@ -97,9 +100,15 @@ func onStartup(event interface{}) error {
 	}
 
 	logger.WithField("metrics_dsn", e.Config.Stats.DSN).Debug("Statsd metrics enabled")
+
+	dsnURL, err := url.Parse(e.Config.Stats.DSN)
+	if err != nil {
+		return errors.Wrap(err, "could not parse stats dsn")
+	}
+
 	c, err := plugins.InitializeStatsdCollector(&plugins.StatsdCollectorConfig{
-		StatsdAddr: e.Config.Stats.DSN,
-		Prefix:     statsdPrefix,
+		StatsdAddr: dsnURL.Host,
+		Prefix:     strings.Trim(dsnURL.Path, "/"),
 	})
 	if err != nil {
 		return errors.Wrap(err, "could not initialize statsd client")
