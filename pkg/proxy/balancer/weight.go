@@ -35,6 +35,10 @@ func (b *WeightBalancer) Elect(hosts []*Target) (*Target, error) {
 		return nil, ErrZeroWeight
 	}
 
+	if len(hosts) == 1 {
+		return hosts[0], nil
+	}
+
 	r := rand.Intn(totalWeight)
 	pos := 0
 

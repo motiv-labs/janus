@@ -21,6 +21,10 @@ func (b *RoundrobinBalancer) Elect(hosts []*Target) (*Target, error) {
 		return nil, ErrEmptyBackendList
 	}
 
+	if len(hosts) == 1 {
+		return hosts[0], nil
+	}
+
 	if b.current >= len(hosts) {
 		b.current = 0
 	}
