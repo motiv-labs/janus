@@ -26,14 +26,10 @@ func TestSetup(t *testing.T) {
 	require.NoError(t, err)
 }
 
-func TestOnStartupMissingMongoSession(t *testing.T) {
-	event := plugin.OnStartup{Register: proxy.NewRegister(proxy.WithRouter(router.NewChiRouter()))}
-	err := onStartup(event)
-	require.Error(t, err)
-	require.IsType(t, ErrInvalidMongoDBSession, err)
-}
-
 func TestOnStartupMissingAdminRouter(t *testing.T) {
+	// reset admin router to avoid dependency from another test
+	adminRouter = nil
+
 	event := plugin.OnStartup{}
 	err := onStartup(event)
 	require.Error(t, err)
