@@ -13,8 +13,6 @@ var (
 	ErrUserNotFound = errors.New(http.StatusNotFound, "user not found")
 	// ErrUserExists is used when an user already exists
 	ErrUserExists = errors.New(http.StatusNotFound, "user already exists")
-	// ErrInvalidMongoDBSession is used when mongodb is not being used
-	ErrInvalidMongoDBSession = errors.New(http.StatusNotFound, "invalid mongodb session given")
 	// ErrInvalidAdminRouter is used when an invalid admin router is given
 	ErrInvalidAdminRouter = errors.New(http.StatusNotFound, "invalid admin router given")
 )
