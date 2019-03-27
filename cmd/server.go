@@ -52,6 +52,11 @@ func NewServerStartCmd(ctx context.Context) *cobra.Command {
 
 // RunServerStart is the run command to start Janus
 func RunServerStart(ctx context.Context, opts *ServerStartOptions) error {
+	// all the logging configurations are initialised in initLog() later,
+	// but we try to initialise Writer (STDIN/STDERR/etc.) as early as possible manually
+	// to avoid loosing logs in systems heavily relying on them (e.g. running in docker)
+	initLogWriterEarly()
+
 	log.WithField("version", version).Info("Janus starting...")
 
 	initConfig()

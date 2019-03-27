@@ -1,12 +1,15 @@
 package cmd
 
 import (
+	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/hellofresh/janus/pkg/config"
 	obs "github.com/hellofresh/janus/pkg/observability"
+	"github.com/hellofresh/logging-go"
 	"github.com/hellofresh/stats-go"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
@@ -22,6 +25,19 @@ var (
 	globalConfig *config.Specification
 	statsClient  client.Client
 )
+
+func initLogWriterEarly() {
+	switch logging.LogWriter(strings.ToLower(os.Getenv("LOG_WRITER"))) {
+	case logging.StdOut:
+		log.SetOutput(os.Stdout)
+	case logging.Discard:
+		log.SetOutput(ioutil.Discard)
+	case logging.StdErr:
+		fallthrough
+	default:
+		log.SetOutput(os.Stderr)
+	}
+}
 
 func initConfig() {
 	var err error
