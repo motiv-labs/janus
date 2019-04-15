@@ -41,11 +41,22 @@ func createDirector(proxyDefinition *Definition, balancer balancer.Balancer, sta
 			log.WithError(err).Error("Could not elect one upstream")
 			return
 		}
-		log.WithField("target", upstream.Target).Debug("Target upstream elected")
 
-		target, err := url.Parse(upstream.Target)
+		targetURL := upstream.Target
+
+		paramNames := paramNameExtractor.Extract(targetURL)
+		parametrizedPath, err := applyParameters(req, targetURL, paramNames)
 		if err != nil {
-			log.WithError(err).WithField("upstream_url", upstream.Target).Error("Could not parse the target URL")
+			log.WithError(err).Warn("Unable to extract param from request")
+		} else {
+			targetURL = parametrizedPath
+		}
+
+		log.WithField("target", targetURL).Debug("Target upstream elected")
+
+		target, err := url.Parse(targetURL)
+		if err != nil {
+			log.WithError(err).WithField("upstream_url", targetURL).Error("Could not parse the target URL")
 			return
 		}
 
@@ -69,14 +80,6 @@ func createDirector(proxyDefinition *Definition, balancer balancer.Balancer, sta
 			if !strings.HasSuffix(target.Path, "/") && strings.HasSuffix(path, "/") {
 				path = path[:len(path)-1]
 			}
-		}
-
-		paramNames := paramNameExtractor.Extract(path)
-		parametrizedPath, err := applyParameters(req, path, paramNames)
-		if err != nil {
-			log.WithError(err).Warn("Unable to extract param from request")
-		} else {
-			path = parametrizedPath
 		}
 
 		log.WithField("path", path).Debug("Upstream Path")
