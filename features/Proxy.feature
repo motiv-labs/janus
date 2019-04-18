@@ -272,3 +272,40 @@ Feature: Proxy requests to upstream.
         And I request "/api/recipes/5252b1b5301bbf46038b473f/menus/6362b1b5301bbf46038b4766" path with "GET" method
         Then I should receive 200 response code
         And the response should contain "A menu description"
+
+        Given request JSON payload:
+            """
+            {
+                "name":"dynamic-host",
+                "active":true,
+                "proxy":{
+                    "preserve_host":false,
+                    "listen_path":"/{service}/example",
+                    "upstreams":{
+                        "balancing":"roundrobin",
+                        "targets":[
+                            {
+                                "target":"http://{service}:9089/hello-world"
+                            }
+                        ]
+                    },
+                    "strip_path":false,
+                    "append_path":false,
+                    "methods":[
+                        "GET"
+                    ]
+                },
+                "health_check":{
+                    "url":"https://example.com/status"
+                }
+            }
+            """
+        When I request "/apis" API path with "POST" method
+        Then I should receive 201 response code
+        And header "Location" should be "/apis/dynamic-host"
+
+        When I request "/unknown/example" path with "GET" method
+        Then I should receive 502 response code
+
+        And I request "/localhost/example" path with "GET" method
+        Then I should receive 200 response code
