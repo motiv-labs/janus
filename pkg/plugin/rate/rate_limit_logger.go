@@ -30,7 +30,7 @@ func NewRateLimitLogger(lmt *limiter.Limiter, statsClient client.Client) func(ha
 				log.WithFields(log.Fields{
 					"ip_address":  limiterIP.String(),
 					"request_uri": r.RequestURI,
-				}).Warning("Rate Limit exceded for this IP")
+				}).Warning("Rate Limit exceeded for this IP")
 			}
 
 			trackLimitState(lmt, statsClient, limiterIP, r)
