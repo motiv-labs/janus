@@ -6,7 +6,7 @@
 
 ## Added
 
-- Url parameters can be used in the target definition
+- Url parameters can be used in the target definition. Thanks to @Serjick
 - Request-ID to error handler logs
 - Additional attributes to tracing spans
 
