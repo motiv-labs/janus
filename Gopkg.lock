@@ -487,7 +487,7 @@
   revision = "1731857f09b1f38450e2c12409748407822dc6be"
 
 [[projects]]
-  digest = "1:4e065a1e2b1e517d6e5073ff05ba5aadbfad782ade9a8f006bf0abdfd29c77e2"
+  digest = "1:5c1c48d01a6b1271144921d079e88cf3918d0d84d6d32640c3afcba3023af44a"
   name = "github.com/ulule/limiter"
   packages = [
     ".",
@@ -497,8 +497,8 @@
     "drivers/store/redis",
   ]
   pruneopts = ""
-  revision = "0d25c13867d07314999d01525f9d69d40c6bf235"
-  version = "v2.1.0"
+  revision = "38b2a440be905c8be884fd5e114dc893a64e5d81"
+  version = "v2.2.2"
 
 [[projects]]
   digest = "1:ad67dfd3799a2c58f6c65871dd141d8b53f61f600aec48ce8d7fa16a4d5476f8"
