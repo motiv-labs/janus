@@ -1,6 +1,26 @@
 # Unreleased
-- Added additional attributes to ochttp spans
 
+- None
+
+# 3.8.7
+
+## Added
+
+- Url parameters can be used in the target definition
+- Request-ID to error handler logs
+- Additional attributes to tracing spans
+
+## Changed
+
+- Log writer initialized earlier
+- Use in-memory repository for basic auth plugin when Mongo is not available
+- Use `gofrs/uuid` instead of `satori/go.uuid`
+- Rate limiter respects `X-Forawared-For` and `X-Real-IP` HTTP headers
+
+## Fixed
+
+- Circuit breaker plugin statsd collector prefix
+ 
 # 3.8.6
 
 ## Updated
