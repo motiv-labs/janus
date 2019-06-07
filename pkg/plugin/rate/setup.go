@@ -29,9 +29,10 @@ const (
 
 // Config represents a rate limit config
 type Config struct {
-	Limit       string      `json:"limit"`
-	Policy      string      `json:"policy"`
-	RedisConfig redisConfig `json:"redis"`
+	Limit               string      `json:"limit"`
+	Policy              string      `json:"policy"`
+	RedisConfig         redisConfig `json:"redis"`
+	TrustForwardHeaders bool        `json:"trust_forward_headers"`
 }
 
 type redisConfig struct {
@@ -86,7 +87,7 @@ func setupRateLimit(def *proxy.RouterDefinition, rawConfig plugin.Config) error 
 
 	limiterInstance := limiter.New(limiterStore, rate)
 	def.AddMiddleware(NewRateLimitLogger(limiterInstance, statsClient))
-	def.AddMiddleware(stdlib.NewMiddleware(limiterInstance, stdlib.WithForwardHeader(true)).Handler)
+	def.AddMiddleware(stdlib.NewMiddleware(limiterInstance, stdlib.WithForwardHeader(config.TrustForwardHeaders)).Handler)
 
 	return nil
 }
