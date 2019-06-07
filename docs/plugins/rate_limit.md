@@ -12,18 +12,18 @@ The plain rate limit config:
     "config": {
         "limit": "10-S",
         "policy": "local",
-        "trust_forward_header": false
+        "trust_forward_headers": false
     }
 }
 ```
 
 | Configuration        | Description                                                                                                                                                                                                                                                 |
 |----------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| limit                | Defines the limit rule for the proxy. i.e. 5 reqs/second: `5-S`, 10 reqs/minute: `10-M`, 1000 reqs/hour: `1000-H`                                                                                                                                           |
-| policy               | The rate-limiting policies to use for retrieving and incrementing the limits. Available values are `local` (counters will be stored locally in-memory on the node) and `redis` (counters are stored on a Redis server and will be shared across the nodes). |
-| redis.dsn            | The DSN for the redis instance/cluster to be used                                                                                                                                                                                                           |
-| redis.prefix         | A prefix to be used on redis keys. It defaults to `limiter`                                                                                                                                                                                                 |                                                        |
-| trust_forward_header | If set to True, `X-Forwarded-For` and `X-Real-IP` headers will be used instead of the source ip. Defaults to False.                                                                                                                                         |
+| limit                 | Defines the limit rule for the proxy. i.e. 5 reqs/second: `5-S`, 10 reqs/minute: `10-M`, 1000 reqs/hour: `1000-H`                                                                                                                                           |
+| policy                | The rate-limiting policies to use for retrieving and incrementing the limits. Available values are `local` (counters will be stored locally in-memory on the node) and `redis` (counters are stored on a Redis server and will be shared across the nodes). |
+| redis.dsn             | The DSN for the redis instance/cluster to be used                                                                                                                                                                                                           |
+| redis.prefix          | A prefix to be used on redis keys. It defaults to `limiter`                                                                                                                                                                                                 |                                                        |
+| trust_forward_headers | If set to True, `X-Forwarded-For` and `X-Real-IP` headers will be used instead of the source ip. Defaults to False.                                                                                                                                         |
 
 ## Headers sent to the client
 
