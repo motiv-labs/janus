@@ -11,8 +11,8 @@ import (
 func TestRateLimitConfig(t *testing.T) {
 	var config Config
 	rawConfig := map[string]interface{}{
-		"limit":  "10-S",
-		"policy": "local",
+		"limit":                 "10-S",
+		"policy":                "local",
 		"trust_forward_headers": true,
 	}
 
@@ -87,8 +87,8 @@ func TestRateLimitPluginTrustForwardHeadersDefaultsToFalse(t *testing.T) {
 func TestRateLimitPluginInvalidTrustForwardHeaders(t *testing.T) {
 	var config Config
 	rawConfig := map[string]interface{}{
-		"limit":  "10-S",
-		"policy": "local",
+		"limit":                 "10-S",
+		"policy":                "local",
 		"trust_forward_headers": "not_boolean",
 	}
 
