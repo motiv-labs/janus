@@ -11,8 +11,9 @@ import (
 func TestRateLimitConfig(t *testing.T) {
 	var config Config
 	rawConfig := map[string]interface{}{
-		"limit":  "10-S",
-		"policy": "local",
+		"limit":                 "10-S",
+		"policy":                "local",
+		"trust_forward_headers": true,
 	}
 
 	err := plugin.Decode(rawConfig, &config)
@@ -20,6 +21,7 @@ func TestRateLimitConfig(t *testing.T) {
 
 	assert.Equal(t, "10-S", config.Limit)
 	assert.Equal(t, "local", config.Policy)
+	assert.True(t, config.TrustForwardHeaders)
 }
 
 func TestInvalidRateLimitConfig(t *testing.T) {
@@ -66,5 +68,30 @@ func TestRateLimitPluginInvalidPolicy(t *testing.T) {
 	def := proxy.NewRouterDefinition(proxy.NewDefinition())
 	err := setupRateLimit(def, rawConfig)
 
+	assert.Error(t, err)
+}
+
+func TestRateLimitPluginTrustForwardHeadersDefaultsToFalse(t *testing.T) {
+	var config Config
+	rawConfig := map[string]interface{}{
+		"limit":  "10-S",
+		"policy": "local",
+	}
+
+	err := plugin.Decode(rawConfig, &config)
+	assert.NoError(t, err)
+
+	assert.False(t, config.TrustForwardHeaders)
+}
+
+func TestRateLimitPluginInvalidTrustForwardHeaders(t *testing.T) {
+	var config Config
+	rawConfig := map[string]interface{}{
+		"limit":                 "10-S",
+		"policy":                "local",
+		"trust_forward_headers": "not_boolean",
+	}
+
+	err := plugin.Decode(rawConfig, &config)
 	assert.Error(t, err)
 }
