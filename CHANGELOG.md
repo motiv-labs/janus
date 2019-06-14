@@ -1,4 +1,8 @@
 # Unreleased
+-
+ None
+
+# 3.8.8
 
 ## Added
 - Rate limiter configuration to respect `X-Forwarded-For` and `X-Real-IP` headers
