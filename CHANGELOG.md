@@ -19,7 +19,7 @@
 - Log writer initialized earlier
 - Use in-memory repository for basic auth plugin when Mongo is not available
 - Use `gofrs/uuid` instead of `satori/go.uuid`
-- Rate limiter respects `X-Forawared-For` and `X-Real-IP` HTTP headers
+- Rate limiter respects `X-Forwarded-For` and `X-Real-IP` HTTP headers
 
 ## Fixed
 
