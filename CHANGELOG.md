@@ -1,6 +1,10 @@
 # Unreleased
 
-- None
+## Added
+- Rate limiter configuration to respect `X-Forwarded-For` and `X-Real-IP` headers
+
+## Changed
+- Rate limiter plugin now ignores `X-Forwarded-For` and `X-Real-IP` headers by default
 
 # 3.8.7
 
