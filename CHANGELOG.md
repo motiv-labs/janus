@@ -1,6 +1,14 @@
 # Unreleased
+-
+ None
 
-- None
+# 3.8.8
+
+## Added
+- Rate limiter configuration to respect `X-Forwarded-For` and `X-Real-IP` headers
+
+## Changed
+- Rate limiter plugin now ignores `X-Forwarded-For` and `X-Real-IP` headers by default
 
 # 3.8.7
 
@@ -15,7 +23,7 @@
 - Log writer initialized earlier
 - Use in-memory repository for basic auth plugin when Mongo is not available
 - Use `gofrs/uuid` instead of `satori/go.uuid`
-- Rate limiter respects `X-Forawared-For` and `X-Real-IP` HTTP headers
+- Rate limiter respects `X-Forwarded-For` and `X-Real-IP` HTTP headers
 
 ## Fixed
 
