@@ -1,0 +1,31 @@
+# This is an auto-generated .comply.yaml metadata file to
+# setup a GitHub repo with the minimal required information.
+# You can update the commented attributes providing more
+# information about this repo
+#
+#
+# description: |
+#   Enter here a brief and useful information about this code base
+
+contact: platform-tribe@hellofresh.com
+known-name: janus
+squad: engineering-experience
+tribe: platform
+# concourse-team: platform.engineering-experience
+# slack-channel: "#your-channel-here"
+# labels:
+# - label1
+# - label2
+# public_urls:
+# - http://my.url 
+# private_urls:
+# - http://my.url
+docs:
+- https://github.com/hellofresh/janus
+# dashboards:
+#   staging:
+#   - http://grafana.staging-k8s.hellofresh.io/d/1h55xOkWk/kubernetes-cluster-status
+#   - http://grafana.staging-k8s.hellofresh.io/d/fa49a4706d07a042595b664c87fb33ea/kubernetes-nodes
+#   live:
+#   - http://grafana.live-k8s.hellofresh.io/d/ab4f13a9892a76a4d21ce8c2445bf4ea/kubernetes-pods
+#   - http://grafana.live-k8s.hellofresh.io/d/fa49a4706d07a042595b664c87fb33ea/kubernetes-nodes
