@@ -36,3 +36,11 @@ func WithIdleConnTimeout(d time.Duration) Option {
 		t.idleConnTimeout = d
 	}
 }
+
+// WithIdleConnPurgeTicker purges idle connections on every interval if set
+// this is done to prevent permanent keep-alive on connections with high ops
+func WithIdleConnPurgeTicker(ticker *time.Ticker) Option {
+	return func(t *transport) {
+		t.idleConnPurgeTicker = ticker
+	}
+}

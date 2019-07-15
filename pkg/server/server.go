@@ -77,6 +77,8 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 		proxy.WithFlushInterval(s.globalConfig.BackendFlushInterval),
 		proxy.WithIdleConnectionsPerHost(s.globalConfig.MaxIdleConnsPerHost),
 		proxy.WithIdleConnTimeout(s.globalConfig.IdleConnTimeout),
+		//proxy.WithIdleConnPurgeTicker(s.globalConfig.IdleConnTimeout),
+		proxy.WithIdleConnPurgeTicker(15*time.Second),
 		proxy.WithStatsClient(s.statsClient),
 	)
 

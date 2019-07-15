@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/sirupsen/logrus"
 	"golang.org/x/net/http2"
 )
 
@@ -34,6 +35,7 @@ type transport struct {
 	dialTimeout            time.Duration
 	responseHeaderTimeout  time.Duration
 	idleConnTimeout        time.Duration
+	idleConnPurgeTicker    *time.Ticker
 }
 
 func (t transport) hash() string {
@@ -96,6 +98,20 @@ func New(opts ...Option) *http.Transport {
 	}
 
 	http2.ConfigureTransport(tr)
+
+	// Create a channel that listens to idleConnPurgeTicker to periodically purge idle connections
+	if t.idleConnPurgeTicker != nil {
+		go func(transport *http.Transport) {
+			for {
+				select {
+				case <-t.idleConnPurgeTicker.C:
+					logrus.Info("Closing idle connections")
+					//transport.DisableKeepAlives = true
+					transport.CloseIdleConnections()
+				}
+			}
+		}(tr)
+	}
 
 	// save newly created transport in registry, to try to reuse it in the future
 	registryInstance.put(hash, tr)
