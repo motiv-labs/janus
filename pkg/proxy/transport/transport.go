@@ -106,8 +106,10 @@ func New(opts ...Option) *http.Transport {
 				select {
 				case <-t.idleConnPurgeTicker.C:
 					logrus.Info("Closing idle connections")
-					//transport.DisableKeepAlives = true
+					// hack it, with switching it on and off it flushes all connections
+					transport.DisableKeepAlives = true
 					transport.CloseIdleConnections()
+					transport.DisableKeepAlives = false
 				}
 			}
 		}(tr)
