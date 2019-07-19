@@ -8,7 +8,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/sirupsen/logrus"
 	"golang.org/x/net/http2"
 )
 
@@ -105,8 +104,8 @@ func New(opts ...Option) *http.Transport {
 			for {
 				select {
 				case <-t.idleConnPurgeTicker.C:
-					logrus.Info("Closing idle connections")
-					// hack it, with switching it on and off it flushes all connections
+					// This is a hack to prevent (stale) keep-alive connections from being used
+					// Toggling DisableKeepAlives flushes all idle keep-alive connections
 					transport.DisableKeepAlives = true
 					transport.CloseIdleConnections()
 					transport.DisableKeepAlives = false
