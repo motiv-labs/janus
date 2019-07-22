@@ -17,6 +17,7 @@ type Specification struct {
 	MaxIdleConnsPerHost  int           `envconfig:"MAX_IDLE_CONNS_PER_HOST"`
 	BackendFlushInterval time.Duration `envconfig:"BACKEND_FLUSH_INTERVAL"`
 	IdleConnTimeout      time.Duration `envconfig:"IDLE_CONN_TIMEOUT"`
+	ConnPurgeInterval    time.Duration `envconfig:"CONN_PURGE_INTERVAL"`
 	RequestID            bool          `envconfig:"REQUEST_ID_ENABLED"`
 	Log                  logging.LogConfig
 	Web                  Web

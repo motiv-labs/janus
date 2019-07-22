@@ -24,6 +24,7 @@ type Register struct {
 	router                 router.Router
 	idleConnectionsPerHost int
 	idleConnTimeout        time.Duration
+	idleConnPurgeTicker    *time.Ticker
 	flushInterval          time.Duration
 	statsClient            client.Client
 	matcher                *router.ListenPathMatcher
@@ -62,6 +63,7 @@ func (p *Register) Add(definition *RouterDefinition) error {
 	handler.Transport = &ochttp.Transport{
 		Base: transport.New(
 			transport.WithIdleConnTimeout(p.idleConnTimeout),
+			transport.WithIdleConnPurgeTicker(p.idleConnPurgeTicker),
 			transport.WithInsecureSkipVerify(definition.InsecureSkipVerify),
 			transport.WithDialTimeout(time.Duration(definition.ForwardingTimeouts.DialTimeout)),
 			transport.WithResponseHeaderTimeout(time.Duration(definition.ForwardingTimeouts.ResponseHeaderTimeout)),

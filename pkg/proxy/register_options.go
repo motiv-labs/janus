@@ -46,3 +46,17 @@ func WithIdleConnTimeout(d time.Duration) RegisterOption {
 		r.idleConnTimeout = d
 	}
 }
+
+// WithIdleConnPurgeTicker purges idle connections on every interval if set
+// this is done to prevent permanent keep-alive on connections with high ops
+func WithIdleConnPurgeTicker(d time.Duration) RegisterOption {
+	var ticker *time.Ticker
+
+	if d != 0 {
+		ticker = time.NewTicker(d)
+	}
+
+	return func(t *Register) {
+		t.idleConnPurgeTicker = ticker
+	}
+}

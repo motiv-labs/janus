@@ -42,6 +42,8 @@
     * [Health Checks](misc/health_checks.md)
     * [Monitoring](misc/monitoring.md)
     * [Tracing](misc/tracing.md)
+* Known Issues
+    * [Stale HTTP Keep-Alive](misc/http_keepalive.md)
 * Upgrade Notes
     * [2.x to 3.x](upgrade/3x.md)
     * [3.6.x to 3.7.x](upgrade/3.7.x.md)
