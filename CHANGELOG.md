@@ -1,4 +1,8 @@
 # Unreleased
+- None
+
+
+# 3.8.9
 - Added `CONN_PURGE_INTERVAL` environment variable as a way to prevent stale http keep-alive connections
 
 # 3.8.8
