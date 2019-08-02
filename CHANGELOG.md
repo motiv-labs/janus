@@ -1,5 +1,5 @@
 # Unreleased
-- None
+- Rate limiter logs correct (forwarded) IP if configuration is set to respect `X-Forwarded-For` and `X-Real-IP` headers
 
 
 # 3.8.9
