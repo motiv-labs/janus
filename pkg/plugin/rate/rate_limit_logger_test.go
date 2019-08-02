@@ -17,7 +17,7 @@ func TestSuccessfulRateLimitLog(t *testing.T) {
 	rate, _ := limiter.NewRateFromFormatted("100-M")
 	limiterInstance := limiter.New(limiterStore, rate)
 
-	mw := NewRateLimitLogger(limiterInstance, statsClient)
+	mw := NewRateLimitLogger(limiterInstance, statsClient, false)
 	w, err := test.Record(
 		"GET",
 		"/",
