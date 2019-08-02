@@ -86,7 +86,7 @@ func setupRateLimit(def *proxy.RouterDefinition, rawConfig plugin.Config) error 
 	}
 
 	limiterInstance := limiter.New(limiterStore, rate)
-	def.AddMiddleware(NewRateLimitLogger(limiterInstance, statsClient))
+	def.AddMiddleware(NewRateLimitLogger(limiterInstance, statsClient, config.TrustForwardHeaders))
 	def.AddMiddleware(stdlib.NewMiddleware(limiterInstance, stdlib.WithForwardHeader(config.TrustForwardHeaders)).Handler)
 
 	return nil

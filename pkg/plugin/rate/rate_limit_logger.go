@@ -18,14 +18,14 @@ const (
 )
 
 // NewRateLimitLogger logs the IP of blocked users with rate limit
-func NewRateLimitLogger(lmt *limiter.Limiter, statsClient client.Client) func(handler http.Handler) http.Handler {
+func NewRateLimitLogger(lmt *limiter.Limiter, statsClient client.Client, trustForwardHeader bool) func(handler http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Debug("Starting RateLimitLogger.WriterWrapper middleware")
 
 			m := httpsnoop.CaptureMetrics(handler, w, r)
 
-			limiterIP := limiter.GetIP(r)
+			limiterIP := limiter.GetIP(r, trustForwardHeader)
 			if m.Code == http.StatusTooManyRequests {
 				log.WithFields(log.Fields{
 					"ip_address":  limiterIP.String(),
