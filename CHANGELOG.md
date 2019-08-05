@@ -1,6 +1,11 @@
 # Unreleased
-- Rate limiter logs correct (forwarded) IP if configuration is set to respect `X-Forwarded-For` and `X-Real-IP` headers
 
+--
+
+# 3.8.10
+
+## Fixed
+- Rate limiter logs correct (forwarded) IP if configuration is set to respect `X-Forwarded-For` and `X-Real-IP` headers
 
 # 3.8.9
 - Added `CONN_PURGE_INTERVAL` environment variable as a way to prevent stale http keep-alive connections
