@@ -63,4 +63,5 @@ func TestDefaults(t *testing.T) {
 	assert.Equal(t, "janus", globalConfig.Tracing.ServiceName)
 	assert.Equal(t, "probabilistic", globalConfig.Tracing.SamplingStrategy)
 	assert.Equal(t, 0.15, globalConfig.Tracing.SamplingParam)
+	assert.Empty(t, globalConfig.Tracing.DebugTraceKey)
 }
