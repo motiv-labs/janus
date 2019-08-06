@@ -155,7 +155,7 @@ func init() {
 	logging.InitDefaults(viper.GetViper(), "log")
 }
 
-//Load configuration variables
+// Load configuration variables
 func Load(configFile string) (*Specification, error) {
 	if configFile != "" {
 		viper.SetConfigFile(configFile)
@@ -183,7 +183,7 @@ func Load(configFile string) (*Specification, error) {
 	return &config, nil
 }
 
-//LoadEnv loads configuration from environment variables
+// LoadEnv loads configuration from environment variables
 func LoadEnv() (*Specification, error) {
 	var config Specification
 
