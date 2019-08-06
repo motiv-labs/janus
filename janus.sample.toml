@@ -195,6 +195,11 @@
   #
   SamplingParam: "0.15"
 
+  # Requests that have X-Debug-Trace header set with the value of DebugTraceKey will
+  # force sampling, and additionally will have the Trace ID returned in their responses
+  # on the X-Debug-Trace header.
+  DebugTraceKey = ""
+
   [tracing.jaeger]
     # SamplingServerURL is the address to the sampling server
     #
