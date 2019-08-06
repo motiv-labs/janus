@@ -1,5 +1,7 @@
 # Unreleased
 
+- Added trace debugging setting (`tracing.DebugTraceKey`) to get the Trace ID of a debug request in the response
+
 --
 
 # 3.8.10
