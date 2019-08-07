@@ -169,13 +169,13 @@
   #
   # Default: None
   #
-  Exporter: "jaeger"
+  Exporter = "jaeger"
 
   # Service name used in the backend
   #
   # Default: "janus"
   #
-  ServiceName: "janus"
+  ServiceName = "janus"
 
   # SamplingStrategy specifies the sampling strategy
   #
@@ -183,7 +183,7 @@
   #
   # Default: "probabilistic"
   #
-  SamplingStrategy: "probabilistic"
+  SamplingStrategy = "probabilistic"
 
   # SamplingParam is an additional value passed to the sampler.
   #
@@ -193,11 +193,16 @@
   #
   # Default: "0.15"
   #
-  SamplingParam: "0.15"
+  SamplingParam = "0.15"
+
+  # Requests that have X-Debug-Trace header set with the value of DebugTraceKey will
+  # force sampling, and additionally will have the Trace ID returned in their responses
+  # on the X-Debug-Trace header.
+  DebugTraceKey = ""
 
   [tracing.jaeger]
     # SamplingServerURL is the address to the sampling server
     #
     # Default: None
     #
-    SamplingServerURL: "localhost:6832"
+    SamplingServerURL = "localhost:6832"

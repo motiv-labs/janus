@@ -112,6 +112,7 @@ type Tracing struct {
 	ServiceName      string        `envconfig:"TRACING_SERVICE_NAME"`
 	SamplingStrategy string        `envconfig:"TRACING_SAMPLING_STRATEGY"`
 	SamplingParam    float64       `envconfig:"TRACING_SAMPLING_PARAM"`
+	DebugTraceKey    string        `envconfig:"TRACING_DEBUG_TRACE_KEY"`
 	JaegerTracing    JaegerTracing `mapstructure:"jaeger"`
 }
 
@@ -149,11 +150,12 @@ func init() {
 	viper.SetDefault("tracing.serviceName", serviceName)
 	viper.SetDefault("tracing.samplingStrategy", "probabilistic")
 	viper.SetDefault("tracing.samplingParam", 0.15)
+	viper.SetDefault("tracing.debugTraceKey", "")
 
 	logging.InitDefaults(viper.GetViper(), "log")
 }
 
-//Load configuration variables
+// Load configuration variables
 func Load(configFile string) (*Specification, error) {
 	if configFile != "" {
 		viper.SetConfigFile(configFile)
@@ -181,7 +183,7 @@ func Load(configFile string) (*Specification, error) {
 	return &config, nil
 }
 
-//LoadEnv loads configuration from environment variables
+// LoadEnv loads configuration from environment variables
 func LoadEnv() (*Specification, error) {
 	var config Specification
 

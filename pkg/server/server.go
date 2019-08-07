@@ -19,6 +19,7 @@ import (
 	"github.com/hellofresh/janus/pkg/web"
 	"github.com/hellofresh/stats-go/client"
 	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/plugin/ochttp/propagation/b3"
 )
 
 // Server is the Janus server
@@ -279,6 +280,11 @@ func (s *Server) createRouter() router.Router {
 	// Add RequestID middleware first if enabled, so we could use it in other middlewares, e.g. logger
 	if s.globalConfig.RequestID {
 		r.Use(middleware.RequestID)
+	}
+
+	// Add DebugTraceKey middleware which returns debug header with the Trace ID
+	if s.globalConfig.Tracing.DebugTraceKey != "" {
+		r.Use(middleware.DebugTrace(&b3.HTTPFormat{}, s.globalConfig.Tracing.DebugTraceKey))
 	}
 
 	r.Use(
