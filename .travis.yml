@@ -9,8 +9,11 @@ go:
 
 env:
   - MAKE_TASK=test
+    GO111MODULE=on
   - MAKE_TASK=test-integration
+    GO111MODULE=on
   - MAKE_TASK=test-features
+    GO111MODULE=on
 
 before_install:
   - docker-compose -f assets/docker-compose.yml up -d
