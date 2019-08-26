@@ -46,7 +46,7 @@ func (c *client) Teams(httpClient *http.Client) (OrganizationTeams, error) {
 	organizationTeams := OrganizationTeams{}
 
 	for nextPage != 0 {
-		teams, resp, err := client.Organizations.ListUserTeams(context.TODO(), &github.ListOptions{Page: nextPage})
+		teams, resp, err := client.Teams.ListUserTeams(context.TODO(), &github.ListOptions{Page: nextPage})
 		if err != nil {
 			return nil, err
 		}
