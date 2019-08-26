@@ -1,6 +1,17 @@
 # Unreleased
 
+- None
+
+--
+
+# 3.8.11
+
+## Added
 - Added trace debugging setting (`tracing.DebugTraceKey`) to get the Trace ID of a debug request in the response
+
+## Changed
+- Releases are now built with go1.12
+- Updated github client dependency
 
 --
 
