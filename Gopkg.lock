@@ -190,12 +190,12 @@
   version = "v1.2.0"
 
 [[projects]]
-  branch = "master"
-  digest = "1:3d4a946cf7d13080ff1e15530bf53b7607fe7bbe5edf1c045b637b96526f463d"
+  digest = "1:613d8bed8dfae7d0c33c8ea5f5e0914f29db7b469abb45790fb1c862ef20c029"
   name = "github.com/google/go-github"
   packages = ["github"]
   pruneopts = ""
-  revision = "b1f138353a6287df5156971b3963e9107eca06a1"
+  revision = "2245c71a086635d02fa2d2d5cc43f4c3f7f9faac"
+  version = "v28.0.0"
 
 [[projects]]
   branch = "master"
@@ -275,7 +275,10 @@
 [[projects]]
   digest = "1:739b2038a38cebb50e922d18f4b042c042256320fea2db094814aeef8891e0c1"
   name = "github.com/magiconair/properties"
-  packages = ["."]
+  packages = [
+    ".",
+    "assert",
+  ]
   pruneopts = ""
   revision = "d419a98cdbed11a922bf76f257b7c4be79b50e73"
   version = "v1.7.4"
@@ -530,7 +533,16 @@
   branch = "master"
   digest = "1:f8e4d7d2ee6f5f8a2d0c006a57763552dc013d06925f239b8f3c3a7a1f398920"
   name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
+  packages = [
+    "cast5",
+    "openpgp",
+    "openpgp/armor",
+    "openpgp/elgamal",
+    "openpgp/errors",
+    "openpgp/packet",
+    "openpgp/s2k",
+    "ssh/terminal",
+  ]
   pruneopts = ""
   revision = "3d37316aaa6bd9929127ac9a527abf408178ea7b"
 
@@ -680,6 +692,7 @@
     "github.com/hellofresh/stats-go/hooks",
     "github.com/hellofresh/stats-go/timer",
     "github.com/kelseyhightower/envconfig",
+    "github.com/magiconair/properties/assert",
     "github.com/mitchellh/go-homedir",
     "github.com/mitchellh/mapstructure",
     "github.com/pkg/errors",
@@ -699,10 +712,12 @@
     "go.opencensus.io/exporter/jaeger",
     "go.opencensus.io/exporter/prometheus",
     "go.opencensus.io/plugin/ochttp",
+    "go.opencensus.io/plugin/ochttp/propagation/b3",
     "go.opencensus.io/stats",
     "go.opencensus.io/stats/view",
     "go.opencensus.io/tag",
     "go.opencensus.io/trace",
+    "go.opencensus.io/trace/propagation",
     "golang.org/x/net/http2",
     "golang.org/x/oauth2",
   ]

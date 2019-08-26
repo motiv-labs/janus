@@ -46,7 +46,7 @@
 
 [[constraint]]
   name = "github.com/google/go-github"
-  branch = "master"
+  version = "28.0.0"
 
 [[constraint]]
   name = "github.com/hellofresh/health-go"
