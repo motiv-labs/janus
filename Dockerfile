@@ -1,4 +1,4 @@
-FROM golang:1.10-alpine AS builder
+FROM golang:1.12-alpine AS builder
 
 ARG VERSION='0.0.1-docker'
 
@@ -9,7 +9,7 @@ COPY . ./
 RUN apk add --update bash make git
 RUN export JANUS_BUILD_ONLY_DEFAULT=1 && \
     export VERSION=$VERSION && \
-    make
+    make build
 
 # ---
 
