@@ -13,13 +13,12 @@ import (
 func newRepo(t *testing.T) *FileSystemRepository {
 	wd, err := os.Getwd()
 	assert.NoError(t, err)
-	assert.Contains(t, wd, "github.com/hellofresh/janus")
 
-	// .../github.com/hellofresh/janus/pkg/api/../../assets/apis
+	// ./../../assets/apis
 	exampleAPIsPath := filepath.Join(wd, "..", "..", "assets", "apis")
 	info, err := os.Stat(exampleAPIsPath)
-	assert.NoError(t, err)
-	assert.True(t, info.IsDir())
+	require.NoError(t, err)
+	require.True(t, info.IsDir())
 
 	fsRepo, err := NewFileSystemRepository(exampleAPIsPath)
 	assert.NoError(t, err)
