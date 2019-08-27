@@ -2,7 +2,7 @@ FROM golang:1.12-alpine AS builder
 
 ARG VERSION='0.0.1-docker'
 
-WORKDIR /go/src/github.com/hellofresh/janus
+WORKDIR /janus
 
 COPY . ./
 
@@ -15,7 +15,7 @@ RUN export JANUS_BUILD_ONLY_DEFAULT=1 && \
 
 FROM alpine
 
-COPY --from=builder /go/src/github.com/hellofresh/janus/dist/janus /
+COPY --from=builder /janus/dist/janus /
 
 RUN apk add --no-cache ca-certificates
 RUN mkdir -p /etc/janus/apis && \
