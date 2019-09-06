@@ -4,7 +4,6 @@ go 1.12
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20180108190415-b31f603f5e1e
-	git.apache.org/thrift.git v0.0.0-20181106172052-f7d43ce0aa58 // indirect
 	github.com/BurntSushi/toml v0.3.1 // indirect
 	github.com/DATA-DOG/godog v0.7.13
 	github.com/DataDog/datadog-go v0.0.0-20180330214955-e67964b4021a // indirect
@@ -59,15 +58,16 @@ require (
 	github.com/ulule/limiter v2.2.2+incompatible
 	go.opencensus.io v0.18.0
 	golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586 // indirect
-	golang.org/x/lint v0.0.0-20190409202823-959b441ac422 // indirect
 	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7
 	golang.org/x/oauth2 v0.0.0-20180118004544-b28fcf2b08a1
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
 	golang.org/x/sys v0.0.0-20190825160603-fb81701db80f // indirect
 	golang.org/x/text v0.3.2 // indirect
-	golang.org/x/tools v0.0.0-20190826060629-95c3470cfb70 // indirect
 	google.golang.org/appengine v1.0.0 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/alexcesaro/statsd.v2 v2.0.0 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
 	gopkg.in/gemnasium/logrus-graylog-hook.v2 v2.0.6 // indirect
 )
+
+replace git.apache.org/thrift.git => github.com/apache/thrift v0.12.0
