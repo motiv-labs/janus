@@ -27,13 +27,23 @@ Currently, only Jaeger exporter is available in `Janus`.
   #
   # Default: None
   #
-  Exporter: "jaeger"
+  Exporter = "jaeger"
   
   # Service name used in the backend
   #
   # Default: "janus"
   #
-  ServiceName: "janus"
+  ServiceName = "janus"
+  
+  # If set to false, trace metadata set in incoming requests will be
+  # added as the parent span of the trace.
+  #
+  # See the following link for more details:
+  # https://godoc.org/go.opencensus.io/plugin/ochttp#Handler 
+  #
+  # Default: true
+  #
+  IsPublicEndpoint = true
   
   # SamplingStrategy specifies the sampling strategy
   #
@@ -41,7 +51,7 @@ Currently, only Jaeger exporter is available in `Janus`.
   #
   # Default: "probabilistic"
   #
-  SamplingStrategy: "probabilistic"
+  SamplingStrategy = "probabilistic"
   
   # SamplingParam is an additional value passed to the sampler.
   #
@@ -51,7 +61,7 @@ Currently, only Jaeger exporter is available in `Janus`.
   #
   # Default: "0.15"
   #
-  SamplingParam: "0.15"
+  SamplingParam = "0.15"
   
   [tracing.jaeger]
     # SamplingServerURL is the address to the sampling server

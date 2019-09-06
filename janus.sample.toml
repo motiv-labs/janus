@@ -185,6 +185,16 @@
   #
   SamplingStrategy = "probabilistic"
 
+  # If set to false, trace metadata set in incoming requests will be
+  # added as the parent span of the trace.
+  #
+  # See the following link for more details:
+  # https://godoc.org/go.opencensus.io/plugin/ochttp#Handler 
+  #
+  # Default: true
+  #
+  IsPublicEndpoint = true
+
   # SamplingParam is an additional value passed to the sampler.
   #
   # Valid Values:
