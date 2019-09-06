@@ -28,6 +28,7 @@ type Register struct {
 	flushInterval          time.Duration
 	statsClient            client.Client
 	matcher                *router.ListenPathMatcher
+	isPublicEndpoint       bool
 }
 
 // NewRegister creates a new instance of Register
@@ -71,10 +72,10 @@ func (p *Register) Add(definition *RouterDefinition) error {
 	}
 
 	if p.matcher.Match(definition.ListenPath) {
-		p.doRegister(p.matcher.Extract(definition.ListenPath), definition, &ochttp.Handler{Handler: handler, IsPublicEndpoint: true})
+		p.doRegister(p.matcher.Extract(definition.ListenPath), definition, &ochttp.Handler{Handler: handler, IsPublicEndpoint: p.isPublicEndpoint})
 	}
 
-	p.doRegister(definition.ListenPath, definition, &ochttp.Handler{Handler: handler, IsPublicEndpoint: true})
+	p.doRegister(definition.ListenPath, definition, &ochttp.Handler{Handler: handler, IsPublicEndpoint: p.isPublicEndpoint})
 	return nil
 }
 
