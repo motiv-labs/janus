@@ -60,3 +60,11 @@ func WithIdleConnPurgeTicker(d time.Duration) RegisterOption {
 		t.idleConnPurgeTicker = ticker
 	}
 }
+
+// WithIsPublicEndpoint adds trace metadata from incoming requests
+// as parent span if set to false
+func WithIsPublicEndpoint(b bool) RegisterOption {
+	return func(r *Register) {
+		r.isPublicEndpoint = b
+	}
+}

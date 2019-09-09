@@ -80,6 +80,7 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 		proxy.WithIdleConnTimeout(s.globalConfig.IdleConnTimeout),
 		proxy.WithIdleConnPurgeTicker(s.globalConfig.ConnPurgeInterval),
 		proxy.WithStatsClient(s.statsClient),
+		proxy.WithIsPublicEndpoint(s.globalConfig.Tracing.IsPublicEndpoint),
 	)
 
 	// API Loader must be initialised synchronously as well to avoid race condition
