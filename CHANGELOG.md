@@ -1,5 +1,9 @@
 # Unreleased
 
+- None
+
+# 3.8.12
+
 ## Added
 
 - Added `TRACING_IS_PUBLIC_ENDPOINT` environment variable to allow trace propagation
