@@ -10,6 +10,7 @@ import (
 	"github.com/hellofresh/janus/pkg/config"
 	obs "github.com/hellofresh/janus/pkg/observability"
 	"github.com/hellofresh/logging-go"
+	_trace "github.com/hellofresh/opencensus-go-extras/trace"
 	"github.com/hellofresh/stats-go"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
@@ -171,23 +172,29 @@ func initTracingExporter() {
 	}
 
 	var traceConfig trace.Config
+	var sampler trace.Sampler
 	logger = logger.WithField("tracing.samplingStrategy", globalConfig.Tracing.SamplingStrategy)
 
 	switch globalConfig.Tracing.SamplingStrategy {
 	case "always":
-		traceConfig.DefaultSampler = trace.AlwaysSample()
+		sampler = trace.AlwaysSample()
 		break
 	case "never":
-		traceConfig.DefaultSampler = trace.NeverSample()
+		sampler = trace.NeverSample()
 		break
 	case "probabilistic":
-		traceConfig.DefaultSampler = trace.ProbabilitySampler(globalConfig.Tracing.SamplingParam)
+		sampler = trace.ProbabilitySampler(globalConfig.Tracing.SamplingParam)
 		break
 	default:
 		logger.Warn("Invalid tracing sampling strategy specified")
 		return
 	}
 
+	if !globalConfig.Tracing.IsPublicEndpoint {
+		sampler = _trace.RespectParentSampler(sampler)
+	}
+
+	traceConfig.DefaultSampler = sampler
 	trace.ApplyConfig(traceConfig)
 }
 

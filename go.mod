@@ -27,6 +27,7 @@ require (
 	github.com/hashicorp/hcl v0.0.0-20171017181929-23c074d0eceb // indirect
 	github.com/hellofresh/health-go v1.2.6
 	github.com/hellofresh/logging-go v0.1.6
+	github.com/hellofresh/opencensus-go-extras v0.0.0-20191004131501-7bd94f603dcf
 	github.com/hellofresh/stats-go v0.8.0
 	github.com/inconshreveable/mousetrap v1.0.0 // indirect
 	github.com/kelseyhightower/envconfig v1.3.0
@@ -58,7 +59,7 @@ require (
 	github.com/ulule/limiter v2.2.2+incompatible
 	go.opencensus.io v0.18.0
 	golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586 // indirect
-	golang.org/x/net v0.0.0-20190813141303-74dc4d7220e7
+	golang.org/x/net v0.0.0-20191003171128-d98b1b443823
 	golang.org/x/oauth2 v0.0.0-20180118004544-b28fcf2b08a1
 	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
 	golang.org/x/sys v0.0.0-20190825160603-fb81701db80f // indirect
