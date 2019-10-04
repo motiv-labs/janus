@@ -2,6 +2,9 @@
 
 - None
 
+# 3.8.13
+- Changed trace sampling behavior when `TRACING_IS_PUBLIC_ENDPOINT` is set to false
+
 # 3.8.12
 
 ## Added
@@ -55,7 +58,7 @@
 ## Fixed
 
 - Circuit breaker plugin statsd collector prefix
- 
+
 # 3.8.6
 
 ## Updated
