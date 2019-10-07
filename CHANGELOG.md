@@ -2,21 +2,19 @@
 
 - None
 
-# 3.8.13
-- Changed trace sampling behavior when `TRACING_IS_PUBLIC_ENDPOINT` is set to false
+--
 
 # 3.8.12
 
-## Added
+## Changed
 
-- Added `TRACING_IS_PUBLIC_ENDPOINT` environment variable to allow trace propagation
-
---
+- Changed trace sampling behavior when `TRACING_IS_PUBLIC_ENDPOINT` is set to false
 
 # 3.8.11
 
 ## Added
 - Added trace debugging setting (`tracing.DebugTraceKey`) to get the Trace ID of a debug request in the response
+- Added `TRACING_IS_PUBLIC_ENDPOINT` environment variable to allow trace propagation
 
 ## Changed
 - Releases are now built with go1.12
