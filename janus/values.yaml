@@ -15,7 +15,7 @@ imagePullSecrets: []
 image:
   repository: quay.io/hellofresh/janus
   tag: latest
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
 
 service:
   name: ops-gateway
@@ -38,8 +38,6 @@ ingress:
   enabled: false
   name: ops-gateway
   annotations:
-    kubernetes.io/ingress.class: "nginx"
-    disable-external-dns: "true"
     nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
   hosts:
     - host: gateway.sample.com

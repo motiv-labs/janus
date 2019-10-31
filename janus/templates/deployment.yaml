@@ -32,14 +32,14 @@ spec:
               name: http-private
               protocol: TCP
           env:
-            {{- if .Values.configMap }}
+            {{- if .Values.envConfig }}
             {{- range $key, $value := .Values.envConfig }}
             - name: {{ $key | quote }}
               value: {{ $value | quote }}
             {{- end }}
             {{- end }}
             - name: "DATABASE_DSN"
-              value: "{{ .Values.databaseDSN }}"
+              value: "{{ .Values.deployment.databaseDSN }}"
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
