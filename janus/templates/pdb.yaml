@@ -1,0 +1,12 @@
+apiVersion: policy/v1beta1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "janus.fullname" . }}
+  labels:
+{{ include "janus.labels" . | indent 4 }}
+spec:
+  minAvailable: {{ .Values.deployment.minAvailable }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "janus.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}

@@ -1,0 +1,75 @@
+# Default values for janus.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+nameOverride: ""
+fullnameOverride: ""
+
+deployment:
+  replicaCount: 2
+  minAvailable: 1
+  databaseDSN: "mongodb://janus-database:27017/janus"
+
+imagePullSecrets: []
+
+image:
+  repository: quay.io/hellofresh/janus
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  name: ops-gateway
+  type: ClusterIP
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8080
+    name: http
+  - protocol: TCP
+    port: 443
+    targetPort: 8080
+    name: https
+  - protocol: TCP
+    port: 8081
+    targetPort: 8081
+    name: http-private
+
+ingress:
+  enabled: false
+  name: ops-gateway
+  annotations:
+    kubernetes.io/ingress.class: "nginx"
+    disable-external-dns: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
+  hosts:
+    - host: gateway.sample.com
+      paths:
+        - path: /
+          port: 80
+    - host: admin-gateway.sample.com
+      paths:
+        - path: /
+          port: 8081
+
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
