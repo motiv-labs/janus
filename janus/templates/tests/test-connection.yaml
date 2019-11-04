@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "janus.fullname" ( dict "Values" .Values "Chart" .Chart "Release" .Release "name" .Values.name ) }}-test-connection"
+  labels:
+{{ include "janus.labels" . | indent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args:  ['{{ include "janus.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
