@@ -9,6 +9,11 @@ deployment:
   replicaCount: 2
   minAvailable: 1
   databaseDSN: "mongodb://janus-database:27017/janus"
+  valuesFrom:
+    - name: POD_NAME
+      valueFrom:
+        fieldRef:
+          fieldPath: metadata.name
 
 imagePullSecrets: []
 
