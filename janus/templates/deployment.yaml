@@ -32,6 +32,9 @@ spec:
               name: http-private
               protocol: TCP
           env:
+            {{- if .Values.deployment.valuesFrom }}
+            {{ toYaml .Values.deployment.valuesFrom  | nindent 12 }}
+            {{- end}}
             {{- if .Values.envConfig }}
             {{- range $key, $value := .Values.envConfig }}
             - name: {{ $key | quote }}

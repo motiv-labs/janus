@@ -40,6 +40,7 @@ The following table lists the configurable parameters of the Janus chart and the
 | `allowEmptyPassword`                | Allow DB blank passwords                                      | `yes`                                                    |
 | `deployment.replicaCount`           | Number of Janus pod replicas                                  | `2`                                                      |
 | `deployment.minAvailable`           | Creates PDB is min available (must be less than replicaCount) | `1`                                                      |
+| `deployment.valuesFrom`             | Add needed env vars from Kubernetes metadata                  | `POD_NAME`                                               |
 | `deployment.databaseDSN`            | Database connection string                                    | `mongodb://janus-database:27017/janus`                   |
 | `service.type`                      | Kubernetes Service type                                       | `LoadBalancer`                                           |
 | `service.name`                      | Override service name                                         | ``                                                       |
