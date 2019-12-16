@@ -41,6 +41,7 @@ The following table lists the configurable parameters of the Janus chart and the
 | `deployment.replicaCount`           | Number of Janus pod replicas                                  | `2`                                                      |
 | `deployment.minAvailable`           | Creates PDB is min available (must be less than replicaCount) | `1`                                                      |
 | `deployment.valuesFrom`             | Add needed env vars from Kubernetes metadata                  | `POD_NAME`                                               |
+| `deployment.labels`                 | Add custom labels to the deployment                           | `app: janus`                                             |
 | `deployment.databaseDSN`            | Database connection string                                    | `mongodb://janus-database:27017/janus`                   |
 | `service.type`                      | Kubernetes Service type                                       | `LoadBalancer`                                           |
 | `service.name`                      | Override service name                                         | ``                                                       |
