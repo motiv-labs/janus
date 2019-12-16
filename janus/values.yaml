@@ -9,6 +9,8 @@ deployment:
   replicaCount: 2
   minAvailable: 1
   databaseDSN: "mongodb://janus-database:27017/janus"
+  labels:
+    app: janus
   valuesFrom:
     - name: POD_NAME
       valueFrom:
