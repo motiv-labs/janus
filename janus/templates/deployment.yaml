@@ -4,7 +4,7 @@ metadata:
   name: {{ include "janus.fullname" . }}
   labels:
 {{ include "janus.labels" . | indent 4 }}
-{{ .Values.deployment.labels | indent 4 }}
+{{ toYaml .Values.deployment.labels | indent 4 }}
 spec:
   replicas: {{ .Values.deployment.replicaCount }}
   selector:
@@ -14,7 +14,7 @@ spec:
   template:
     metadata:
       labels:
-        {{ .Values.deployment.labels | indent 8 }}
+{{ toYaml .Values.deployment.labels | indent 8 }}
         app.kubernetes.io/name: {{ include "janus.name" . }}
         app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if or (.Values.deployment.podAnnotations) (.Values.deployment.PodAnnotations) }}
