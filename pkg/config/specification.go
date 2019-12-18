@@ -119,7 +119,9 @@ type Tracing struct {
 
 // JaegerTracing holds the Jaeger tracing configuration
 type JaegerTracing struct {
-	SamplingServerURL string `envconfig:"TRACING_JAEGER_SAMPLING_SERVER_URL"`
+	SamplingServerURL  string `envconfig:"TRACING_JAEGER_SAMPLING_SERVER_URL"`
+	SamplingServerHost string `envconfig:"JAEGER_AGENT_HOST"`
+	SamplingServerPort string `envconfig:"JAEGER_AGENT_PORT"`
 }
 
 func init() {
