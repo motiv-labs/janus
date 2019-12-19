@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -199,8 +200,13 @@ func initTracingExporter() {
 }
 
 func initJaegerExporter() (err error) {
+	jaegerURL := globalConfig.Tracing.JaegerTracing.SamplingServerURL
+	if jaegerURL == "" {
+		jaegerURL = fmt.Sprintf("%s:%s", globalConfig.Tracing.JaegerTracing.SamplingServerHost, globalConfig.Tracing.JaegerTracing.SamplingServerPort)
+	}
+
 	jaegerExporter, err := jaeger.NewExporter(jaeger.Options{
-		AgentEndpoint: globalConfig.Tracing.JaegerTracing.SamplingServerURL,
+		AgentEndpoint: jaegerURL,
 		ServiceName:   globalConfig.Tracing.ServiceName,
 	})
 	if err != nil {
