@@ -17,7 +17,7 @@ require (
 	github.com/felixge/httpsnoop v1.0.0
 	github.com/fiam/gounidecode v0.0.0-20150629112515-8deddbd03fec // indirect
 	github.com/fsnotify/fsnotify v1.4.7
-	github.com/globalsign/mgo v0.0.0-20180424091348-efe0945164a7
+	github.com/globalsign/mgo v0.0.0-20180615134936-113d3961e731
 	github.com/go-chi/chi v3.3.2+incompatible
 	github.com/go-redis/redis v6.12.0+incompatible
 	github.com/gofrs/uuid v3.2.0+incompatible
