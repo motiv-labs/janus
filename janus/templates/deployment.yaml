@@ -49,8 +49,10 @@ spec:
               value: {{ $value | quote }}
             {{- end }}
             {{- end }}
+            {{- with .Values.deployment.databaseDSN }}
             - name: "DATABASE_DSN"
-              value: "{{ .Values.deployment.databaseDSN }}"
+              value: "{{ . }}"
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
