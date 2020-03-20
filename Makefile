@@ -15,7 +15,7 @@ all: clean deps test build
 deps:
 	@echo "$(OK_COLOR)==> Installing dependencies$(NO_COLOR)"
 	@go get -u golang.org/x/lint/golint
-	@go get -u github.com/DATA-DOG/godog/cmd/godog
+	@go get -u github.com/cucumber/godog/cmd/godog
 
 build:
 	@echo "$(OK_COLOR)==> Building... $(NO_COLOR)"

@@ -3,9 +3,10 @@ package bootstrap
 import (
 	"time"
 
-	"github.com/DATA-DOG/godog"
-	"github.com/hellofresh/janus/pkg/api"
+	"github.com/cucumber/godog"
 	"github.com/pkg/errors"
+
+	"github.com/hellofresh/janus/pkg/api"
 )
 
 // RegisterAPIContext registers godog suite context for handling API related steps

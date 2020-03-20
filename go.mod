@@ -5,13 +5,13 @@ go 1.12
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20180108190415-b31f603f5e1e
 	github.com/BurntSushi/toml v0.3.1 // indirect
-	github.com/DATA-DOG/godog v0.7.13
 	github.com/DataDog/datadog-go v0.0.0-20180330214955-e67964b4021a // indirect
 	github.com/Knetic/govaluate v3.0.0+incompatible
 	github.com/afex/hystrix-go v0.0.0-20180406012432-f86abeeb9f72
 	github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f
 	github.com/bshuster-repo/logrus-logstash-hook v0.4.1 // indirect
 	github.com/cactus/go-statsd-client v3.1.1+incompatible // indirect
+	github.com/cucumber/godog v0.8.1
 	github.com/davecgh/go-spew v1.1.0 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/felixge/httpsnoop v1.0.0

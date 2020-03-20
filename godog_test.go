@@ -9,11 +9,12 @@ import (
 	"testing"
 	"time"
 
-	"github.com/DATA-DOG/godog"
+	"github.com/cucumber/godog"
+	"github.com/stretchr/testify/assert"
+
 	"github.com/hellofresh/janus/features/bootstrap"
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
-	"github.com/stretchr/testify/assert"
 )
 
 var (
