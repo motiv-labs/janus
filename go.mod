@@ -58,12 +58,12 @@ require (
 	github.com/tidwall/match v1.0.0 // indirect
 	github.com/ulule/limiter v2.2.2+incompatible
 	go.opencensus.io v0.18.0
-	golang.org/x/crypto v0.0.0-20190820162420-60c769a6c586 // indirect
-	golang.org/x/net v0.0.0-20191003171128-d98b1b443823
+	golang.org/x/lint v0.0.0-20200302205851-738671d3881b // indirect
+	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
 	golang.org/x/oauth2 v0.0.0-20180118004544-b28fcf2b08a1
-	golang.org/x/sync v0.0.0-20190423024810-112230192c58 // indirect
 	golang.org/x/sys v0.0.0-20190825160603-fb81701db80f // indirect
 	golang.org/x/text v0.3.2 // indirect
+	golang.org/x/tools v0.0.0-20200319210407-521f4a0cd458 // indirect
 	google.golang.org/appengine v1.0.0 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/alexcesaro/statsd.v2 v2.0.0 // indirect

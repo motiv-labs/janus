@@ -23,11 +23,11 @@ build:
 
 test: lint format vet
 	@echo "$(OK_COLOR)==> Running tests$(NO_COLOR)"
-	@go test -v -cover ./...
+	@go test -cover ./...
 
 test-integration: lint format vet
 	@echo "$(OK_COLOR)==> Running tests$(NO_COLOR)"
-	@go test -v -cover -tags=integration ./...
+	@go test -cover -tags=integration ./...
 
 test-features:
 	@/bin/sh -c "JANUS_BUILD_ONLY_DEFAULT=1 PKG_SRC=$(PKG_SRC) ./build/build.sh"
