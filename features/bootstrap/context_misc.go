@@ -3,7 +3,7 @@ package bootstrap
 import (
 	"time"
 
-	"github.com/DATA-DOG/godog"
+	"github.com/cucumber/godog"
 )
 
 const durationAWhile = time.Second

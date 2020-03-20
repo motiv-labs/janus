@@ -9,12 +9,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/DATA-DOG/godog"
-	"github.com/DATA-DOG/godog/gherkin"
-	jwtgo "github.com/dgrijalva/jwt-go"
+	"github.com/cucumber/godog"
+	"github.com/cucumber/godog/gherkin"
+	jwtGo "github.com/dgrijalva/jwt-go"
+	"github.com/tidwall/gjson"
+
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt"
-	"github.com/tidwall/gjson"
 )
 
 const (
@@ -233,7 +234,7 @@ func (c *requestContext) requestJWTTokenIsNotSet() error {
 
 func (c *requestContext) requestJWTTokenIsValidAdminToken() error {
 	jwtConfig := jwt.NewGuard(c.adminCred)
-	accessToken, err := jwt.IssueAdminToken(jwtConfig.SigningMethod, jwtgo.MapClaims{}, jwtConfig.Timeout)
+	accessToken, err := jwt.IssueAdminToken(jwtConfig.SigningMethod, jwtGo.MapClaims{}, jwtConfig.Timeout)
 	if nil != err {
 		return fmt.Errorf("failed to issue JWT: %v", err)
 	}

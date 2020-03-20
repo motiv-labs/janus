@@ -62,7 +62,7 @@ export API_PORT=${API_PORT_PRIMARY}
 # make sure app started
 sleep 1
 
-go test -godog -stop-on-failure
+godog --format=pretty --random --stop-on-failure --strict
 exit_code=$?
 
 kill ${pid_janus}
