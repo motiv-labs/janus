@@ -1,4 +1,4 @@
-FROM golang:1.12-alpine AS builder
+FROM golang:1.14-alpine AS builder
 
 ARG VERSION='0.0.1-docker'
 
