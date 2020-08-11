@@ -20,7 +20,7 @@ build:
 	@echo "$(OK_COLOR)==> Building... $(NO_COLOR)"
 	@/bin/sh -c "JANUS_BUILD_ONLY_DEFAULT=$(JANUS_BUILD_ONLY_DEFAULT) PKG_SRC=$(PKG_SRC) VERSION=$(VERSION) ./build/build.sh"
 
-test:
+test: lint
 	@echo "$(OK_COLOR)==> Running tests$(NO_COLOR)"
 	@go test -cover ./...
 
@@ -34,6 +34,10 @@ test-features:
 
 lint:
 	@echo "$(OK_COLOR)==> Linting with golangci-lint$(NO_COLOR)"
+	@golangci-lint run
+
+lint-docker:
+	@echo "$(OK_COLOR)==> Linting with golangci-lint running in docker container$(NO_COLOR)"
 	@docker run --rm -v $(PWD):/app -w /app golangci/golangci-lint:v1.30.0 golangci-lint run -v
 
 clean:
