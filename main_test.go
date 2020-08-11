@@ -15,54 +15,66 @@ import (
 	"github.com/hellofresh/janus/pkg/config"
 )
 
-func FeatureContext(s *godog.Suite) {
-	c, err := config.LoadEnv()
-	if nil != err {
-		panic(err)
-	}
+var (
+	apiRepo          api.Repository
+	cfg              *config.Specification
+	portSecondary    int
+	apiPortSecondary int
+	cfgChan          chan api.ConfigurationMessage
+)
 
-	var apiRepo api.Repository
+func InitializeTestSuite(ctx *godog.TestSuiteContext) {
+	var err error
 
-	dsnURL, err := url.Parse(c.Database.DSN)
-	if nil != err {
-		panic(err)
-	}
-
-	switch dsnURL.Scheme {
-	case "mongodb":
-		apiRepo, err = api.NewMongoAppRepository(c.Database.DSN, c.BackendFlushInterval)
+	ctx.BeforeSuite(func() {
+		cfg, err = config.LoadEnv()
 		if err != nil {
 			panic(err)
 		}
-	case "file":
-		var apiPath = dsnURL.Path + "/apis"
 
-		apiRepo, err = api.NewFileSystemRepository(apiPath)
+		dsnURL, err := url.Parse(cfg.Database.DSN)
+		if nil != err {
+			panic(err)
+		}
+
+		switch dsnURL.Scheme {
+		case "mongodb":
+			apiRepo, err = api.NewMongoAppRepository(cfg.Database.DSN, cfg.BackendFlushInterval)
+			if err != nil {
+				panic(err)
+			}
+		case "file":
+			var apiPath = dsnURL.Path + "/apis"
+
+			apiRepo, err = api.NewFileSystemRepository(apiPath)
+			if err != nil {
+				panic(err)
+			}
+		default:
+			panic("invalid database")
+		}
+
+		portSecondary, err = strconv.Atoi(os.Getenv("PORT_SECONDARY"))
 		if err != nil {
 			panic(err)
 		}
-	default:
-		panic("invalid database")
-	}
 
-	portSecondary, err := strconv.Atoi(os.Getenv("PORT_SECONDARY"))
-	if nil != err {
-		panic(err)
-	}
+		apiPortSecondary, err = strconv.Atoi(os.Getenv("API_PORT_SECONDARY"))
+		if err != nil {
+			panic(err)
+		}
 
-	apiPortSecondary, err := strconv.Atoi(os.Getenv("API_PORT_SECONDARY"))
-	if nil != err {
-		panic(err)
-	}
+		cfgChan = make(chan api.ConfigurationMessage, 100)
+		if listener, ok := apiRepo.(api.Listener); ok {
+			listener.Listen(context.Background(), cfgChan)
+		}
+	})
+}
 
-	ch := make(chan api.ConfigurationMessage, 100)
-	if listener, ok := apiRepo.(api.Listener); ok {
-		listener.Listen(context.Background(), ch)
-	}
-
-	bootstrap.RegisterRequestContext(s, c.Port, c.Web.Port, portSecondary, apiPortSecondary, c.Web.Credentials)
-	bootstrap.RegisterAPIContext(s, apiRepo, ch)
-	bootstrap.RegisterMiscContext(s)
+func InitializeScenario(ctx *godog.ScenarioContext) {
+	bootstrap.RegisterRequestContext(ctx, cfg.Port, cfg.Web.Port, portSecondary, apiPortSecondary, cfg.Web.Credentials)
+	bootstrap.RegisterAPIContext(ctx, apiRepo, cfgChan)
+	bootstrap.RegisterMiscContext(ctx)
 }
 
 func Test_Fake(t *testing.T) {

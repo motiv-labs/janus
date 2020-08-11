@@ -11,10 +11,10 @@ import (
 )
 
 // RegisterAPIContext registers godog suite context for handling API related steps
-func RegisterAPIContext(s *godog.Suite, apiRepo api.Repository, ch chan<- api.ConfigurationMessage) {
-	ctx := &apiContext{apiRepo: apiRepo, ch: ch}
+func RegisterAPIContext(ctx *godog.ScenarioContext, apiRepo api.Repository, ch chan<- api.ConfigurationMessage) {
+	scenarioCtx := &apiContext{apiRepo: apiRepo, ch: ch}
 
-	s.BeforeScenario(ctx.clearAPI)
+	ctx.BeforeScenario(scenarioCtx.clearAPI)
 }
 
 type apiContext struct {

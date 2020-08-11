@@ -23,8 +23,8 @@ const (
 )
 
 // RegisterRequestContext registers godog suite context for handling HTTP-requests related steps
-func RegisterRequestContext(s *godog.Suite, port, apiPort, portSecondary, apiPortSecondary int, adminCred config.Credentials) {
-	ctx := &requestContext{
+func RegisterRequestContext(ctx *godog.ScenarioContext, port, apiPort, portSecondary, apiPortSecondary int, adminCred config.Credentials) {
+	scenarioCtx := &requestContext{
 		port:             port,
 		apiPort:          apiPort,
 		portSecondary:    portSecondary,
@@ -32,24 +32,24 @@ func RegisterRequestContext(s *godog.Suite, port, apiPort, portSecondary, apiPor
 		adminCred:        adminCred,
 	}
 
-	ctx.requestHeaders = make(http.Header)
+	scenarioCtx.requestHeaders = make(http.Header)
 
-	s.Step(`^I request "([^"]*)" path with "([^"]*)" method$`, ctx.iRequestPathWithMethod)
-	s.Step(`^I request "([^"]*)" API path with "([^"]*)" method$`, ctx.iRequestAPIPathWithMethod)
-	s.Step(`^I request "([^"]*)" secondary path with "([^"]*)" method$`, ctx.iRequestSecondaryPathWithMethod)
-	s.Step(`^I request "([^"]*)" secondary API path with "([^"]*)" method$`, ctx.iRequestSecondaryAPIPathWithMethod)
-	s.Step(`^I should receive (\d+) response code$`, ctx.iShouldReceiveResponseCode)
-	s.Step(`^header "([^"]*)" should be "([^"]*)"$`, ctx.headerShouldBe)
-	s.Step(`^header "([^"]*)" should start with "([^"]*)"$`, ctx.headerShouldStartWith)
-	s.Step(`^the response should contain "([^"]*)"$`, ctx.responseShouldContain)
-	s.Step(`^response JSON body has "([^"]*)" path with value \'([^']*)\'$`, ctx.responseJSONBodyHasPathWithValue)
-	s.Step(`^response JSON body has "([^"]*)" path and is an array of length (\d+)$`, ctx.responseJSONBodyHasPathIsAnArrayOfLenght)
-	s.Step(`^response JSON body has "([^"]*)" path`, ctx.responseJSONBodyHasPath)
-	s.Step(`^response JSON body is an array of length (\d+)$`, ctx.responseJSONBodyIsAnArrayOfLength)
-	s.Step(`^request JSON payload:$`, ctx.requestJSONPayload)
-	s.Step(`^request header "([^"]*)" is set to "([^"]*)"$`, ctx.requestHeaderIsSetTo)
-	s.Step(`^request JWT token is not set$`, ctx.requestJWTTokenIsNotSet)
-	s.Step(`^request JWT token is valid admin token$`, ctx.requestJWTTokenIsValidAdminToken)
+	ctx.Step(`^I request "([^"]*)" path with "([^"]*)" method$`, scenarioCtx.iRequestPathWithMethod)
+	ctx.Step(`^I request "([^"]*)" API path with "([^"]*)" method$`, scenarioCtx.iRequestAPIPathWithMethod)
+	ctx.Step(`^I request "([^"]*)" secondary path with "([^"]*)" method$`, scenarioCtx.iRequestSecondaryPathWithMethod)
+	ctx.Step(`^I request "([^"]*)" secondary API path with "([^"]*)" method$`, scenarioCtx.iRequestSecondaryAPIPathWithMethod)
+	ctx.Step(`^I should receive (\d+) response code$`, scenarioCtx.iShouldReceiveResponseCode)
+	ctx.Step(`^header "([^"]*)" should be "([^"]*)"$`, scenarioCtx.headerShouldBe)
+	ctx.Step(`^header "([^"]*)" should start with "([^"]*)"$`, scenarioCtx.headerShouldStartWith)
+	ctx.Step(`^the response should contain "([^"]*)"$`, scenarioCtx.responseShouldContain)
+	ctx.Step(`^response JSON body has "([^"]*)" path with value \'([^']*)\'$`, scenarioCtx.responseJSONBodyHasPathWithValue)
+	ctx.Step(`^response JSON body has "([^"]*)" path and is an array of length (\d+)$`, scenarioCtx.responseJSONBodyHasPathIsAnArrayOfLenght)
+	ctx.Step(`^response JSON body has "([^"]*)" path`, scenarioCtx.responseJSONBodyHasPath)
+	ctx.Step(`^response JSON body is an array of length (\d+)$`, scenarioCtx.responseJSONBodyIsAnArrayOfLength)
+	ctx.Step(`^request JSON payload:$`, scenarioCtx.requestJSONPayload)
+	ctx.Step(`^request header "([^"]*)" is set to "([^"]*)"$`, scenarioCtx.requestHeaderIsSetTo)
+	ctx.Step(`^request JWT token is not set$`, scenarioCtx.requestJWTTokenIsNotSet)
+	ctx.Step(`^request JWT token is valid admin token$`, scenarioCtx.requestJWTTokenIsValidAdminToken)
 }
 
 type requestContext struct {
