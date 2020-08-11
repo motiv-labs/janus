@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/cucumber/godog"
-	"github.com/cucumber/godog/gherkin"
+	"github.com/cucumber/messages-go/v10"
 	jwtGo "github.com/dgrijalva/jwt-go"
 	"github.com/tidwall/gjson"
 
@@ -217,7 +217,7 @@ func (c *requestContext) responseJSONBodyIsAnArrayOfLength(length int) error {
 	return nil
 }
 
-func (c *requestContext) requestJSONPayload(body *gherkin.DocString) error {
+func (c *requestContext) requestJSONPayload(body *messages.PickleStepArgument_PickleDocString) error {
 	c.requestBody = bytes.NewBufferString(body.Content)
 	return nil
 }

@@ -11,8 +11,8 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f
 	github.com/bshuster-repo/logrus-logstash-hook v0.4.1 // indirect
 	github.com/cactus/go-statsd-client v3.1.1+incompatible // indirect
-	github.com/cucumber/godog v0.8.1
-	github.com/davecgh/go-spew v1.1.0 // indirect
+	github.com/cucumber/godog v0.10.0
+	github.com/cucumber/messages-go/v10 v10.0.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/felixge/httpsnoop v1.0.0
 	github.com/fiam/gounidecode v0.0.0-20150629112515-8deddbd03fec // indirect
@@ -20,8 +20,7 @@ require (
 	github.com/globalsign/mgo v0.0.0-20180615134936-113d3961e731
 	github.com/go-chi/chi v3.3.2+incompatible
 	github.com/go-redis/redis v6.12.0+incompatible
-	github.com/gofrs/uuid v3.2.0+incompatible
-	github.com/gogo/protobuf v1.2.1 // indirect
+	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135 // indirect
 	github.com/hashicorp/hcl v0.0.0-20171017181929-23c074d0eceb // indirect
@@ -53,7 +52,7 @@ require (
 	github.com/spf13/jwalterweatherman v0.0.0-20180109140146-7c0cea34c8ec // indirect
 	github.com/spf13/pflag v1.0.0 // indirect
 	github.com/spf13/viper v1.0.0
-	github.com/stretchr/testify v1.2.2
+	github.com/stretchr/testify v1.6.1
 	github.com/tidwall/gjson v1.1.0
 	github.com/tidwall/match v1.0.0 // indirect
 	github.com/ulule/limiter v2.2.2+incompatible
@@ -69,6 +68,7 @@ require (
 	gopkg.in/alexcesaro/statsd.v2 v2.0.0 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
 	gopkg.in/gemnasium/logrus-graylog-hook.v2 v2.0.6 // indirect
+	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
 )
 
 replace git.apache.org/thrift.git => github.com/apache/thrift v0.12.0
