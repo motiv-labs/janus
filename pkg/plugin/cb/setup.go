@@ -5,13 +5,14 @@ import (
 	"strings"
 
 	"github.com/afex/hystrix-go/hystrix"
-	"github.com/afex/hystrix-go/hystrix/metric_collector"
+	metricCollector "github.com/afex/hystrix-go/hystrix/metric_collector"
 	"github.com/afex/hystrix-go/plugins"
 	"github.com/asaskevich/govalidator"
-	"github.com/hellofresh/janus/pkg/plugin"
-	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/hellofresh/janus/pkg/plugin"
+	"github.com/hellofresh/janus/pkg/proxy"
 )
 
 const (

@@ -17,6 +17,7 @@ env:
 
 before_install:
   - docker-compose -f assets/docker-compose.yml up -d
+  - curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.30.0
 
 install:
   - mkdir -p $GOPATH/bin
