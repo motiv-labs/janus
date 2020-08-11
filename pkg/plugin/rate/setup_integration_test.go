@@ -1,12 +1,11 @@
-// +build integration
-
 package rate
 
 import (
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/stretchr/testify/assert"
+
+	"github.com/hellofresh/janus/pkg/proxy"
 )
 
 func TestRateLimitPluginRedisPolicy(t *testing.T) {

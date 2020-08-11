@@ -2,24 +2,29 @@
 version: '3'
 services:
 
-  janus-database:
-      image: mongo:3
-      ports:
-          - "27017:27017"
+  mongo:
+    image: mongo:3
+    ports:
+      - "27017:27017"
+    healthcheck:
+      test: "mongo localhost:27017/test --quiet --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'"
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
-  service1:
+  upstreams:
     image: rodolpheche/wiremock:2.6.0-alpine
     ports:
       - '9089:8080'
     volumes:
-      - ./stubs:/home/wiremock
+      - ./stubs/upstreams:/home/wiremock/mappings
 
   auth-service:
     image: rodolpheche/wiremock:2.6.0-alpine
     ports:
       - '9088:8080'
     volumes:
-      - ./stubs/auth:/home/wiremock/mappings
+      - ./stubs/auth-service:/home/wiremock/mappings
 
   jaeger:
     image: jaegertracing/all-in-one

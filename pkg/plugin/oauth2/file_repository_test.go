@@ -14,7 +14,7 @@ func TestNewFileSystemRepository(t *testing.T) {
 	assert.NoError(t, err)
 
 	// ./../../assets/auth
-	exampleAPIsPath := filepath.Join(wd, "..", "..", "..", "assets", "stubs", "auth")
+	exampleAPIsPath := filepath.Join(wd, "..", "..", "..", "assets", "stubs", "auth-service")
 	info, err := os.Stat(exampleAPIsPath)
 	require.NoError(t, err)
 	require.True(t, info.IsDir())

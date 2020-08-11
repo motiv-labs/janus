@@ -3,16 +3,22 @@
 package proxy
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"testing"
 
-	"github.com/hellofresh/janus/pkg/router"
-	"github.com/hellofresh/janus/pkg/test"
 	"github.com/hellofresh/stats-go/client"
 	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	"github.com/hellofresh/janus/pkg/router"
+	"github.com/hellofresh/janus/pkg/test"
 )
+
+const defaultUpstreamsPort = "9089"
 
 var tests = []struct {
 	description         string
@@ -67,16 +73,17 @@ func TestSuccessfulProxy(t *testing.T) {
 
 	log.SetOutput(ioutil.Discard)
 
-	ts := test.NewServer(createRegisterAndRouter())
+	ts := test.NewServer(createRegisterAndRouter(t))
 	defer ts.Close()
 
 	for _, tc := range tests {
 		t.Run(tc.description, func(t *testing.T) {
 			res, err := ts.Do(tc.method, tc.url, make(map[string]string))
-			assert.NoError(t, err)
-			if res != nil {
-				defer res.Body.Close()
-			}
+			require.NoError(t, err)
+			t.Cleanup(func() {
+				err := res.Body.Close()
+				assert.NoError(t, err)
+			})
 
 			assert.Equal(t, tc.expectedContentType, res.Header.Get("Content-Type"), tc.description)
 			assert.Equal(t, tc.expectedCode, res.StatusCode, tc.description)
@@ -84,13 +91,20 @@ func TestSuccessfulProxy(t *testing.T) {
 	}
 }
 
-func createProxyDefinitions() []*Definition {
+func createProxyDefinitions(t *testing.T) []*Definition {
+	t.Helper()
+
+	upstreamsPort := os.Getenv("DYNAMIC_UPSTREAMS_PORT")
+	if upstreamsPort == "" {
+		upstreamsPort = defaultUpstreamsPort
+	}
+
 	return []*Definition{
 		{
 			ListenPath: "/example/*",
 			Upstreams: &Upstreams{
 				Balancing: "roundrobin",
-				Targets:   []*Target{{Target: "http://localhost:9089/hello-world"}},
+				Targets:   []*Target{{Target: fmt.Sprintf("http://localhost:%s/hello-world", upstreamsPort)}},
 			},
 			Methods: []string{"ALL"},
 		},
@@ -99,7 +113,7 @@ func createProxyDefinitions() []*Definition {
 			StripPath:  true,
 			Upstreams: &Upstreams{
 				Balancing: "roundrobin",
-				Targets:   []*Target{{Target: "http://localhost:9089/posts"}},
+				Targets:   []*Target{{Target: fmt.Sprintf("http://localhost:%s/posts", upstreamsPort)}},
 			},
 			Methods: []string{"ALL"},
 		},
@@ -107,7 +121,7 @@ func createProxyDefinitions() []*Definition {
 			ListenPath: "/append/*",
 			Upstreams: &Upstreams{
 				Balancing: "roundrobin",
-				Targets:   []*Target{{Target: "http://localhost:9089/hello-world"}},
+				Targets:   []*Target{{Target: fmt.Sprintf("http://localhost:%s/hello-world", upstreamsPort)}},
 			},
 			AppendPath: true,
 			Methods:    []string{"GET"},
@@ -116,7 +130,7 @@ func createProxyDefinitions() []*Definition {
 			ListenPath: "/api/recipes/{id:[\\da-f]{24}}",
 			Upstreams: &Upstreams{
 				Balancing: "roundrobin",
-				Targets:   []*Target{{Target: "http://localhost:9089/recipes/{id}"}},
+				Targets:   []*Target{{Target: fmt.Sprintf("http://localhost:%s/recipes/{id}", upstreamsPort)}},
 			},
 			Methods: []string{"GET"},
 		},
@@ -124,25 +138,30 @@ func createProxyDefinitions() []*Definition {
 			ListenPath: "/api/recipes/search",
 			Upstreams: &Upstreams{
 				Balancing: "roundrobin",
-				Targets:   []*Target{{Target: "http://localhost:9089/recipes/{id}"}},
+				Targets:   []*Target{{Target: fmt.Sprintf("http://localhost:%s/recipes/{id}", upstreamsPort)}},
 			},
 			Methods: []string{"GET"},
 		},
 	}
 }
 
-func createRegisterAndRouter() router.Router {
+func createRegisterAndRouter(t *testing.T) router.Router {
+	t.Helper()
+
 	r := router.NewChiRouter()
-	createRegister(r)
+	createRegister(t, r)
 	return r
 }
 
-func createRegister(r router.Router) *Register {
+func createRegister(t *testing.T, r router.Router) *Register {
+	t.Helper()
+
 	register := NewRegister(WithRouter(r), WithStatsClient(client.NewNoop()))
 
-	definitions := createProxyDefinitions()
+	definitions := createProxyDefinitions(t)
 	for _, def := range definitions {
-		register.Add(NewRouterDefinition(def))
+		err := register.Add(NewRouterDefinition(def))
+		require.NoError(t, err)
 	}
 
 	return register
