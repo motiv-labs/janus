@@ -13,18 +13,14 @@ services:
       retries: 5
 
   upstreams:
-    image: rodolpheche/wiremock:2.6.0-alpine
+    image: rodolpheche/wiremock:2.27.1-alpine
     ports:
       - '9089:8080'
-    volumes:
-      - ./stubs/upstreams:/home/wiremock/mappings
 
   auth-service:
-    image: rodolpheche/wiremock:2.6.0-alpine
+    image: rodolpheche/wiremock:2.27.1-alpine
     ports:
       - '9088:8080'
-    volumes:
-      - ./stubs/auth-service:/home/wiremock/mappings
 
   jaeger:
     image: jaegertracing/all-in-one
