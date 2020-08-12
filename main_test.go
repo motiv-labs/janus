@@ -68,7 +68,7 @@ func InitializeTestSuite(ctx *godog.TestSuiteContext) {
 		}
 
 		upstreamsPort = defaultUpstreamsPort
-		if dynamicUpstreamsPort, exists := os.LookupEnv("DYNAMIC_UPSTREAMS_MOCK_PORT"); exists {
+		if dynamicUpstreamsPort, exists := os.LookupEnv("DYNAMIC_UPSTREAMS_PORT"); exists {
 			upstreamsPort, err = strconv.Atoi(dynamicUpstreamsPort)
 			if err != nil {
 				panic(err)
