@@ -21,14 +21,14 @@ build:
 	@/bin/sh -c "JANUS_BUILD_ONLY_DEFAULT=$(JANUS_BUILD_ONLY_DEFAULT) PKG_SRC=$(PKG_SRC) VERSION=$(VERSION) ./build/build.sh"
 
 test: lint
-	@echo "$(OK_COLOR)==> Running tests$(NO_COLOR)"
+	@echo "$(OK_COLOR)==> Running unit tests$(NO_COLOR)"
 	@go test -cover ./...
 
-test-integration:
-	@echo "$(OK_COLOR)==> Running tests$(NO_COLOR)"
+test-integration: _mocks
+	@echo "$(OK_COLOR)==> Running integration tests$(NO_COLOR)"
 	@go test -cover -tags=integration ./...
 
-test-features:
+test-features: _mocks
 	@/bin/sh -c "JANUS_BUILD_ONLY_DEFAULT=1 PKG_SRC=$(PKG_SRC) ./build/build.sh"
 	@/bin/sh -c "./build/features.sh"
 
@@ -44,3 +44,6 @@ clean:
 	@echo "$(OK_COLOR)==> Cleaning project$(NO_COLOR)"
 	@go clean
 	@rm -rf bin $GOPATH/bin
+
+_mocks:
+	@/bin/sh -c "./build/mocks.sh"

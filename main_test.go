@@ -15,12 +15,15 @@ import (
 	"github.com/hellofresh/janus/pkg/config"
 )
 
+const defaultUpstreamsPort = 9089
+
 var (
 	apiRepo          api.Repository
 	cfg              *config.Specification
+	cfgChan          chan api.ConfigurationMessage
 	portSecondary    int
 	apiPortSecondary int
-	cfgChan          chan api.ConfigurationMessage
+	upstreamsPort    int
 )
 
 func InitializeTestSuite(ctx *godog.TestSuiteContext) {
@@ -64,6 +67,14 @@ func InitializeTestSuite(ctx *godog.TestSuiteContext) {
 			panic(err)
 		}
 
+		upstreamsPort = defaultUpstreamsPort
+		if dynamicUpstreamsPort, exists := os.LookupEnv("DYNAMIC_UPSTREAMS_MOCK_PORT"); exists {
+			upstreamsPort, err = strconv.Atoi(dynamicUpstreamsPort)
+			if err != nil {
+				panic(err)
+			}
+		}
+
 		cfgChan = make(chan api.ConfigurationMessage, 100)
 		if listener, ok := apiRepo.(api.Listener); ok {
 			listener.Listen(context.Background(), cfgChan)
@@ -72,7 +83,7 @@ func InitializeTestSuite(ctx *godog.TestSuiteContext) {
 }
 
 func InitializeScenario(ctx *godog.ScenarioContext) {
-	bootstrap.RegisterRequestContext(ctx, cfg.Port, cfg.Web.Port, portSecondary, apiPortSecondary, cfg.Web.Credentials)
+	bootstrap.RegisterRequestContext(ctx, cfg.Port, cfg.Web.Port, portSecondary, apiPortSecondary, defaultUpstreamsPort, upstreamsPort, cfg.Web.Credentials)
 	bootstrap.RegisterAPIContext(ctx, apiRepo, cfgChan)
 	bootstrap.RegisterMiscContext(ctx)
 }

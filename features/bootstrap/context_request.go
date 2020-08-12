@@ -23,13 +23,16 @@ const (
 )
 
 // RegisterRequestContext registers godog suite context for handling HTTP-requests related steps
-func RegisterRequestContext(ctx *godog.ScenarioContext, port, apiPort, portSecondary, apiPortSecondary int, adminCred config.Credentials) {
+func RegisterRequestContext(ctx *godog.ScenarioContext, port, apiPort, portSecondary, apiPortSecondary, defaultUpstreamsPort, upstreamsPort int, adminCred config.Credentials) {
 	scenarioCtx := &requestContext{
 		port:             port,
 		apiPort:          apiPort,
 		portSecondary:    portSecondary,
 		apiPortSecondary: apiPortSecondary,
 		adminCred:        adminCred,
+
+		defaultUpstreamsPort: defaultUpstreamsPort,
+		upstreamsPort:        upstreamsPort,
 	}
 
 	scenarioCtx.requestHeaders = make(http.Header)
@@ -58,6 +61,9 @@ type requestContext struct {
 
 	portSecondary    int
 	apiPortSecondary int
+
+	defaultUpstreamsPort int
+	upstreamsPort        int
 
 	adminCred config.Credentials
 
@@ -218,7 +224,11 @@ func (c *requestContext) responseJSONBodyIsAnArrayOfLength(length int) error {
 }
 
 func (c *requestContext) requestJSONPayload(body *messages.PickleStepArgument_PickleDocString) error {
-	c.requestBody = bytes.NewBufferString(body.Content)
+	defaultUpstreamsHost := fmt.Sprintf("/localhost:%d/", c.defaultUpstreamsPort)
+	dynamicUpstreamsHost := fmt.Sprintf("/localhost:%d/", c.upstreamsPort)
+	rq := strings.ReplaceAll(body.GetContent(), defaultUpstreamsHost, dynamicUpstreamsHost)
+
+	c.requestBody = bytes.NewBufferString(rq)
 	return nil
 }
 

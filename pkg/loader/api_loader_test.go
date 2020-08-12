@@ -64,18 +64,20 @@ func TestSuccessfulLoader(t *testing.T) {
 	defer ts.Close()
 
 	for _, tc := range tests {
-		res, err := ts.Do(tc.method, tc.url, tc.headers)
-		require.NoError(t, err)
-		t.Cleanup(func() {
-			err := res.Body.Close()
-			assert.NoError(t, err)
+		t.Run(tc.description, func(t *testing.T) {
+			res, err := ts.Do(tc.method, tc.url, tc.headers)
+			require.NoError(t, err)
+			t.Cleanup(func() {
+				err := res.Body.Close()
+				assert.NoError(t, err)
+			})
+
+			for headerName, headerValue := range tc.expectedHeaders {
+				assert.Equal(t, headerValue, res.Header.Get(headerName))
+			}
+
+			assert.Equal(t, tc.expectedCode, res.StatusCode)
 		})
-
-		for headerName, headerValue := range tc.expectedHeaders {
-			assert.Equal(t, headerValue, res.Header.Get(headerName))
-		}
-
-		assert.Equal(t, tc.expectedCode, res.StatusCode, tc.description)
 	}
 }
 
