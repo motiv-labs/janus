@@ -55,5 +55,5 @@ The following table lists the configurable parameters of the Janus chart and the
 | `ingress.hosts[0].name`             | Hostname to your Janus installation                           | `janus.local`                                            |
 | `ingress.hosts[0].paths[0].port`    | Port to service                                               | `80`                                                     |
 | `ingress.hosts[0].paths[0].path`    | Path within the url structure                                 | `/`                                                      |
-| `resources`                         | CPU/Memory resource requests/limits                           | Memory: `512Mi`, CPU: `300m`                             |
+| `resources`                         | CPU/Memory resource requests/limits                           | Default values of the cluster                            |
 | `affinity`                          | Map of node/pod affinities                                    | `{}`                                                     |
