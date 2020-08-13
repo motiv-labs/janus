@@ -9,7 +9,7 @@ import (
 var configFile string
 
 // NewRootCmd creates a new instance of the root command
-func NewRootCmd() *cobra.Command {
+func NewRootCmd(version string) *cobra.Command {
 	ctx := context.Background()
 
 	cmd := &cobra.Command{
@@ -26,8 +26,8 @@ Complete documentation is available at https://hellofresh.gitbooks.io/janus`,
 	cmd.PersistentFlags().StringVarP(&configFile, "config", "c", "", "Config file (default is $PWD/janus.toml)")
 
 	cmd.AddCommand(NewCheckCmd(ctx))
-	cmd.AddCommand(NewVersionCmd(ctx))
-	cmd.AddCommand(NewServerStartCmd(ctx))
+	cmd.AddCommand(NewVersionCmd(ctx, version))
+	cmd.AddCommand(NewServerStartCmd(ctx, version))
 
 	return cmd
 }

@@ -33,14 +33,14 @@ type ServerStartOptions struct {
 }
 
 // NewServerStartCmd creates a new http server command
-func NewServerStartCmd(ctx context.Context) *cobra.Command {
+func NewServerStartCmd(ctx context.Context, version string) *cobra.Command {
 	opts := &ServerStartOptions{}
 
 	cmd := &cobra.Command{
 		Use:   "start",
 		Short: "Starts a Janus web server",
 		RunE: func(cmd *cobra.Command, args []string) error {
-			return RunServerStart(ctx, opts)
+			return RunServerStart(ctx, opts, version)
 		},
 	}
 
@@ -51,7 +51,7 @@ func NewServerStartCmd(ctx context.Context) *cobra.Command {
 }
 
 // RunServerStart is the run command to start Janus
-func RunServerStart(ctx context.Context, opts *ServerStartOptions) error {
+func RunServerStart(ctx context.Context, opts *ServerStartOptions, version string) error {
 	// all the logging configurations are initialised in initLog() later,
 	// but we try to initialise Writer (STDIN/STDERR/etc.) as early as possible manually
 	// to avoid loosing logs in systems heavily relying on them (e.g. running in docker)
