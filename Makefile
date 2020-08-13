@@ -3,18 +3,13 @@ OK_COLOR=\033[32;01m
 ERROR_COLOR=\033[31;01m
 WARN_COLOR=\033[33;01m
 
-# The import path is the unique absolute name of your repository.
-# All subpackages should always be imported as relative to it.
-# If you change this, run `make clean`.
-PKG_SRC := github.com/hellofresh/janus
+.PHONY: all lint test-unit test-integration test-features build
 
-.PHONY: all clean lint test-unit build
-
-all: clean lint test-unit test-integration test-features lint build
+all: test-unit build
 
 build:
 	@echo "$(OK_COLOR)==> Building... $(NO_COLOR)"
-	@/bin/sh -c "JANUS_BUILD_ONLY_DEFAULT=$(JANUS_BUILD_ONLY_DEFAULT) PKG_SRC=$(PKG_SRC) VERSION=$(VERSION) ./build/build.sh"
+	@/bin/sh -c "JANUS_BUILD_ONLY_DEFAULT=$(JANUS_BUILD_ONLY_DEFAULT) VERSION=$(VERSION) ./build/build.sh"
 
 test-unit:
 	@echo "$(OK_COLOR)==> Running unit tests$(NO_COLOR)"
@@ -25,17 +20,12 @@ test-integration: _mocks
 	@go test -cover -tags=integration -coverprofile=coverage.txt -covermode=atomic ./...
 
 test-features: _mocks
-	@/bin/sh -c "JANUS_BUILD_ONLY_DEFAULT=1 PKG_SRC=$(PKG_SRC) ./build/build.sh"
+	@/bin/sh -c "JANUS_BUILD_ONLY_DEFAULT=1 ./build/build.sh"
 	@/bin/sh -c "./build/features.sh"
 
 lint:
 	@echo "$(OK_COLOR)==> Linting with golangci-lint running in docker container$(NO_COLOR)"
 	@docker run --rm -v $(PWD):/app -w /app golangci/golangci-lint:v1.30.0 golangci-lint run -v
-
-clean:
-	@echo "$(OK_COLOR)==> Cleaning project$(NO_COLOR)"
-	@go clean
-	@rm -rf bin $GOPATH/bin
 
 _mocks:
 	@/bin/sh -c "./build/mocks.sh"
