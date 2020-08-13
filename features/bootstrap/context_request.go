@@ -31,8 +31,10 @@ func RegisterRequestContext(ctx *godog.ScenarioContext, port, apiPort, portSecon
 		apiPortSecondary: apiPortSecondary,
 		adminCred:        adminCred,
 
-		defaultUpstreamsPort: defaultUpstreamsPort,
-		upstreamsPort:        upstreamsPort,
+		defaultUpstreamsHost: fmt.Sprintf("/localhost:%d/", defaultUpstreamsPort),
+		defaultServiceHost:   fmt.Sprintf("/{service}:%d/", defaultUpstreamsPort),
+		dynamicUpstreamsHost: fmt.Sprintf("/localhost:%d/", upstreamsPort),
+		dynamicServiceHost:   fmt.Sprintf("/{service}:%d/", upstreamsPort),
 	}
 
 	scenarioCtx.requestHeaders = make(http.Header)
@@ -62,8 +64,10 @@ type requestContext struct {
 	portSecondary    int
 	apiPortSecondary int
 
-	defaultUpstreamsPort int
-	upstreamsPort        int
+	defaultUpstreamsHost string
+	defaultServiceHost   string
+	dynamicUpstreamsHost string
+	dynamicServiceHost   string
 
 	adminCred config.Credentials
 
@@ -224,9 +228,8 @@ func (c *requestContext) responseJSONBodyIsAnArrayOfLength(length int) error {
 }
 
 func (c *requestContext) requestJSONPayload(body *messages.PickleStepArgument_PickleDocString) error {
-	defaultUpstreamsHost := fmt.Sprintf("/localhost:%d/", c.defaultUpstreamsPort)
-	dynamicUpstreamsHost := fmt.Sprintf("/localhost:%d/", c.upstreamsPort)
-	rq := strings.ReplaceAll(body.GetContent(), defaultUpstreamsHost, dynamicUpstreamsHost)
+	rq := strings.ReplaceAll(body.GetContent(), c.defaultUpstreamsHost, c.dynamicUpstreamsHost)
+	rq = strings.ReplaceAll(rq, c.defaultServiceHost, c.dynamicServiceHost)
 
 	c.requestBody = bytes.NewBufferString(rq)
 	return nil

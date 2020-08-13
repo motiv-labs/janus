@@ -9,8 +9,19 @@ PASS="${OK_COLOR}PASS ${NO_COLOR}"
 FAIL="${ERROR_COLOR}FAIL ${NO_COLOR}"
 
 MONGO_PORT="27017"
-if [[ -n "${DYNAMIC_MONGO_PORT}" ]]; then
+if [ -n "${DYNAMIC_MONGO_PORT}" ]; then
     MONGO_PORT=${DYNAMIC_MONGO_PORT}
+fi
+
+if ! [ -x "$(command -v godog)" ]; then
+    echo "${OK_COLOR}Installing missing godog command:${NO_COLOR}"
+    # We need to be outside of the project root when installing godog
+    # Otherwise we will try to verify dependencies again
+    cd ..
+    GO111MODULE=on go get -u github.com/cucumber/godog/cmd/godog@v0.10.0
+    cd -
+    # add $GOPATH/bin to global path to make command available w/out as path
+    export PATH=${PATH}:`go env GOPATH`/bin
 fi
 
 echo "${OK_COLOR}Running features test:${NO_COLOR}"
