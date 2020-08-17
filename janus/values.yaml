@@ -22,7 +22,7 @@ deployment:
 imagePullSecrets: []
 
 image:
-  repository: quay.io/hellofresh/janus
+  repository: hellofreshtech/janus
   tag: latest
   pullPolicy: Always
 

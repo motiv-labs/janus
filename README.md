@@ -1,4 +1,4 @@
-<p align="center">  
+<p align="center">
   <img height="150" src="./janus-logo.png"  alt="Janus" title="Janus">
 </p>
 
@@ -51,7 +51,7 @@ This API Gateway offers powerful, yet lightweight features that allows fine-grai
 * Rate Limiting, easily rate limit your API users, rate limiting is granular and can be applied on a per-key basis
 * CORS Filter, enable cors for your API, or even for specific endpoints
 * Multiple auth protocols, out of the box, we support JWT, OAuth 2.0 and Basic Auth access methods
-* Small [official](https://quay.io/repository/hellofresh/janus) docker image included
+* Small [official](https://hub.docker.com/repository/docker/hellofreshtech/janus) docker image included
 
 ## Installation
 
@@ -67,7 +67,7 @@ cd examples/front-proxy
 docker-compose up -d
 ```
 
-Now you should be able to get a response from the gateway. 
+Now you should be able to get a response from the gateway.
 
 Try the following command:
 

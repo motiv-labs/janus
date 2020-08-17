@@ -2,7 +2,7 @@ version: '3.3'
 services:
 
   janus:
-    image: quay.io/hellofresh/janus
+    image: hellofreshtech/janus
     ports:
       - "8080:8080"
       - "8081:8081"

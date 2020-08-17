@@ -1,8 +1,9 @@
 # Docker Installation
 
-Details about how to use Janus in Docker can be found on the Quay.io repo hosting the image: [janus](https://quay.io/repository/hellofresh/janus). We also have a some cool examples with [Docker Compose template](https://github.com/hellofresh/janus/blob/master/examples) with built-in orchestration and scalability.
+Official docker image is available in [Docker Hub repository](https://hub.docker.com/repository/docker/hellofreshtech/janus).
+We also have a some cool examples with [Docker Compose template](https://github.com/hellofresh/janus/blob/master/examples) with built-in orchestration and scalability.
 
-Here is a quick example showing how to link a Janus container to a Cassandra or PostgreSQL container:
+Here is a quick example showing how to link a Janus container to a MongoDB container:
 
 1. **Start your database:**
 
@@ -37,7 +38,7 @@ $ docker run -d --name janus \
                 -p 8443:8443 \
                 -p 8081:8081 \
                 -p 8444:8444 \
-                quay.io/hellofresh/janus
+                hellofreshtech/janus
 ```
 
 3. **Janus is running:**

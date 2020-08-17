@@ -31,7 +31,7 @@ The following table lists the configurable parameters of the Janus chart and the
 
 | Parameter                           | Description                                                   | Default                                                  |
 |-------------------------------------|---------------------------------------------------------------|----------------------------------------------------------|
-| `image.repository`                  | Janus Image name                                              | `quay.io/hellofresh/janus`                               |
+| `image.repository`                  | Janus Image name                                              | `hellofreshtech/janus`                               |
 | `image.tag`                         | Janus Image tag                                               | `latest`                                                 |
 | `image.pullPolicy`                  | Janus pull policy                                             | `IfNotPresent`                                           |
 | `image.pullSecrets`                 | Specify docker-registry secret names as an array              | `[]` (does not add image pull secrets to deployed pods)  |
