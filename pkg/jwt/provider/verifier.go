@@ -1,9 +1,8 @@
 package provider
 
 import (
+	"fmt"
 	"net/http"
-
-	"github.com/pkg/errors"
 )
 
 // Verifier contains the methods for verification of providers
@@ -28,7 +27,7 @@ func (vb *VerifierBasket) Verify(r *http.Request, httpClient *http.Client) (bool
 	for _, verifier := range vb.verifiers {
 		verified, err := verifier.Verify(r, httpClient)
 		if err != nil {
-			wrappedErrors = errors.Wrap(err, "verification failed")
+			wrappedErrors = fmt.Errorf("verification failed: %w", err)
 			continue
 		}
 		if verified {

@@ -1,9 +1,9 @@
 package github
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
-
-	"github.com/pkg/errors"
 )
 
 // Team represents a github team within the organization
@@ -30,7 +30,7 @@ func NewTeamVerifier(teams []Team, gitHubClient Client) *TeamVerifier {
 func (v *TeamVerifier) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
 	usersOrgTeams, err := v.gitHubClient.Teams(httpClient)
 	if err != nil {
-		return false, errors.Wrap(err, "failed to get teams")
+		return false, fmt.Errorf("failed to get teams: %w", err)
 	}
 
 	for _, team := range v.teams {

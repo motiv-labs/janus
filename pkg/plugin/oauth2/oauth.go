@@ -1,13 +1,15 @@
 package oauth2
 
 import (
+	"errors"
+	"fmt"
 	"sync"
 
 	"github.com/Knetic/govaluate"
+	"github.com/mitchellh/mapstructure"
+
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/proxy"
-	"github.com/mitchellh/mapstructure"
-	"github.com/pkg/errors"
 )
 
 // AccessRequestType is the type for OAuth param `grant_type`
@@ -103,7 +105,7 @@ func (t TokenStrategy) GetIntrospectionSettings() (*IntrospectionSettings, error
 	var settings *IntrospectionSettings
 	err := mapstructure.Decode(t.Settings, &settings)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not decode introspection settings")
+		return nil, fmt.Errorf("could not decode introspection settings: %w", err)
 	}
 	return settings, nil
 }
@@ -160,12 +162,12 @@ func (r *AccessRule) IsAllowed(claims map[string]interface{}) (bool, error) {
 func (r *AccessRule) parse(claims map[string]interface{}) (bool, error) {
 	expression, err := govaluate.NewEvaluableExpression(r.Predicate)
 	if err != nil {
-		return false, errors.New("Could not create an expression with this predicate")
+		return false, errors.New("could not create an expression with this predicate")
 	}
 
 	result, err := expression.Evaluate(claims)
 	if err != nil {
-		return false, errors.New("Cannot evaluate the expression")
+		return false, errors.New("cannot evaluate the expression")
 	}
 
 	r.mu.Lock()

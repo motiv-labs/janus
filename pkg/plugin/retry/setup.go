@@ -1,13 +1,14 @@
 package retry
 
 import (
+	"errors"
 	"strconv"
 	"time"
 
 	"github.com/asaskevich/govalidator"
+
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
-	"github.com/pkg/errors"
 )
 
 const (

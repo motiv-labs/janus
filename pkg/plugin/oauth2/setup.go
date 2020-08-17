@@ -1,18 +1,19 @@
 package oauth2
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 
 	"github.com/asaskevich/govalidator"
 	"github.com/globalsign/mgo"
+	log "github.com/sirupsen/logrus"
+
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -44,7 +45,7 @@ type Config struct {
 func onAdminAPIStartup(event interface{}) error {
 	e, ok := event.(plugin.OnAdminAPIStartup)
 	if !ok {
-		return errors.New("Could not convert event to admin startup type")
+		return errors.New("could not convert event to admin startup type")
 	}
 
 	adminRouter = e.Router
@@ -54,7 +55,7 @@ func onAdminAPIStartup(event interface{}) error {
 func onReload(event interface{}) error {
 	_, ok := event.(plugin.OnReload)
 	if !ok {
-		return errors.New("Could not convert event to reload type")
+		return errors.New("could not convert event to reload type")
 	}
 
 	loader.LoadDefinitions(repo)
@@ -65,11 +66,11 @@ func onReload(event interface{}) error {
 func onStartup(event interface{}) error {
 	e, ok := event.(plugin.OnStartup)
 	if !ok {
-		return errors.New("Could not convert event to startup type")
+		return errors.New("could not convert event to startup type")
 	}
 
-	config := e.Config.Database
-	dsnURL, err := url.Parse(config.DSN)
+	cfg := e.Config.Database
+	dsnURL, err := url.Parse(cfg.DSN)
 	if err != nil {
 		return err
 	}
@@ -78,7 +79,7 @@ func onStartup(event interface{}) error {
 	case mongodb:
 		repo, err = NewMongoRepository(e.MongoSession)
 		if err != nil {
-			return errors.Wrap(err, "Could not create a mongodb repository for oauth servers")
+			return fmt.Errorf("could not create a mongodb repository for oauth servers: %w", err)
 		}
 
 		session := e.MongoSession.Copy()
@@ -92,18 +93,20 @@ func onStartup(event interface{}) error {
 			Background: true,
 			Sparse:     true,
 		}); err != nil {
-			return errors.Wrap(err, "Failed to create indexes for oauth servers repository")
+			return fmt.Errorf("failed to create indexes for oauth servers repository: %w", err)
 		}
+
 	case file:
 		authPath := fmt.Sprintf("%s/auth", dsnURL.Path)
 		log.WithField("path", authPath).Debug("Trying to load Auth configuration files")
 
 		repo, err = NewFileSystemRepository(authPath)
 		if err != nil {
-			return errors.Wrap(err, "Could not create a file based repository for the oauth servers")
+			return fmt.Errorf("could not create a file based repository for the oauth servers: %w", err)
 		}
+
 	default:
-		return errors.New("The selected scheme is not supported to load OAuth servers")
+		return errors.New("the selected scheme is not supported to load OAuth servers")
 	}
 
 	loadOAuthEndpoints(adminRouter, repo, e.Config.Web.Credentials)
@@ -114,18 +117,18 @@ func onStartup(event interface{}) error {
 }
 
 func setupOAuth2(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
-	var config Config
-	err := plugin.Decode(rawConfig, &config)
+	var cfg Config
+	err := plugin.Decode(rawConfig, &cfg)
 	if err != nil {
 		return err
 	}
 
-	oauthServer, err := repo.FindByName(config.ServerName)
+	oauthServer, err := repo.FindByName(cfg.ServerName)
 	if nil != err {
 		return err
 	}
 
-	manager, err := getManager(oauthServer, config.ServerName)
+	manager, err := getManager(oauthServer, cfg.ServerName)
 	if nil != err {
 		log.WithError(err).Error("OAuth Configuration for this API is incorrect, skipping...")
 		return err
@@ -143,13 +146,13 @@ func setupOAuth2(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
 }
 
 func validateConfig(rawConfig plugin.Config) (bool, error) {
-	var config Config
-	err := plugin.Decode(rawConfig, &config)
+	var cfg Config
+	err := plugin.Decode(rawConfig, &cfg)
 	if err != nil {
 		return false, err
 	}
 
-	return govalidator.ValidateStruct(config)
+	return govalidator.ValidateStruct(cfg)
 }
 
 func getManager(oauthServer *OAuth, oAuthServerName string) (Manager, error) {

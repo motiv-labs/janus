@@ -1,12 +1,12 @@
 package config
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/hellofresh/logging-go"
 	"github.com/kelseyhightower/envconfig"
 	"github.com/mitchellh/go-homedir"
-	"github.com/pkg/errors"
 	"github.com/spf13/viper"
 )
 
@@ -176,7 +176,7 @@ func Load(configFile string) (*Specification, error) {
 	}
 
 	if err := viper.ReadInConfig(); err != nil {
-		return nil, errors.Wrap(err, "No config file found")
+		return nil, fmt.Errorf("config file not found: %w", err)
 	}
 
 	var config Specification

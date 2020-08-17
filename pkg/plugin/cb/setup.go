@@ -1,6 +1,8 @@
 package cb
 
 import (
+	"errors"
+	"fmt"
 	"net/url"
 	"strings"
 
@@ -8,7 +10,6 @@ import (
 	metricCollector "github.com/afex/hystrix-go/hystrix/metric_collector"
 	"github.com/afex/hystrix-go/plugins"
 	"github.com/asaskevich/govalidator"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 
 	"github.com/hellofresh/janus/pkg/plugin"
@@ -77,7 +78,7 @@ func onAdminAPIStartup(event interface{}) error {
 
 	e, ok := event.(plugin.OnAdminAPIStartup)
 	if !ok {
-		return errors.New("Could not convert event to admin startup type")
+		return errors.New("could not convert event to admin startup type")
 	}
 
 	logger.Debug("Registering hystrix stream endpoint")
@@ -96,14 +97,14 @@ func onStartup(event interface{}) error {
 
 	e, ok := event.(plugin.OnStartup)
 	if !ok {
-		return errors.New("Could not convert event to startup type")
+		return errors.New("could not convert event to startup type")
 	}
 
 	logger.WithField("metrics_dsn", e.Config.Stats.DSN).Debug("Statsd metrics enabled")
 
 	dsnURL, err := url.Parse(e.Config.Stats.DSN)
 	if err != nil {
-		return errors.Wrap(err, "could not parse stats dsn")
+		return fmt.Errorf("could not parse stats dsn: %w", err)
 	}
 
 	c, err := plugins.InitializeStatsdCollector(&plugins.StatsdCollectorConfig{
@@ -111,7 +112,7 @@ func onStartup(event interface{}) error {
 		Prefix:     strings.Trim(dsnURL.Path, "/"),
 	})
 	if err != nil {
-		return errors.Wrap(err, "could not initialize statsd client")
+		return fmt.Errorf("could not initialize statsd client: %w", err)
 	}
 
 	metricCollector.Registry.Register(c.NewStatsdCollector)

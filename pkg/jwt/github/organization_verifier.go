@@ -1,9 +1,9 @@
 package github
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
-
-	"github.com/pkg/errors"
 )
 
 // OrganizationVerifier checks if the current user belongs any of the defined organizations
@@ -24,7 +24,7 @@ func NewOrganizationVerifier(organizations []string, gitHubClient Client) *Organ
 func (v *OrganizationVerifier) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
 	orgs, err := v.gitHubClient.Organizations(httpClient)
 	if err != nil {
-		return false, errors.Wrap(err, "failed to get organizations")
+		return false, fmt.Errorf("failed to get organizations: %w", err)
 	}
 
 	for _, name := range orgs {

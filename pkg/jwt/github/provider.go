@@ -1,15 +1,16 @@
 package github
 
 import (
+	"errors"
 	"net/http"
 	"strings"
 	"sync"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/go-github/github"
+
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt/provider"
-	"github.com/pkg/errors"
 )
 
 func init() {
@@ -81,7 +82,7 @@ func (gp *Provider) GetClaims(httpClient *http.Client) (jwt.MapClaims, error) {
 }
 
 func (gp *Provider) teamConfigsToTeam(configTeams map[string]string) []Team {
-	teams := []Team{}
+	var teams []Team
 	for org, team := range configTeams {
 		teams = append(teams, Team{
 			Name:         team,

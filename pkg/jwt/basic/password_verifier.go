@@ -2,9 +2,9 @@ package basic
 
 import (
 	"encoding/json"
+	"errors"
+	"fmt"
 	"net/http"
-
-	"github.com/pkg/errors"
 )
 
 const (
@@ -36,7 +36,7 @@ func NewPasswordVerifier(users []*user) *PasswordVerifier {
 func (v *PasswordVerifier) Verify(r *http.Request, httpClient *http.Client) (bool, error) {
 	currentUser, err := v.getUserFromRequest(r)
 	if err != nil {
-		return false, errors.Wrap(err, "could not get user from request")
+		return false, fmt.Errorf("could not get user from request: %w", err)
 	}
 
 	for _, user := range v.users {
@@ -65,7 +65,7 @@ func (v *PasswordVerifier) getUserFromRequest(r *http.Request) (*user, error) {
 		case contentTypeJSON:
 			err := json.NewDecoder(r.Body).Decode(&u)
 			if err != nil {
-				return u, errors.Wrap(err, "could not parse the json body")
+				return u, fmt.Errorf("could not parse the json body: %w", err)
 			}
 		default:
 			r.ParseForm()

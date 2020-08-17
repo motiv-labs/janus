@@ -1,16 +1,18 @@
 package retry
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/Knetic/govaluate"
 	"github.com/felixge/httpsnoop"
-	janusErr "github.com/hellofresh/janus/pkg/errors"
-	"github.com/hellofresh/janus/pkg/metrics"
-	"github.com/pkg/errors"
 	"github.com/rafaeljesus/retry-go"
 	log "github.com/sirupsen/logrus"
+
+	janusErr "github.com/hellofresh/janus/pkg/errors"
+	"github.com/hellofresh/janus/pkg/metrics"
 )
 
 const (
@@ -51,14 +53,14 @@ func NewRetryMiddleware(cfg Config) func(http.Handler) http.Handler {
 				}
 
 				if result.(bool) {
-					return errors.Errorf("%s %s request failed", r.Method, r.URL)
+					return fmt.Errorf("%s %s request failed", r.Method, r.URL)
 				}
 
 				return nil
 			}, cfg.Attempts, time.Duration(cfg.Backoff)); err != nil {
 				statsClient := metrics.WithContext(r.Context())
 				statsClient.SetHTTPRequestSection(proxySection).TrackRequest(r, nil, false).ResetHTTPRequestSection()
-				janusErr.Handler(w, r, errors.Wrap(err, "request failed too many times"))
+				janusErr.Handler(w, r, fmt.Errorf("request failed too many times: %w", err))
 			}
 		})
 	}

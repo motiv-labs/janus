@@ -2,11 +2,11 @@ package api
 
 import (
 	"context"
+	"fmt"
 	"time"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -27,7 +27,7 @@ func NewMongoAppRepository(dsn string, refreshTime time.Duration) (*MongoReposit
 	log.WithField("dsn", dsn).Debug("Trying to connect to MongoDB...")
 	session, err := mgo.Dial(dsn)
 	if err != nil {
-		return nil, errors.Wrap(err, "could not connect to mongodb")
+		return nil, fmt.Errorf("could not connect to mongodb: %w", err)
 	}
 
 	log.Debug("Connected to MongoDB")
