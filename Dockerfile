@@ -1,20 +1,6 @@
-FROM golang:1.14-alpine AS builder
-
-ARG VERSION='0.0.1-docker'
-ENV VERSION $VERSION
-
-WORKDIR /janus
-
-COPY . ./
-
-RUN apk add --update bash make git
-RUN export JANUS_BUILD_ONLY_DEFAULT=1 make build
-
-# ---
-
 FROM ubuntu:20.04
 
-COPY --from=builder /janus/dist/janus /bin/janus
+ADD janus /bin/janus
 RUN chmod a+x /bin/janus && \
     mkdir -p /etc/janus/apis && \
     mkdir -p /etc/janus/auth
@@ -31,3 +17,6 @@ USER 65534:65534
 
 EXPOSE 8080 8081 8443 8444
 ENTRYPOINT ["/bin/janus", "start"]
+
+# just to have it
+RUN ["/bin/janus", "--version"]

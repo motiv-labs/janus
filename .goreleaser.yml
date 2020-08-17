@@ -1,0 +1,34 @@
+project_name: janus
+
+builds:
+  - id: binary-build
+    main: main.go
+    binary: janus
+    ldflags:
+      - -s -w -X main.version={{.Version}}
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - darwin
+      - windows
+      - freebsd
+      - openbsd
+    goarch:
+      - amd64
+      - arm
+      - arm64
+      - 386
+    ignore:
+      - goos: darwin
+        goarch: 386
+
+dockers:
+  - goos: linux
+    goarch: amd64
+    binaries:
+      - janus
+    image_templates:
+      - "hellofreshtech/janus:latest"
+      - "hellofreshtech/janus:{{.Tag}}"
+    dockerfile: Dockerfile
