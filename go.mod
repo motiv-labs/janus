@@ -1,6 +1,6 @@
 module github.com/hellofresh/janus
 
-go 1.12
+go 1.15
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20180108190415-b31f603f5e1e
