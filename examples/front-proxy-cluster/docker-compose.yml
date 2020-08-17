@@ -2,7 +2,7 @@ version: '3.3'
 services:
 
   janus1:
-    image: quay.io/hellofresh/janus
+    image: hellofreshtech/janus
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -14,7 +14,7 @@ services:
       - ./apis:/etc/janus/apis
 
   janus2:
-    image: quay.io/hellofresh/janus
+    image: hellofreshtech/janus
     ports:
       - "8082:8080"
       - "8083:8081"
@@ -26,7 +26,7 @@ services:
       - ./apis:/etc/janus/apis
 
   janus3:
-    image: quay.io/hellofresh/janus
+    image: hellofreshtech/janus
     ports:
       - "8084:8080"
       - "8085:8081"

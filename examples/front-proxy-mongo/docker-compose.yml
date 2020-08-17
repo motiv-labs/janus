@@ -2,7 +2,7 @@ version: '3'
 services:
 
   janus:
-    image: quay.io/hellofresh/janus
+    image: hellofreshtech/janus
     ports:
       - "8080:8080"
       - "8081:8081"
@@ -16,7 +16,7 @@ services:
       image: mongo
       ports:
         - "27017:27017"
-  
+
   # This container is just a helper to seed the database
   mongo-seed:
     build:
