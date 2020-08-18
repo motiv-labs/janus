@@ -1,17 +1,18 @@
 package proxy
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
 
+	"github.com/hellofresh/stats-go/client"
+	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/plugin/ochttp"
+
 	"github.com/hellofresh/janus/pkg/proxy/balancer"
 	"github.com/hellofresh/janus/pkg/proxy/transport"
 	"github.com/hellofresh/janus/pkg/router"
-	"github.com/hellofresh/stats-go/client"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
-	"go.opencensus.io/plugin/ochttp"
 )
 
 const (
@@ -54,9 +55,8 @@ func (p *Register) Add(definition *RouterDefinition) error {
 	log.WithField("balancing_alg", definition.Upstreams.Balancing).Debug("Using a load balancing algorithm")
 	balancerInstance, err := balancer.New(definition.Upstreams.Balancing)
 	if err != nil {
-		msg := "Could not create a balancer"
-		log.WithError(err).Error(msg)
-		return errors.Wrap(err, msg)
+		log.WithError(err).Error("Could not create a balancer")
+		return fmt.Errorf("could not create a balancer: %w", err)
 	}
 
 	handler := NewBalancedReverseProxy(definition.Definition, balancerInstance, p.statsClient)

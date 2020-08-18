@@ -7,10 +7,10 @@ import (
 	"net/http"
 	"net/url"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/proxy/balancer"
-	"github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 type oAuthResponse struct {
@@ -27,12 +27,12 @@ type IntrospectionManager struct {
 
 // NewIntrospectionManager creates a new instance of Introspection
 func NewIntrospectionManager(def *proxy.Definition, settings *IntrospectionSettings) (*IntrospectionManager, error) {
-	balancer, err := balancer.New(def.Upstreams.Balancing)
+	bb, err := balancer.New(def.Upstreams.Balancing)
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not create a balancer")
+		return nil, fmt.Errorf("could not create a bb: %w", err)
 	}
 
-	return &IntrospectionManager{balancer, def.Upstreams.Targets, settings}, nil
+	return &IntrospectionManager{bb, def.Upstreams.Targets, settings}, nil
 }
 
 // IsKeyAuthorized checks if the access token is valid
@@ -63,7 +63,7 @@ func (o *IntrospectionManager) IsKeyAuthorized(ctx context.Context, accessToken 
 func (o *IntrospectionManager) doStatusRequest(accessToken string) (*http.Response, error) {
 	upstream, err := o.balancer.Elect(o.urls.ToBalancerTargets())
 	if err != nil {
-		return nil, errors.Wrap(err, "Could not elect one upstream")
+		return nil, fmt.Errorf("could not elect one upstream: %w", err)
 	}
 
 	req, err := http.NewRequest(http.MethodGet, upstream.Target, nil)

@@ -11,10 +11,10 @@ import (
 	"net/http"
 	"runtime/debug"
 
+	log "github.com/sirupsen/logrus"
+
 	"github.com/hellofresh/janus/pkg/observability"
 	"github.com/hellofresh/janus/pkg/render"
-	baseErrors "github.com/pkg/errors"
-	log "github.com/sirupsen/logrus"
 )
 
 var (
@@ -73,11 +73,4 @@ func Handler(w http.ResponseWriter, r *http.Request, err interface{}) {
 		}).Error("Internal server error handled")
 		render.JSON(w, http.StatusInternalServerError, err)
 	}
-}
-
-// Wrap returns an error annotating err with a stack trace
-// at the point Wrap is called, and the supplied message.
-// If err is nil, Wrap returns nil.
-func Wrap(err error, message string) error {
-	return baseErrors.Wrap(err, message)
 }

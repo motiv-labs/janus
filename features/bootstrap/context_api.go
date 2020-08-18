@@ -1,11 +1,11 @@
 package bootstrap
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/cucumber/godog"
 	"github.com/cucumber/messages-go/v10"
-	"github.com/pkg/errors"
 
 	"github.com/hellofresh/janus/pkg/api"
 )
@@ -25,7 +25,7 @@ type apiContext struct {
 func (c *apiContext) clearAPI(*messages.Pickle) {
 	data, err := c.apiRepo.FindAll()
 	if err != nil {
-		panic(errors.Wrap(err, "Failed to get all registered route specs"))
+		panic(fmt.Errorf("failed to get all registered route specs: %w", err))
 	}
 
 	for _, definition := range data {

@@ -1,6 +1,6 @@
 module github.com/hellofresh/janus
 
-go 1.12
+go 1.15
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20180108190415-b31f603f5e1e
@@ -36,7 +36,7 @@ require (
 	github.com/onsi/ginkgo v1.9.0 // indirect
 	github.com/onsi/gomega v1.6.0 // indirect
 	github.com/pelletier/go-toml v1.1.0 // indirect
-	github.com/pkg/errors v0.8.0
+	github.com/pkg/errors v0.8.0 // indirect
 	github.com/prometheus/client_golang v0.9.1 // indirect
 	github.com/prometheus/common v0.0.0-20181109100915-0b1957f9d949 // indirect
 	github.com/prometheus/procfs v0.0.0-20181005140218-185b4288413d // indirect

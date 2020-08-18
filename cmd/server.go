@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/hellofresh/janus/pkg/api"
-	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/server"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -70,7 +70,7 @@ func RunServerStart(ctx context.Context, opts *ServerStartOptions, version strin
 
 	repo, err := api.BuildRepository(globalConfig.Database.DSN, globalConfig.Cluster.UpdateFrequency)
 	if err != nil {
-		return errors.Wrap(err, "could not build a repository for the database")
+		return fmt.Errorf("could not build a repository for the database: %w", err)
 	}
 	defer repo.Close()
 

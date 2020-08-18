@@ -1,14 +1,16 @@
 package cb
 
 import (
+	"errors"
+	"fmt"
 	"net/http"
 
 	"github.com/Knetic/govaluate"
 	"github.com/afex/hystrix-go/hystrix"
 	"github.com/felixge/httpsnoop"
-	janusErr "github.com/hellofresh/janus/pkg/errors"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+
+	janusErr "github.com/hellofresh/janus/pkg/errors"
 )
 
 const (
@@ -50,7 +52,7 @@ func NewCBMiddleware(cfg Config) func(http.Handler) http.Handler {
 				}
 
 				if result.(bool) {
-					return errors.Errorf("%s %s request failed", r.Method, r.URL)
+					return fmt.Errorf("%s %s request failed", r.Method, r.URL)
 				}
 
 				return nil
@@ -58,7 +60,7 @@ func NewCBMiddleware(cfg Config) func(http.Handler) http.Handler {
 
 			if err != nil {
 				logger.WithError(err).Error("Request failed on the cb middleware")
-				janusErr.Handler(w, r, errors.Wrap(err, "request failed"))
+				janusErr.Handler(w, r, fmt.Errorf("request failed: %w", err))
 			}
 		})
 	}

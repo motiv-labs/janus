@@ -8,6 +8,10 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
+	"github.com/hellofresh/stats-go/client"
+	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/plugin/ochttp/propagation/b3"
+
 	"github.com/hellofresh/janus/pkg/api"
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/errors"
@@ -17,9 +21,6 @@ import (
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/janus/pkg/web"
-	"github.com/hellofresh/stats-go/client"
-	log "github.com/sirupsen/logrus"
-	"go.opencensus.io/plugin/ochttp/propagation/b3"
 )
 
 // Server is the Janus server
@@ -96,7 +97,7 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 
 	definitions, err := s.provider.FindAll()
 	if err != nil {
-		return errors.Wrap(err, "could not find all configurations from the provider")
+		return fmt.Errorf("could not find all configurations from the provider: %w", err)
 	}
 
 	s.currentConfigurations = &api.Configuration{Definitions: definitions}
@@ -179,7 +180,7 @@ func (s *Server) startProvider(ctx context.Context) error {
 	)
 
 	if err := s.webServer.Start(); err != nil {
-		return errors.Wrap(err, "could not start Janus web API")
+		return fmt.Errorf("could not start Janus web API: %w", err)
 	}
 
 	// We're listening to the configuration changes in any case, even if provider does not implement Listener,
@@ -252,7 +253,7 @@ func (s *Server) listenAndServe(handler http.Handler) error {
 	}
 	listener, err := net.Listen("tcp", address)
 	if err != nil {
-		return errors.Wrap(err, "error opening listener")
+		return fmt.Errorf("error opening listener: %w", err)
 	}
 
 	if s.globalConfig.TLS.IsHTTPS() {

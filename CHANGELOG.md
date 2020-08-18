@@ -1,6 +1,7 @@
 # Unreleased
 
 - Official docker image moved to [Docker Hub](https://hub.docker.com/repository/docker/hellofreshtech/janus) and can be pulled with `docker pull hellofreshtech/janus`
+- Test and release flow uses the latest stable Go version
 
 --
 

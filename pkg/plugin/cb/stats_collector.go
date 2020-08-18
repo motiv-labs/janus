@@ -1,11 +1,12 @@
 package cb
 
 import (
+	"errors"
+
 	metricCollector "github.com/afex/hystrix-go/hystrix/metric_collector"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
 	"github.com/hellofresh/stats-go/timer"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 

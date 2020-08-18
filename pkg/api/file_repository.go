@@ -3,12 +3,12 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"path/filepath"
 	"strings"
 
 	"github.com/fsnotify/fsnotify"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -35,7 +35,7 @@ func NewFileSystemRepository(dir string) (*FileSystemRepository, error) {
 
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return nil, errors.Wrap(err, "failed to create a file system watcher")
+		return nil, fmt.Errorf("failed to create a file system watcher: %w", err)
 	}
 
 	repo.watcher = watcher

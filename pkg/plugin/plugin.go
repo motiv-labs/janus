@@ -2,11 +2,11 @@ package plugin
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"sync"
 
 	"github.com/hellofresh/janus/pkg/proxy"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
 
@@ -55,7 +55,7 @@ func RegisterPlugin(name string, plugin Plugin) error {
 		return errors.New("plugin must have a name")
 	}
 	if _, dup := plugins[name]; dup {
-		return fmt.Errorf("plugin named %s  already registered", name)
+		return fmt.Errorf("plugin named %q already registered", name)
 	}
 	plugins[name] = plugin
 	return nil
@@ -92,7 +92,7 @@ func EmitEvent(name string, event interface{}) error {
 
 	hooks, found := eventHooks[name]
 	if !found {
-		return errors.New("Plugin not found")
+		return fmt.Errorf("plugin for event %q not found", name)
 	}
 
 	for _, hook := range hooks {

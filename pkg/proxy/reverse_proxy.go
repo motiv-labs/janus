@@ -9,15 +9,15 @@ import (
 	"strings"
 
 	"github.com/go-chi/chi"
-	"github.com/hellofresh/janus/pkg/observability"
-	"github.com/hellofresh/janus/pkg/proxy/balancer"
-	"github.com/hellofresh/janus/pkg/router"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
-	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"go.opencensus.io/tag"
 	"go.opencensus.io/trace"
+
+	"github.com/hellofresh/janus/pkg/observability"
+	"github.com/hellofresh/janus/pkg/proxy/balancer"
+	"github.com/hellofresh/janus/pkg/router"
 )
 
 const (
@@ -146,7 +146,7 @@ func applyParameters(req *http.Request, path string, paramNames []string) (strin
 		paramValue := chi.URLParam(req, paramName)
 
 		if len(paramValue) == 0 {
-			return "", errors.Errorf("unable to extract {%s} from request", paramName)
+			return "", fmt.Errorf("unable to extract {%s} from request", paramName)
 		}
 
 		path = strings.Replace(
