@@ -34,3 +34,10 @@ dockers:
       - "hellofreshtech/janus:latest"
       - "hellofreshtech/janus:{{.Tag}}"
     dockerfile: Dockerfile
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - Merge pull request
+      - Merge branch
