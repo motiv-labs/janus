@@ -1,13 +1,14 @@
 package oauth2
 
 import (
-	"github.com/hellofresh/janus/pkg/proxy"
-	"github.com/hellofresh/janus/pkg/router"
 	"github.com/rs/cors"
 	log "github.com/sirupsen/logrus"
-	"github.com/ulule/limiter"
-	"github.com/ulule/limiter/drivers/middleware/stdlib"
-	storeMemory "github.com/ulule/limiter/drivers/store/memory"
+	"github.com/ulule/limiter/v3"
+	"github.com/ulule/limiter/v3/drivers/middleware/stdlib"
+	storeMemory "github.com/ulule/limiter/v3/drivers/store/memory"
+
+	"github.com/hellofresh/janus/pkg/proxy"
+	"github.com/hellofresh/janus/pkg/router"
 )
 
 // OAuthLoader handles the loading of the api specs
