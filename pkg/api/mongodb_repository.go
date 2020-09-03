@@ -5,42 +5,65 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
 	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
+	"go.mongodb.org/mongo-driver/x/mongo/driver/connstring"
 )
 
 const (
 	collectionName = "api_specs"
+
+	mongoConnTimeout  = 10 * time.Second
+	mongoQueryTimeout = 10 * time.Second
 )
 
 // MongoRepository represents a mongodb repository
 type MongoRepository struct {
-	// TODO: we need to expose this so the plugins can use the same session. We should abstract the session and provide
+	// TODO: we need to expose this so the plugins can use the same session. We should abstract mongo DB and provide
 	// the plugins with a simple interface to search, insert, update and remove data from whatever backend implementation
-	Session     *mgo.Session
+	DB          *mongo.Database
+	collection  *mongo.Collection
+	client      *mongo.Client
 	refreshTime time.Duration
 }
 
 // NewMongoAppRepository creates a mongo API definition repo
 func NewMongoAppRepository(dsn string, refreshTime time.Duration) (*MongoRepository, error) {
 	log.WithField("dsn", dsn).Debug("Trying to connect to MongoDB...")
-	session, err := mgo.Dial(dsn)
+
+	ctx, cancel := context.WithTimeout(context.Background(), mongoConnTimeout)
+	defer cancel()
+
+	connString, err := connstring.Parse(dsn)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse mongodb connection string: %w", err)
+	}
+
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(dsn))
 	if err != nil {
 		return nil, fmt.Errorf("could not connect to mongodb: %w", err)
 	}
 
-	log.Debug("Connected to MongoDB")
-	session.SetMode(mgo.Monotonic, true)
+	if err := client.Ping(ctx, readpref.Primary()); err != nil {
+		return nil, fmt.Errorf("could not ping mongodb after connect: %w", err)
+	}
 
-	return &MongoRepository{Session: session, refreshTime: refreshTime}, nil
+	mongoDB := client.Database(connString.Database)
+	return &MongoRepository{
+		DB:          mongoDB,
+		client:      client,
+		collection:  mongoDB.Collection(collectionName),
+		refreshTime: refreshTime,
+	}, nil
 }
 
-// Close terminates the session.  It's a runtime error to use a session
+// Close terminates underlying mongo connection. It's a runtime error to use a session
 // after it has been closed.
 func (r *MongoRepository) Close() error {
-	r.Session.Close()
-	return nil
+	return r.client.Disconnect(context.TODO())
 }
 
 // Listen watches for changes on the configuration
@@ -102,31 +125,46 @@ func (r *MongoRepository) Watch(ctx context.Context, cfgChan chan<- Configuratio
 // FindAll fetches all the API definitions available
 func (r *MongoRepository) FindAll() ([]*Definition, error) {
 	var result []*Definition
-	session, coll := r.getSession()
-	defer session.Close()
+
+	ctx, cancel := context.WithTimeout(context.Background(), mongoQueryTimeout)
+	defer cancel()
 
 	// sort by name to have the same order all the time - for easier comparison
-	err := coll.Find(nil).Sort("name").All(&result)
+	cur, err := r.collection.Find(ctx, bson.M{}, options.Find().SetSort(bson.D{{Key: "name", Value: 1}}))
 	if err != nil {
 		return nil, err
 	}
+	defer cur.Close(ctx)
 
-	return result, nil
+	for cur.Next(ctx) {
+		d := new(Definition)
+		if err := cur.Decode(d); err != nil {
+			return nil, err
+		}
+
+		result = append(result, d)
+	}
+
+	return result, cur.Err()
 }
 
 // Add adds an API definition to the repository
 func (r *MongoRepository) add(definition *Definition) error {
-	session, coll := r.getSession()
-	defer session.Close()
-
 	isValid, err := definition.Validate()
 	if false == isValid && err != nil {
 		log.WithError(err).Error("Validation errors")
 		return err
 	}
 
-	_, err = coll.Upsert(bson.M{"name": definition.Name}, definition)
-	if err != nil {
+	ctx, cancel := context.WithTimeout(context.Background(), mongoQueryTimeout)
+	defer cancel()
+
+	if err := r.collection.FindOneAndUpdate(
+		ctx,
+		bson.M{"name": definition.Name},
+		bson.M{"$set": definition},
+		options.FindOneAndUpdate().SetUpsert(true),
+	).Err(); err != nil {
 		log.WithField("name", definition.Name).Error("There was an error adding the resource")
 		return err
 	}
@@ -137,25 +175,19 @@ func (r *MongoRepository) add(definition *Definition) error {
 
 // Remove removes an API definition from the repository
 func (r *MongoRepository) remove(name string) error {
-	session, coll := r.getSession()
-	defer session.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), mongoQueryTimeout)
+	defer cancel()
 
-	err := coll.Remove(bson.M{"name": name})
+	res, err := r.collection.DeleteOne(ctx, bson.M{"name": name})
 	if err != nil {
-		if err == mgo.ErrNotFound {
-			return ErrAPIDefinitionNotFound
-		}
 		log.WithField("name", name).Error("There was an error removing the resource")
 		return err
 	}
 
+	if res.DeletedCount < 1 {
+		return ErrAPIDefinitionNotFound
+	}
+
 	log.WithField("name", name).Debug("Resource removed")
 	return nil
-}
-
-func (r *MongoRepository) getSession() (*mgo.Session, *mgo.Collection) {
-	session := r.Session.Copy()
-	coll := session.DB("").C(collectionName)
-
-	return session, coll
 }

@@ -3,12 +3,11 @@ package basic
 import (
 	"testing"
 
-	"github.com/globalsign/mgo"
+	"github.com/stretchr/testify/require"
 
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 	"github.com/hellofresh/janus/pkg/router"
-	"github.com/stretchr/testify/require"
 )
 
 func TestSetup(t *testing.T) {
@@ -18,7 +17,7 @@ func TestSetup(t *testing.T) {
 	err := onAdminAPIStartup(event1)
 	require.NoError(t, err)
 
-	event2 := plugin.OnStartup{Register: proxy.NewRegister(proxy.WithRouter(router.NewChiRouter())), MongoSession: &mgo.Session{}}
+	event2 := plugin.OnStartup{Register: proxy.NewRegister(proxy.WithRouter(router.NewChiRouter()))}
 	err = onStartup(event2)
 	require.NoError(t, err)
 
