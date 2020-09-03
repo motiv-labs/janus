@@ -5,15 +5,16 @@ import (
 	"time"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/go-redis/redis"
+	"github.com/go-redis/redis/v7"
+	"github.com/hellofresh/stats-go/client"
+	"github.com/ulule/limiter/v3"
+	"github.com/ulule/limiter/v3/drivers/middleware/stdlib"
+	storeMemory "github.com/ulule/limiter/v3/drivers/store/memory"
+	storeRedis "github.com/ulule/limiter/v3/drivers/store/redis"
+
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
-	"github.com/hellofresh/stats-go/client"
-	"github.com/ulule/limiter"
-	"github.com/ulule/limiter/drivers/middleware/stdlib"
-	storeMemory "github.com/ulule/limiter/drivers/store/memory"
-	storeRedis "github.com/ulule/limiter/drivers/store/redis"
 )
 
 var (
@@ -85,9 +86,9 @@ func setupRateLimit(def *proxy.RouterDefinition, rawConfig plugin.Config) error 
 		return err
 	}
 
-	limiterInstance := limiter.New(limiterStore, rate)
+	limiterInstance := limiter.New(limiterStore, rate, limiter.WithTrustForwardHeader(config.TrustForwardHeaders))
 	def.AddMiddleware(NewRateLimitLogger(limiterInstance, statsClient, config.TrustForwardHeaders))
-	def.AddMiddleware(stdlib.NewMiddleware(limiterInstance, stdlib.WithForwardHeader(config.TrustForwardHeaders)).Handler)
+	def.AddMiddleware(stdlib.NewMiddleware(limiterInstance).Handler)
 
 	return nil
 }

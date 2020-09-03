@@ -9,7 +9,7 @@ import (
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
 	log "github.com/sirupsen/logrus"
-	"github.com/ulule/limiter"
+	"github.com/ulule/limiter/v3"
 )
 
 const (
@@ -25,7 +25,7 @@ func NewRateLimitLogger(lmt *limiter.Limiter, statsClient client.Client, trustFo
 
 			m := httpsnoop.CaptureMetrics(handler, w, r)
 
-			limiterIP := limiter.GetIP(r, trustForwardHeaders)
+			limiterIP := limiter.GetIP(r, limiter.Options{TrustForwardHeader: trustForwardHeaders})
 			if m.Code == http.StatusTooManyRequests {
 				log.WithFields(log.Fields{
 					"ip_address":  limiterIP.String(),
@@ -39,20 +39,21 @@ func NewRateLimitLogger(lmt *limiter.Limiter, statsClient client.Client, trustFo
 }
 
 func trackLimitState(lmt *limiter.Limiter, statsClient client.Client, limiterIP net.IP, r *http.Request) {
-	context, err := lmt.Peek(context.Background(), limiterIP.String())
+	ctx, err := lmt.Peek(context.Background(), limiterIP.String())
 	if err != nil {
 		log.WithError(err).WithFields(log.Fields{
 			"ip_address":  limiterIP.String(),
 			"request_uri": r.RequestURI,
-		}).Error("Failed to get limiter context from request")
-	} else {
-		requestsPerformed := context.Limit - context.Remaining
-		limitState := requestsPerformed * 100 / context.Limit
-
-		operation := bucket.BuildHTTPRequestMetricOperation(r, statsClient.GetHTTPMetricCallback())
-		// replace request method with fixed section name
-		operation[0] = limiterMetric
-
-		statsClient.TrackState(limiterSection, operation, int(limitState))
+		}).Error("Failed to get limiter ctx from request")
+		return
 	}
+
+	requestsPerformed := ctx.Limit - ctx.Remaining
+	limitState := requestsPerformed * 100 / ctx.Limit
+
+	operation := bucket.BuildHTTPRequestMetricOperation(r, statsClient.GetHTTPMetricCallback())
+	// replace request method with fixed section name
+	operation[0] = limiterMetric
+
+	statsClient.TrackState(limiterSection, operation, int(limitState))
 }

@@ -18,7 +18,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.7
 	github.com/globalsign/mgo v0.0.0-20180615134936-113d3961e731
 	github.com/go-chi/chi v3.3.2+incompatible
-	github.com/go-redis/redis v6.12.0+incompatible
+	github.com/go-redis/redis/v7 v7.4.0
 	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135 // indirect
@@ -47,7 +47,7 @@ require (
 	github.com/stretchr/testify v1.6.1
 	github.com/tidwall/gjson v1.1.0
 	github.com/tidwall/match v1.0.0 // indirect
-	github.com/ulule/limiter v2.2.2+incompatible
+	github.com/ulule/limiter/v3 v3.5.0
 	go.opencensus.io v0.18.0
 	golang.org/x/net v0.0.0-20200226121028-0de0cce0169b
 	golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be
