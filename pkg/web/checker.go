@@ -7,15 +7,15 @@ import (
 	"time"
 
 	"github.com/go-chi/chi"
-	"github.com/hellofresh/health-go"
+	"github.com/hellofresh/health-go/v3"
 	"github.com/hellofresh/janus/pkg/api"
 	log "github.com/sirupsen/logrus"
 )
 
 // NewOverviewHandler creates instance of all status checks handler
-func NewOverviewHandler(cfgs *api.Configuration) func(w http.ResponseWriter, r *http.Request) {
+func NewOverviewHandler(cfg *api.Configuration) func(w http.ResponseWriter, r *http.Request) {
 	return func(w http.ResponseWriter, r *http.Request) {
-		defs := findValidAPIHealthChecks(cfgs.Definitions)
+		defs := findValidAPIHealthChecks(cfg.Definitions)
 
 		log.WithField("len", len(defs)).Debug("Loading health check endpoints")
 		health.Reset()
