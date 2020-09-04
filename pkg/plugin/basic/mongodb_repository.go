@@ -1,13 +1,19 @@
 package basic
 
 import (
-	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
+	"context"
+	"time"
+
 	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
 	collectionName string = "basic_auth"
+
+	mongoQueryTimeout = 10 * time.Second
 )
 
 // User represents an user
@@ -26,26 +32,37 @@ type Repository interface {
 
 // MongoRepository represents a mongodb repository
 type MongoRepository struct {
-	session *mgo.Session
+	collection *mongo.Collection
 }
 
 // NewMongoRepository creates a mongo API definition repo
-func NewMongoRepository(session *mgo.Session) (*MongoRepository, error) {
-	return &MongoRepository{session}, nil
+func NewMongoRepository(db *mongo.Database) (*MongoRepository, error) {
+	return &MongoRepository{db.Collection(collectionName)}, nil
 }
 
 // FindAll fetches all the API definitions available
 func (r *MongoRepository) FindAll() ([]*User, error) {
 	var result []*User
-	session, coll := r.getSession()
-	defer session.Close()
 
-	err := coll.Find(nil).Sort("username").All(&result)
+	ctx, cancel := context.WithTimeout(context.Background(), mongoQueryTimeout)
+	defer cancel()
+
+	cur, err := r.collection.Find(ctx, bson.M{}, options.Find().SetSort(bson.D{{Key: "username", Value: 1}}))
 	if err != nil {
 		return nil, err
 	}
+	defer cur.Close(ctx)
 
-	return result, nil
+	for cur.Next(ctx) {
+		u := new(User)
+		if err := cur.Decode(u); err != nil {
+			return nil, err
+		}
+
+		result = append(result, u)
+	}
+
+	return result, cur.Err()
 }
 
 // FindByUsername find an user by username
@@ -55,27 +72,29 @@ func (r *MongoRepository) FindByUsername(username string) (*User, error) {
 
 func (r *MongoRepository) findOneByQuery(query interface{}) (*User, error) {
 	var result User
-	session, coll := r.getSession()
-	defer session.Close()
 
-	err := coll.Find(query).One(&result)
-	if err != nil {
-		if err == mgo.ErrNotFound {
-			return nil, ErrUserNotFound
-		}
-		return nil, err
+	ctx, cancel := context.WithTimeout(context.Background(), mongoQueryTimeout)
+	defer cancel()
+
+	err := r.collection.FindOne(ctx, query).Decode(&result)
+	if err == mongo.ErrNoDocuments {
+		return nil, ErrUserNotFound
 	}
 
-	return &result, nil
+	return &result, err
 }
 
 // Add adds an user to the repository
 func (r *MongoRepository) Add(user *User) error {
-	session, coll := r.getSession()
-	defer session.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), mongoQueryTimeout)
+	defer cancel()
 
-	_, err := coll.Upsert(bson.M{"username": user.Username}, user)
-	if err != nil {
+	if err := r.collection.FindOneAndUpdate(
+		ctx,
+		bson.M{"username": user.Username},
+		bson.M{"$set": user},
+		options.FindOneAndUpdate().SetUpsert(true),
+	).Err(); err != nil {
 		log.WithField("username", user.Username).Error("There was an error adding the user")
 		return err
 	}
@@ -86,25 +105,19 @@ func (r *MongoRepository) Add(user *User) error {
 
 // Remove an user from the repository
 func (r *MongoRepository) Remove(username string) error {
-	session, coll := r.getSession()
-	defer session.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), mongoQueryTimeout)
+	defer cancel()
 
-	err := coll.Remove(bson.M{"username": username})
+	res, err := r.collection.DeleteOne(ctx, bson.M{"username": username})
 	if err != nil {
-		if err == mgo.ErrNotFound {
-			return ErrUserNotFound
-		}
 		log.WithField("username", username).Error("There was an error removing the user")
 		return err
 	}
 
+	if res.DeletedCount < 1 {
+		return ErrUserNotFound
+	}
+
 	log.WithField("username", username).Debug("User removed")
 	return nil
-}
-
-func (r *MongoRepository) getSession() (*mgo.Session, *mgo.Collection) {
-	session := r.session.Copy()
-	coll := session.DB("").C(collectionName)
-
-	return session, coll
 }

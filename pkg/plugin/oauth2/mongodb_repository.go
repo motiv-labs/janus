@@ -1,14 +1,20 @@
 package oauth2
 
 import (
+	"context"
+	"time"
+
 	"github.com/asaskevich/govalidator"
-	"github.com/globalsign/mgo"
-	"github.com/globalsign/mgo/bson"
 	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const (
 	collectionName = "oauth_servers"
+
+	mongoQueryTimeout = 10 * time.Second
 )
 
 // Repository defines the behavior of a OAuth Server repo
@@ -22,62 +28,70 @@ type Repository interface {
 
 // MongoRepository represents a mongodb repository
 type MongoRepository struct {
-	session *mgo.Session
+	collection *mongo.Collection
 }
 
 // NewMongoRepository creates a mongodb OAuth Server repo
-func NewMongoRepository(session *mgo.Session) (*MongoRepository, error) {
-	return &MongoRepository{session}, nil
+func NewMongoRepository(db *mongo.Database) (*MongoRepository, error) {
+	return &MongoRepository{db.Collection(collectionName)}, nil
 }
 
 // FindAll fetches all the OAuth Servers available
 func (r *MongoRepository) FindAll() ([]*OAuth, error) {
-	session, coll := r.getSession()
-	defer session.Close()
+	var result []*OAuth
 
-	result := []*OAuth{}
-	err := coll.Find(nil).All(&result)
+	ctx, cancel := context.WithTimeout(context.Background(), mongoQueryTimeout)
+	defer cancel()
+
+	cur, err := r.collection.Find(ctx, bson.M{}, options.Find().SetSort(bson.D{{Key: "name", Value: 1}}))
 	if err != nil {
-		return result, err
+		return nil, err
+	}
+	defer cur.Close(ctx)
+
+	for cur.Next(ctx) {
+		o := new(OAuth)
+		if err := cur.Decode(o); err != nil {
+			return nil, err
+		}
+
+		result = append(result, o)
 	}
 
-	return result, nil
+	return result, cur.Err()
 }
 
 // FindByName find an OAuth Server by name
 func (r *MongoRepository) FindByName(name string) (*OAuth, error) {
-	session, coll := r.getSession()
-	defer session.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), mongoQueryTimeout)
+	defer cancel()
 
 	result := NewOAuth()
-	if err := coll.Find(bson.M{"name": name}).One(result); err != nil {
-		if err == mgo.ErrNotFound {
-			return nil, ErrOauthServerNotFound
-		}
-		return nil, err
+	err := r.collection.FindOne(ctx, bson.M{"name": name}).Decode(result)
+	if err == mongo.ErrNoDocuments {
+		return nil, ErrOauthServerNotFound
 	}
 
-	return result, nil
+	return result, err
 }
 
 // Add add a new OAuth Server to the repository
 func (r *MongoRepository) Add(oauth *OAuth) error {
-	session, coll := r.getSession()
-	defer session.Close()
-
 	isValid, err := govalidator.ValidateStruct(oauth)
 	if !isValid && err != nil {
 		log.WithField("errors", err.Error()).Error("Validation errors")
 		return err
 	}
 
-	if err = coll.Insert(oauth); err != nil {
-		log.WithField("name", oauth.Name).
-			WithError(err).
-			Error("There was an error persisting the resource")
-		if mgo.IsDup(err) {
+	ctx, cancel := context.WithTimeout(context.Background(), mongoQueryTimeout)
+	defer cancel()
+
+	_, err = r.collection.InsertOne(ctx, oauth)
+	if err != nil {
+		if isDuplicateKeyError(err) {
 			return ErrOauthServerNameExists
 		}
+		log.WithField("name", oauth.Name).WithError(err).Error("There was an error persisting the resource")
 		return err
 	}
 
@@ -87,20 +101,22 @@ func (r *MongoRepository) Add(oauth *OAuth) error {
 
 // Save saves OAuth Server to the repository
 func (r *MongoRepository) Save(oauth *OAuth) error {
-	session, coll := r.getSession()
-	defer session.Close()
-
 	isValid, err := govalidator.ValidateStruct(oauth)
 	if !isValid && err != nil {
 		log.WithField("errors", err.Error()).Error("Validation errors")
 		return err
 	}
 
-	_, err = coll.Upsert(bson.M{"name": oauth.Name}, oauth)
-	if err != nil {
-		log.WithField("name", oauth.Name).
-			WithError(err).
-			Error("There was an error adding the resource")
+	ctx, cancel := context.WithTimeout(context.Background(), mongoQueryTimeout)
+	defer cancel()
+
+	if err := r.collection.FindOneAndUpdate(
+		ctx,
+		bson.M{"name": oauth.Name},
+		bson.M{"$set": oauth},
+		options.FindOneAndUpdate().SetUpsert(true),
+	).Err(); err != nil {
+		log.WithField("name", oauth.Name).WithError(err).Error("There was an error adding the resource")
 		return err
 	}
 
@@ -110,13 +126,12 @@ func (r *MongoRepository) Save(oauth *OAuth) error {
 
 // Remove removes an OAuth Server from the repository
 func (r *MongoRepository) Remove(name string) error {
-	session, coll := r.getSession()
-	defer session.Close()
+	ctx, cancel := context.WithTimeout(context.Background(), mongoQueryTimeout)
+	defer cancel()
 
-	if err := coll.Remove(bson.M{"name": name}); err != nil {
-		log.WithField("name", name).
-			WithError(err).
-			Error("There was an error removing the resource")
+	_, err := r.collection.DeleteOne(ctx, bson.M{"name": name})
+	if err != nil {
+		log.WithField("name", name).Error("There was an error removing the resource")
 		return err
 	}
 
@@ -124,9 +139,13 @@ func (r *MongoRepository) Remove(name string) error {
 	return nil
 }
 
-func (r *MongoRepository) getSession() (*mgo.Session, *mgo.Collection) {
-	session := r.session.Copy()
-	coll := session.DB("").C(collectionName)
+func isDuplicateKeyError(err error) bool {
+	// TODO: maybe there is (or will be) a better way of checking duplicate key error
+	// this one is based on https://github.com/mongodb/mongo-go-driver/blob/master/mongo/integration/collection_test.go#L54-L65
+	we, ok := err.(mongo.WriteException)
+	if !ok {
+		return false
+	}
 
-	return session, coll
+	return len(we.WriteErrors) > 0 && we.WriteErrors[0].Code == 11000
 }

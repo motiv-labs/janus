@@ -1,13 +1,15 @@
 package proxy
 
 import (
-	"reflect"
+	"fmt"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/globalsign/mgo/bson"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/bsontype"
+
 	"github.com/hellofresh/janus/pkg/proxy/balancer"
 	"github.com/hellofresh/janus/pkg/router"
 )
@@ -84,21 +86,21 @@ func (d Duration) GetBSON() (interface{}, error) {
 }
 
 // SetBSON implements unmarshalling from BSON
-func (d *Duration) SetBSON(raw bson.Raw) error {
+func (d *Duration) SetBSON(raw bson.RawValue) error {
 	// took BSON string parsing logic from BSON decoder
-	if raw.Kind != bson.ElementString {
-		return &bson.TypeError{Type: reflect.TypeOf(Duration(0)), Kind: raw.Kind}
+	if raw.Type != bsontype.String {
+		return fmt.Errorf("expected %q type, but got %q", bsontype.String.String(), raw.Type.String())
 	}
 
 	// l := d.readInt32()
-	b := raw.Data[0:4]
+	b := raw.Value[0:4]
 	l := int32((uint32(b[0]) << 0) |
 		(uint32(b[1]) << 8) |
 		(uint32(b[2]) << 16) |
 		(uint32(b[3]) << 24))
 
 	// b := d.readBytes(l - 1)
-	b = raw.Data[4 : 4+l-1]
+	b = raw.Value[4 : 4+l-1]
 
 	return d.UnmarshalJSON(b)
 }

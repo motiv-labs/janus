@@ -50,14 +50,14 @@ func onStartup(event interface{}) error {
 		return errors.New("could not convert event to startup type")
 	}
 
-	if e.MongoSession == nil {
-		log.Debug("Mongo session is not set, using memory repository for basic auth plugin")
+	if e.MongoDB == nil {
+		log.Debug("Mongo DB is not set, using memory repository for basic auth plugin")
 
 		repo = NewInMemoryRepository()
 	} else {
-		log.Debug("Mongo session is set, using mongo repository for basic auth plugin")
+		log.Debug("Mongo DB is set, using mongo repository for basic auth plugin")
 
-		repo, err = NewMongoRepository(e.MongoSession)
+		repo, err = NewMongoRepository(e.MongoDB)
 		if err != nil {
 			return err
 		}

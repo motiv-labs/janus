@@ -1,13 +1,17 @@
 package oauth2
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"net/url"
+	"time"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/globalsign/mgo"
 	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/x/bsonx"
 
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt"
@@ -19,6 +23,8 @@ import (
 const (
 	mongodb = "mongodb"
 	file    = "file"
+
+	mongoIdxTimeout = 10 * time.Second
 )
 
 var (
@@ -77,22 +83,23 @@ func onStartup(event interface{}) error {
 
 	switch dsnURL.Scheme {
 	case mongodb:
-		repo, err = NewMongoRepository(e.MongoSession)
+		repo, err = NewMongoRepository(e.MongoDB)
 		if err != nil {
 			return fmt.Errorf("could not create a mongodb repository for oauth servers: %w", err)
 		}
 
-		session := e.MongoSession.Copy()
-		coll := session.DB("").C(collectionName)
-		defer session.Close()
+		ctx, cancel := context.WithTimeout(context.Background(), mongoIdxTimeout)
+		defer cancel()
 
-		if err := coll.EnsureIndex(mgo.Index{
-			Key:        []string{"name"},
-			Unique:     true,
-			DropDups:   true,
-			Background: true,
-			Sparse:     true,
-		}); err != nil {
+		if _, err := e.MongoDB.Collection(collectionName).Indexes().CreateOne(
+			ctx,
+			mongo.IndexModel{
+				Keys: bsonx.Doc{
+					{Key: "name", Value: bsonx.Int32(1)},
+				},
+				Options: options.Index().SetUnique(true).SetBackground(true).SetSparse(true),
+			},
+		); err != nil {
 			return fmt.Errorf("failed to create indexes for oauth servers repository: %w", err)
 		}
 

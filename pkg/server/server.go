@@ -113,7 +113,7 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 	}
 
 	if mgoRepo, ok := s.provider.(*api.MongoRepository); ok {
-		event.MongoSession = mgoRepo.Session
+		event.MongoDB = mgoRepo.DB
 	}
 
 	plugin.EmitEvent(plugin.StartupEvent, event)
