@@ -76,7 +76,11 @@ func createDirector(proxyDefinition *Definition, balancer balancer.Balancer, sta
 			listenPath := matcher.Extract(proxyDefinition.ListenPath)
 
 			log.WithField("listen_path", listenPath).Debug("Stripping listen path")
-			path = strings.Replace(path, listenPath, "", 1)
+			if len(paramNames) > 0 {
+				path = stripPathWithParams(req, path, listenPath, paramNames)
+			} else {
+				path = strings.Replace(path, listenPath, "", 1)
+			}
 			if !strings.HasSuffix(target.Path, "/") && strings.HasSuffix(path, "/") {
 				path = path[:len(path)-1]
 			}
@@ -192,4 +196,15 @@ func cleanSlashes(a string) string {
 	}
 
 	return a
+}
+
+func stripPathWithParams(req *http.Request, path string, listenPath string, paramNames []string) string {
+	remove := strings.Split(listenPath, "/")
+	for i := 0; i < len(paramNames); i ++ {
+		remove = append(remove, chi.URLParam(req, paramNames[i]))
+	}
+	for i := 1; i < len(remove); i++ {
+		path = strings.Replace(path, "/" + remove[i], "", 1)
+	}
+	return path
 }
