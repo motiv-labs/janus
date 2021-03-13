@@ -8,11 +8,6 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/hellofresh/janus)](https://goreportcard.com/report/github.com/hellofresh/janus)
 [![Join us on slack](https://img.shields.io/badge/chat-on%20slack-brightgreen.svg)](https://join.slack.com/t/janus-gw/shared_invite/enQtNTM1MDE3Mjg0ODIxLTVhNmQwODBmYTE1MmI5MDZiY2ZhN2ZmOGFiMGZmZTZmMzMxMTQ1MzA0NzY4ODA5Zjg1YzczNzg0ZjcwYjQwMjA)
 
----
-
-**Note:** This project is in maintenance mode. There will be bug fixes, but no feature development.
-
----
 
 > An API Gateway written in Go
 
