@@ -1,0 +1,43 @@
+FROM golang:1.14-alpine AS build-debug-common
+
+ARG VERSION='0.0.1-docker'
+
+WORKDIR /janus
+
+COPY . ./
+
+# Add tooling to install GCC
+RUN apk add build-base
+# Add cqlsh to the image.
+RUN apk add --update \
+    bash \
+    curl \
+    py-pip
+RUN go get github.com/go-delve/delve/cmd/dlv
+
+RUN apk add --update bash make git
+RUN export JANUS_BUILD_ONLY_DEFAULT=1 && \
+    export VERSION=$VERSION && \
+    make build
+
+# ---
+
+FROM alpine
+
+COPY --from=build-debug-common /janus/dist/janus /
+
+RUN apk add --no-cache ca-certificates
+RUN mkdir -p /etc/janus/apis && \
+    mkdir -p /etc/janus/auth
+
+RUN apk add --update curl && \
+    rm -rf /var/cache/apk/*
+
+HEALTHCHECK --interval=5s --timeout=5s --retries=3 CMD curl -f http://localhost:8081/status || exit 1
+
+FROM build-debug-common as dev
+EXPOSE 8080 8081 8443 8444 40000
+COPY entry-dev.sh /usr/local/bin
+RUN chmod 755 /usr/local/bin/entry-dev.sh
+ENTRYPOINT ["/usr/local/bin/entry-dev.sh"]
+#ENTRYPOINT ["/janus", "start"]

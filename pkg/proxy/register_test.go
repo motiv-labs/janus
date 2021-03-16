@@ -66,6 +66,20 @@ var tests = []struct {
 		expectedContentType: "application/json",
 		expectedCode:        http.StatusNotFound,
 	},
+	{
+		description:         "named param with strip path to posts",
+		method:              "GET",
+		url:                 "/private/localhost/posts/1",
+		expectedContentType: "application/json; charset=utf-8",
+		expectedCode:        http.StatusOK,
+	},
+	{
+		description:         "named param with strip path - no api",
+		method:              "GET",
+		url:                 "/private/localhost/no-api",
+		expectedContentType: "application/json",
+		expectedCode:        http.StatusNotFound,
+	},
 }
 
 func TestSuccessfulProxy(t *testing.T) {
@@ -141,6 +155,15 @@ func createProxyDefinitions(t *testing.T) []*Definition {
 				Targets:   []*Target{{Target: fmt.Sprintf("http://localhost:%s/recipes/{id}", upstreamsPort)}},
 			},
 			Methods: []string{"GET"},
+		},
+		{
+			ListenPath: "/private/{service}/*",
+			Upstreams: &Upstreams{
+				Balancing: "roundrobin",
+				Targets:   []*Target{{Target: fmt.Sprintf("http://{service}:%s/", upstreamsPort)}},
+			},
+			StripPath: true,
+			Methods: []string{"ALL"},
 		},
 	}
 }
