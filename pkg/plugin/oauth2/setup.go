@@ -104,12 +104,11 @@ func onStartup(event interface{}) error {
 			return fmt.Errorf("failed to create indexes for oauth servers repository: %w", err)
 		}
 	case cassandra:
-		repo, err = NewCassandraRepository(dsnURL.Path)
+		repo, err = NewCassandraRepository(e.Cassandra)
 		if err != nil {
 			log.Errorf("error creating new cassandra repo")
 			return err
 		}
-		// todo more setup may be required but I don't think so
 	case file:
 		authPath := fmt.Sprintf("%s/auth", dsnURL.Path)
 		log.WithField("path", authPath).Debug("Trying to load Auth configuration files")

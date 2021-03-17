@@ -1,6 +1,7 @@
 package plugin
 
 import (
+	"github.com/hellofresh/janus/cassandra/wrapper"
 	"github.com/hellofresh/stats-go/client"
 	"go.mongodb.org/mongo-driver/mongo"
 
@@ -24,6 +25,7 @@ const (
 type OnStartup struct {
 	StatsClient   client.Client
 	MongoDB       *mongo.Database
+	Cassandra 	  wrapper.Holder
 	Register      *proxy.Register
 	Config        *config.Specification
 	Configuration []*api.Definition

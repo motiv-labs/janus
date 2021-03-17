@@ -50,17 +50,25 @@ func onStartup(event interface{}) error {
 		return errors.New("could not convert event to startup type")
 	}
 
-	if e.MongoDB == nil {
-		log.Debug("Mongo DB is not set, using memory repository for basic auth plugin")
-
-		repo = NewInMemoryRepository()
-	} else {
+	if e.MongoDB != nil {
 		log.Debug("Mongo DB is set, using mongo repository for basic auth plugin")
 
 		repo, err = NewMongoRepository(e.MongoDB)
 		if err != nil {
 			return err
 		}
+	} else if e.Cassandra != nil {
+		log.Debugf("Cassandra is set, using cassandra repository for basic auth plugin")
+
+		repo, err = NewCassandraRepository(e.Cassandra)
+		if err != nil {
+			log.Errorf("error getting cassandra repo: %v", err)
+			return err
+		}
+	} else {
+		log.Debug("No DB set, using memory repository for basic auth plugin")
+
+		repo = NewInMemoryRepository()
 	}
 
 	if adminRouter == nil {

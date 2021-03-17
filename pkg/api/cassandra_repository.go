@@ -14,9 +14,9 @@ import (
 
 // CassandraRepository represents a cassandra repository
 type CassandraRepository struct {
-	//TODO: we need to expose this so the plugins can use the same session. We should abstract mongo DB and provide
+	//TODO: we need to expose this so the plugins can use the same Session. We should abstract mongo DB and provide
 	// the plugins with a simple interface to search, insert, update and remove data from whatever backend implementation
-	session wrapper.Holder
+	Session     wrapper.Holder
 	refreshTime time.Duration
 }
 
@@ -48,24 +48,24 @@ func NewCassandraRepository(dsn string, refreshTime time.Duration) (*CassandraRe
 	// Getting a cassandra connection initializer
 	initializer := wrapper.New(cass.ClusterHostName, cass.AppKeyspace)
 
-	// Starting a new cassandra session
+	// Starting a new cassandra Session
 	sessionHolder, err := initializer.NewSession()
 	if err != nil {
 		panic(err)
 	}
-	// api cassandra repo session
+	// api cassandra repo Session
 	cass.SetSessionHolder(sessionHolder)
 
 	return &CassandraRepository{
-		session: sessionHolder,
+		Session:     sessionHolder,
 		refreshTime: refreshTime,
 	}, nil
 
 }
 
 func (r *CassandraRepository) Close() error {
-	// Close the session
-	r.session.CloseSession()
+	// Close the Session
+	r.Session.CloseSession()
 	return nil
 }
 
@@ -131,13 +131,13 @@ func (r *CassandraRepository) FindAll() ([]*Definition, error) {
 
 	var results []*Definition
 
-	iter := r.session.GetSession().Query(
+	iter := r.Session.GetSession().Query(
 		"SELECT definition FROM api_definition").Iter()
 
 	var savedDef string
-	var definition *Definition
 
 	for iter.Scan(&savedDef) {
+		var definition *Definition
 		err := json.Unmarshal([]byte(savedDef), &definition)
 		if err != nil {
 			log.Errorf("error trying to unmarshal definition json: %v", err)
@@ -171,7 +171,7 @@ func (r *CassandraRepository) add(definition *Definition) error {
 		return err
 	}
 
-	err = r.session.GetSession().Query(
+	err = r.Session.GetSession().Query(
 		"UPDATE api_definition " +
 		"SET definition = ? " +
 		"WHERE name = ?",
@@ -190,7 +190,7 @@ func (r *CassandraRepository) add(definition *Definition) error {
 func (r *CassandraRepository) remove(name string) error {
 	log.Infof("removing: %s", name)
 
-	err := r.session.GetSession().Query(
+	err := r.Session.GetSession().Query(
 		"DELETE FROM api_definition WHERE name = ?", name).Exec()
 
 	if err != nil {

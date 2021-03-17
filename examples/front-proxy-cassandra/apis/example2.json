@@ -1,8 +1,8 @@
 {
-    "name" : "my-endpoint",
+    "name" : "my-endpoint-2",
     "active" : true,
     "proxy" : {
-        "listen_path" : "/example/*",
+        "listen_path" : "/example/path/*",
         "upstreams" : {
             "balancing": "roundrobin",
             "targets": [

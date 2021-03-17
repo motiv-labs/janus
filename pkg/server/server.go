@@ -116,6 +116,10 @@ func (s *Server) StartWithContext(ctx context.Context) error {
 		event.MongoDB = mgoRepo.DB
 	}
 
+	if cassRepo, ok := s.provider.(*api.CassandraRepository); ok {
+		event.Cassandra = cassRepo.Session
+	}
+
 	plugin.EmitEvent(plugin.StartupEvent, event)
 	s.apiLoader.RegisterAPIs(definitions)
 

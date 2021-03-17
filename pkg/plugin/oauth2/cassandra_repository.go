@@ -2,12 +2,10 @@ package oauth2
 
 import (
 	"encoding/json"
-	cass "github.com/hellofresh/janus/cassandra"
 	"github.com/hellofresh/janus/cassandra/wrapper"
 	log "github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
-	"time"
 )
 
 // CassandraRepository represents a cassandra repository
@@ -15,42 +13,10 @@ type CassandraRepository struct {
 	session wrapper.Holder
 }
 
-func NewCassandraRepository(dsn string) (*CassandraRepository, error) {
+func NewCassandraRepository(session wrapper.Holder) (*CassandraRepository, error) {
 	log.Debugf("getting new oauth cassandra repo")
 
-	// parse the dsn string for the cluster host, system key space, app key space and connection timeout.
-	log.Infof("dsn is %s", dsn)
-	clusterHost, systemKeyspace, appKeyspace, connectionTimeout := parseDSN(dsn)
-	if clusterHost == "" {
-		clusterHost = cass.ClusterHostName
-	}
-	if systemKeyspace == "" {
-		systemKeyspace = cass.SystemKeyspace
-	}
-	if appKeyspace == "" {
-		appKeyspace = cass.AppKeyspace
-	}
-	if connectionTimeout == 0 {
-		connectionTimeout = cass.Timeout
-	}
-
-	// Wait for Cassandra to start, setup Cassandra keyspace if required
-	wrapper.Initialize(cass.ClusterHostName, cass.SystemKeyspace, cass.AppKeyspace, cass.Timeout*time.Second)
-
-	// Getting a cassandra connection initializer
-	initializer := wrapper.New(cass.ClusterHostName, cass.AppKeyspace)
-
-	// Starting a new cassandra session
-	sessionHolder, err := initializer.NewSession()
-	if err != nil {
-		panic(err)
-	}
-	// set oauth cassandra repo session
-	cass.SetSessionHolder(sessionHolder)
-
-	return &CassandraRepository{
-		session: sessionHolder,
-	}, nil
+	return &CassandraRepository{session: session}, nil
 
 }
 
@@ -62,11 +28,11 @@ func (r *CassandraRepository) FindAll() ([]*OAuth, error) {
 
 	iter := r.session.GetSession().Query("SELECT name, oauth FROM oauth").Iter()
 
-	var savedDef string
-	var oauth *OAuth
+	var savedOauth string
 
-	for iter.Scan(&savedDef) {
-		err := json.Unmarshal([]byte(savedDef), &oauth)
+	for iter.Scan(&savedOauth) {
+		var oauth *OAuth
+		err := json.Unmarshal([]byte(savedOauth), &oauth)
 		if err != nil {
 			log.Errorf("error trying to unmarshal oauth json: %v", err)
 			return nil, err
@@ -85,13 +51,16 @@ func (r *CassandraRepository) FindAll() ([]*OAuth, error) {
 func (r *CassandraRepository) FindByName(name string) (*OAuth, error) {
 	log.Infof("finding: %s", name)
 
+	var savedOauth string
 	var oauth *OAuth
 
 	err := r.session.GetSession().Query(
-		"SELECT oauth = ? " +
-			"FROM oauth" +
+		"SELECT oauth " +
+			"FROM oauth " +
 			"WHERE name = ?",
-		oauth, name).Exec()
+		name).Scan(&savedOauth)
+
+	err = json.Unmarshal([]byte(savedOauth), &oauth)
 
 	if err != nil {
 		log.Errorf("error selecting oauth %s: %v", name, err)
@@ -201,4 +170,3 @@ func parseDSN(dsn string) (clusterHost string, systemKeyspace string, appKeyspac
 	}
 	return clusterHost, systemKeyspace, appKeyspace, connectionTimeout
 }
-
