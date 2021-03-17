@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"contrib.go.opencensus.io/exporter/jaeger"
+	"contrib.go.opencensus.io/exporter/prometheus"
 	"github.com/hellofresh/janus/pkg/config"
 	obs "github.com/hellofresh/janus/pkg/observability"
 	"github.com/hellofresh/logging-go"
@@ -17,8 +19,6 @@ import (
 	"github.com/hellofresh/stats-go/client"
 	"github.com/hellofresh/stats-go/hooks"
 	log "github.com/sirupsen/logrus"
-	"go.opencensus.io/exporter/jaeger"
-	"go.opencensus.io/exporter/prometheus"
 	"go.opencensus.io/stats/view"
 	"go.opencensus.io/trace"
 )

@@ -4,10 +4,11 @@ go 1.15
 
 require (
 	code.cloudfoundry.org/bytefmt v0.0.0-20180108190415-b31f603f5e1e
-	git.apache.org/thrift.git v0.0.0-20180902110319-2566ecd5d999 // indirect
+	contrib.go.opencensus.io/exporter/jaeger v0.2.1
+	contrib.go.opencensus.io/exporter/prometheus v0.3.0
 	github.com/DataDog/datadog-go v0.0.0-20180330214955-e67964b4021a // indirect
-	github.com/Knetic/govaluate v3.0.0+incompatible
-	github.com/afex/hystrix-go v0.0.0-20180406012432-f86abeeb9f72
+	github.com/Knetic/govaluate v3.0.1-0.20171022003610-9aa49832a739+incompatible
+	github.com/afex/hystrix-go v0.0.0-20180502004556-fa1af6a1f4f5
 	github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f
 	github.com/bshuster-repo/logrus-logstash-hook v0.4.1 // indirect
 	github.com/cactus/go-statsd-client v3.1.1+incompatible // indirect
@@ -31,10 +32,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/motiv-labs/cassandra v0.0.0-20210126221137-4ac871dd211e
-	github.com/opentracing/opentracing-go v1.2.0 // indirect
-	github.com/openzipkin/zipkin-go v0.1.1 // indirect
 	github.com/rafaeljesus/retry-go v0.0.0-20171214204623-5981a380a879
-	github.com/rcrowley/go-metrics v0.0.0-20180406234716-d932a24a8ccb // indirect
 	github.com/rs/cors v1.4.0
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.0.0
@@ -44,9 +42,9 @@ require (
 	github.com/tidwall/match v1.0.0 // indirect
 	github.com/ulule/limiter/v3 v3.5.0
 	go.mongodb.org/mongo-driver v1.4.1
-	go.opencensus.io v0.22.0
-	golang.org/x/net v0.0.0-20200625001655-4c5254603344
-	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
+	go.opencensus.io v0.23.0
+	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
+	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	gopkg.in/alexcesaro/statsd.v2 v2.0.0 // indirect
 	gopkg.in/gemnasium/logrus-graylog-hook.v2 v2.0.6 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect
