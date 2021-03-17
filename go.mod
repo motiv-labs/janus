@@ -20,6 +20,7 @@ require (
 	github.com/fsnotify/fsnotify v1.4.9
 	github.com/go-chi/chi v3.3.2+incompatible
 	github.com/go-redis/redis/v7 v7.4.0
+	github.com/gocql/gocql v0.0.0-20200624222514-34081eda590e
 	github.com/gofrs/uuid v3.3.0+incompatible
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/google/go-querystring v0.0.0-20170111101155-53e6ce116135 // indirect
@@ -28,15 +29,17 @@ require (
 	github.com/hellofresh/opencensus-go-extras v0.0.0-20191004131501-7bd94f603dcf
 	github.com/hellofresh/stats-go v0.8.0
 	github.com/kelseyhightower/envconfig v1.3.0
+	github.com/klauspost/compress v1.10.10 // indirect
 	github.com/magiconair/properties v1.8.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2
-	github.com/motiv-labs/cassandra v0.0.0-20210126221137-4ac871dd211e
+	github.com/onsi/ginkgo v1.13.0 // indirect
 	github.com/opentracing/opentracing-go v1.2.0
 	github.com/rafaeljesus/retry-go v0.0.0-20171214204623-5981a380a879
 	github.com/rs/cors v1.4.0
 	github.com/sirupsen/logrus v1.7.0
 	github.com/spf13/cobra v1.0.0
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.1
 	github.com/stretchr/testify v1.6.1
 	github.com/tidwall/gjson v1.1.0
@@ -46,6 +49,7 @@ require (
 	go.opencensus.io v0.23.0
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/alexcesaro/statsd.v2 v2.0.0 // indirect
 	gopkg.in/gemnasium/logrus-graylog-hook.v2 v2.0.6 // indirect
 	gopkg.in/yaml.v3 v3.0.0-20200615113413-eeeca48fe776 // indirect

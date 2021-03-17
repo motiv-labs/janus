@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	cass "github.com/hellofresh/janus/cassandra"
-	cassmod "github.com/motiv-labs/cassandra"
+	"github.com/hellofresh/janus/cassandra/wrapper"
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
 	"strconv"
@@ -16,7 +16,7 @@ import (
 type CassandraRepository struct {
 	//TODO: we need to expose this so the plugins can use the same session. We should abstract mongo DB and provide
 	// the plugins with a simple interface to search, insert, update and remove data from whatever backend implementation
-	session cassmod.Holder
+	session wrapper.Holder
 	refreshTime time.Duration
 }
 
@@ -43,13 +43,13 @@ func NewCassandraRepository(dsn string, refreshTime time.Duration) (*CassandraRe
 	}
 
 	// Wait for Cassandra to start, setup Cassandra keyspace if required
-	cassmod.Initialize(cass.ClusterHostName, cass.SystemKeyspace, cass.AppKeyspace, cass.Timeout*time.Second, span)
+	wrapper.Initialize(cass.ClusterHostName, cass.SystemKeyspace, cass.AppKeyspace, cass.Timeout*time.Second)
 
 	// Getting a cassandra connection initializer
-	initializer := cassmod.New(cass.ClusterHostName, cass.AppKeyspace, span)
+	initializer := wrapper.New(cass.ClusterHostName, cass.AppKeyspace)
 
 	// Starting a new cassandra session
-	sessionHolder, err := initializer.NewSession(span)
+	sessionHolder, err := initializer.NewSession()
 	if err != nil {
 		panic(err)
 	}
@@ -64,11 +64,8 @@ func NewCassandraRepository(dsn string, refreshTime time.Duration) (*CassandraRe
 }
 
 func (r *CassandraRepository) Close() error {
-	span := opentracing.StartSpan("Close")
-	defer span.Finish()
-	span.SetTag("Interface", "CassandraRepository")
 	// Close the session
-	r.session.CloseSession(span)
+	r.session.CloseSession()
 	return nil
 }
 
@@ -130,21 +127,17 @@ func (r *CassandraRepository) Watch(ctx context.Context, cfgChan chan<- Configur
 
 // FindAll fetches all the API definitions available
 func (r *CassandraRepository) FindAll() ([]*Definition, error) {
-	span := opentracing.StartSpan("FindAll")
-	defer span.Finish()
-	span.SetTag("Interface", "CassandraRepository")
-
 	log.Infof("finding all definitions")
 
 	var results []*Definition
 
-	iter := r.session.GetSession(span).Query(span,
-		"SELECT definition FROM api_definition").Iter(span)
+	iter := r.session.GetSession().Query(
+		"SELECT definition FROM api_definition").Iter()
 
 	var savedDef string
 	var definition *Definition
 
-	for iter.Scan(span, &savedDef) {
+	for iter.Scan(&savedDef) {
 		err := json.Unmarshal([]byte(savedDef), &definition)
 		if err != nil {
 			log.Errorf("error trying to unmarshal definition json: %v", err)
@@ -153,7 +146,7 @@ func (r *CassandraRepository) FindAll() ([]*Definition, error) {
 		results = append(results, definition)
 	}
 
-	err := iter.Close(span)
+	err := iter.Close()
 	if err != nil {
 		log.Errorf("error getting all definitions: %v", err)
 	}
@@ -162,10 +155,6 @@ func (r *CassandraRepository) FindAll() ([]*Definition, error) {
 
 // Add adds an API definition to the repository
 func (r *CassandraRepository) add(definition *Definition) error {
-	span := opentracing.StartSpan("add")
-	defer span.Finish()
-	span.SetTag("Interface", "CassandraRepository")
-
 	log.Infof("adding: %s", definition.Name)
 
 	log.Infof("definition is: %v", *definition)
@@ -182,11 +171,11 @@ func (r *CassandraRepository) add(definition *Definition) error {
 		return err
 	}
 
-	err = r.session.GetSession(span).Query(span,
+	err = r.session.GetSession().Query(
 		"UPDATE api_definition " +
 		"SET definition = ? " +
 		"WHERE name = ?",
-		saveDef, definition.Name).Exec(span)
+		saveDef, definition.Name).Exec()
 
 	if err != nil {
 		log.Errorf("error saving definition %s: %v", definition.Name, err)
@@ -199,14 +188,10 @@ func (r *CassandraRepository) add(definition *Definition) error {
 
 // Remove removes an API definition from the repository
 func (r *CassandraRepository) remove(name string) error {
-	span := opentracing.StartSpan("remove")
-	defer span.Finish()
-	span.SetTag("Interface", "CassandraRepository")
-
 	log.Infof("removing: %s", name)
 
-	err := r.session.GetSession(span).Query(span,
-		"DELETE FROM api_definition WHERE name = ?", name).Exec(span)
+	err := r.session.GetSession().Query(
+		"DELETE FROM api_definition WHERE name = ?", name).Exec()
 
 	if err != nil {
 		log.Errorf("error saving definition %s: %v", name, err)

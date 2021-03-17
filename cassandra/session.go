@@ -1,10 +1,8 @@
 package cassandra
 
 import (
-	"github.com/motiv-labs/cassandra"
-	"github.com/opentracing/opentracing-go"
+	"github.com/hellofresh/janus/cassandra/wrapper"
 )
-
 const (
 	// Cassandra cluster host
 	ClusterHostName = "db"
@@ -17,15 +15,12 @@ const (
 )
 
 // SessionHolder holds our connection to Cassandra
-var sessionHolder cassandra.Holder
+var sessionHolder wrapper.Holder
 
-func GetSession() cassandra.SessionInterface {
-	span := opentracing.StartSpan("GetSession")
-	defer span.Finish()
-	span.SetTag("Package", "cassandra")
-	return sessionHolder.GetSession(span)
+func GetSession() wrapper.SessionInterface {
+	return sessionHolder.GetSession()
 }
 
-func SetSessionHolder(holder cassandra.Holder) {
+func SetSessionHolder(holder wrapper.Holder) {
 	sessionHolder = holder
 }

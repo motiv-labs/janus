@@ -3,8 +3,7 @@ package oauth2
 import (
 	"encoding/json"
 	cass "github.com/hellofresh/janus/cassandra"
-	cassmod "github.com/motiv-labs/cassandra"
-	"github.com/opentracing/opentracing-go"
+	"github.com/hellofresh/janus/cassandra/wrapper"
 	log "github.com/sirupsen/logrus"
 	"strconv"
 	"strings"
@@ -13,14 +12,11 @@ import (
 
 // CassandraRepository represents a cassandra repository
 type CassandraRepository struct {
-	session cassmod.Holder
+	session wrapper.Holder
 }
 
 func NewCassandraRepository(dsn string) (*CassandraRepository, error) {
 	log.Debugf("getting new oauth cassandra repo")
-	span := opentracing.StartSpan("NewCassandraRepository")
-	defer span.Finish()
-	span.SetTag("Interface", "CassandraRepository")
 
 	// parse the dsn string for the cluster host, system key space, app key space and connection timeout.
 	log.Infof("dsn is %s", dsn)
@@ -39,13 +35,13 @@ func NewCassandraRepository(dsn string) (*CassandraRepository, error) {
 	}
 
 	// Wait for Cassandra to start, setup Cassandra keyspace if required
-	cassmod.Initialize(cass.ClusterHostName, cass.SystemKeyspace, cass.AppKeyspace, cass.Timeout*time.Second, span)
+	wrapper.Initialize(cass.ClusterHostName, cass.SystemKeyspace, cass.AppKeyspace, cass.Timeout*time.Second)
 
 	// Getting a cassandra connection initializer
-	initializer := cassmod.New(cass.ClusterHostName, cass.AppKeyspace, span)
+	initializer := wrapper.New(cass.ClusterHostName, cass.AppKeyspace)
 
 	// Starting a new cassandra session
-	sessionHolder, err := initializer.NewSession(span)
+	sessionHolder, err := initializer.NewSession()
 	if err != nil {
 		panic(err)
 	}
@@ -60,21 +56,16 @@ func NewCassandraRepository(dsn string) (*CassandraRepository, error) {
 
 // FindAll fetches all the OAuth Servers available
 func (r *CassandraRepository) FindAll() ([]*OAuth, error) {
-	span := opentracing.StartSpan("FindAll")
-	defer span.Finish()
-	span.SetTag("Interface", "CassandraRepository")
-
 	log.Infof("finding all oauth servers")
 
 	var results []*OAuth
 
-	iter := r.session.GetSession(span).Query(span,
-		"SELECT name, oauth FROM oauth").Iter(span)
+	iter := r.session.GetSession().Query("SELECT name, oauth FROM oauth").Iter()
 
 	var savedDef string
 	var oauth *OAuth
 
-	for iter.Scan(span, &savedDef) {
+	for iter.Scan(&savedDef) {
 		err := json.Unmarshal([]byte(savedDef), &oauth)
 		if err != nil {
 			log.Errorf("error trying to unmarshal oauth json: %v", err)
@@ -83,7 +74,7 @@ func (r *CassandraRepository) FindAll() ([]*OAuth, error) {
 		results = append(results, oauth)
 	}
 
-	err := iter.Close(span)
+	err := iter.Close()
 	if err != nil {
 		log.Errorf("error getting all oauths: %v", err)
 	}
@@ -92,19 +83,15 @@ func (r *CassandraRepository) FindAll() ([]*OAuth, error) {
 
 // FindByName find an OAuth Server by name
 func (r *CassandraRepository) FindByName(name string) (*OAuth, error) {
-	span := opentracing.StartSpan("add")
-	defer span.Finish()
-	span.SetTag("Interface", "CassandraRepository")
-
 	log.Infof("finding: %s", name)
 
 	var oauth *OAuth
 
-	err := r.session.GetSession(span).Query(span,
+	err := r.session.GetSession().Query(
 		"SELECT oauth = ? " +
 			"FROM oauth" +
 			"WHERE name = ?",
-		oauth, name).Exec(span)
+		oauth, name).Exec()
 
 	if err != nil {
 		log.Errorf("error selecting oauth %s: %v", name, err)
@@ -118,10 +105,6 @@ func (r *CassandraRepository) FindByName(name string) (*OAuth, error) {
 // Add add a new OAuth Server to the repository
 // Add is the same as Save because Cassandra only upserts and I didn't want to write an existence checker
 func (r *CassandraRepository) Add(oauth *OAuth) error {
-	span := opentracing.StartSpan("add")
-	defer span.Finish()
-	span.SetTag("Interface", "CassandraRepository")
-
 	log.Infof("adding: %s", oauth.Name)
 
 	log.Infof("oauth is: %v", *oauth)
@@ -131,11 +114,11 @@ func (r *CassandraRepository) Add(oauth *OAuth) error {
 		log.Errorf("error marshaling oauth: %v", err)
 		return err
 	}
-	err = r.session.GetSession(span).Query(span,
+	err = r.session.GetSession().Query(
 		"UPDATE oauth " +
 			"SET oauth = ? " +
 			"WHERE name = ?",
-		saveOauth, oauth.Name).Exec(span)
+		saveOauth, oauth.Name).Exec()
 
 	if err != nil {
 		log.Errorf("error saving oauth %s: %v", oauth.Name, err)
@@ -148,10 +131,6 @@ func (r *CassandraRepository) Add(oauth *OAuth) error {
 
 // Save saves OAuth Server to the repository
 func (r *CassandraRepository) Save(oauth *OAuth) error {
-	span := opentracing.StartSpan("add")
-	defer span.Finish()
-	span.SetTag("Interface", "CassandraRepository")
-
 	log.Infof("adding: %s", oauth.Name)
 
 	log.Infof("oauth is: %v", *oauth)
@@ -161,11 +140,11 @@ func (r *CassandraRepository) Save(oauth *OAuth) error {
 		log.Errorf("error marshaling oauth: %v", err)
 		return err
 	}
-	err = r.session.GetSession(span).Query(span,
+	err = r.session.GetSession().Query(
 		"UPDATE oauth " +
 			"SET oauth = ? " +
 			"WHERE name = ?",
-		saveOauth, oauth.Name).Exec(span)
+		saveOauth, oauth.Name).Exec()
 
 	if err != nil {
 		log.Errorf("error saving oauth %s: %v", oauth.Name, err)
@@ -178,14 +157,10 @@ func (r *CassandraRepository) Save(oauth *OAuth) error {
 
 // Remove removes an OAuth Server from the repository
 func (r *CassandraRepository) Remove(name string) error {
-	span := opentracing.StartSpan("remove")
-	defer span.Finish()
-	span.SetTag("Interface", "CassandraRepository")
-
 	log.Infof("removing: %s", name)
 
-	err := r.session.GetSession(span).Query(span,
-		"DELETE FROM oauth WHERE name = ?", name).Exec(span)
+	err := r.session.GetSession().Query(
+		"DELETE FROM oauth WHERE name = ?", name).Exec()
 
 	if err != nil {
 		log.Errorf("error removing oauth %s: %v", name, err)
