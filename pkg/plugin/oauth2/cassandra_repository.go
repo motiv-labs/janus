@@ -4,8 +4,6 @@ import (
 	"encoding/json"
 	"github.com/hellofresh/janus/cassandra/wrapper"
 	log "github.com/sirupsen/logrus"
-	"strconv"
-	"strings"
 )
 
 // CassandraRepository represents a cassandra repository
@@ -138,35 +136,4 @@ func (r *CassandraRepository) Remove(name string) error {
 	}
 
 	return err
-}
-
-func parseDSN(dsn string) (clusterHost string, systemKeyspace string, appKeyspace string, connectionTimeout int) {
-	trimDSN := strings.TrimSpace(dsn)
-	log.Infof("trimDSN: %s", trimDSN)
-	if len(trimDSN) == 0 {
-		return "", "", "", 0
-	}
-	// split each `:`
-	splitDSN := strings.Split(trimDSN, "/")
-	// list of info
-	for i, v := range splitDSN {
-		log.Infof("splitDSN i is %d and v is %s", i, v)
-		// start at 1 because the dsn path comes in with a leading /
-		switch i {
-		case 1:
-			clusterHost = v
-		case 2:
-			systemKeyspace = v
-		case 3:
-			appKeyspace = v
-		case 4:
-			timeout, err := strconv.Atoi(v)
-			if err != nil {
-				log.Error("timeout is not an int")
-				timeout = 0
-			}
-			connectionTimeout = timeout
-		}
-	}
-	return clusterHost, systemKeyspace, appKeyspace, connectionTimeout
 }

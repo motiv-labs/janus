@@ -1,7 +1,7 @@
 package basic
 
 import (
-	"crypto/subtle"
+	"github.com/hellofresh/janus/pkg/plugin/basic/encrypt"
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/errors"
@@ -32,8 +32,11 @@ func NewBasicAuth(repo Repository) func(http.Handler) http.Handler {
 				return
 			}
 
+			hash := encrypt.Hash{}
+
 			for _, u := range users {
-				if username == u.Username && (subtle.ConstantTimeCompare([]byte(password), []byte(u.Password)) == 1) {
+				//if username == u.Username && (subtle.ConstantTimeCompare([]byte(password), []byte(u.Password)) == 1) {
+				if username == u.Username && (hash.Compare(u.Password, password) == nil) {
 					found = true
 					break
 				}

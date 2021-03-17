@@ -1,6 +1,8 @@
 package basic
 
 import (
+	"github.com/hellofresh/janus/pkg/plugin/basic/encrypt"
+	log "github.com/sirupsen/logrus"
 	"sync"
 )
 
@@ -8,6 +10,7 @@ import (
 type InMemoryRepository struct {
 	sync.RWMutex
 	users map[string]*User
+	hash encrypt.Hash
 }
 
 // NewInMemoryRepository creates a in memory repository
@@ -39,6 +42,13 @@ func (r *InMemoryRepository) FindByUsername(username string) (*User, error) {
 func (r *InMemoryRepository) Add(user *User) error {
 	r.Lock()
 	defer r.Unlock()
+
+	hash, err := r.hash.Generate(user.Password)
+	if err != nil {
+		log.Errorf("error hashing password: %v", err)
+		return err
+	}
+	user.Password = hash
 
 	r.users[user.Username] = user
 

@@ -47,6 +47,7 @@ require (
 	github.com/ulule/limiter/v3 v3.5.0
 	go.mongodb.org/mongo-driver v1.4.1
 	go.opencensus.io v0.23.0
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
 	golang.org/x/net v0.0.0-20201110031124-69a78807bb2b
 	golang.org/x/oauth2 v0.0.0-20200107190931-bf48bf16ab8d
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
