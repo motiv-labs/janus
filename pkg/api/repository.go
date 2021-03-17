@@ -13,6 +13,7 @@ import (
 
 const (
 	mongodb = "mongodb"
+	cassandra = "cassandra"
 	file    = "file"
 )
 
@@ -43,6 +44,9 @@ func BuildRepository(dsn string, refreshTime time.Duration) (Repository, error) 
 	case mongodb:
 		log.Debug("MongoDB configuration chosen")
 		return NewMongoAppRepository(dsn, refreshTime)
+	case cassandra:
+		log.Debugf("Casssandra configuration chosen")
+		return NewCassandraRepository(dsn, refreshTime)
 	case file:
 		log.Debug("File system based configuration chosen")
 		apiPath := fmt.Sprintf("%s/apis", dsnURL.Path)
