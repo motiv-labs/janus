@@ -10,3 +10,8 @@ CREATE TABLE IF NOT EXISTS janus.api_definition (
     name text,
     definition text,
     PRIMARY KEY (name));
+
+CREATE TABLE IF NOT EXISTS janus.oauth (
+    name text,
+    oauth text,
+    PRIMARY KEY (name));

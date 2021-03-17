@@ -23,6 +23,7 @@ import (
 const (
 	mongodb = "mongodb"
 	file    = "file"
+	cassandra = "cassandra"
 
 	mongoIdxTimeout = 10 * time.Second
 )
@@ -102,7 +103,13 @@ func onStartup(event interface{}) error {
 		); err != nil {
 			return fmt.Errorf("failed to create indexes for oauth servers repository: %w", err)
 		}
-
+	case cassandra:
+		repo, err = NewCassandraRepository(dsnURL.Path)
+		if err != nil {
+			log.Errorf("error creating new cassandra repo")
+			return err
+		}
+		// todo more setup may be required but I don't think so
 	case file:
 		authPath := fmt.Sprintf("%s/auth", dsnURL.Path)
 		log.WithField("path", authPath).Debug("Trying to load Auth configuration files")

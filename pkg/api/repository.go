@@ -45,8 +45,8 @@ func BuildRepository(dsn string, refreshTime time.Duration) (Repository, error) 
 		log.Debug("MongoDB configuration chosen")
 		return NewMongoAppRepository(dsn, refreshTime)
 	case cassandra:
-		log.Debugf("Casssandra configuration chosen")
-		return NewCassandraRepository(dsn, refreshTime)
+		log.Debugf("Casssandra configuration chosen: dsn is %s, dsnURL is %s", dsnURL.Path, dsnURL)
+		return NewCassandraRepository(dsnURL.Path, refreshTime)
 	case file:
 		log.Debug("File system based configuration chosen")
 		apiPath := fmt.Sprintf("%s/apis", dsnURL.Path)

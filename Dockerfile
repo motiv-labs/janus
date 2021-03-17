@@ -1,5 +1,7 @@
 FROM ubuntu:20.04
 
+COPY cassandra/schema.sql /usr/local/bin
+
 ADD janus /bin/janus
 RUN chmod a+x /bin/janus && \
     mkdir -p /etc/janus/apis && \

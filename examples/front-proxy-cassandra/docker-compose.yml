@@ -1,0 +1,34 @@
+version: '3'
+services:
+
+  janus:
+    image: motivlabs/janus:debug
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+      - "40000:40000"
+    environment:
+      - debug=1
+    depends_on:
+      - service1
+      - janus-database
+    volumes:
+      - ./janus.toml:/etc/janus/janus.toml
+      - ~/dev/motiv/janus:/janus
+
+  janus-database:
+    image: cassandra:latest
+    container_name: db
+    ports:
+      - "9042:9042"
+    environment:
+      - MAX_HEAP_SIZE=1G
+      - HEAP_NEWSIZE=250M
+      - JAVA_OPTS="-Dcassandra.skip_wait_for_gossip_to_settle=0 -Dcassandra.num_tokens=1 -Dcassandra.initial_token=1"
+
+  service1:
+    image: rodolpheche/wiremock
+    ports:
+      - '9089:8080'
+    volumes:
+      - ../front-proxy/stubs:/home/wiremock/mappings

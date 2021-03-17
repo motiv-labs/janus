@@ -32,6 +32,7 @@ require (
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.1.2
 	github.com/motiv-labs/cassandra v0.0.0-20210126221137-4ac871dd211e
+	github.com/opentracing/opentracing-go v1.2.0
 	github.com/rafaeljesus/retry-go v0.0.0-20171214204623-5981a380a879
 	github.com/rs/cors v1.4.0
 	github.com/sirupsen/logrus v1.7.0

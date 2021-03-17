@@ -2,6 +2,7 @@ package cassandra
 
 import (
 	"github.com/motiv-labs/cassandra"
+	"github.com/opentracing/opentracing-go"
 )
 
 const (
@@ -19,15 +20,12 @@ const (
 var sessionHolder cassandra.Holder
 
 func GetSession() cassandra.SessionInterface {
-	//span := opentracing.StartSpan("GetSession", opentracing.ChildOf(parentSpan.Context()))
-	//defer span.Finish()
-	//span.SetTag("Package", "cassandra")
-	return sessionHolder.GetSession(nil)
+	span := opentracing.StartSpan("GetSession")
+	defer span.Finish()
+	span.SetTag("Package", "cassandra")
+	return sessionHolder.GetSession(span)
 }
 
 func SetSessionHolder(holder cassandra.Holder) {
-	//span := opentracing.StartSpan("SetSessionHolder", opentracing.ChildOf(parentSpan.Context()))
-	//defer span.Finish()
-	//span.SetTag("Package", "cassandra")
 	sessionHolder = holder
 }
