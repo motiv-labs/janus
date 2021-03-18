@@ -2,6 +2,7 @@ package basic
 
 import (
 	"context"
+	"github.com/hellofresh/janus/pkg/plugin/basic/encrypt"
 	"time"
 
 	log "github.com/sirupsen/logrus"
@@ -33,11 +34,12 @@ type Repository interface {
 // MongoRepository represents a mongodb repository
 type MongoRepository struct {
 	collection *mongo.Collection
+	hash encrypt.Hash
 }
 
 // NewMongoRepository creates a mongo API definition repo
 func NewMongoRepository(db *mongo.Database) (*MongoRepository, error) {
-	return &MongoRepository{db.Collection(collectionName)}, nil
+	return &MongoRepository{collection: db.Collection(collectionName), hash: encrypt.Hash{}}, nil
 }
 
 // FindAll fetches all the API definitions available
@@ -88,6 +90,14 @@ func (r *MongoRepository) findOneByQuery(query interface{}) (*User, error) {
 func (r *MongoRepository) Add(user *User) error {
 	ctx, cancel := context.WithTimeout(context.Background(), mongoQueryTimeout)
 	defer cancel()
+
+	hash, err := r.hash.Generate(user.Password)
+	if err != nil {
+		log.Errorf("error hashing password: %v", err)
+		return err
+	}
+
+	user.Password = hash
 
 	if err := r.collection.FindOneAndUpdate(
 		ctx,

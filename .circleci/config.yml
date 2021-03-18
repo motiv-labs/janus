@@ -1,0 +1,48 @@
+jobs:
+  build_test:
+    #docker:
+    #  - image: docker/compose:1.25.3
+
+    machine:
+      image: ubuntu-1604:201903-01
+
+    steps:
+      - checkout
+
+#      - run:
+#          name: Running Unit Tests
+#          command: |
+#            echo "Running unit tests and building binary"
+#            go mod download
+#            make all
+      - run:
+          name: Build and Push Images
+          command: |
+            echo "Logging in to Docker Hub"
+            docker login --username ${DOCKERHUB_USERNAME} --password ${DOCKERHUB_PASSWORD}
+
+            echo "Setting Image Name"
+            IMAGE_NAME="motivlabs/janus:$(date +%Y%m%d%H%M%S)-${CIRCLE_SHA1:0:6}"
+            echo "Image Name"
+            echo $IMAGE_NAME
+
+            echo "Building Service Image"
+            docker build -f ./Dockerfile --target=prod -t ${IMAGE_NAME} -t motivlabs/janus:latest .
+            echo "Finished Building Service Image"
+
+            echo "Pushing Service Images to Docker Hub"
+            docker push $IMAGE_NAME
+            echo "Pushed Extended Image Name"
+            docker push motivlabs/janus:latest
+            echo "Pushed Latest Image Name"
+
+workflows:
+  version: 2
+  build:
+    jobs:
+      - build_test:
+          context: MotivLabs
+          filters:
+            branches:
+              only:
+                - master

@@ -22,7 +22,7 @@ const (
 
 // MongoRepository represents a mongodb repository
 type MongoRepository struct {
-	// TODO: we need to expose this so the plugins can use the same session. We should abstract mongo DB and provide
+	//TODO: we need to expose this so the plugins can use the same session. We should abstract mongo DB and provide
 	// the plugins with a simple interface to search, insert, update and remove data from whatever backend implementation
 	DB          *mongo.Database
 	collection  *mongo.Collection

@@ -36,3 +36,39 @@ Will cause Janus to send the following request to your upstream service:
 GET /path/to/resource HTTP/1.1
 Host: my-api.com
 ```
+
+The `strip_path` property can be used in tandem with `Named URL Parameters`.
+i.e:
+```json
+{
+    "name": "My API",
+    "proxy": {
+        "strip_path" : true,
+        "listen_path": "/prepath/{service}/*",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://{service}.com"}
+            ]
+        },
+        "methods": ["GET"]
+    }
+}
+```
+
+Akin to the previous example a request to janus like this:
+```http
+GET /prepath/my-service/path/to/resource HTTP/1.1
+Host: janus
+```
+
+Will cause Janus to send the following request to your upstream service:
+
+```http
+GET /path/to/resource HTTP/1.1
+Host: my-service.com
+```
+
+This is because when the `strip_path` property is set to **true** and a `Named URL parameter` is used, the first instance of each section of the `listen_path` (delineated by `/`) will be removed from the upstream request. This includes the parameter name and regex.
+<br>
+In addition to that, the first instance of each `Named URL parameter` will be removed from the upstream request.

@@ -2,15 +2,19 @@ version: '3'
 services:
 
   janus:
-    image: hellofreshtech/janus
+    image: motivlabs/janus:debug
     ports:
-      - "8080:8080"
-      - "8081:8081"
+      - "8082:8080"
+      - "8083:8081"
+      - "40001:40000"
     depends_on:
       - service1
       - janus-database
+    environment:
+      - debug=1
     volumes:
       - ./janus.toml:/etc/janus/janus.toml
+      - ~/dev/motiv/janus:/janus
 
   janus-database:
       image: mongo
@@ -28,6 +32,6 @@ services:
   service1:
     image: rodolpheche/wiremock
     ports:
-      - '9089:8080'
+      - '9090:8080'
     volumes:
       - ../front-proxy/stubs:/home/wiremock/mappings

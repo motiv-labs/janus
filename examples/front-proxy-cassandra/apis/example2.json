@@ -1,0 +1,20 @@
+{
+    "name" : "my-endpoint-2",
+    "active" : true,
+    "proxy" : {
+        "listen_path" : "/example/path/*",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://www.mocky.io/v2/595625d22900008702cd71e8"}
+            ]
+        },
+        "methods" : ["GET"]
+    },
+    "plugins": [
+        {
+            "name": "basic_auth",
+            "enabled": true
+        }
+    ]
+}
