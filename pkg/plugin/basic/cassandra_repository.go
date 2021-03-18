@@ -20,7 +20,7 @@ func NewCassandraRepository(session wrapper.Holder) (*CassandraRepository, error
 
 // FindAll fetches all the basic user definitions available
 func (r *CassandraRepository) FindAll() ([]*User, error) {
-	log.Infof("finding all users servers")
+	log.Debugf("finding all users servers")
 
 	var results []*User
 
@@ -47,7 +47,7 @@ func (r *CassandraRepository) FindAll() ([]*User, error) {
 // FindByUsername find an user by username
 // returns ErrUserNotFound when a user is not found.
 func (r *CassandraRepository) FindByUsername(username string) (*User, error) {
-	log.Infof("finding: %s", username)
+	log.Debugf("finding: %s", username)
 
 	var user User
 
@@ -72,7 +72,7 @@ func (r *CassandraRepository) FindByUsername(username string) (*User, error) {
 
 // Add adds an user to the repository
 func (r *CassandraRepository) Add(user *User) error {
-	log.Infof("adding: %s", user.Username)
+	log.Debugf("adding: %s", user.Username)
 
 	hash, err := r.hash.Generate(user.Password)
 	if err != nil {
@@ -97,7 +97,7 @@ func (r *CassandraRepository) Add(user *User) error {
 
 // Remove an user from the repository
 func (r *CassandraRepository) Remove(username string) error {
-	log.Infof("removing: %s", username)
+	log.Debugf("removing: %s", username)
 
 	err := r.session.GetSession().Query(
 		"DELETE FROM user WHERE username = ?", username).Exec()

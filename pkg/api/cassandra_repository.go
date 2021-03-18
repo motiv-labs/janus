@@ -127,7 +127,7 @@ func (r *CassandraRepository) Watch(ctx context.Context, cfgChan chan<- Configur
 
 // FindAll fetches all the API definitions available
 func (r *CassandraRepository) FindAll() ([]*Definition, error) {
-	log.Infof("finding all definitions")
+	log.Debugf("finding all definitions")
 
 	var results []*Definition
 
@@ -155,9 +155,7 @@ func (r *CassandraRepository) FindAll() ([]*Definition, error) {
 
 // Add adds an API definition to the repository
 func (r *CassandraRepository) add(definition *Definition) error {
-	log.Infof("adding: %s", definition.Name)
-
-	log.Infof("definition is: %v", *definition)
+	log.Debugf("adding: %s", definition.Name)
 
 	isValid, err := definition.Validate()
 	if false == isValid && err != nil {
@@ -188,7 +186,7 @@ func (r *CassandraRepository) add(definition *Definition) error {
 
 // Remove removes an API definition from the repository
 func (r *CassandraRepository) remove(name string) error {
-	log.Infof("removing: %s", name)
+	log.Debugf("removing: %s", name)
 
 	err := r.Session.GetSession().Query(
 		"DELETE FROM api_definition WHERE name = ?", name).Exec()
@@ -204,15 +202,12 @@ func (r *CassandraRepository) remove(name string) error {
 
 func parseDSN(dsn string) (clusterHost string, systemKeyspace string, appKeyspace string, connectionTimeout int) {
 	trimDSN := strings.TrimSpace(dsn)
-	log.Infof("trimDSN: %s", trimDSN)
 	if len(trimDSN) == 0 {
 		return "", "", "", 0
 	}
-	// split each `:`
 	splitDSN := strings.Split(trimDSN, "/")
 	// list of info
 	for i, v := range splitDSN {
-		log.Infof("splitDSN i is %d and v is %s", i, v)
 		// start at 1 because the dsn path comes in with a leading /
 		switch i {
 		case 1:

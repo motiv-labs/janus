@@ -12,9 +12,5 @@
         "methods" : ["GET"]
     },
     "plugins": [
-        {
-            "name": "basic_auth",
-            "enabled": true
-        }
     ]
 }

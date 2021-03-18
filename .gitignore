@@ -33,5 +33,5 @@ _book
 node_modules/
 
 # HF config files
-/dist
+/dist/janus
 debug

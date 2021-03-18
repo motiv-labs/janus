@@ -38,7 +38,7 @@ HEALTHCHECK --interval=5s --timeout=5s --retries=3 CMD curl -f http://localhost:
 FROM build-debug-common as dev
 EXPOSE 8080 8081 8443 8444 40000
 COPY entry-dev.sh /usr/local/bin
-COPY cassandra/schema.sql /usr/local/bin
+COPY dist/schema.sql /usr/local/bin
 RUN chmod 755 /usr/local/bin/entry-dev.sh
 ENTRYPOINT ["/usr/local/bin/entry-dev.sh"]
 #ENTRYPOINT ["/janus", "start"]

@@ -12,15 +12,13 @@ type CassandraRepository struct {
 }
 
 func NewCassandraRepository(session wrapper.Holder) (*CassandraRepository, error) {
-	log.Debugf("getting new oauth cassandra repo")
-
 	return &CassandraRepository{session: session}, nil
 
 }
 
 // FindAll fetches all the OAuth Servers available
 func (r *CassandraRepository) FindAll() ([]*OAuth, error) {
-	log.Infof("finding all oauth servers")
+	log.Debugf("finding all oauth servers")
 
 	var results []*OAuth
 
@@ -47,7 +45,7 @@ func (r *CassandraRepository) FindAll() ([]*OAuth, error) {
 
 // FindByName find an OAuth Server by name
 func (r *CassandraRepository) FindByName(name string) (*OAuth, error) {
-	log.Infof("finding: %s", name)
+	log.Debugf("finding: %s", name)
 
 	var savedOauth string
 	var oauth *OAuth
@@ -72,9 +70,7 @@ func (r *CassandraRepository) FindByName(name string) (*OAuth, error) {
 // Add add a new OAuth Server to the repository
 // Add is the same as Save because Cassandra only upserts and I didn't want to write an existence checker
 func (r *CassandraRepository) Add(oauth *OAuth) error {
-	log.Infof("adding: %s", oauth.Name)
-
-	log.Infof("oauth is: %v", *oauth)
+	log.Debugf("adding: %s", oauth.Name)
 
 	saveOauth, err := json.Marshal(oauth)
 	if err != nil {
@@ -98,9 +94,7 @@ func (r *CassandraRepository) Add(oauth *OAuth) error {
 
 // Save saves OAuth Server to the repository
 func (r *CassandraRepository) Save(oauth *OAuth) error {
-	log.Infof("adding: %s", oauth.Name)
-
-	log.Infof("oauth is: %v", *oauth)
+	log.Debugf("adding: %s", oauth.Name)
 
 	saveOauth, err := json.Marshal(oauth)
 	if err != nil {
@@ -124,7 +118,7 @@ func (r *CassandraRepository) Save(oauth *OAuth) error {
 
 // Remove removes an OAuth Server from the repository
 func (r *CassandraRepository) Remove(name string) error {
-	log.Infof("removing: %s", name)
+	log.Debugf("removing: %s", name)
 
 	err := r.session.GetSession().Query(
 		"DELETE FROM oauth WHERE name = ?", name).Exec()
