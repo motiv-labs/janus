@@ -9,14 +9,14 @@ jobs:
     steps:
       - checkout
 
-      - run:
-          name: Running Unit Tests
-          command: |
-            echo "Running unit tests and building binary"
+#      - run:
+#          name: Running Unit Tests
+#          command: |
+#            echo "Running unit tests and building binary"
 #            go mod download
 #            make all
       - run:
-          name: Running Integration Test and Push Images
+          name: Build and Push Images
           command: |
             echo "Logging in to Docker Hub"
             docker login --username ${DOCKERHUB_USERNAME} --password ${DOCKERHUB_PASSWORD}
@@ -27,8 +27,7 @@ jobs:
             echo $IMAGE_NAME
 
             echo "Building Service Image"
-            cd dist
-            docker build -f ../Dockerfile -t ${IMAGE_NAME} -t motivlabs/janus:latest .
+            docker build -f ./Dockerfile --target=prod -t ${IMAGE_NAME} -t motivlabs/janus:latest .
             echo "Finished Building Service Image"
 
             echo "Pushing Service Images to Docker Hub"

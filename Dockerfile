@@ -1,9 +1,18 @@
-# run this from the dist folder of janus after running make build or make all
-FROM ubuntu:20.04
+####### Start from a golang base image ###############
+FROM golang:1.13.6-buster as builder
+LABEL maintainer="Motiv Labs <dev@motivsolutions.com>"
+WORKDIR /app
+COPY ./ ./
 
-COPY schema.sql /usr/local/bin
+RUN go mod download
 
-ADD janus /bin/janus
+RUN make build
+
+FROM ubuntu:20.04 as prod
+
+COPY --from=builder /app/cassandra/schema.sql /usr/local/bin
+
+COPY --from=builder /app/dist/janus /bin/janus
 RUN chmod a+x /bin/janus && \
     mkdir -p /etc/janus/apis && \
     mkdir -p /etc/janus/auth
