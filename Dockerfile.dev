@@ -1,3 +1,4 @@
+# run this from the root of janus
 FROM golang:1.14-alpine AS build-debug-common
 
 ARG VERSION='0.0.1-docker'

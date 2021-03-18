@@ -1,3 +1,4 @@
+# run this from the dist folder of janus after running make build or make all
 FROM ubuntu:20.04
 
 COPY schema.sql /usr/local/bin
