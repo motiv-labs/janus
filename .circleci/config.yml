@@ -13,7 +13,7 @@ jobs:
           name: Running Unit Tests
           command: |
             echo "Running unit tests and building binary"
-            make run all
+            make all
       - run:
           name: Running Integration Test and Push Images
           command: |
