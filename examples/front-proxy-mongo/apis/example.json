@@ -1,14 +1,23 @@
-{
-    "name" : "my-endpoint",
-    "active" : true,
-    "proxy" : {
-        "listen_path" : "/example/*",
-        "upstreams" : {
-            "balancing": "roundrobin",
-            "targets": [
-                {"target": "http://www.mocky.io/v2/595625d22900008702cd71e8"}
-            ]
+[
+    {
+        "name" : "example",
+        "active" : true,
+        "proxy" : {
+            "preserve_host" : false,
+            "listen_path" : "/example/*",
+            "upstreams" : {
+                "balancing": "roundrobin",
+                "targets": [
+                    {"target": "http://service1:8080/"}
+                ]
+            },
+            "strip_path" : false,
+            "append_path" : false,
+            "methods" : ["GET"]
         },
-        "methods" : ["GET"]
+        "health_check": {
+            "url": "http://service1:8080/status",
+            "timeout": 3
+        }
     }
-}
+]

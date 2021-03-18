@@ -22,12 +22,12 @@ services:
         - "27017:27017"
 
   # This container is just a helper to seed the database
-#  mongo-seed:
-#    build:
-#      context: .
-#      dockerfile: seed.Dockerfile
-#    depends_on:
-#      - janus-database
+  mongo-seed:
+    build:
+      context: .
+      dockerfile: seed.Dockerfile
+    depends_on:
+      - janus-database
 
   service1:
     image: rodolpheche/wiremock

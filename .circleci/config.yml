@@ -45,4 +45,4 @@ workflows:
           filters:
             branches:
               only:
-                - janus#463-cassandra-repo
+                - master
