@@ -12,7 +12,7 @@ jobs:
       - run:
           name: Running Unit Tests
           command: |
-#            echo "Running unit tests and building binary"
+            echo "Running unit tests and building binary"
 #            go mod download
 #            make all
       - run:
