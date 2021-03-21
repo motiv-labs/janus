@@ -98,7 +98,10 @@ func (q queryRetry) Scan(dest ...interface{}) error {
 	for attempts <= retries {
 		//we will try to run the method several times until attempts is met
 		err = q.goCqlQuery.Scan(dest...)
-		if err != nil {
+		if err.Error() == "not found" {
+			log.Warnf("returning not found")
+			return err
+		} else if err != nil {
 			log.Warnf("error when running Scan(): %v, attempt: %d / %d", err, attempts, retries)
 
 			// incremental sleep
