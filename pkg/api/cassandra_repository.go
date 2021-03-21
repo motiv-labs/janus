@@ -136,17 +136,17 @@ func (r *CassandraRepository) FindAll() ([]*Definition, error) {
 
 	var savedDef string
 
-	for iter.Scan(&savedDef) {
+	err := iter.ScanAndClose(func() bool {
 		var definition *Definition
 		err := json.Unmarshal([]byte(savedDef), &definition)
 		if err != nil {
 			log.Errorf("error trying to unmarshal definition json: %v", err)
-			return nil, err
+			return false
 		}
 		results = append(results, definition)
-	}
+		return true
+	}, &savedDef)
 
-	err := iter.Close()
 	if err != nil {
 		log.Errorf("error getting all definitions: %v", err)
 	}

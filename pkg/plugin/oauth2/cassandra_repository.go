@@ -26,17 +26,17 @@ func (r *CassandraRepository) FindAll() ([]*OAuth, error) {
 
 	var savedOauth string
 
-	for iter.Scan(&savedOauth) {
+	err := iter.ScanAndClose(func() bool {
 		var oauth *OAuth
 		err := json.Unmarshal([]byte(savedOauth), &oauth)
 		if err != nil {
 			log.Errorf("error trying to unmarshal oauth json: %v", err)
-			return nil, err
+			return false
 		}
 		results = append(results, oauth)
-	}
-
-	err := iter.Close()
+		return true
+	}, &savedOauth)
+	
 	if err != nil {
 		log.Errorf("error getting all oauths: %v", err)
 	}
