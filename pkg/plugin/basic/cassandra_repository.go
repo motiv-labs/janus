@@ -29,14 +29,14 @@ func (r *CassandraRepository) FindAll() ([]*User, error) {
 	var username string
 	var password string
 
-	for iter.Scan(&username, &password) {
+	err := iter.ScanAndClose(func() bool {
 		var user User
 		user.Username = username
 		user.Password = password
 		results = append(results, &user)
-	}
+		return true
+	}, &username, &password)
 
-	err := iter.Close()
 	if err != nil {
 		log.Errorf("error getting all oauths: %v", err)
 	}
@@ -51,14 +51,11 @@ func (r *CassandraRepository) FindByUsername(username string) (*User, error) {
 
 	var user User
 
-	iter := r.session.GetSession().Query(
+	err := r.session.GetSession().Query(
 		"SELECT username, password " +
 			"FROM user " +
 			"WHERE username = ?",
-		username).Iter()
-
-	iter.Scan(&user.Username, &user.Password)
-	err := iter.Close()
+		username).Scan(&user.Username, &user.Password)
 
 	if err != nil {
 		log.Errorf("error selecting user %s: %v", username, err)
