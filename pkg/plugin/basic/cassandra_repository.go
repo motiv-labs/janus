@@ -57,11 +57,13 @@ func (r *CassandraRepository) FindByUsername(username string) (*User, error) {
 			"WHERE username = ?",
 		username).Scan(&user.Username, &user.Password)
 
-	if err != nil {
+	if err.Error() == "not found"{
+		log.Debugf("user not found")
+		err = ErrUserNotFound
+	} else if err != nil {
 		log.Errorf("error selecting user %s: %v", username, err)
 	} else {
 		log.Debugf("successfully found user %s", username)
-		err = ErrUserNotFound
 	}
 
 	return &user, err
