@@ -25,6 +25,7 @@ const (
 
 var schemaPath = "/usr/local/bin"
 var schemaFileName = "schema.sql"
+var clusterConsistency = gocql.Quorum
 
 // Package level initialization.
 //
@@ -43,6 +44,7 @@ func init() {
 type sessionInitializer struct {
 	clusterHostName string
 	keyspace        string
+	consistency gocql.Consistency
 }
 
 // sessionHolder stores a cassandra session
@@ -52,9 +54,13 @@ type sessionHolder struct {
 
 // New return a cassandra session Initializer
 func New(clusterHostName, keyspace string) Initializer {
+	log.Debugf("in new")
+	consistencyEnv := getenv("CLUSTER_CONSISTENCY", clusterConsistency.String())
+	consistency := checkConsistency(consistencyEnv)
 	return sessionInitializer{
 		clusterHostName: clusterHostName,
 		keyspace:        keyspace,
+		consistency: consistency,
 	}
 }
 
@@ -117,6 +123,9 @@ func newKeyspaceSession(clusterHostName, keyspace string, clusterTimeout time.Du
 	cluster := gocql.NewCluster(clusterHostName)
 	cluster.Keyspace = keyspace
 	cluster.Timeout = clusterTimeout
+	consistencyEnv := getenv("CLUSTER_CONSISTENCY", clusterConsistency.String())
+	consistency := checkConsistency(consistencyEnv)
+	cluster.Consistency = consistency
 	return cluster.CreateSession()
 }
 
@@ -151,7 +160,6 @@ func createAppKeyspaceIfRequired(clusterHostName, systemKeyspace, appKeyspace st
 
 	for _, stmt := range stmtList {
 		log.Debugf("Executing statement: %s", stmt)
-
 		// New session for use statement
 		newKeyspace, isCaseSensitive := getKeyspaceNameFromUseStmt(stmt)
 		if newKeyspace != "" {
@@ -172,12 +180,13 @@ func createAppKeyspaceIfRequired(clusterHostName, systemKeyspace, appKeyspace st
 		// execute statement
 		err = session.Query(stmt).Exec()
 		if err != nil {
+			log.Error("statement error: %v", err)
 			return err
 		}
 		log.Debug("Statement executed")
 	}
 
-	log.Debugf("Created new keyspace: %s", appKeyspace)
+	log.Debugf("app keyspace set to: %s", appKeyspace)
 	return nil
 }
 
@@ -308,4 +317,39 @@ func getenv(envVariable string, defaultValue string) string {
 	}
 
 	return returnValue
+}
+
+func checkConsistency(envVar string) gocql.Consistency {
+	switch strings.ToLower(envVar) {
+	case "any":
+		log.Debugf("consistency set to any")
+		return gocql.Any
+	case "one":
+		log.Debugf("consistency set to one")
+		return gocql.One
+	case "two":
+		log.Debugf("consistency set to two")
+		return gocql.Two
+	case "three":
+		log.Debugf("consistency set to three")
+		return gocql.Three
+	case "quorum":
+		log.Debugf("consistency set to quorum")
+		return gocql.Quorum
+	case "all":
+		log.Debugf("consistency set to all")
+		return gocql.All
+	case "localquorum":
+		log.Debugf("consistency set to local quorum")
+		return gocql.LocalQuorum
+	case "eachquorum":
+		log.Debugf("consistency set to each quorum")
+		return gocql.EachQuorum
+	case "localone":
+		log.Debugf("consistency set to local one")
+		return gocql.LocalOne
+	default:
+		log.Debugf("consistency set to %s", clusterConsistency.String())
+		return clusterConsistency
+	}
 }
