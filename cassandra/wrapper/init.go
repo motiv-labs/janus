@@ -120,7 +120,6 @@ func (holder sessionHolder) CloseSession() {
 // newKeyspaceSession returns a new session for the given keyspace
 func newKeyspaceSession(clusterHostName, keyspace string, clusterTimeout time.Duration) (*gocql.Session, error) {
 	log.Infof("Creating new cassandra session for cluster hostname: %s and keyspace: %s", clusterHostName, keyspace)
-	log.Debugf("in newKeyspaceSession")
 	cluster := gocql.NewCluster(clusterHostName)
 	cluster.Keyspace = keyspace
 	cluster.Timeout = clusterTimeout
@@ -161,18 +160,11 @@ func createAppKeyspaceIfRequired(clusterHostName, systemKeyspace, appKeyspace st
 
 	for _, stmt := range stmtList {
 		log.Debugf("Executing statement: %s", stmt)
-		log.Debugf("at the top of for loop")
-		log.Debugf("statment is: %s", stmt)
 		// New session for use statement
 		newKeyspace, isCaseSensitive := getKeyspaceNameFromUseStmt(stmt)
 		if newKeyspace != "" {
-			log.Debugf("in first if: newKeyspace is not empty")
-			log.Debugf("current keyspace is: %s", currentKeyspace)
-			log.Debugf("newKeyspace is: %s", newKeyspace)
 			if (isCaseSensitive && newKeyspace != currentKeyspace) || (!isCaseSensitive &&
 				strings.ToLower(newKeyspace) != strings.ToLower(currentKeyspace)) {
-				log.Debugf("in second if: setting new keyspace")
-				log.Debugf("isCaseSensitive is: %v", isCaseSensitive)
 				log.Infof("about to create a session with a 5 minute timeout to set keyspace: %s", newKeyspace)
 				session, err = newKeyspaceSession(clusterHostName, newKeyspace, 5*time.Minute) //5 minutes
 				if err != nil {
@@ -182,14 +174,11 @@ func createAppKeyspaceIfRequired(clusterHostName, systemKeyspace, appKeyspace st
 				sessionList = append(sessionList, session)
 				log.Debugf("Changed to new keyspace: %s", newKeyspace)
 			}
-			log.Debugf("at continue statement")
 			continue
 		}
 
 		// execute statement
-		log.Debugf("about to execute statement")
 		err = session.Query(stmt).Exec()
-		log.Debugf("executed statement")
 		if err != nil {
 			log.Error("statement error: %v", err)
 			return err
