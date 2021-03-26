@@ -36,6 +36,10 @@ jobs:
             docker push motivlabs/janus:latest
             echo "Pushed Latest Image Name"
 
+            echo "Running Script to Update Impulse Docker-Compose with Correct Image"
+            .circleci/update-impulse.sh "janus" ${IMAGE_NAME} ${GITHUB_OAUTH}
+            echo "Impulse Updated"
+
 workflows:
   version: 2
   build:

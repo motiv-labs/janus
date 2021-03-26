@@ -36,7 +36,6 @@ func (r *CassandraRepository) FindAll() ([]*OAuth, error) {
 		results = append(results, oauth)
 		return true
 	}, &savedOauth)
-	
 	if err != nil {
 		log.Errorf("error getting all oauths: %v", err)
 	}
