@@ -12,15 +12,13 @@ set -x
 # echo running script
 #
 # echo getting file from GITHUB
-# curl --user $3:$4 "https://api.bitbucket.org/2.0/repositories/motivlabs/impulse/src/master/docker-tools/docker-compose.yml" > docker-compose.yml
-curl -H 'Authorization: token '"$3"'' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/motiv-labs/impulse/contents/docker-tools/docker-compose.yml
+curl -H 'Authorization: token '"$3"'' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/motiv-labs/impulse/contents/docker-tools/compose-template/config/conf
 
 # echo search and replace
-sed -i "s+motivlabs/$1:.*+$2+g" docker-compose.yml
+sed -i "s+motivlabs/$1:.*+$2+g" conf
 # echo pushing file to GITHUB
 
-# curl --user $3:$4 "https://api.bitbucket.org/2.0/repositories/motivlabs/impulse/src" -F /docker-tools/docker-compose.yml=@docker-compose.yml -F message="updated $1 image"
-curl -X PUT -H 'Authorization: token '"$3"'' -d '{"message":"updated janus image","content":"'"$(base64 -w0 docker-compose.yml)"'","sha":'"$(curl -s -X GET -H 'Authorization: token '"$3"'' https://api.github.com/repos/motiv-labs/impulse/contents/docker-tools/docker-compose.yml | jq .sha)"'}' -L https://api.github.com/repos/motiv-labs/impulse/contents/docker-tools/docker-compose.yml
+curl -X PUT -H 'Authorization: token '"$3"'' -d '{"message":"updated janus image","content":"'"$(base64 -w0 conf)"'","sha":'"$(curl -s -X GET -H 'Authorization: token '"$3"'' https://api.github.com/repos/motiv-labs/impulse/contents/docker-tools/compose-template/config/conf | jq .sha)"'}' -L https://api.github.com/repos/motiv-labs/impulse/contents/docker-tools/compose-template/config/conf
 
 # update googlecloud image
 curl -H 'Authorization: token '"$3"'' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/motiv-labs/impulse-googlecloud/contents/impulse/janus-deployment.yaml
