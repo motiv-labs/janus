@@ -36,8 +36,11 @@ jobs:
             docker push motivlabs/janus:latest
             echo "Pushed Latest Image Name"
 
+            COMMIT_MESSAGE=$(git log --format=oneline -n 1 $CIRCLE_SHA1)
+            echo "got commit message: ${COMMIT_MESSAGE}"
+
             echo "Running Script to Update Impulse Docker-Compose with Correct Image"
-            .circleci/update-impulse.sh "janus" ${IMAGE_NAME} ${GITHUB_OAUTH}
+            .circleci/update-impulse.sh "janus" ${IMAGE_NAME} ${GITHUB_OAUTH} "${COMMIT_MESSAGE}"
             echo "Impulse Updated"
 
 workflows:

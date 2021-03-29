@@ -18,7 +18,13 @@ curl -H 'Authorization: token '"$3"'' -H 'Accept: application/vnd.github.v3.raw'
 sed -i "s+motivlabs/$1:.*+$2+g" astro.conf
 # echo pushing file to GITHUB
 
-curl -X PUT -H 'Authorization: token '"$3"'' -d '{"message":"updated janus image","content":"'"$(base64 -w0 astro.conf)"'","sha":'"$(curl -s -X GET -H 'Authorization: token '"$3"'' https://api.github.com/repos/motiv-labs/impulse/contents/docker-tools/compose-template/config/astro.conf | jq .sha)"'}' -L https://api.github.com/repos/motiv-labs/impulse/contents/docker-tools/compose-template/config/astro.conf
+if [[ $(echo "$4" | grep -c -i "#nosmoke") == 1 ]]; then
+  echo "no smoke"
+  curl -X PUT -H 'Authorization: token '"$3"'' -d '{"message":"[skip ci] updated janus image","content":"'"$(base64 -w0 astro.conf)"'","sha":'"$(curl -s -X GET -H 'Authorization: token '"$3"'' https://api.github.com/repos/motiv-labs/impulse/contents/docker-tools/compose-template/config/astro.conf | jq .sha)"'}' -L https://api.github.com/repos/motiv-labs/impulse/contents/docker-tools/compose-template/config/astro.conf
+else
+  echo "smoke"
+  curl -X PUT -H 'Authorization: token '"$3"'' -d '{"message":"updated janus image","content":"'"$(base64 -w0 astro.conf)"'","sha":'"$(curl -s -X GET -H 'Authorization: token '"$3"'' https://api.github.com/repos/motiv-labs/impulse/contents/docker-tools/compose-template/config/astro.conf | jq .sha)"'}' -L https://api.github.com/repos/motiv-labs/impulse/contents/docker-tools/compose-template/config/astro.conf
+fi
 
 # update googlecloud image
 curl -H 'Authorization: token '"$3"'' -H 'Accept: application/vnd.github.v3.raw' -O -L https://api.github.com/repos/motiv-labs/impulse-googlecloud/contents/impulse/janus-deployment.yaml
