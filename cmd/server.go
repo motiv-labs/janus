@@ -13,6 +13,7 @@ import (
 	_ "github.com/hellofresh/janus/pkg/plugin/basic"
 	_ "github.com/hellofresh/janus/pkg/plugin/bodylmt"
 	_ "github.com/hellofresh/janus/pkg/plugin/cb"
+	_ "github.com/hellofresh/janus/pkg/plugin/company"
 	_ "github.com/hellofresh/janus/pkg/plugin/compression"
 	_ "github.com/hellofresh/janus/pkg/plugin/cors"
 	_ "github.com/hellofresh/janus/pkg/plugin/oauth2"

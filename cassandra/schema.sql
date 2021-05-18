@@ -15,3 +15,8 @@ CREATE TABLE IF NOT EXISTS janus.oauth (
     name text,
     oauth text,
     PRIMARY KEY (name));
+
+CREATE TABLE IF NOT EXISTS janus.company (
+    username text,
+    company text,
+    PRIMARY KEY (username));
