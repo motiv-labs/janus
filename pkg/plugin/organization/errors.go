@@ -1,4 +1,4 @@
-package company
+package organization
 
 import (
 	"net/http"

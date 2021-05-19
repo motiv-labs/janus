@@ -1,4 +1,4 @@
-package company
+package organization
 
 import (
 	"encoding/json"
@@ -97,26 +97,33 @@ func (c *Handler) Update() http.HandlerFunc {
 // Create is the create handler
 func (c *Handler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		company := &Company{}
+		organization := &Organization{}
 
-		err := json.NewDecoder(r.Body).Decode(company)
+		err := json.NewDecoder(r.Body).Decode(organization)
 		if nil != err {
 			errors.Handler(w, r, err)
 			return
 		}
 
+		if organization.Organization == "" {
+			err = errors.New(http.StatusBadRequest, "Invalid request body")
+			log.WithError(err).Error("No organization provided. Must provide an organization.")
+			errors.Handler(w, r, err)
+			return
+		}
+
 		_, span := trace.StartSpan(r.Context(), "repo.FindByUsername")
-		_, err = c.repo.FindByUsername(company.Username)
+		_, err = c.repo.FindByUsername(organization.Username)
 		span.End()
 
 		if err != ErrUserNotFound {
-			log.WithError(err).Warn("An error occurred when looking for an company")
+			log.WithError(err).Warn("An error occurred when looking for an organization")
 			errors.Handler(w, r, ErrUserExists)
 			return
 		}
 
 		_, span = trace.StartSpan(r.Context(), "repo.Add")
-		err = c.repo.Add(company)
+		err = c.repo.Add(organization)
 		span.End()
 
 		if err != nil {
@@ -124,7 +131,7 @@ func (c *Handler) Create() http.HandlerFunc {
 			return
 		}
 
-		w.Header().Add("Location", fmt.Sprintf("/credentials/company/%s", company.Username))
+		w.Header().Add("Location", fmt.Sprintf("/credentials/organization/%s", organization.Username))
 		w.WriteHeader(http.StatusCreated)
 	}
 }
