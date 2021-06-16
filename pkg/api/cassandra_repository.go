@@ -43,10 +43,10 @@ func NewCassandraRepository(dsn string, refreshTime time.Duration) (*CassandraRe
 	}
 
 	// Wait for Cassandra to start, setup Cassandra keyspace if required
-	wrapper.Initialize(cass.ClusterHostName, cass.SystemKeyspace, cass.AppKeyspace, cass.Timeout*time.Second)
+	wrapper.Initialize(cass.SystemKeyspace, cass.AppKeyspace, cass.Timeout*time.Second)
 
 	// Getting a cassandra connection initializer
-	initializer := wrapper.New(cass.ClusterHostName, cass.AppKeyspace)
+	initializer := wrapper.New(cass.AppKeyspace)
 
 	// Starting a new cassandra Session
 	sessionHolder, err := initializer.NewSession()
