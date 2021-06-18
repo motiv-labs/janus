@@ -18,7 +18,6 @@ import (
 const (
 	schemaDefaultPath     = "/usr/local/bin"
 	schemaDefaultFileName = "schema.sql"
-	defaultCassandraDomain = "db"
 	defaultCassandraClusterConsistency = gocql.Quorum
 	defaultUsername = ""
 	defaultPassword = ""
@@ -27,7 +26,6 @@ const (
 	envCassandraClusterConsistency = "CLUSTER_CONSISTENCY"
 	envCassandraSchemaPath     = "CASSANDRA_SCHEMA_PATH"
 	envCassandraSchemaFileName = "CASSANDRA_SCHEMA_FILE_NAME"
-	envCassandraDomain = "CASSANDRA_DOMAIN_NAME"
 	envUsername = "CASSANDRA_USERNAME"
 	envPassword = "CASSANDRA_PASSWORD"
 	envSSLCert = "CASSANDRA_SSL_CERT"
@@ -36,7 +34,6 @@ const (
 var schemaPath = "/usr/local/bin"
 var schemaFileName = "schema.sql"
 var clusterConsistency = gocql.Quorum
-var domain = "db"
 var username = ""
 var password = ""
 var sslCert = ""
@@ -49,7 +46,6 @@ func init() {
 	// reading and setting up environment variables
 	schemaPath = getenv(envCassandraSchemaPath, schemaDefaultPath)
 	schemaFileName = getenv(envCassandraSchemaFileName, schemaDefaultFileName)
-	domain = getenv(envCassandraDomain, defaultCassandraDomain)
 	clusterConsistency = checkConsistency(getenv(envCassandraClusterConsistency, defaultCassandraClusterConsistency.String()))
 	username = getenvnolog(envUsername, defaultUsername)
 	password = getenvnolog(envPassword, defaultPassword)
@@ -57,7 +53,6 @@ func init() {
 
 	log.Debugf("Got schema path: %s", schemaPath)
 	log.Debugf("Got schema file name: %s", schemaFileName)
-	log.Debugf("Got domain name: %s", domain)
 	log.Debugf("Got cluster consistency: %s", clusterConsistency)
 	log.Debugf("Got username: %s", username)
 }
@@ -78,11 +73,11 @@ type sessionHolder struct {
 }
 
 // New return a cassandra session Initializer
-func New(keyspace string) Initializer {
+func New(clusterHostName, keyspace string) Initializer {
 	log.Debugf("in new")
 
 	return sessionInitializer{
-		clusterHostName:     domain,
+		clusterHostName:     clusterHostName,
 		clusterHostUsername: username,
 		clusterHostPassword: password,
 		clusterHostSSLCert:  sslCert,
@@ -99,9 +94,9 @@ func New(keyspace string) Initializer {
 //	systemKeyspace: System keyspace
 //	appKeyspace: Application keyspace
 //	connectionTimeout: timeout to get the connection
-func Initialize(systemKeyspace, appKeyspace string, connectionTimeout time.Duration) {
+func Initialize(clusterHostName, systemKeyspace, appKeyspace string, connectionTimeout time.Duration) {
 	log.Debug("Setting up cassandra db")
-	connectionHolder, err := loop(connectionTimeout, New(systemKeyspace), "cassandra-db")
+	connectionHolder, err := loop(connectionTimeout, New(clusterHostName, systemKeyspace), "cassandra-db")
 	if err != nil {
 		log.Fatalf("error connecting to Cassandra db: %v", err)
 		panic(err)
@@ -109,7 +104,7 @@ func Initialize(systemKeyspace, appKeyspace string, connectionTimeout time.Durat
 	defer connectionHolder.CloseSession()
 
 	log.Debug("Setting up cassandra keyspace")
-	err = createAppKeyspaceIfRequired(systemKeyspace, appKeyspace)
+	err = createAppKeyspaceIfRequired(clusterHostName, systemKeyspace, appKeyspace)
 	if err != nil {
 		log.Fatalf("error creating keyspace for Cassandra db: %v", err)
 		panic(err)
@@ -168,7 +163,7 @@ func newKeyspaceSession(clusterHostName, keyspace, username, password, sslCert s
 }
 
 // createAppKeyspaceIfRequired creates the keyspace for the app if it doesn't exist
-func createAppKeyspaceIfRequired(systemKeyspace, appKeyspace string) error {
+func createAppKeyspaceIfRequired(clusterHostName, systemKeyspace, appKeyspace string) error {
 	// Getting the schema file if exist
 	stmtList, err := getStmtsFromFile(path.Join(schemaPath, schemaFileName))
 	if err != nil {
@@ -179,7 +174,7 @@ func createAppKeyspaceIfRequired(systemKeyspace, appKeyspace string) error {
 	}
 
 	log.Info("about to create a session with a 5 minute timeout to allow for all schema creation")
-	session, err := newKeyspaceSession(domain, systemKeyspace, username, password, sslCert, clusterConsistency, 5*time.Minute)
+	session, err := newKeyspaceSession(clusterHostName, systemKeyspace, username, password, sslCert, clusterConsistency, 5*time.Minute)
 	if err != nil {
 		return err
 	}
@@ -204,7 +199,7 @@ func createAppKeyspaceIfRequired(systemKeyspace, appKeyspace string) error {
 			if (isCaseSensitive && newKeyspace != currentKeyspace) || (!isCaseSensitive &&
 				strings.ToLower(newKeyspace) != strings.ToLower(currentKeyspace)) {
 				log.Infof("about to create a session with a 5 minute timeout to set keyspace: %s", newKeyspace)
-				session, err = newKeyspaceSession(domain, newKeyspace, username, password, sslCert, clusterConsistency, 5*time.Minute) //5 minutes
+				session, err = newKeyspaceSession(clusterHostName, newKeyspace, username, password, sslCert, clusterConsistency, 5*time.Minute) //5 minutes
 				if err != nil {
 					return err
 				}
