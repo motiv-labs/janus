@@ -213,7 +213,7 @@ func createAppKeyspaceIfRequired(clusterHostName, systemKeyspace, appKeyspace st
 		// execute statement
 		err = session.Query(stmt).Exec()
 		if err != nil {
-			log.Error("statement error: %v", err)
+			log.Errorf("statement error: %v", err)
 			return err
 		}
 		log.Debug("Statement executed")

@@ -27,6 +27,7 @@
     * [Conclusion](proxy/conclusion.md)
 * [Plugins](plugins/README.md)
     * [Basic](plugins/basic.md)
+    * [Organization](plugins/organization_auth.md)
     * [Body Limit](plugins/body_limit.md)
     * [Circuit Breaker](plugins/cb.md)
     * [Compression](plugins/compression.md)

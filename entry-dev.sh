@@ -11,5 +11,5 @@ echo "compile finished"
 if [ "$debug" == 1 ]; then
   dlv --listen=:40000 --headless=true --continue --accept-multiclient --api-version=2 exec ./main start
 else
-  ./main
+  ./main start
 fi
