@@ -43,10 +43,10 @@ func NewCassandraRepository(dsn string, refreshTime time.Duration) (*CassandraRe
 	}
 
 	// Wait for Cassandra to start, setup Cassandra keyspace if required
-	wrapper.Initialize(cass.ClusterHostName, cass.SystemKeyspace, cass.AppKeyspace, cass.Timeout*time.Second)
+	wrapper.Initialize(clusterHost, systemKeyspace, appKeyspace, time.Duration(connectionTimeout)*time.Second)
 
 	// Getting a cassandra connection initializer
-	initializer := wrapper.New(cass.ClusterHostName, cass.AppKeyspace)
+	initializer := wrapper.New(clusterHost, appKeyspace)
 
 	// Starting a new cassandra Session
 	sessionHolder, err := initializer.NewSession()
@@ -170,9 +170,9 @@ func (r *CassandraRepository) add(definition *Definition) error {
 	}
 
 	err = r.Session.GetSession().Query(
-		"UPDATE api_definition " +
-		"SET definition = ? " +
-		"WHERE name = ?",
+		"UPDATE api_definition "+
+			"SET definition = ? "+
+			"WHERE name = ?",
 		saveDef, definition.Name).Exec()
 
 	if err != nil {

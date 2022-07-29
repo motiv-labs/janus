@@ -14,7 +14,7 @@ RUN apk add --update \
     bash \
     curl \
     py-pip
-RUN go get github.com/go-delve/delve/cmd/dlv
+RUN go get github.com/go-delve/delve/cmd/dlv@v1.6.0
 
 RUN apk add --update bash make git
 RUN export JANUS_BUILD_ONLY_DEFAULT=1 && \
