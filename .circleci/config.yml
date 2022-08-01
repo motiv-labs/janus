@@ -4,7 +4,7 @@ jobs:
     #  - image: docker/compose:1.25.3
 
     machine:
-      image: ubuntu-1604:201903-01
+      image: ubuntu-2004:202010-01
 
     steps:
       - checkout
@@ -20,6 +20,7 @@ jobs:
           command: |
             echo "Logging in to Docker Hub"
             docker login --username ${DOCKERHUB_USERNAME} --password ${DOCKERHUB_PASSWORD}
+            sudo docker login --username ${DOCKERHUB_USERNAME} --password ${DOCKERHUB_PASSWORD}
 
             echo "Setting Image Name"
             IMAGE_NAME="motivlabs/janus:$(date +%Y%m%d%H%M%S)-${CIRCLE_SHA1:0:6}"
