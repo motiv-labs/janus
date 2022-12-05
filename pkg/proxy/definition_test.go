@@ -61,7 +61,7 @@ func TestDefinition(t *testing.T) {
 func testNewDefinitions(t *testing.T) {
 	definition := NewDefinition()
 
-	assert.Equal(t, []string{"GET"}, definition.Methods)
+	assert.Equal(t, []string{"ALL"}, definition.Methods)
 	assert.NotNil(t, definition)
 }
 
