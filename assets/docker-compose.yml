@@ -1,43 +1,16 @@
 # This file is used to run integration tests on travis
 version: '3'
 services:
-
-  mongo:
-    image: mongo:3
+  gateway:
     ports:
-      - "27017:27017"
-    healthcheck:
-      test: "mongo localhost:27017/test --quiet --eval 'quit(db.runCommand({ ping: 1 }).ok ? 0 : 2)'"
-      interval: 10s
-      timeout: 5s
-      retries: 5
-
-  upstreams:
-    image: rodolpheche/wiremock:2.27.1-alpine
-    ports:
-      - '9089:8080'
-
-  auth-service:
-    image: rodolpheche/wiremock:2.27.1-alpine
-    ports:
-      - '9088:8080'
-
-  jaeger:
-    image: jaegertracing/all-in-one
-    environment:
-      COLLECTOR_ZIPKIN_HTTP_PORT: 9411
-    ports:
-      - "5775:5775/udp"
-      - "6831:6831/udp"
-      - "6832:6832/udp"
-      - "5778:5778"
-      - "16686:16686"
-      - "14268:14268"
-
-  zipkin:
-    image: openzipkin/zipkin
-    environment:
-      STORAGE_TYPE: mem
-      JAVA_OPTS: -Dlogging.level.zipkin=DEBUG
-    ports:
-      - 9411:9411
+      - "8080:8080"
+      - "8081:8081"
+    container_name: "gateway"
+    build:
+      context: ../
+      dockerfile: Dockerfile
+    volumes:
+      - ${PWD}/config/config.yaml:/config/config.yaml
+      - .janus.toml:/etc/janus/janus.toml
+      - ./apis:/etc/janus/apis
+      - ./auth:/etc/janus/auth

@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -71,6 +72,18 @@ func NewKeyExistsMiddleware(manager Manager) func(http.Handler) http.Handler {
 			statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "malformed"}, nil, true)
 
 			accessToken := parts[1]
+
+			claims, err := ExtractClaims(accessToken)
+			if err != nil {
+				errors.Handler(w, r, err)
+				return
+			}
+
+			if len(claims.Roles) <= 0 {
+				errors.Handler(w, r, fmt.Errorf("No roles have been set"))
+				return
+			}
+
 			keyExists := manager.IsKeyAuthorized(r.Context(), accessToken)
 			statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "authorized"}, nil, keyExists)
 			if keyExists {
