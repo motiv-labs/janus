@@ -2,9 +2,14 @@ package oauth2
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/hellofresh/janus/pkg/cache"
 	"github.com/hellofresh/janus/pkg/kafka"
+	"github.com/hellofresh/janus/pkg/models"
+	"io"
+	"net/http"
 	"net/url"
 	"time"
 
@@ -36,12 +41,6 @@ var (
 )
 
 func init() {
-	var kafkaConfig config.Config
-
-	_ = config.UnmarshalYAML("config/config.yaml", &kafkaConfig)
-
-	go kafka.StartFactConsumer(kafkaConfig.KafkaAddr, kafkaConfig.KafkaFactTopic, kafkaConfig.KafkaDLQTopic, kafkaConfig.KafkaConsumerGroup)
-
 	plugin.RegisterEventHook(plugin.StartupEvent, onStartup)
 	plugin.RegisterEventHook(plugin.ReloadEvent, onReload)
 	plugin.RegisterEventHook(plugin.AdminAPIStartupEvent, onAdminAPIStartup)
@@ -159,7 +158,43 @@ func setupOAuth2(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
 		return err
 	}
 
-	def.AddMiddleware(NewKeyExistsMiddleware(manager))
+	var kafkaConfig config.Config
+
+	err = config.UnmarshalYAML("./config/config.yaml", &kafkaConfig)
+	if err != nil {
+		return err
+	}
+
+	rolesCache := cache.NewRoleCache()
+
+	url := fmt.Sprintf("%s/roles", kafkaConfig.RBACUrl)
+
+	resp, err := http.DefaultClient.Get(url)
+	if err != nil {
+		return err
+	}
+
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	var roles []*models.Role
+
+	err = json.Unmarshal(body, &roles)
+	if err != nil {
+		return err
+	}
+
+	for _, role := range roles {
+		rolesCache.Set(role)
+	}
+
+	go kafka.StartFactConsumer(kafkaConfig.KafkaAddr, kafkaConfig.KafkaFactTopic, kafkaConfig.KafkaDLQTopic, kafkaConfig.KafkaConsumerGroup, rolesCache)
+
+	def.AddMiddleware(NewKeyExistsMiddleware(manager, rolesCache))
 	def.AddMiddleware(NewRevokeRulesMiddleware(jwt.NewParser(jwt.NewParserConfig(oauthServer.TokenStrategy.Leeway, signingMethods...)), oauthServer.AccessRules))
 
 	return nil

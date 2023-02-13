@@ -4,8 +4,6 @@ LABEL maintainer="Motiv Labs <dev@motivsolutions.com>"
 WORKDIR /app
 COPY ./ ./
 
-RUN go mod download
-
 RUN make build
 
 FROM ubuntu:20.04 as prod
