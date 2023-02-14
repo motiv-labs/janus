@@ -11,6 +11,7 @@ type Config struct {
 	KafkaFactTopic     string `yaml:"kafkaFactTopic"`
 	KafkaDLQTopic      string `yaml:"kafkaDLQTopic"`
 	KafkaConsumerGroup string `yaml:"kafkaConsumerGroup"`
+	RBACUrl            string `yaml:"RBACUrl"`
 }
 
 func UnmarshalYAML(path string, dest *Config) error {

@@ -1,0 +1,44 @@
+version: '3'
+services:
+
+  postgres:
+    image: postgres:9.6-alpine
+    ports:
+      - "5432"
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: test
+
+  rabbit:
+    image: rabbitmq:3.6-management-alpine
+    ports:
+      - "5672"
+      - "15672"
+
+  redis:
+    image: redis:3.2-alpine
+    ports:
+      - "6379"
+
+  mongo:
+    image: mongo:3
+    ports:
+      - "27017"
+
+  mysql:
+    image: mysql:5.7
+    ports:
+      - "3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: test
+      MYSQL_DATABASE: test
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
+
+  http:
+    image: pierreprinetti/apimock:latest
+    ports:
+      - "8080"
+    environment:
+      HOST: ":8080"

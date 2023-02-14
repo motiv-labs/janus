@@ -12,7 +12,7 @@ all: test-unit build
 
 build:
 	@echo "$(OK_COLOR)==> Building default binary... $(NO_COLOR)"
-	@CGO_ENABLED=0 go build ${GO_LINKER_FLAGS} -o "dist/janus"
+	@CGO_ENABLED=0 go build -mod=vendor ${GO_LINKER_FLAGS} -o "dist/janus"
 
 test-unit:
 	@echo "$(OK_COLOR)==> Running unit tests$(NO_COLOR)"

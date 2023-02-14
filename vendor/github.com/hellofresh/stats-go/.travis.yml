@@ -1,0 +1,16 @@
+language: go
+
+go:
+  - 1.x
+  - 1.8
+  - 1.9
+
+install:
+  - mkdir -p $GOPATH/bin
+  - go get github.com/go-playground/overalls
+  - make deps
+
+script:
+  - make test
+  - $GOPATH/bin/overalls -project=github.com/hellofresh/stats-go -covermode=count
+  - bash <(curl -s https://codecov.io/bash) -f overalls.coverprofile

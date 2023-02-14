@@ -3,6 +3,7 @@ package oauth2
 import (
 	"context"
 	"fmt"
+	"github.com/hellofresh/janus/pkg/cache"
 	"net/http"
 	"strings"
 
@@ -39,7 +40,7 @@ func (c ContextKey) String() string {
 }
 
 // NewKeyExistsMiddleware creates a new instance of KeyExistsMiddleware
-func NewKeyExistsMiddleware(manager Manager) func(http.Handler) http.Handler {
+func NewKeyExistsMiddleware(manager Manager, cache *cache.RolesCache) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Debug("Starting Oauth2KeyExists middleware")
@@ -84,6 +85,12 @@ func NewKeyExistsMiddleware(manager Manager) func(http.Handler) http.Handler {
 				return
 			}
 
+			err = RolesChecker(cache, claims.Roles, r.URL.Path, r.Method)
+			if err != nil {
+				errors.Handler(w, r, errors.New(http.StatusUnauthorized, err.Error()))
+				return
+			}
+
 			keyExists := manager.IsKeyAuthorized(r.Context(), accessToken)
 			statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "authorized"}, nil, keyExists)
 			if keyExists {
@@ -106,4 +113,24 @@ func NewKeyExistsMiddleware(manager Manager) func(http.Handler) http.Handler {
 			handler.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
+}
+
+func RolesChecker(cache *cache.RolesCache, userRoles []string, path, method string) error {
+	for _, userRole := range userRoles {
+		for _, role := range cache.Roles {
+			if role.Name != userRole {
+				continue
+			}
+
+			for _, feature := range role.Features {
+				for _, endpoint := range feature.Endpoints {
+					if endpoint.Method == method && endpoint.Path == path {
+						return nil
+					}
+				}
+			}
+		}
+	}
+
+	return fmt.Errorf("Error: Access is denied")
 }
