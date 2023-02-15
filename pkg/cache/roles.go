@@ -55,7 +55,7 @@ func (c *RolesCache) Delete(roleName string) error {
 	return nil
 }
 
-func (c *RolesCache) Updatguye(role *models.Role, roleName string) error {
+func (c *RolesCache) Update(role *models.Role, roleName string) error {
 	c.Lock()
 	defer c.Unlock()
 

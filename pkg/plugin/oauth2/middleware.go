@@ -124,7 +124,7 @@ func RolesChecker(cache *cache.RolesCache, userRoles []string, path, method stri
 
 			for _, feature := range role.Features {
 				for _, endpoint := range feature.Endpoints {
-					if endpoint.Method == method && endpoint.Path == path {
+					if endpoint.Method == method && isEndpointPathsEqual(path, endpoint.Path) {
 						return nil
 					}
 				}
@@ -133,4 +133,24 @@ func RolesChecker(cache *cache.RolesCache, userRoles []string, path, method stri
 	}
 
 	return fmt.Errorf("Error: Access is denied")
+}
+
+func isEndpointPathsEqual(reqPath, dbPath string) bool {
+	reqPathArr := strings.Split(dbPath, "/")
+	dbPathArr := strings.Split(reqPath, "/")
+	if len(reqPathArr) != len(dbPathArr) {
+		return false
+	}
+
+	for i, _ := range dbPathArr {
+		if reqPathArr[i] == "" || string(reqPathArr[i][0]) == "{" {
+			continue
+		}
+
+		if reqPathArr[i] != dbPathArr[i] {
+			return false
+		}
+	}
+
+	return true
 }
