@@ -11,15 +11,17 @@ import (
 
 var (
 	repo        Repository
-	basicRepo basic.Repository
+	basicRepo   basic.Repository
 	adminRouter router.Router
 )
 
 // Organization represents the configuration to save the user and organization pair
 type Organization struct {
-	Username string `json:"username"`
+	Username      string `json:"username"`
 	Organization  string `json:"organization"`
-	Password string `json:"password"`
+	Password      string `json:"password"`
+	Priority      int    `json:"priority"`
+	ContentPerDay int    `json:"contentPerDay"`
 }
 
 func init() {

@@ -17,7 +17,7 @@ type Repository interface {
 // CassandraRepository represents a cassandra repository
 type CassandraRepository struct {
 	session wrapper.Holder
-	hash encrypt.Hash
+	hash    encrypt.Hash
 }
 
 func NewCassandraRepository(session wrapper.Holder) (*CassandraRepository, error) {
@@ -31,20 +31,24 @@ func (r *CassandraRepository) FindAll() ([]*Organization, error) {
 
 	var results []*Organization
 
-	iter := r.session.GetSession().Query("SELECT username, organization, password FROM organization").Iter()
+	iter := r.session.GetSession().Query("SELECT username, organization, password, priority, content_per_day FROM organization").Iter()
 
 	var username string
 	var comp string
 	var pass string
+	var priority int
+	var contentPerDay int
 
 	err := iter.ScanAndClose(func() bool {
 		var organization Organization
 		organization.Username = username
 		organization.Organization = comp
 		organization.Password = pass
+		organization.Priority = priority
+		organization.ContentPerDay = contentPerDay
 		results = append(results, &organization)
 		return true
-	}, &username, &comp, &pass)
+	}, &username, &comp, &pass, &priority, &contentPerDay)
 
 	if err != nil {
 		log.Errorf("error getting all organization users: %v", err)
@@ -61,15 +65,16 @@ func (r *CassandraRepository) FindByUsername(username string) (*Organization, er
 	var organization Organization
 
 	err := r.session.GetSession().Query(
-		"SELECT username, organization, password " +
-			"FROM organization " +
+		"SELECT username, organization, password, priority, content_per_day "+
+			"FROM organization "+
 			"WHERE username = ?",
-		username).Scan(&organization.Username, &organization.Organization, &organization.Password)
+		username).Scan(&organization.Username, &organization.Organization, &organization.Password, &organization.Priority, &organization.ContentPerDay)
 
-	if err.Error() == "not found"{
-		log.Debugf("organization not found")
-		err = ErrUserNotFound
-	} else if err != nil {
+	if err != nil {
+		if err.Error() == "not found" {
+			log.Debugf("organization not found")
+			err = ErrUserNotFound
+		}
 		log.Errorf("error selecting organization user %s: %v", username, err)
 	} else {
 		log.Debugf("successfully found organization user %s", username)
@@ -89,11 +94,13 @@ func (r *CassandraRepository) Add(organization *Organization) error {
 	}
 
 	err = r.session.GetSession().Query(
-		"UPDATE organization " +
-			"SET organization = ?, " +
-			"password = ? " +
+		"UPDATE organization "+
+			"SET organization = ?, "+
+			"password = ?, "+
+			"priority = ?, "+
+			"content_per_day = ? "+
 			"WHERE username = ?",
-		organization.Organization, hash, organization.Username).Exec()
+		organization.Organization, hash, organization.Priority, organization.ContentPerDay, organization.Username).Exec()
 
 	if err != nil {
 		log.Errorf("error saving organization user %s: %v", organization.Username, err)

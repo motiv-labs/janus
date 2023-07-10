@@ -1,15 +1,16 @@
 package organization
 
 import (
+	"encoding/json"
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/plugin/basic/encrypt"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 )
 
-
-
 const organizationHeader = "X-Organization"
+const organizationConfigHeader = "X-OrganizationConfig"
+
 // NewOrganization is a HTTP organization middleware
 func NewOrganization(organization Organization, repo Repository) func(handler http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
@@ -43,6 +44,8 @@ func NewOrganization(organization Organization, repo Repository) func(handler ht
 				if username == u.Username && (hash.Compare(u.Password, password) == nil) {
 					found = true
 					organization.Organization = u.Organization
+					organization.Priority = u.Priority
+					organization.ContentPerDay = u.ContentPerDay
 					break
 				}
 			}
@@ -59,6 +62,17 @@ func NewOrganization(organization Organization, repo Repository) func(handler ht
 					r.Header.Del(organizationHeader)
 				}
 				r.Header.Add(organizationHeader, organization.Organization)
+
+				if r.Header.Get(organizationConfigHeader) != "" {
+					r.Header.Del(organizationConfigHeader)
+				}
+				bOrganization, err := json.Marshal(organization)
+				if err != nil {
+					log.WithError(err).Error("Error marshaling organization for config header")
+					errors.Handler(w, r, errors.New(http.StatusInternalServerError, "there was an error when setting config header"))
+					return
+				}
+				r.Header.Add(organizationConfigHeader, string(bOrganization))
 			} else {
 				log.Debugf("No organization associated with user")
 			}
