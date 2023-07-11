@@ -20,6 +20,10 @@ CREATE TABLE IF NOT EXISTS janus.organization (
     username text,
     password text,
     organization text,
+    PRIMARY KEY (username));
+
+CREATE TABLE IF NOT EXISTS janus.organization_config (
+    organization text,
     priority int,
     content_per_day int,
-    PRIMARY KEY (username));
+    PRIMARY KEY (organization));

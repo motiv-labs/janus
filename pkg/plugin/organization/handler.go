@@ -55,6 +55,23 @@ func (c *Handler) Show() http.HandlerFunc {
 	}
 }
 
+// ShowOrganization is the find by handler
+func (c *Handler) ShowOrganization() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		organization := router.URLParam(r, "organization")
+		_, span := trace.StartSpan(r.Context(), "repo.FindOrganization")
+		data, err := c.repo.FindOrganization(organization)
+		span.End()
+
+		if err != nil {
+			errors.Handler(w, r, err)
+			return
+		}
+
+		render.JSON(w, http.StatusOK, data)
+	}
+}
+
 // Update is the update handler
 func (c *Handler) Update() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -80,6 +97,7 @@ func (c *Handler) Update() http.HandlerFunc {
 			errors.Handler(w, r, err)
 			return
 		}
+		user.Username = username
 
 		_, span = trace.StartSpan(r.Context(), "repo.Add")
 		err = c.repo.Add(user)
@@ -97,7 +115,7 @@ func (c *Handler) Update() http.HandlerFunc {
 // Create is the create handler
 func (c *Handler) Create() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		organization := &Organization{}
+		organization := &OrganizationUserAndConfig{}
 
 		err := json.NewDecoder(r.Body).Decode(organization)
 		if nil != err {
@@ -122,8 +140,14 @@ func (c *Handler) Create() http.HandlerFunc {
 			return
 		}
 
+		organizationUser := &Organization{
+			Username:     organization.Username,
+			Organization: organization.Organization,
+			Password:     organization.Password,
+		}
+
 		_, span = trace.StartSpan(r.Context(), "repo.Add")
-		err = c.repo.Add(organization)
+		err = c.repo.Add(organizationUser)
 		span.End()
 
 		if err != nil {
@@ -131,8 +155,112 @@ func (c *Handler) Create() http.HandlerFunc {
 			return
 		}
 
+		_, span = trace.StartSpan(r.Context(), "repo.FindOrganization")
+		_, err = c.repo.FindOrganization(organization.Organization)
+		span.End()
+
+		if err == ErrUserNotFound {
+			// create organization if it doesn't already exist
+			organizationConfig := &OrganizationConfig{
+				Organization:  organization.Organization,
+				Priority:      organization.Priority,
+				ContentPerDay: organization.ContentPerDay,
+			}
+
+			_, span = trace.StartSpan(r.Context(), "repo.AddOrganization")
+			err = c.repo.AddOrganization(organizationConfig)
+			span.End()
+
+			if err != nil {
+				errors.Handler(w, r, errors.New(http.StatusBadRequest, err.Error()))
+				return
+			}
+		}
+
 		w.Header().Add("Location", fmt.Sprintf("/credentials/organization/%s", organization.Username))
 		w.WriteHeader(http.StatusCreated)
+	}
+}
+
+// CreateOrganization is the create organization handler
+func (c *Handler) CreateOrganization() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		organization := &OrganizationConfig{}
+
+		err := json.NewDecoder(r.Body).Decode(organization)
+		if nil != err {
+			errors.Handler(w, r, err)
+			return
+		}
+
+		if organization.Organization == "" {
+			err = errors.New(http.StatusBadRequest, "Invalid request body")
+			log.WithError(err).Error("No organization provided. Must provide an organization.")
+			errors.Handler(w, r, err)
+			return
+		}
+
+		_, span := trace.StartSpan(r.Context(), "repo.FindOrganization")
+		_, err = c.repo.FindOrganization(organization.Organization)
+		span.End()
+
+		if err != ErrUserNotFound {
+			log.WithError(err).Warn("An error occurred when looking for an organization")
+			errors.Handler(w, r, ErrUserExists)
+			return
+		}
+
+		_, span = trace.StartSpan(r.Context(), "repo.Add")
+		err = c.repo.AddOrganization(organization)
+		span.End()
+
+		if err != nil {
+			errors.Handler(w, r, errors.New(http.StatusBadRequest, err.Error()))
+			return
+		}
+
+		w.Header().Add("Location", fmt.Sprintf("/credentials/organization_config/%s", organization.Organization))
+		w.WriteHeader(http.StatusCreated)
+	}
+}
+
+// UpdateOrganization is the update handler
+func (c *Handler) UpdateOrganization() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		var err error
+
+		organization := router.URLParam(r, "organization")
+		_, span := trace.StartSpan(r.Context(), "repo.FindOrganization")
+		organizationConfig, err := c.repo.FindOrganization(organization)
+		span.End()
+
+		if organizationConfig == nil {
+			errors.Handler(w, r, ErrUserNotFound)
+			return
+		}
+
+		if err != nil {
+			errors.Handler(w, r, err)
+			return
+		}
+
+		err = json.NewDecoder(r.Body).Decode(organizationConfig)
+		if err != nil {
+			errors.Handler(w, r, err)
+			return
+		}
+		organizationConfig.Organization = organization
+
+		_, span = trace.StartSpan(r.Context(), "repo.Add")
+		err = c.repo.AddOrganization(organizationConfig)
+		span.End()
+
+		if err != nil {
+			errors.Handler(w, r, errors.New(http.StatusBadRequest, err.Error()))
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
 	}
 }
 

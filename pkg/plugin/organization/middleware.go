@@ -38,14 +38,19 @@ func NewOrganization(organization Organization, repo Repository) func(handler ht
 			}
 
 			hash := encrypt.Hash{}
+			var organizationConfig *OrganizationConfig
 
 			for _, u := range users {
 				//if username == u.Username && (subtle.ConstantTimeCompare([]byte(password), []byte(u.Password)) == 1) {
 				if username == u.Username && (hash.Compare(u.Password, password) == nil) {
 					found = true
 					organization.Organization = u.Organization
-					organization.Priority = u.Priority
-					organization.ContentPerDay = u.ContentPerDay
+					organizationConfig, err = repo.FindOrganization(u.Organization)
+					if err != nil {
+						log.WithError(err).Error("Error finding organization")
+						errors.Handler(w, r, errors.New(http.StatusInternalServerError, "there was an error when looking for organization"))
+						return
+					}
 					break
 				}
 			}
@@ -66,13 +71,13 @@ func NewOrganization(organization Organization, repo Repository) func(handler ht
 				if r.Header.Get(organizationConfigHeader) != "" {
 					r.Header.Del(organizationConfigHeader)
 				}
-				bOrganization, err := json.Marshal(organization)
+				bOrganizationConfig, err := json.Marshal(organizationConfig)
 				if err != nil {
 					log.WithError(err).Error("Error marshaling organization for config header")
 					errors.Handler(w, r, errors.New(http.StatusInternalServerError, "there was an error when setting config header"))
 					return
 				}
-				r.Header.Add(organizationConfigHeader, string(bOrganization))
+				r.Header.Add(organizationConfigHeader, string(bOrganizationConfig))
 			} else {
 				log.Debugf("No organization associated with user")
 			}

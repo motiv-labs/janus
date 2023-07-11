@@ -17,6 +17,19 @@ var (
 
 // Organization represents the configuration to save the user and organization pair
 type Organization struct {
+	Username     string `json:"username"`
+	Organization string `json:"organization"`
+	Password     string `json:"password"`
+}
+
+// OrganizationConfig represents the configuration to save the user and organization pair
+type OrganizationConfig struct {
+	Organization  string `json:"organization"`
+	Priority      int    `json:"priority"`
+	ContentPerDay int    `json:"contentPerDay"`
+}
+
+type OrganizationUserAndConfig struct {
 	Username      string `json:"username"`
 	Organization  string `json:"organization"`
 	Password      string `json:"password"`
@@ -96,8 +109,11 @@ func onStartup(event interface{}) error {
 	{
 		group.GET("/", handlers.Index())
 		group.POST("/", handlers.Create())
+		group.POST("/organization", handlers.CreateOrganization())
 		group.GET("/{username}", handlers.Show())
+		group.GET("/organization/{organization}", handlers.ShowOrganization())
 		group.PUT("/{username}", handlers.Update())
+		group.PUT("/organization/{organization}", handlers.UpdateOrganization())
 		group.DELETE("/{username}", handlers.Delete())
 	}
 
