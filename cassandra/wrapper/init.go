@@ -197,7 +197,7 @@ func createAppKeyspaceIfRequired(clusterHostName, systemKeyspace, appKeyspace st
 		newKeyspace, isCaseSensitive := getKeyspaceNameFromUseStmt(stmt)
 		if newKeyspace != "" {
 			if (isCaseSensitive && newKeyspace != currentKeyspace) || (!isCaseSensitive &&
-				strings.ToLower(newKeyspace) != strings.ToLower(currentKeyspace)) {
+				strings.EqualFold(newKeyspace, currentKeyspace)) {
 				log.Infof("about to create a session with a 5 minute timeout to set keyspace: %s", newKeyspace)
 				session, err = newKeyspaceSession(clusterHostName, newKeyspace, username, password, sslCert, clusterConsistency, 5*time.Minute) //5 minutes
 				if err != nil {
