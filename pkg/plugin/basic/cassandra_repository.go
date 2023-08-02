@@ -9,9 +9,10 @@ import (
 // CassandraRepository represents a cassandra repository
 type CassandraRepository struct {
 	session wrapper.Holder
-	hash encrypt.Hash
+	hash    encrypt.Hash
 }
 
+// NewCassandraRepository constructs CassandraRepository
 func NewCassandraRepository(session wrapper.Holder) (*CassandraRepository, error) {
 	log.Debugf("getting new basic cassandra repo")
 	return &CassandraRepository{session: session, hash: encrypt.Hash{}}, nil
@@ -52,12 +53,12 @@ func (r *CassandraRepository) FindByUsername(username string) (*User, error) {
 	var user User
 
 	err := r.session.GetSession().Query(
-		"SELECT username, password " +
-			"FROM user " +
+		"SELECT username, password "+
+			"FROM user "+
 			"WHERE username = ?",
 		username).Scan(&user.Username, &user.Password)
 
-	if err.Error() == "not found"{
+	if err.Error() == "not found" {
 		log.Debugf("user not found")
 		err = ErrUserNotFound
 	} else if err != nil {
@@ -80,8 +81,8 @@ func (r *CassandraRepository) Add(user *User) error {
 	}
 
 	err = r.session.GetSession().Query(
-		"UPDATE user " +
-			"SET password = ? " +
+		"UPDATE user "+
+			"SET password = ? "+
 			"WHERE username = ?",
 		hash, user.Username).Exec()
 

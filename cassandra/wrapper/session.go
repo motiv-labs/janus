@@ -13,22 +13,24 @@ type Holder interface {
 
 // SessionInterface is an interface to wrap gocql methods used in Motiv
 type SessionInterface interface {
-	Query( stmt string, values ...interface{}) QueryInterface
+	Query(stmt string, values ...interface{}) QueryInterface
 	Close()
 }
 
+// QueryInterface is a query interface
 type QueryInterface interface {
 	Exec() error
-	Scan( dest ...interface{}) error
+	Scan(dest ...interface{}) error
 	Iter() IterInterface
-	PageState(state []byte, ) QueryInterface
-	PageSize(n int, ) QueryInterface
+	PageState(state []byte) QueryInterface
+	PageSize(n int) QueryInterface
 }
 
+// IterInterface is an iterator interface
 type IterInterface interface {
-	Scan( dest ...interface{}) bool
+	Scan(dest ...interface{}) bool
 	WillSwitchPage() bool
 	PageState() []byte
 	Close() error
-	ScanAndClose( handle func() bool, dest ...interface{}) error
+	ScanAndClose(handle func() bool, dest ...interface{}) error
 }

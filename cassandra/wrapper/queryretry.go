@@ -1,10 +1,11 @@
 package wrapper
 
 import (
-	"github.com/gocql/gocql"
-	log "github.com/sirupsen/logrus"
 	"strconv"
 	"time"
+
+	"github.com/gocql/gocql"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -145,7 +146,6 @@ func (q queryRetry) PageSize(n int) QueryInterface {
 	return queryRetry{goCqlQuery: q.goCqlQuery.PageSize(n)}
 }
 
-//
 func (i iterRetry) Scan(dest ...interface{}) bool {
 	log.Debug("running iterRetry Scan() method")
 

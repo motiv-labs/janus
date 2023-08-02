@@ -1,9 +1,10 @@
 package proxy
 
 import (
-	"github.com/stretchr/testify/assert"
 	"net/http"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func newTestRequest() *http.Request {
@@ -39,7 +40,7 @@ func TestStripPathWithParams(t *testing.T) {
 		paramNames := []string{"service"}
 
 		old := chiURLParam
-		defer func() {chiURLParam = old}()
+		defer func() { chiURLParam = old }()
 
 		chiURLParam = func(r *http.Request, key string) string {
 			return "my-service"
@@ -56,7 +57,7 @@ func TestStripPathWithParams(t *testing.T) {
 		paramNames := []string{"service"}
 
 		old := chiURLParam
-		defer func() {chiURLParam = old}()
+		defer func() { chiURLParam = old }()
 
 		chiURLParam = func(r *http.Request, key string) string {
 			return "other-value"

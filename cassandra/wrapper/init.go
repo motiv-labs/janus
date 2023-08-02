@@ -16,19 +16,19 @@ import (
 
 // Schema file to create keyspace if required
 const (
-	schemaDefaultPath     = "/usr/local/bin"
-	schemaDefaultFileName = "schema.sql"
+	schemaDefaultPath                  = "/usr/local/bin"
+	schemaDefaultFileName              = "schema.sql"
 	defaultCassandraClusterConsistency = gocql.Quorum
-	defaultUsername = ""
-	defaultPassword = ""
-	defaultSSLCert = ""
+	defaultUsername                    = ""
+	defaultPassword                    = ""
+	defaultSSLCert                     = ""
 
 	envCassandraClusterConsistency = "CLUSTER_CONSISTENCY"
-	envCassandraSchemaPath     = "CASSANDRA_SCHEMA_PATH"
-	envCassandraSchemaFileName = "CASSANDRA_SCHEMA_FILE_NAME"
-	envUsername = "CASSANDRA_USERNAME"
-	envPassword = "CASSANDRA_PASSWORD"
-	envSSLCert = "CASSANDRA_SSL_CERT"
+	envCassandraSchemaPath         = "CASSANDRA_SCHEMA_PATH"
+	envCassandraSchemaFileName     = "CASSANDRA_SCHEMA_FILE_NAME"
+	envUsername                    = "CASSANDRA_USERNAME"
+	envPassword                    = "CASSANDRA_PASSWORD"
+	envSSLCert                     = "CASSANDRA_SSL_CERT"
 )
 
 var schemaPath = "/usr/local/bin"
@@ -59,12 +59,12 @@ func init() {
 
 // sessionInitializer is an initializer for a cassandra session
 type sessionInitializer struct {
-	clusterHostName string
+	clusterHostName     string
 	clusterHostUsername string
 	clusterHostPassword string
-	clusterHostSSLCert string
-	keyspace        string
-	consistency gocql.Consistency
+	clusterHostSSLCert  string
+	keyspace            string
+	consistency         gocql.Consistency
 }
 
 // sessionHolder stores a cassandra session
@@ -90,6 +90,7 @@ func New(clusterHostName, keyspace string) Initializer {
 // NOTE: Needs to be called only once on the app startup, won't fail if it is called multiple times but is not necessary.
 //
 // Params:
+//
 //	clusterHostName: Cassandra cluster host
 //	systemKeyspace: System keyspace
 //	appKeyspace: Application keyspace
@@ -224,7 +225,7 @@ func createAppKeyspaceIfRequired(clusterHostName, systemKeyspace, appKeyspace st
 }
 
 // getStmtsFromFile extracts CQL statements from the file
-func getStmtsFromFile(fileName string, ) ([]string, error) {
+func getStmtsFromFile(fileName string) ([]string, error) {
 	// Verify first if the file exist
 	if _, err := os.Stat(fileName); err != nil {
 		if os.IsNotExist(err) { // Does not exist
@@ -272,16 +273,16 @@ func getStmtsFromFile(fileName string, ) ([]string, error) {
 }
 
 // getMatch returns the matched substring if there's a match, nil otherwise
-func getMatch(src []byte, base int, match []int, start int, end int, ) []byte {
+func getMatch(src []byte, base int, match []int, start int, end int) []byte {
 	if match[start] >= 0 {
 		return src[base+match[start] : base+match[end]]
-	} else {
-		return nil
 	}
+
+	return nil
 }
 
 // getKeyspaceNameFromUseStmt return keyspace name for use statement
-func getKeyspaceNameFromUseStmt(stmt string, ) (string, bool) {
+func getKeyspaceNameFromUseStmt(stmt string) (string, bool) {
 	pattern := regexp.MustCompile(`(?ms)[Uu][Ss][Ee]\s+("(?:[^"]|"")+"|\w+)`)
 	if pattern.MatchString(stmt) {
 		match := pattern.FindStringSubmatch(stmt)
@@ -301,12 +302,13 @@ func getKeyspaceNameFromUseStmt(stmt string, ) (string, bool) {
 // Loop is a loop that tries to get a connection until a timeout is reached
 //
 // Params:
-//	 timeout: timeout to get the connection
-//	 initializer : initializer to start the session
-//	 connectionHost : name of host for the connection
+//
+//	timeout: timeout to get the connection
+//	initializer : initializer to start the session
+//	connectionHost : name of host for the connection
 //
 // Returns a session Holder to store the session, or an error if the timeout was reached
-func loop(timeout time.Duration, initializer Initializer, connectionHost string, ) (Holder, error) {
+func loop(timeout time.Duration, initializer Initializer, connectionHost string) (Holder, error) {
 	log.Debugf("Connection loop to connect to %s, timeout to use: %s", connectionHost, timeout)
 	ticker := time.NewTicker(1 * time.Second)
 	defer ticker.Stop()
@@ -334,8 +336,9 @@ func loop(timeout time.Duration, initializer Initializer, connectionHost string,
 // or return the given default value if the environment variable is not set
 //
 // Params:
-//  envVariable : environment variable
-//  defaultValue : value to return if environment variable is not set
+//
+//	envVariable : environment variable
+//	defaultValue : value to return if environment variable is not set
 //
 // Returns the string value for the specified variable
 func getenv(envVariable string, defaultValue string) string {
@@ -356,8 +359,9 @@ func getenv(envVariable string, defaultValue string) string {
 // or return the given default value if the environment variable is not set
 //
 // Params:
-//  envVariable : environment variable
-//  defaultValue : value to return if environment variable is not set
+//
+//	envVariable : environment variable
+//	defaultValue : value to return if environment variable is not set
 //
 // Returns the string value for the specified variable
 func getenvnolog(envVariable string, defaultValue string) string {

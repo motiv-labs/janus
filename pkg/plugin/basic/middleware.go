@@ -1,10 +1,10 @@
 package basic
 
 import (
-	"github.com/hellofresh/janus/pkg/plugin/basic/encrypt"
 	"net/http"
 
 	"github.com/hellofresh/janus/pkg/errors"
+	"github.com/hellofresh/janus/pkg/plugin/basic/encrypt"
 	log "github.com/sirupsen/logrus"
 )
 

@@ -12,9 +12,9 @@ import (
 )
 
 const (
-	mongodb = "mongodb"
+	mongodb   = "mongodb"
 	cassandra = "cassandra"
-	file    = "file"
+	file      = "file"
 )
 
 // Repository defines the behavior of a proxy specs repository

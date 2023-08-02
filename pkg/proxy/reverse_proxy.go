@@ -201,15 +201,16 @@ func cleanSlashes(a string) string {
 // chiURLParam is created to allow for mocking of the chi.URLParam function.
 // This allowed for writing a quick unit test to check that the logic of the function works without having to deal with chi's context requirements.
 var chiURLParam = chi.URLParam
+
 // stripPathWithParams is intended to properly strip the listen path from the requested path when named parameters are used.
 // From left to right, it removes the first instance of each section of the listenPath and each paramName from the path.
 func stripPathWithParams(req *http.Request, path string, listenPath string, paramNames []string) string {
 	remove := strings.Split(listenPath, "/")
-	for i := 0; i < len(paramNames); i ++ {
+	for i := 0; i < len(paramNames); i++ {
 		remove = append(remove, chiURLParam(req, paramNames[i]))
 	}
 	for i := 1; i < len(remove); i++ {
-		path = strings.Replace(path, "/" + remove[i], "", 1)
+		path = strings.Replace(path, "/"+remove[i], "", 1)
 	}
 	return path
 }

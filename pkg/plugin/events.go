@@ -25,7 +25,7 @@ const (
 type OnStartup struct {
 	StatsClient   client.Client
 	MongoDB       *mongo.Database
-	Cassandra 	  wrapper.Holder
+	Cassandra     wrapper.Holder
 	Register      *proxy.Register
 	Config        *config.Specification
 	Configuration []*api.Definition

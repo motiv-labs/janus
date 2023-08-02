@@ -22,6 +22,7 @@ type CassandraRepository struct {
 	hash    encrypt.Hash
 }
 
+// NewCassandraRepository constructs CassandraRepository
 func NewCassandraRepository(session wrapper.Holder) (*CassandraRepository, error) {
 	log.Debugf("getting new organization cassandra repo")
 	return &CassandraRepository{session: session}, nil
@@ -81,7 +82,7 @@ func (r *CassandraRepository) FindByUsername(username string) (*Organization, er
 	return &organization, err
 }
 
-// FindByUsername find an user by username
+// FindOrganization find an organization by organization name
 // returns ErrUserNotFound when a user is not found.
 func (r *CassandraRepository) FindOrganization(organization string) (*OrganizationConfig, error) {
 	log.Debugf("finding: %s", organization)

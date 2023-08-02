@@ -1,4 +1,4 @@
-// +build integration
+//go:build integration
 
 package proxy
 
@@ -163,7 +163,7 @@ func createProxyDefinitions(t *testing.T) []*Definition {
 				Targets:   []*Target{{Target: fmt.Sprintf("http://{service}:%s/", upstreamsPort)}},
 			},
 			StripPath: true,
-			Methods: []string{"ALL"},
+			Methods:   []string{"ALL"},
 		},
 	}
 }

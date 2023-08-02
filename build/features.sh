@@ -18,7 +18,7 @@ if ! [ -x "$(command -v godog)" ]; then
     # We need to be outside of the project root when installing godog
     # Otherwise we will try to verify dependencies again
     cd ..
-    GO111MODULE=on go get -u github.com/cucumber/godog/cmd/godog@v0.10.0
+    GO111MODULE=on go install github.com/cucumber/godog/cmd/godog@v0.12.6
     cd -
     # add $GOPATH/bin to global path to make command available w/out as path
     export PATH=${PATH}:`go env GOPATH`/bin
@@ -99,7 +99,7 @@ if [ ${exit_code} -ne 0 ]; then
     echo "${WARN_COLOR}=================================${NO_COLOR}"
     echo "${WARN_COLOR}===         WIREMOCK          ===${NO_COLOR}"
     echo "${WARN_COLOR}=================================${NO_COLOR}"
-    docker-compose -f assets/docker-compose.yml logs service1
+    docker-compose -f assets/docker-compose.yml logs upstreams
 fi
 
 exit ${exit_code}

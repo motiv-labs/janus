@@ -21,8 +21,8 @@ import (
 )
 
 const (
-	mongodb = "mongodb"
-	file    = "file"
+	mongodb   = "mongodb"
+	file      = "file"
 	cassandra = "cassandra"
 
 	mongoIdxTimeout = 10 * time.Second
