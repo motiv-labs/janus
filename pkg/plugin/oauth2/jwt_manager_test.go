@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	jwtbase "github.com/dgrijalva/jwt-go"
+	jwtbase "github.com/golang-jwt/jwt/v5"
 	"github.com/hellofresh/janus/pkg/jwt"
 	"github.com/hellofresh/janus/pkg/metrics"
 	"github.com/hellofresh/stats-go"

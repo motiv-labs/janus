@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/cucumber/godog"
-	jwtGo "github.com/dgrijalva/jwt-go"
+	jwtGo "github.com/golang-jwt/jwt/v5"
 	"github.com/tidwall/gjson"
 
 	"github.com/hellofresh/janus/pkg/config"

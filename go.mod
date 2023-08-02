@@ -11,12 +11,12 @@ require (
 	github.com/asaskevich/govalidator v0.0.0-20171111151018-521b25f4b05f
 	github.com/cucumber/godog v0.12.6
 	github.com/cucumber/messages-go/v16 v16.0.1
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/felixge/httpsnoop v1.0.3
 	github.com/fsnotify/fsnotify v1.6.0
 	github.com/go-chi/chi v4.1.2+incompatible
 	github.com/gocql/gocql v1.5.2
 	github.com/gofrs/uuid v4.4.0+incompatible
+	github.com/golang-jwt/jwt/v5 v5.0.0
 	github.com/google/go-github v17.0.0+incompatible
 	github.com/hellofresh/health-go/v3 v3.2.0
 	github.com/hellofresh/logging-go v0.1.6

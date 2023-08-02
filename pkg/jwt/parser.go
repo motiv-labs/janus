@@ -7,8 +7,9 @@ import (
 	"errors"
 	"net/http"
 	"strings"
+	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 var (
@@ -96,7 +97,7 @@ func (jp *Parser) ParseFromRequest(r *http.Request) (*jwt.Token, error) {
 // Parse a JWT token and validates it
 func (jp *Parser) Parse(tokenString string) (*jwt.Token, error) {
 	for _, method := range jp.Config.SigningMethods {
-		token, err := jwt.ParseWithClaims(tokenString, NewJanusClaims(jp.Config.Leeway), func(token *jwt.Token) (interface{}, error) {
+		token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 			if token.Method.Alg() != method.Alg {
 				return nil, ErrSigningMethodMismatch
 			}
@@ -125,14 +126,14 @@ func (jp *Parser) Parse(tokenString string) (*jwt.Token, error) {
 			default:
 				return nil, ErrUnsupportedSigningMethod
 			}
-		})
+		}, jwt.WithLeeway(time.Duration(jp.Config.Leeway)))
 
 		if err != nil {
-			if err == ErrSigningMethodMismatch {
+			if errors.Is(err, ErrSigningMethodMismatch) {
 				continue
 			}
 
-			if validationErr, ok := err.(*jwt.ValidationError); ok && (validationErr.Errors&jwt.ValidationErrorUnverifiable > 0 || validationErr.Errors&jwt.ValidationErrorSignatureInvalid > 0) {
+			if errors.Is(err, jwt.ErrTokenUnverifiable) || errors.Is(err, jwt.ErrSignatureInvalid) {
 				continue
 			}
 		}
@@ -145,11 +146,11 @@ func (jp *Parser) Parse(tokenString string) (*jwt.Token, error) {
 
 // GetMapClaims returns a map version of Claims Section
 func (jp *Parser) GetMapClaims(token *jwt.Token) (jwt.MapClaims, bool) {
-	claims, ok := token.Claims.(*JanusClaims)
+	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
 		return jwt.MapClaims{}, ok
 	}
-	return claims.MapClaims, ok
+	return claims, ok
 }
 
 func (jp *Parser) jwtFromHeader(r *http.Request, key string) (string, error) {
