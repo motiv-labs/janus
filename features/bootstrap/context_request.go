@@ -10,7 +10,6 @@ import (
 	"time"
 
 	"github.com/cucumber/godog"
-	"github.com/cucumber/messages-go/v10"
 	jwtGo "github.com/dgrijalva/jwt-go"
 	"github.com/tidwall/gjson"
 
@@ -227,8 +226,8 @@ func (c *requestContext) responseJSONBodyIsAnArrayOfLength(length int) error {
 	return nil
 }
 
-func (c *requestContext) requestJSONPayload(body *messages.PickleStepArgument_PickleDocString) error {
-	rq := strings.ReplaceAll(body.GetContent(), c.defaultUpstreamsHost, c.dynamicUpstreamsHost)
+func (c *requestContext) requestJSONPayload(body *godog.DocString) error {
+	rq := strings.ReplaceAll(body.Content, c.defaultUpstreamsHost, c.dynamicUpstreamsHost)
 	rq = strings.ReplaceAll(rq, c.defaultServiceHost, c.dynamicServiceHost)
 
 	c.requestBody = bytes.NewBufferString(rq)

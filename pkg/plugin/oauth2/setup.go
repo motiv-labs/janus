@@ -9,9 +9,9 @@ import (
 
 	"github.com/asaskevich/govalidator"
 	log "github.com/sirupsen/logrus"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
-	"go.mongodb.org/mongo-driver/x/bsonx"
 
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/jwt"
@@ -95,8 +95,8 @@ func onStartup(event interface{}) error {
 		if _, err := e.MongoDB.Collection(collectionName).Indexes().CreateOne(
 			ctx,
 			mongo.IndexModel{
-				Keys: bsonx.Doc{
-					{Key: "name", Value: bsonx.Int32(1)},
+				Keys: bson.D{
+					{Key: "name", Value: int32(1)},
 				},
 				Options: options.Index().SetUnique(true).SetBackground(true).SetSparse(true),
 			},

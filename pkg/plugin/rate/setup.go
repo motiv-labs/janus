@@ -5,8 +5,8 @@ import (
 	"time"
 
 	"github.com/asaskevich/govalidator"
-	"github.com/go-redis/redis/v7"
 	"github.com/hellofresh/stats-go/client"
+	"github.com/redis/go-redis/v9"
 	"github.com/ulule/limiter/v3"
 	"github.com/ulule/limiter/v3/drivers/middleware/stdlib"
 	storeMemory "github.com/ulule/limiter/v3/drivers/store/memory"
@@ -101,7 +101,7 @@ func getLimiterStore(policy string, config redisConfig) (limiter.Store, error) {
 			return nil, err
 		}
 		option.PoolSize = 3
-		option.IdleTimeout = 240 * time.Second
+		option.ConnMaxIdleTime = 240 * time.Second
 		redisClient := redis.NewClient(option)
 
 		if config.Prefix == "" {

@@ -13,6 +13,6 @@ func init() {
 }
 
 func setupCompression(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
-	def.AddMiddleware(middleware.DefaultCompress)
+	def.AddMiddleware(middleware.Compress(5))
 	return nil
 }

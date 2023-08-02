@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/cucumber/godog"
-	"github.com/cucumber/messages-go/v10"
+	"github.com/cucumber/messages-go/v16"
 
 	"github.com/hellofresh/janus/pkg/api"
 )
