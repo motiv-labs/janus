@@ -89,10 +89,14 @@ func (r *CassandraRepository) FindOrganization(organization string) (*Organizati
 	var organizationConfig OrganizationConfig
 
 	err := r.session.GetSession().Query(
-		"SELECT organization, priority, content_per_day "+
+		"SELECT organization, priority, content_per_day, config "+
 			"FROM organization_config "+
 			"WHERE organization = ?",
-		organization).Scan(&organizationConfig.Organization, &organizationConfig.Priority, &organizationConfig.ContentPerDay)
+		organization).Scan(
+		&organizationConfig.Organization,
+		&organizationConfig.Priority,
+		&organizationConfig.ContentPerDay,
+		&organizationConfig.Config)
 
 	if err != nil {
 		if err.Error() == "not found" {
@@ -141,8 +145,9 @@ func (r *CassandraRepository) AddOrganization(organization *OrganizationConfig) 
 		"UPDATE organization_config "+
 			"SET priority = ?, "+
 			"content_per_day = ? "+
+			"config = ? "+
 			"WHERE organization = ?",
-		organization.Priority, organization.ContentPerDay, organization.Organization).Exec()
+		organization.Priority, organization.ContentPerDay, organization.Config, organization.Organization).Exec()
 
 	if err != nil {
 		log.Errorf("error saving organization %s: %v", organization.Organization, err)

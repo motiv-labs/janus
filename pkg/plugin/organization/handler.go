@@ -165,6 +165,7 @@ func (c *Handler) Create() http.HandlerFunc {
 				Organization:  organization.Organization,
 				Priority:      organization.Priority,
 				ContentPerDay: organization.ContentPerDay,
+				Config:        organization.Config,
 			}
 
 			_, span = trace.StartSpan(r.Context(), "repo.AddOrganization")
