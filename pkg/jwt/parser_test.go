@@ -9,7 +9,7 @@ import (
 	"testing"
 	"time"
 
-	baseJWT "github.com/dgrijalva/jwt-go"
+	baseJWT "github.com/golang-jwt/jwt/v5"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -93,6 +93,7 @@ func TestParser_Parse(t *testing.T) {
 
 	_, err = parser.ParseFromRequest(req)
 	require.Error(t, err)
+	require.ErrorIs(t, err, ErrFailedToParseToken)
 
 	parser.Config.SigningMethods = append(parser.Config.SigningMethods, SigningMethod{Alg: alg, Key: rsa2048Public})
 
@@ -252,15 +253,15 @@ func assertParseToken(t *testing.T, parser *Parser, r *http.Request) {
 func generateToken(alg, key string) (string, error) {
 	type userClaims struct {
 		Username string `json:"username"`
-		baseJWT.StandardClaims
+		baseJWT.RegisteredClaims
 	}
 
 	token := baseJWT.NewWithClaims(baseJWT.GetSigningMethod(alg), userClaims{
 		userName,
-		baseJWT.StandardClaims{
+		baseJWT.RegisteredClaims{
 			Issuer:    clientID,
-			IssuedAt:  time.Now().Unix(),
-			ExpiresAt: time.Now().Add(time.Hour).Unix(),
+			IssuedAt:  baseJWT.NewNumericDate(time.Now()),
+			ExpiresAt: baseJWT.NewNumericDate(time.Now().Add(time.Hour)),
 		},
 	})
 

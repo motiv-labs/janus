@@ -2,10 +2,11 @@ package organization
 
 import (
 	"encoding/json"
+	"net/http"
+
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/plugin/basic/encrypt"
 	log "github.com/sirupsen/logrus"
-	"net/http"
 )
 
 const organizationHeader = "X-Organization"

@@ -15,7 +15,7 @@ type VerifierBasket struct {
 	verifiers []Verifier
 }
 
-//NewVerifierBasket creates a new instace of VerifierBasket
+// NewVerifierBasket creates a new instace of VerifierBasket
 func NewVerifierBasket(verifiers ...Verifier) *VerifierBasket {
 	return &VerifierBasket{verifiers: verifiers}
 }

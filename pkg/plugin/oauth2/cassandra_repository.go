@@ -2,6 +2,7 @@ package oauth2
 
 import (
 	"encoding/json"
+
 	"github.com/hellofresh/janus/cassandra/wrapper"
 	log "github.com/sirupsen/logrus"
 )
@@ -11,6 +12,7 @@ type CassandraRepository struct {
 	session wrapper.Holder
 }
 
+// NewCassandraRepository constructs CassandraRepository
 func NewCassandraRepository(session wrapper.Holder) (*CassandraRepository, error) {
 	return &CassandraRepository{session: session}, nil
 
@@ -50,8 +52,8 @@ func (r *CassandraRepository) FindByName(name string) (*OAuth, error) {
 	var oauth *OAuth
 
 	err := r.session.GetSession().Query(
-		"SELECT oauth " +
-			"FROM oauth " +
+		"SELECT oauth "+
+			"FROM oauth "+
 			"WHERE name = ?",
 		name).Scan(&savedOauth)
 
@@ -77,8 +79,8 @@ func (r *CassandraRepository) Add(oauth *OAuth) error {
 		return err
 	}
 	err = r.session.GetSession().Query(
-		"UPDATE oauth " +
-			"SET oauth = ? " +
+		"UPDATE oauth "+
+			"SET oauth = ? "+
 			"WHERE name = ?",
 		saveOauth, oauth.Name).Exec()
 
@@ -101,8 +103,8 @@ func (r *CassandraRepository) Save(oauth *OAuth) error {
 		return err
 	}
 	err = r.session.GetSession().Query(
-		"UPDATE oauth " +
-			"SET oauth = ? " +
+		"UPDATE oauth "+
+			"SET oauth = ? "+
 			"WHERE name = ?",
 		saveOauth, oauth.Name).Exec()
 

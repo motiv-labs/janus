@@ -11,7 +11,7 @@ type sessionRetry struct {
 }
 
 // Query wrapper to be able to return our own QueryInterface
-func (s sessionRetry) Query( stmt string, values ...interface{}) QueryInterface {
+func (s sessionRetry) Query(stmt string, values ...interface{}) QueryInterface {
 	log.Debug("running SessionRetry Query() method")
 
 	return queryRetry{goCqlQuery: s.goCqlSession.Query(stmt, values...)}

@@ -2,6 +2,7 @@ package organization
 
 import (
 	"errors"
+
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/plugin/basic"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -23,6 +24,8 @@ type Organization struct {
 }
 
 // OrganizationConfig represents the configuration to save the user and organization pair
+//
+//nolint:golint // type name will be used as organization.OrganizationConfig by other packages, and that stutters; consider calling this Config
 type OrganizationConfig struct {
 	Organization  string                 `json:"organization"`
 	Priority      int                    `json:"priority"`
@@ -30,6 +33,9 @@ type OrganizationConfig struct {
 	Config        map[string]interface{} `json:"config"`
 }
 
+// OrganizationUserAndConfig represents organization user and configuration
+//
+//nolint:golint // type name will be used as organization.OrganizationConfig by other packages, and that stutters; consider calling this Config
 type OrganizationUserAndConfig struct {
 	Username      string                 `json:"username"`
 	Organization  string                 `json:"organization"`

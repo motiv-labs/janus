@@ -3,24 +3,27 @@ package cassandra
 import (
 	"github.com/hellofresh/janus/cassandra/wrapper"
 )
+
 const (
-	// Cassandra cluster host
+	// ClusterHostName representing Cassandra cluster host
 	ClusterHostName = "db"
-	// System keyspace
+	// SystemKeyspace is system keyspace
 	SystemKeyspace = "system"
-	// Github taxi dispatcher keyspace
+	// AppKeyspace Github taxi dispatcher keyspace
 	AppKeyspace = "janus"
-	// default timeout
+	// Timeout represents default timeout
 	Timeout = 300
 )
 
 // SessionHolder holds our connection to Cassandra
 var sessionHolder wrapper.Holder
 
+// GetSession returns session
 func GetSession() wrapper.SessionInterface {
 	return sessionHolder.GetSession()
 }
 
+// SetSessionHolder setter
 func SetSessionHolder(holder wrapper.Holder) {
 	sessionHolder = holder
 }

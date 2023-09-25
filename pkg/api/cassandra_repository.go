@@ -3,13 +3,14 @@ package api
 import (
 	"context"
 	"encoding/json"
+	"strconv"
+	"strings"
+	"time"
+
 	cass "github.com/hellofresh/janus/cassandra"
 	"github.com/hellofresh/janus/cassandra/wrapper"
 	"github.com/opentracing/opentracing-go"
 	log "github.com/sirupsen/logrus"
-	"strconv"
-	"strings"
-	"time"
 )
 
 // CassandraRepository represents a cassandra repository
@@ -20,6 +21,7 @@ type CassandraRepository struct {
 	refreshTime time.Duration
 }
 
+// NewCassandraRepository constructs CassandraRepository
 func NewCassandraRepository(dsn string, refreshTime time.Duration) (*CassandraRepository, error) {
 	log.Debugf("getting new api cassandra repo")
 	span := opentracing.StartSpan("NewCassandraRepository")
@@ -63,6 +65,7 @@ func NewCassandraRepository(dsn string, refreshTime time.Duration) (*CassandraRe
 
 }
 
+// Close closes the session
 func (r *CassandraRepository) Close() error {
 	// Close the Session
 	r.Session.CloseSession()

@@ -27,7 +27,7 @@ test-features: build _mocks
 
 lint:
 	@echo "$(OK_COLOR)==> Linting with golangci-lint running in docker container$(NO_COLOR)"
-	@docker run --rm -v $(PWD):/app -w /app golangci/golangci-lint:v1.30.0 golangci-lint run -v
+	@docker run --rm -v $(PWD):/app -w /app golangci/golangci-lint:v1.53.3 golangci-lint run -v
 
 _mocks:
 	@/bin/sh -c "./build/mocks.sh"

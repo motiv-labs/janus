@@ -2,9 +2,9 @@ package basic
 
 import (
 	"context"
-	"github.com/hellofresh/janus/pkg/plugin/basic/encrypt"
 	"time"
 
+	"github.com/hellofresh/janus/pkg/plugin/basic/encrypt"
 	log "github.com/sirupsen/logrus"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -34,7 +34,7 @@ type Repository interface {
 // MongoRepository represents a mongodb repository
 type MongoRepository struct {
 	collection *mongo.Collection
-	hash encrypt.Hash
+	hash       encrypt.Hash
 }
 
 // NewMongoRepository creates a mongo API definition repo

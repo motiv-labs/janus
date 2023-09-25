@@ -68,7 +68,7 @@ func (s *Server) AddRoutes(r router.Router) {
 	guard := jwt.NewGuard(s.Credentials)
 	r.Use(
 		chiMiddleware.StripSlashes,
-		chiMiddleware.DefaultCompress,
+		chiMiddleware.Compress(5),
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(httpErrors.RecoveryHandler),
 		cors.New(cors.Options{

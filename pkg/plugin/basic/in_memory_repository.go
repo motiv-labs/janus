@@ -1,16 +1,17 @@
 package basic
 
 import (
+	"sync"
+
 	"github.com/hellofresh/janus/pkg/plugin/basic/encrypt"
 	log "github.com/sirupsen/logrus"
-	"sync"
 )
 
 // InMemoryRepository represents a in memory repository
 type InMemoryRepository struct {
 	sync.RWMutex
 	users map[string]*User
-	hash encrypt.Hash
+	hash  encrypt.Hash
 }
 
 // NewInMemoryRepository creates a in memory repository
