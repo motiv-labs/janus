@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/hellofresh/janus/pkg/kafka"
 	"net/url"
 	"time"
 
@@ -21,8 +22,8 @@ import (
 )
 
 const (
-	mongodb = "mongodb"
-	file    = "file"
+	mongodb   = "mongodb"
+	file      = "file"
 	cassandra = "cassandra"
 
 	mongoIdxTimeout = 10 * time.Second
@@ -35,6 +36,12 @@ var (
 )
 
 func init() {
+	var kafkaConfig config.Config
+
+	_ = config.UnmarshalYAML("config/config.yaml", &kafkaConfig)
+
+	go kafka.StartFactConsumer(kafkaConfig.KafkaAddr, kafkaConfig.KafkaFactTopic, kafkaConfig.KafkaDLQTopic, kafkaConfig.KafkaConsumerGroup)
+
 	plugin.RegisterEventHook(plugin.StartupEvent, onStartup)
 	plugin.RegisterEventHook(plugin.ReloadEvent, onReload)
 	plugin.RegisterEventHook(plugin.AdminAPIStartupEvent, onAdminAPIStartup)

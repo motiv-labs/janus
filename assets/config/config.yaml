@@ -1,0 +1,4 @@
+kafkaAddr: "kafka:9092"
+kafkaFactTopic: "rbac-facts"
+kafkaDLQTopic: "DLQRBAC"
+kafkaConsumerGroup: "RABAC"
