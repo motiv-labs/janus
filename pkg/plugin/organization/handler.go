@@ -168,6 +168,10 @@ func (c *Handler) Create() http.HandlerFunc {
 				Config:        organization.Config,
 			}
 
+			if organization.Config == nil {
+				organizationConfig.Config = make(map[string]interface{})
+			}
+
 			_, span = trace.StartSpan(r.Context(), "repo.AddOrganization")
 			err = c.repo.AddOrganization(organizationConfig)
 			span.End()
