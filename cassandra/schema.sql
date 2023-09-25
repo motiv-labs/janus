@@ -26,4 +26,5 @@ CREATE TABLE IF NOT EXISTS janus.organization_config (
     organization text,
     priority int,
     content_per_day int,
+    config text,
     PRIMARY KEY (organization));

@@ -1,6 +1,7 @@
 package organization
 
 import (
+	"encoding/json"
 	"github.com/hellofresh/janus/cassandra/wrapper"
 	"github.com/hellofresh/janus/pkg/plugin/basic/encrypt"
 	log "github.com/sirupsen/logrus"
@@ -87,12 +88,17 @@ func (r *CassandraRepository) FindOrganization(organization string) (*Organizati
 	log.Debugf("finding: %s", organization)
 
 	var organizationConfig OrganizationConfig
+	var bOrgConfig []byte
 
 	err := r.session.GetSession().Query(
-		"SELECT organization, priority, content_per_day "+
+		"SELECT organization, priority, content_per_day, config "+
 			"FROM organization_config "+
 			"WHERE organization = ?",
-		organization).Scan(&organizationConfig.Organization, &organizationConfig.Priority, &organizationConfig.ContentPerDay)
+		organization).Scan(
+		&organizationConfig.Organization,
+		&organizationConfig.Priority,
+		&organizationConfig.ContentPerDay,
+		&bOrgConfig)
 
 	if err != nil {
 		if err.Error() == "not found" {
@@ -100,8 +106,14 @@ func (r *CassandraRepository) FindOrganization(organization string) (*Organizati
 			err = ErrUserNotFound
 		}
 		log.Errorf("error selecting organization %s: %v", organization, err)
+		return &organizationConfig, err
 	} else {
 		log.Debugf("successfully found organization %s", organization)
+	}
+
+	err = json.Unmarshal(bOrgConfig, &organizationConfig.Config)
+	if err != nil {
+		log.Errorf("error unmarshalling config: %v", err)
 	}
 
 	return &organizationConfig, err
@@ -137,12 +149,18 @@ func (r *CassandraRepository) Add(organization *Organization) error {
 func (r *CassandraRepository) AddOrganization(organization *OrganizationConfig) error {
 	log.Debugf("adding: %s", organization.Organization)
 
-	err := r.session.GetSession().Query(
+	bOrgConfig, err := json.Marshal(organization.Config)
+	if err != nil {
+		log.Errorf("error marshaling config %s: %v", organization.Config, err)
+	}
+
+	err = r.session.GetSession().Query(
 		"UPDATE organization_config "+
 			"SET priority = ?, "+
-			"content_per_day = ? "+
+			"content_per_day = ?, "+
+			"config = ? "+
 			"WHERE organization = ?",
-		organization.Priority, organization.ContentPerDay, organization.Organization).Exec()
+		organization.Priority, organization.ContentPerDay, bOrgConfig, organization.Organization).Exec()
 
 	if err != nil {
 		log.Errorf("error saving organization %s: %v", organization.Organization, err)

@@ -24,17 +24,19 @@ type Organization struct {
 
 // OrganizationConfig represents the configuration to save the user and organization pair
 type OrganizationConfig struct {
-	Organization  string `json:"organization"`
-	Priority      int    `json:"priority"`
-	ContentPerDay int    `json:"contentPerDay"`
+	Organization  string                 `json:"organization"`
+	Priority      int                    `json:"priority"`
+	ContentPerDay int                    `json:"contentPerDay"`
+	Config        map[string]interface{} `json:"config"`
 }
 
 type OrganizationUserAndConfig struct {
-	Username      string `json:"username"`
-	Organization  string `json:"organization"`
-	Password      string `json:"password"`
-	Priority      int    `json:"priority"`
-	ContentPerDay int    `json:"contentPerDay"`
+	Username      string                 `json:"username"`
+	Organization  string                 `json:"organization"`
+	Password      string                 `json:"password"`
+	Priority      int                    `json:"priority"`
+	ContentPerDay int                    `json:"contentPerDay"`
+	Config        map[string]interface{} `json:"config"`
 }
 
 func init() {
