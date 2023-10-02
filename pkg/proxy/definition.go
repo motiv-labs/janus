@@ -114,7 +114,7 @@ type ForwardingTimeouts struct {
 // NewDefinition creates a new Proxy Definition with default values
 func NewDefinition() *Definition {
 	return &Definition{
-		Methods: []string{"GET"},
+		Methods: []string{methodAll},
 		Hosts:   make([]string, 0),
 		Upstreams: &Upstreams{
 			Targets: make([]*Target, 0),
