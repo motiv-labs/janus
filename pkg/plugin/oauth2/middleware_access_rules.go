@@ -30,15 +30,14 @@ func NewRevokeRulesMiddleware(parser *jwt.Parser, accessRules []*AccessRule) fun
 				for _, rule := range accessRules {
 					allowed, err := rule.IsAllowed(claims)
 					if err != nil {
-						log.WithError(err).Debug("Rule is not allowed")
-						continue
-					}
-
-					if allowed {
-						handler.ServeHTTP(w, r)
-					} else {
-						w.WriteHeader(http.StatusUnauthorized)
-						return
+						log.WithError(err).Debug("Rule is invalid")
+					} else if rule.matched {
+						if allowed {
+							break
+						} else {
+							w.WriteHeader(http.StatusUnauthorized)
+							return
+						}
 					}
 				}
 			}

@@ -139,6 +139,7 @@ type AccessRule struct {
 	Predicate string `bson:"predicate" json:"predicate"`
 	Action    string `bson:"action" json:"action"`
 	parsed    bool
+	matched   bool
 }
 
 // IsAllowed checks if the rule is allowed to
@@ -146,14 +147,14 @@ func (r *AccessRule) IsAllowed(claims map[string]interface{}) (bool, error) {
 	var err error
 
 	if !r.parsed {
-		matched, err := r.parse(claims)
+		r.matched, err = r.parse(claims)
 		if err != nil {
 			return false, err
 		}
+	}
 
-		if !matched {
-			return true, nil
-		}
+	if !r.matched {
+		return true, nil
 	}
 
 	return r.Action == "allow", err

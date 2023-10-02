@@ -15,110 +15,6 @@ import (
 
 const signingAlg = "HS256"
 
-func TestBlockJWTByCountry(t *testing.T) {
-	secret := "secret"
-
-	revokeRules := []*AccessRule{
-		{Predicate: "country == 'de'", Action: "deny"},
-	}
-
-	parser := jwt.NewParser(jwt.NewParserConfig(0, jwt.SigningMethod{Alg: signingAlg, Key: secret}))
-
-	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken(signingAlg, secret)
-	require.NoError(t, err)
-
-	w, err := test.Record(
-		"GET",
-		"/",
-		map[string]string{
-			"Content-Type":  "application/json",
-			"Authorization": fmt.Sprintf("Bearer %s", token),
-		},
-		mw(http.HandlerFunc(test.Ping)),
-	)
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-}
-
-func TestBlockJWTByUsername(t *testing.T) {
-	secret := "secret"
-
-	revokeRules := []*AccessRule{
-		{Predicate: "username == 'test@hellofresh.com'", Action: "deny"},
-	}
-
-	parser := jwt.NewParser(jwt.NewParserConfig(0, jwt.SigningMethod{Alg: signingAlg, Key: secret}))
-
-	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken(signingAlg, secret)
-	require.NoError(t, err)
-
-	w, err := test.Record(
-		"GET",
-		"/",
-		map[string]string{
-			"Content-Type":  "application/json",
-			"Authorization": fmt.Sprintf("Bearer %s", token),
-		},
-		mw(http.HandlerFunc(test.Ping)),
-	)
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-}
-
-func TestBlockJWTByIssueDate(t *testing.T) {
-	secret := "secret"
-
-	revokeRules := []*AccessRule{
-		{Predicate: fmt.Sprintf("iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
-	}
-
-	parser := jwt.NewParser(jwt.NewParserConfig(0, jwt.SigningMethod{Alg: signingAlg, Key: secret}))
-
-	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken(signingAlg, secret)
-	require.NoError(t, err)
-
-	w, err := test.Record(
-		"GET",
-		"/",
-		map[string]string{
-			"Content-Type":  "application/json",
-			"Authorization": fmt.Sprintf("Bearer %s", token),
-		},
-		mw(http.HandlerFunc(test.Ping)),
-	)
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-}
-
-func TestBlockJWTByCountryAndIssueDate(t *testing.T) {
-	secret := "secret"
-
-	revokeRules := []*AccessRule{
-		{Predicate: fmt.Sprintf("country == 'de' && iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
-	}
-
-	parser := jwt.NewParser(jwt.NewParserConfig(0, jwt.SigningMethod{Alg: signingAlg, Key: secret}))
-
-	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken(signingAlg, secret)
-	require.NoError(t, err)
-
-	w, err := test.Record(
-		"GET",
-		"/",
-		map[string]string{
-			"Content-Type":  "application/json",
-			"Authorization": fmt.Sprintf("Bearer %s", token),
-		},
-		mw(http.HandlerFunc(test.Ping)),
-	)
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusUnauthorized, w.Code)
-}
-
 func generateToken(alg, key string) (string, error) {
 	token := basejwt.NewWithClaims(basejwt.GetSigningMethod(alg), basejwt.MapClaims{
 		"country":  "de",
@@ -129,23 +25,108 @@ func generateToken(alg, key string) (string, error) {
 	return token.SignedString([]byte(key))
 }
 
-func TestEmptyAccessRules(t *testing.T) {
+func expectRulesToProduceStatus(t *testing.T, statusCode int, rules []*AccessRule) {
 	secret := "secret"
-
-	revokeRules := []*AccessRule{}
 
 	parser := jwt.NewParser(jwt.NewParserConfig(0, jwt.SigningMethod{Alg: signingAlg, Key: secret}))
 
-	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-
-	w, err := test.Record(
-		"GET",
-		"/",
-		nil,
-		mw(http.HandlerFunc(test.Ping)),
-	)
+	mw := NewRevokeRulesMiddleware(parser, rules)
+	token, err := generateToken(signingAlg, secret)
 	require.NoError(t, err)
-	assert.Equal(t, http.StatusOK, w.Code)
+
+	for i := 1; i <= 3; i++ { // middleware caches predicate and should return the same response every time
+		hits := 0
+		w, err := test.Record(
+			"GET",
+			"/",
+			map[string]string{
+				"Content-Type":  "application/json",
+				"Authorization": fmt.Sprintf("Bearer %s", token),
+			},
+			mw(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				hits++
+				test.Ping(w, r)
+			})),
+		)
+
+		assert.NoError(t, err, "%d. pass", i)
+		assert.Equal(t, statusCode, w.Code, "%d. pass", i)
+		if statusCode == http.StatusOK {
+			assert.Equal(t, 1, hits, "%d. pass", i)
+		} else {
+			assert.Equal(t, 0, hits, "%d. pass", i)
+		}
+	}
+}
+
+func TestBlockJWTByCountry(t *testing.T) {
+	expectRulesToProduceStatus(t, http.StatusUnauthorized, []*AccessRule{
+		{Predicate: "country == 'de'", Action: "deny"},
+	})
+}
+
+func TestBlockJWTByUsername(t *testing.T) {
+	expectRulesToProduceStatus(t, http.StatusUnauthorized, []*AccessRule{
+		{Predicate: "username == 'test@hellofresh.com'", Action: "deny"},
+	})
+}
+
+func TestBlockJWTByIssueDate(t *testing.T) {
+	expectRulesToProduceStatus(t, http.StatusUnauthorized, []*AccessRule{
+		{Predicate: fmt.Sprintf("iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
+	})
+}
+
+func TestBlockJWTByCountryAndIssueDate(t *testing.T) {
+	expectRulesToProduceStatus(t, http.StatusUnauthorized, []*AccessRule{
+		{Predicate: fmt.Sprintf("country == 'de' && iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
+	})
+}
+
+func TestEmptyAccessRules(t *testing.T) {
+	expectRulesToProduceStatus(t, http.StatusOK, []*AccessRule{})
+}
+
+func TestWrongRule(t *testing.T) {
+	expectRulesToProduceStatus(t, http.StatusOK, []*AccessRule{
+		{Predicate: "country == 'wrong'", Action: "deny"},
+	})
+}
+
+func TestMultipleRulesSecondMatchesAndDenies(t *testing.T) {
+	expectRulesToProduceStatus(t, http.StatusUnauthorized, []*AccessRule{
+		{Predicate: "country == 'us'", Action: "deny"},
+		{Predicate: "country == 'de'", Action: "deny"},
+	})
+}
+
+func TestMultipleRulesSecondMatchesAndAllows(t *testing.T) {
+	expectRulesToProduceStatus(t, http.StatusOK, []*AccessRule{
+		{Predicate: "country == 'us'", Action: "allow"},
+		{Predicate: "country == 'de'", Action: "allow"},
+		{Predicate: "true", Action: "deny"},
+	})
+}
+
+func TestMultipleRulesLastMatchesAndDenies(t *testing.T) {
+	expectRulesToProduceStatus(t, http.StatusUnauthorized, []*AccessRule{
+		{Predicate: "country == 'us'", Action: "allow"},
+		{Predicate: "country == 'gb'", Action: "allow"},
+		{Predicate: "true", Action: "deny"},
+	})
+}
+
+func TestMultipleRulesNoneMatch(t *testing.T) {
+	expectRulesToProduceStatus(t, http.StatusOK, []*AccessRule{
+		{Predicate: "country == 'us'", Action: "deny"},
+		{Predicate: "country == 'gb'", Action: "deny"},
+	})
+}
+func TestMultipleRulesMatchAndAllow(t *testing.T) {
+	expectRulesToProduceStatus(t, http.StatusOK, []*AccessRule{
+		{Predicate: "country == 'de'", Action: "allow"},
+		{Predicate: "true", Action: "allow"},
+	})
 }
 
 func TestWrongJWT(t *testing.T) {
@@ -153,36 +134,10 @@ func TestWrongJWT(t *testing.T) {
 		{Predicate: fmt.Sprintf("country == 'de' && iat < %d", time.Now().Add(1*time.Hour).Unix()), Action: "deny"},
 	}
 
-	parser := jwt.NewParser(jwt.NewParserConfig(0, jwt.SigningMethod{Alg: signingAlg, Key: "wrong secret"}))
+	parser := jwt.NewParser(jwt.NewParserConfig(0, jwt.SigningMethod{Alg: signingAlg, Key: "secret"}))
 
 	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken(signingAlg, "secret")
-	require.NoError(t, err)
-
-	w, err := test.Record(
-		"GET",
-		"/",
-		map[string]string{
-			"Content-Type":  "application/json",
-			"Authorization": fmt.Sprintf("Bearer %s", token),
-		},
-		mw(http.HandlerFunc(test.Ping)),
-	)
-	assert.NoError(t, err)
-	assert.Equal(t, http.StatusOK, w.Code)
-}
-
-func TestWrongRule(t *testing.T) {
-	secret := "secret"
-
-	revokeRules := []*AccessRule{
-		{Predicate: "country == 'wrong'", Action: "deny"},
-	}
-
-	parser := jwt.NewParser(jwt.NewParserConfig(0, jwt.SigningMethod{Alg: signingAlg, Key: secret}))
-
-	mw := NewRevokeRulesMiddleware(parser, revokeRules)
-	token, err := generateToken(signingAlg, secret)
+	token, err := generateToken(signingAlg, "wrong secret")
 	require.NoError(t, err)
 
 	w, err := test.Record(
