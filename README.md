@@ -46,7 +46,7 @@ This API Gateway offers powerful, yet lightweight features that allows fine-grai
 * Rate Limiting, easily rate limit your API users, rate limiting is granular and can be applied on a per-key basis
 * CORS Filter, enable cors for your API, or even for specific endpoints
 * Multiple auth protocols, out of the box, we support JWT, OAuth 2.0 and Basic Auth access methods
-* Small [official](https://hub.docker.com/repository/docker/hellofreshtech/janus) docker image included
+* Small [official](https://quay.io/repository/hellofresh/janus) docker image included
 
 ## Installation
 
@@ -73,11 +73,11 @@ http http://localhost:8081
 ### Manual
 
 You can get the binary and play with it in your own environment (or even deploy it where ever you like).
-Just go to the [releases](https://github.com/hellofresh/janus/releases) page and download the latest one for your platform.
+Just go to the [releases](https://github.com/motiv-labs/janus/releases) page and download the latest one for your platform.
 
 ## Getting Started
 
-Check out our [quick start guide](https://hellofresh.gitbooks.io/janus/quick_start) to get up to speed with Janus.
+Check out our [quick start guide](https://motivlabs.gitbook.io/janus/quick_start) to get up to speed with Janus.
 
 ## Contributing
 
@@ -85,8 +85,8 @@ To start contributing, please check [CONTRIBUTING](CONTRIBUTING.md).
 
 ## Documentation
 
-* Janus Docs: https://hellofresh.gitbooks.io/janus
-* Janus Go Docs: https://godoc.org/github.com/hellofresh/janus
+* Janus Docs: https://motivlabs.gitbook.io/janus
+* Janus Go Docs: https://godoc.org/github.com/motiv-labs/janus
 * Go lang: https://golang.org/
 
 ##
