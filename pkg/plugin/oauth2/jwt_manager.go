@@ -2,21 +2,18 @@ package oauth2
 
 import (
 	"context"
-	"encoding/base64"
-	"encoding/json"
-	"fmt"
-	"strings"
 
 	jwtBase "github.com/dgrijalva/jwt-go"
 	jwtUser "github.com/golang-jwt/jwt/v4"
-	"github.com/hellofresh/janus/pkg/jwt"
-	"github.com/hellofresh/janus/pkg/metrics"
-	obs "github.com/hellofresh/janus/pkg/observability"
 	"github.com/hellofresh/stats-go/bucket"
 	"github.com/hellofresh/stats-go/client"
 	log "github.com/sirupsen/logrus"
 	"go.opencensus.io/stats"
 	"go.opencensus.io/tag"
+
+	"github.com/hellofresh/janus/pkg/jwt"
+	"github.com/hellofresh/janus/pkg/metrics"
+	obs "github.com/hellofresh/janus/pkg/observability"
 )
 
 type UserClaims struct {
@@ -24,25 +21,6 @@ type UserClaims struct {
 	FullUserName string
 	Roles        []string
 	jwtUser.StandardClaims
-}
-
-func ExtractClaims(jwtToken string) (*UserClaims, error) {
-	parts := strings.Split(jwtToken, ".")
-	if len(parts) < 2 {
-		return nil, fmt.Errorf("JWT token invalid")
-	}
-
-	decoded, err := base64.RawURLEncoding.DecodeString(parts[1])
-	if err != nil {
-		return nil, err
-	}
-
-	claims := &UserClaims{}
-	err = json.Unmarshal([]byte(decoded), claims)
-	if err != nil {
-		return nil, err
-	}
-	return claims, nil
 }
 
 // JWTManager is responsible for managing the JWT tokens

@@ -2,17 +2,16 @@ package oauth2
 
 import (
 	"context"
-	"fmt"
-	"github.com/hellofresh/janus/pkg/cache"
 	"net/http"
 	"strings"
+
+	"github.com/hellofresh/stats-go/bucket"
+	log "github.com/sirupsen/logrus"
+	"go.opencensus.io/stats"
 
 	"github.com/hellofresh/janus/pkg/errors"
 	"github.com/hellofresh/janus/pkg/metrics"
 	obs "github.com/hellofresh/janus/pkg/observability"
-	"github.com/hellofresh/stats-go/bucket"
-	log "github.com/sirupsen/logrus"
-	"go.opencensus.io/stats"
 )
 
 const (
@@ -40,7 +39,7 @@ func (c ContextKey) String() string {
 }
 
 // NewKeyExistsMiddleware creates a new instance of KeyExistsMiddleware
-func NewKeyExistsMiddleware(manager Manager, cache *cache.RolesCache) func(http.Handler) http.Handler {
+func NewKeyExistsMiddleware(manager Manager) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			log.Debug("Starting Oauth2KeyExists middleware")
@@ -74,23 +73,6 @@ func NewKeyExistsMiddleware(manager Manager, cache *cache.RolesCache) func(http.
 
 			accessToken := parts[1]
 
-			claims, err := ExtractClaims(accessToken)
-			if err != nil {
-				errors.Handler(w, r, err)
-				return
-			}
-
-			if len(claims.Roles) <= 0 {
-				errors.Handler(w, r, fmt.Errorf("No roles have been set"))
-				return
-			}
-
-			err = RolesChecker(cache, claims.Roles, r.URL.Path, r.Method)
-			if err != nil {
-				errors.Handler(w, r, errors.New(http.StatusUnauthorized, err.Error()))
-				return
-			}
-
 			keyExists := manager.IsKeyAuthorized(r.Context(), accessToken)
 			statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "authorized"}, nil, keyExists)
 			if keyExists {
@@ -113,44 +95,4 @@ func NewKeyExistsMiddleware(manager Manager, cache *cache.RolesCache) func(http.
 			handler.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
-}
-
-func RolesChecker(cache *cache.RolesCache, userRoles []string, path, method string) error {
-	for _, userRole := range userRoles {
-		for _, role := range cache.Roles {
-			if role.Name != userRole {
-				continue
-			}
-
-			for _, feature := range role.Features {
-				for _, endpoint := range feature.Endpoints {
-					if endpoint.Method == method && isEndpointPathsEqual(path, endpoint.Path) {
-						return nil
-					}
-				}
-			}
-		}
-	}
-
-	return fmt.Errorf("Error: Access is denied")
-}
-
-func isEndpointPathsEqual(reqPath, dbPath string) bool {
-	reqPathArr := strings.Split(dbPath, "/")
-	dbPathArr := strings.Split(reqPath, "/")
-	if len(reqPathArr) != len(dbPathArr) {
-		return false
-	}
-
-	for i, _ := range dbPathArr {
-		if reqPathArr[i] == "" || string(reqPathArr[i][0]) == "{" {
-			continue
-		}
-
-		if reqPathArr[i] != dbPathArr[i] {
-			return false
-		}
-	}
-
-	return true
 }

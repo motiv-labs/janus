@@ -13,18 +13,18 @@ type Header = kafka.Header
 type KafkaMessageHandler func(Message) error
 type FaultyKafkaMessageHandler func(Message, error)
 
-func ConsumeMessages(kafkaAddr, topic, consumerGroup string, msgHandler KafkaMessageHandler, DLQHandler FaultyKafkaMessageHandler) {
-	// Minimum amount of bytes in a message batch
-	const minBytes = 10e3
-	// Maximum amount of bytes in a message batch
-	const maxBytes = 10e6
-
+func ConsumeMessages(conf *Config, topic string, msgHandler KafkaMessageHandler, DLQHandler FaultyKafkaMessageHandler) {
 	r := kafka.NewReader(kafka.ReaderConfig{
-		Brokers:  []string{kafkaAddr},
-		Topic:    topic,
-		GroupID:  consumerGroup,
-		MinBytes: minBytes,
-		MaxBytes: maxBytes,
+		Brokers:           []string{conf.KafkaAddr},
+		Topic:             topic,
+		GroupID:           conf.Consumer.Group,
+		QueueCapacity:     conf.Consumer.QueueCapacity,
+		MinBytes:          conf.Consumer.MinBytes,
+		MaxBytes:          conf.Consumer.MaxBytes,
+		MaxWait:           conf.Consumer.MaxWait,
+		HeartbeatInterval: conf.Consumer.HeartbeatInterval,
+
+		GroupBalancers: []kafka.GroupBalancer{&kafka.RangeGroupBalancer{}},
 	})
 	defer r.Close()
 
