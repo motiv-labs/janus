@@ -1,17 +1,22 @@
 package models
 
+import "sync"
+
+type RoleManager struct {
+	Roles map[string]*Role
+	sync.Mutex
+}
+
 type Role struct {
-	Name     string
-	Features []*Feature
+	ID       uint64 `json:"id" db:"id"`
+	Name     string `json:"name" db:"name"`
+	Features []Feature
 }
 
 type Feature struct {
-	Name      string
-	Endpoints []*Endpoint
-}
-
-type Endpoint struct {
-	Name   string
-	Path   string
-	Method string
+	ID          uint64 `json:"id" db:"id"`
+	Name        string `json:"name" db:"name"`
+	Description string `json:"description" db:"description"`
+	Path        string `json:"path" db:"path"`
+	Method      string `json:"method" db:"method"`
 }

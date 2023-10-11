@@ -4,12 +4,14 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/hellofresh/janus/pkg/api"
-	"github.com/hellofresh/janus/pkg/server"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 
+	"github.com/hellofresh/janus/pkg/api"
+	"github.com/hellofresh/janus/pkg/server"
+
 	// this is needed to call the init function on each plugin
+	_ "github.com/hellofresh/janus/pkg/plugin/authorization"
 	_ "github.com/hellofresh/janus/pkg/plugin/basic"
 	_ "github.com/hellofresh/janus/pkg/plugin/bodylmt"
 	_ "github.com/hellofresh/janus/pkg/plugin/cb"

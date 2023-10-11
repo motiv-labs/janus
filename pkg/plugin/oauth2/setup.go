@@ -2,14 +2,8 @@ package oauth2
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/hellofresh/janus/pkg/cache"
-	"github.com/hellofresh/janus/pkg/kafka"
-	"github.com/hellofresh/janus/pkg/models"
-	"io"
-	"net/http"
 	"net/url"
 	"time"
 
@@ -136,65 +130,28 @@ func onStartup(event interface{}) error {
 }
 
 func setupOAuth2(def *proxy.RouterDefinition, rawConfig plugin.Config) error {
-	var cfg Config
-	err := plugin.Decode(rawConfig, &cfg)
+	var pluginConf Config
+	err := plugin.Decode(rawConfig, &pluginConf)
 	if err != nil {
 		return err
 	}
 
-	oauthServer, err := repo.FindByName(cfg.ServerName)
+	oauthServer, err := repo.FindByName(pluginConf.ServerName)
 	if nil != err {
 		return err
 	}
 
-	manager, err := getManager(oauthServer, cfg.ServerName)
+	manager, err := getManager(oauthServer, pluginConf.ServerName)
 	if nil != err {
 		log.WithError(err).Error("OAuth Configuration for this API is incorrect, skipping...")
 		return err
 	}
-
 	signingMethods, err := oauthServer.TokenStrategy.GetJWTSigningMethods()
 	if err != nil {
 		return err
 	}
 
-	var kafkaConfig config.Config
-
-	err = config.UnmarshalYAML("./config/config.yaml", &kafkaConfig)
-	if err != nil {
-		return err
-	}
-
-	rolesCache := cache.NewRoleCache()
-
-	url := fmt.Sprintf("%s/roles", kafkaConfig.RBACUrl)
-
-	resp, err := http.DefaultClient.Get(url)
-	if err != nil {
-		return err
-	}
-
-	defer resp.Body.Close()
-
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return err
-	}
-
-	var roles []*models.Role
-
-	err = json.Unmarshal(body, &roles)
-	if err != nil {
-		return err
-	}
-
-	for _, role := range roles {
-		rolesCache.Set(role)
-	}
-
-	go kafka.StartFactConsumer(kafkaConfig.KafkaAddr, kafkaConfig.KafkaFactTopic, kafkaConfig.KafkaDLQTopic, kafkaConfig.KafkaConsumerGroup, rolesCache)
-
-	def.AddMiddleware(NewKeyExistsMiddleware(manager, rolesCache))
+	def.AddMiddleware(NewKeyExistsMiddleware(manager))
 	def.AddMiddleware(NewRevokeRulesMiddleware(jwt.NewParser(jwt.NewParserConfig(oauthServer.TokenStrategy.Leeway, signingMethods...)), oauthServer.AccessRules))
 
 	return nil
