@@ -1,0 +1,22 @@
+name: Update Docker Image
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  update-image:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Login to DockerHub
+        run: docker login -u ${{ secrets.DOCKER_EMAIL }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: Build and push Docker image with :latest tag
+        run: |
+          docker build -t janus-gateway .
+          docker tag janus-gateway ${{ vars.DOCKER_USERNAME }}/janus-gateway:latest
+          docker push ${{ vars.DOCKER_USERNAME }}/janus-gateway:latest
