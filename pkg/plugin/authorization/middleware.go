@@ -45,7 +45,7 @@ func TokenChecker(tokens map[string]*models.JWTToken, userToken string) error {
 		return nil
 	}
 
-	return fmt.Errorf("error: invalid token")
+	return fmt.Errorf("invalid token")
 }
 
 func NewRoleCheckerMiddleware() func(http.Handler) http.Handler {
@@ -99,7 +99,7 @@ func RoleChecker(roles map[string]*models.Role, userRoles []string, path, method
 		}
 	}
 
-	return fmt.Errorf("error: access is denied")
+	return fmt.Errorf("access is denied")
 }
 
 func isEndpointPathsEqual(reqPath, dbPath string) bool {

@@ -2,6 +2,7 @@ package authorization
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/models"
@@ -42,7 +43,7 @@ func onStartup(event interface{}) error {
 
 	_, ok := event.(plugin.OnStartup)
 	if !ok {
-		return errors.New("could not convert event to startup type")
+		return fmt.Errorf("could not convert event to startup type")
 	}
 
 	err = config.UnmarshalYAML("./config/config.yaml", &conf)
@@ -58,11 +59,11 @@ func onStartup(event interface{}) error {
 	tokenManager = &models.TokenManager{Tokens: map[string]*models.JWTToken{}}
 	roleManager = &models.RoleManager{Roles: map[string]*models.Role{}}
 
-	err = RefreshTokens(&conf, tokenManager)
+	err = FetchInitialTokens(&conf, tokenManager)
 	if err != nil && !errors.Is(err, ErrTimeout) {
 		return err
 	}
-	err = RefreshRoles(&conf, roleManager)
+	err = FetchInitialRoles(&conf, roleManager)
 	if err != nil && !errors.Is(err, ErrTimeout) {
 		return err
 	}
