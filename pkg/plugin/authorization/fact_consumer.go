@@ -39,8 +39,19 @@ func UserManagementFactConsumer(conf *config.Config, topic string, tokenManager 
 			case models.ObjectTypeJWTToken:
 				switch fact.ActionType {
 
-				case models.ActionTypeCreate, models.ActionTypeUpdate, models.ActionTypeDelete:
-					err = RefreshTokens(conf, tokenManager)
+				case models.ActionTypeCreate, models.ActionTypeUpdate:
+					var token *models.JWTToken
+					err = json.Unmarshal(*fact.Object, &token)
+					if err != nil {
+						return err
+					}
+					err = UpsertToken(token, tokenManager)
+					if err != nil {
+						return err
+					}
+
+				case models.ActionTypeDelete:
+					err = DeleteTokenByID(fact.ID, tokenManager)
 					if err != nil {
 						return err
 					}
@@ -73,11 +84,22 @@ func RBACFactConsumer(conf *config.Config, topic string, roleManager *models.Rol
 			case models.ObjectTypeRole:
 				switch fact.ActionType {
 
-				case models.ActionTypeCreate, models.ActionTypeUpdate, models.ActionTypeDelete:
-					err = RefreshRoles(conf, roleManager)
+				case models.ActionTypeCreate, models.ActionTypeUpdate:
+					var role *models.Role
+					err = json.Unmarshal(*fact.Object, &role)
 					if err != nil {
 						return err
 					}
+
+					err = UpsertRole(role, roleManager)
+					if err != nil {
+						return err
+					}
+				}
+			case models.ActionTypeDelete:
+				err = DeleteRoleByID(fact.ID, roleManager)
+				if err != nil {
+					return err
 				}
 			}
 			return nil

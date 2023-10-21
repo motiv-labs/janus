@@ -8,15 +8,15 @@ type RoleManager struct {
 }
 
 type Role struct {
-	ID       uint64 `json:"id" db:"id"`
-	Name     string `json:"name" db:"name"`
+	ID       uint64 `json:"id"`
+	Name     string `json:"name"`
 	Features []Feature
 }
 
 type Feature struct {
-	ID          uint64 `json:"id" db:"id"`
-	Name        string `json:"name" db:"name"`
-	Description string `json:"description" db:"description"`
-	Path        string `json:"path" db:"path"`
-	Method      string `json:"method" db:"method"`
+	ID          uint64 `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Path        string `json:"path"`
+	Method      string `json:"method"`
 }

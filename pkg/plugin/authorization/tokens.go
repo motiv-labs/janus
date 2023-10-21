@@ -13,10 +13,10 @@ import (
 	"github.com/hellofresh/janus/pkg/models"
 )
 
-func RefreshTokens(conf *config.Config, tokenManager *models.TokenManager) error {
+func FetchInitialTokens(conf *config.Config, tokenManager *models.TokenManager) error {
 	url := fmt.Sprintf("%s/%s/tokens", conf.UserManagementURL, conf.ApiVersion)
 
-	http.DefaultClient.Timeout = 5 * time.Second
+	http.DefaultClient.Timeout = 3 * time.Second
 	resp, err := http.DefaultClient.Get(url)
 	if err != nil {
 		var netErr net.Error
@@ -49,6 +49,28 @@ func RefreshTokens(conf *config.Config, tokenManager *models.TokenManager) error
 	defer tokenManager.Unlock()
 
 	tokenManager.Tokens = tokensMap
+
+	return nil
+}
+
+func UpsertToken(token *models.JWTToken, tokenManager *models.TokenManager) error {
+	tokenManager.Lock()
+	defer tokenManager.Unlock()
+
+	tokenManager.Tokens[token.Token] = token
+	return nil
+}
+
+func DeleteTokenByID(id uint64, tokenManager *models.TokenManager) error {
+	tokenManager.Lock()
+	defer tokenManager.Unlock()
+
+	for key, token := range tokenManager.Tokens {
+		if token.ID == id {
+			delete(tokenManager.Tokens, key)
+			break
+		}
+	}
 
 	return nil
 }
