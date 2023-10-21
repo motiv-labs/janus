@@ -24,9 +24,9 @@ type consumer struct {
 }
 
 type Config struct {
-	KafkaAddr string   `yaml:"kafkaAddr"`
-	Producer  producer `yaml:"producer"`
-	Consumer  consumer `yaml:"consumer"`
+	KafkaBrokers []string `yaml:"kafkaBrokers"`
+	Producer     producer `yaml:"producer"`
+	Consumer     consumer `yaml:"consumer"`
 }
 
 func (c *Config) Normalize() {
@@ -37,13 +37,13 @@ func (c *Config) Normalize() {
 		c.Producer.BatchSize = 64
 	}
 	if c.Producer.BatchBytes == 0 {
-		c.Producer.BatchBytes = 32000
+		c.Producer.BatchBytes = 16000
 	}
 	if c.Producer.BatchTimeout == 0 {
-		c.Producer.BatchTimeout = 500 * time.Millisecond
+		c.Producer.BatchTimeout = 5 * time.Millisecond
 	}
 	if c.Producer.FactProduceRetryDelay == 0 {
-		c.Producer.FactProduceRetryDelay = 2 * time.Second
+		c.Producer.FactProduceRetryDelay = 50 * time.Millisecond
 	}
 
 	if c.Consumer.ConsumersAmount == 0 {
@@ -62,6 +62,6 @@ func (c *Config) Normalize() {
 		c.Consumer.MaxWait = 10 * time.Second
 	}
 	if c.Consumer.HeartbeatInterval == 0 {
-		c.Consumer.HeartbeatInterval = 500 * time.Millisecond
+		c.Consumer.HeartbeatInterval = 2 * time.Second
 	}
 }

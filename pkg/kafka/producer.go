@@ -6,13 +6,13 @@ import (
 	"github.com/segmentio/kafka-go"
 )
 
-type KafkaProducer struct {
+type kafkaProducer struct {
 	kafkaWriter *kafka.Writer
 }
 
-func NewKafkaProducer(conf *Config) *KafkaProducer {
-	return &KafkaProducer{kafkaWriter: &kafka.Writer{
-		Addr:         kafka.TCP(conf.KafkaAddr),
+func NewKafkaProducer(conf *Config) *kafkaProducer {
+	return &kafkaProducer{kafkaWriter: &kafka.Writer{
+		Addr:         kafka.TCP(conf.KafkaBrokers...),
 		Topic:        conf.Producer.Topic,
 		BatchTimeout: conf.Producer.BatchTimeout,
 		BatchSize:    conf.Producer.BatchSize,
@@ -23,9 +23,7 @@ func NewKafkaProducer(conf *Config) *KafkaProducer {
 	}}
 }
 
-const BatchSize = 1000
-
-func (producer *KafkaProducer) ProduceMessage(key string, messageBytes []byte) error {
+func (producer *kafkaProducer) ProduceMessage(key string, messageBytes []byte) error {
 	err := producer.kafkaWriter.WriteMessages(context.Background(),
 		kafka.Message{
 			Key:   []byte(key),
@@ -35,12 +33,12 @@ func (producer *KafkaProducer) ProduceMessage(key string, messageBytes []byte) e
 	return err
 }
 
-func (producer *KafkaProducer) ProduceMadeMessage(msg kafka.Message) error {
+func (producer *kafkaProducer) ProduceMadeMessage(msg kafka.Message) error {
 	err := producer.kafkaWriter.WriteMessages(context.Background(), msg)
 	return err
 }
 
-func (producer *KafkaProducer) Close() error {
+func (producer *kafkaProducer) Close() error {
 	err := producer.kafkaWriter.Close()
 	return err
 }
