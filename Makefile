@@ -10,6 +10,15 @@ GO_LINKER_FLAGS=-ldflags="-s -w -X main.version=$(VERSION)"
 
 all: test-unit build
 
+# this make target is for testing purposes, run it and then run lms, it will be using local built janus
+build-lms:
+	docker build -t janus-gateway .
+	docker tag janus-gateway krelms/janus-gateway:latest
+
+# and this is cleans local built image, on next lms startup dockerhub image will be downloaded
+clean-lms:
+	docker rmi krelms/janus-gateway:latest
+
 build:
 	@echo "$(OK_COLOR)==> Building default binary... $(NO_COLOR)"
 	@CGO_ENABLED=0 go build -mod=vendor ${GO_LINKER_FLAGS} -o "dist/janus"

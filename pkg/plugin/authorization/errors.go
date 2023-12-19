@@ -1,7 +1,9 @@
 package authorization
 
-import "fmt"
+import (
+	"github.com/pkg/errors"
+)
 
 var (
-	ErrTimeout = fmt.Errorf("timed out")
+	ErrTokenInvalid = errors.New("invalid token")
 )

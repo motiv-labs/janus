@@ -56,15 +56,15 @@ func onStartup(event interface{}) error {
 		return err
 	}
 
-	tokenManager = &models.TokenManager{Tokens: map[string]*models.JWTToken{}}
-	roleManager = &models.RoleManager{Roles: map[string]*models.Role{}}
+	tokenManager = &models.TokenManager{Tokens: map[string]*models.JWTToken{}, Conf: &conf}
+	roleManager = &models.RoleManager{Roles: map[string]*models.Role{}, Conf: &conf}
 
-	err = FetchInitialTokens(&conf, tokenManager)
-	if err != nil && !errors.Is(err, ErrTimeout) {
+	err = tokenManager.FetchTokens()
+	if err != nil && !errors.Is(err, models.ErrTimeout) {
 		return err
 	}
-	err = FetchInitialRoles(&conf, roleManager)
-	if err != nil && !errors.Is(err, ErrTimeout) {
+	err = roleManager.FetchRoles()
+	if err != nil && !errors.Is(err, models.ErrTimeout) {
 		return err
 	}
 

@@ -45,7 +45,17 @@ func TokenChecker(tokens map[string]*models.JWTToken, userToken string) error {
 		return nil
 	}
 
-	return fmt.Errorf("invalid token")
+	err := tokenManager.FetchTokens()
+	if err != nil {
+		return err
+	}
+
+	// TODO: Remove this workaround after adding sync request to Janus when token is added
+	if _, exists := tokens[userToken]; exists {
+		return nil
+	}
+
+	return ErrTokenInvalid
 }
 
 func NewRoleCheckerMiddleware() func(http.Handler) http.Handler {
