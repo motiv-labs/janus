@@ -1,0 +1,17 @@
+{
+    "name" : "echoApi",
+    "active" : true,
+    "proxy" : {
+        "preserve_host" : false,
+        "listen_path" : "/echo/*",
+        "upstreams" : {
+            "balancing": "roundrobin",
+            "targets": [
+                {"target": "http://postman-echo.com/get"}
+            ]
+        },
+        "strip_path" : false,
+        "append_path" : false,
+        "methods" : ["GET"]
+    }
+}

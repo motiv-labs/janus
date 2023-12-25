@@ -35,3 +35,6 @@ node_modules/
 # HF config files
 /dist
 debug
+
+#OSX
+.DS_Store

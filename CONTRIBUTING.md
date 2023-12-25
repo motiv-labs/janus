@@ -64,3 +64,56 @@ Both issue lists are sorted by total number of comments. While not perfect, numb
 
 
 Happy Coding from the HelloFresh Engineering team!
+
+
+## Compiling and Debugging
+
+### Compiling
+After cloning the solution, using the `master` branch, the code should be compiling at all times. If it's not, please file a bug.
+
+### Debugging
+To quickly start a debug session, a simple api has been provided on the examples folder. To use it, a `janus.toml` file at root of the cloned directory and paste the following content to it and save
+
+```
+################################################################
+# Global configuration
+################################################################
+port = 8080
+
+[log]
+  level = "debug"
+
+################################################################
+# API configuration backend
+################################################################
+[web]
+  port = 8081
+
+  [web.credentials]
+    secret = "secret"
+
+    [web.credentials.basic]
+    users = {admin = "admin"}
+
+[database]
+  dsn = "file://{Path To Cloned Directory}}/examples/front-proxy-EchoApi/"
+```
+
+If you're using VSCode, you can use the following settings on the `launch.json`:
+
+```
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch",
+            "type": "go",
+            "args": ["start"],
+            "request": "launch",
+            "program": "${workspaceFolder}"
+        }
+    ]
+}
+```
+
+When you hit debug, the application will start, bind to port 8080. When access `http://localhost:8080/echo` you should get a echo back from the publically available postman-echo service (https://learning.postman.com/docs/developer/echo-api/).
