@@ -3,8 +3,9 @@ package jwt
 import (
 	"net/http"
 
-	"github.com/hellofresh/janus/pkg/render"
 	log "github.com/sirupsen/logrus"
+
+	"github.com/hellofresh/janus/pkg/render"
 )
 
 // Payload Represents the context key

@@ -28,7 +28,7 @@ func ExtractClaims(jwtToken string) (*UserClaims, error) {
 	}
 
 	claims := &UserClaims{}
-	err = json.Unmarshal([]byte(decoded), claims)
+	err = json.Unmarshal(decoded, claims)
 	if err != nil {
 		return nil, err
 	}

@@ -1,27 +1,13 @@
 package authorization
 
 import (
-	"errors"
-	"fmt"
-
 	"github.com/hellofresh/janus/pkg/config"
-	"github.com/hellofresh/janus/pkg/models"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
 )
 
-var (
-	tokenManager *models.TokenManager
-	roleManager  *models.RoleManager
-)
-
 func init() {
-	err := plugin.RegisterEventHook(plugin.StartupEvent, onStartup)
-	if err != nil {
-		panic(err)
-	}
-
-	err = plugin.RegisterPlugin("authorization", plugin.Plugin{
+	err := plugin.RegisterPlugin("authorization", plugin.Plugin{
 		Action:   setupAuthorization,
 		Validate: nil,
 	})
@@ -31,44 +17,31 @@ func init() {
 }
 
 func setupAuthorization(def *proxy.RouterDefinition, _ plugin.Config) error {
-	def.AddMiddleware(NewTokenCheckerMiddleware())
-	def.AddMiddleware(NewRoleCheckerMiddleware())
-
-	return nil
-}
-
-func onStartup(event interface{}) error {
-	var err error
 	var conf config.Config
 
-	_, ok := event.(plugin.OnStartup)
-	if !ok {
-		return fmt.Errorf("could not convert event to startup type")
-	}
-
-	err = config.UnmarshalYAML("./config/config.yaml", &conf)
-	if err != nil {
-		return err
-	}
-	conf.KafkaConfig.Normalize()
-
+	err := config.UnmarshalYAML("./config/config.yaml", &conf)
 	if err != nil {
 		return err
 	}
 
-	tokenManager = &models.TokenManager{Tokens: map[string]*models.JWTToken{}, Conf: &conf}
-	roleManager = &models.RoleManager{Roles: map[string]*models.Role{}, Conf: &conf}
+	tokenManager := NewTokenManager(&conf)
+	roleManager := NewRoleManager(&conf)
 
 	err = tokenManager.FetchTokens()
-	if err != nil && !errors.Is(err, models.ErrTimeout) {
+	if err != nil {
 		return err
 	}
 	err = roleManager.FetchRoles()
-	if err != nil && !errors.Is(err, models.ErrTimeout) {
+	if err != nil {
 		return err
 	}
 
-	StartFactConsumers(&conf, tokenManager, roleManager)
+	// Catch middleware needs to be first, if it successfully catches – it will interrupt http request.
+	def.AddMiddleware(NewTokenCatcherMiddleware(tokenManager))
+	def.AddMiddleware(NewRoleCatcherMiddleware(roleManager))
+
+	def.AddMiddleware(NewTokenCheckerMiddleware(tokenManager))
+	def.AddMiddleware(NewRoleCheckerMiddleware(roleManager))
 
 	return nil
 }
