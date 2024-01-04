@@ -2,73 +2,87 @@ package authorization
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 
-	"github.com/hellofresh/janus/pkg/models"
-
 	"github.com/hellofresh/janus/pkg/errors"
+	"github.com/hellofresh/janus/pkg/render"
 )
 
-func NewTokenCheckerMiddleware() func(http.Handler) http.Handler {
+var (
+	AuthHeaderValue = ContextKey("auth_header")
+
+	ErrAuthorizationFieldNotFound = errors.New(http.StatusBadRequest, "authorization field missing")
+	ErrBearerMalformed            = errors.New(http.StatusBadRequest, "bearer token malformed")
+	ErrAccessTokenNotAuthorized   = errors.New(http.StatusUnauthorized, "access token not authorized")
+	ErrNoRolesSet                 = errors.New(http.StatusUnauthorized, "no roles in access token")
+	ErrAccessIsDenied             = errors.New(http.StatusUnauthorized, "access is denied")
+	ErrBodyReading                = errors.New(http.StatusInternalServerError, "body reading error")
+	ErrUnmarshal                  = errors.New(http.StatusInternalServerError, "cannot unmarshal")
+)
+
+// ContextKey is used to create context keys that are concurrent safe
+type ContextKey string
+
+func (c ContextKey) String() string {
+	return "janus." + string(c)
+}
+
+func NewTokenCheckerMiddleware(manager *TokenManager) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeaderValue := r.Header.Get("Authorization")
 			parts := strings.Split(authHeaderValue, " ")
 
 			if len(parts) == 0 {
-				errors.Handler(w, r, errors.New(http.StatusUnauthorized, "no authorization header provided"))
+				errors.Handler(w, r, ErrAuthorizationFieldNotFound)
 				return
 			} else if len(parts) < 2 {
-				errors.Handler(w, r, errors.New(http.StatusUnauthorized, "bearer token malformed"))
+				errors.Handler(w, r, ErrBearerMalformed)
 				return
 			}
 
 			accessToken := parts[1]
-			tokenManager.RLock()
-			defer tokenManager.RUnlock()
-			err := TokenChecker(tokenManager.Tokens, accessToken)
+
+			err := manager.FetchTokens()
 			if err != nil {
-				errors.Handler(w, r, errors.New(http.StatusUnauthorized, err.Error()))
+				errors.Handler(w, r, errors.New(http.StatusInternalServerError, err.Error()))
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), "auth_header", accessToken)
+			if !isTokenAuthorized(manager.Tokens, accessToken) {
+				errors.Handler(w, r, ErrAccessTokenNotAuthorized)
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), AuthHeaderValue, accessToken)
 			handler.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
 
-func TokenChecker(tokens map[string]*models.JWTToken, userToken string) error {
+func isTokenAuthorized(tokens map[string]*JWTToken, userToken string) bool {
 	if _, exists := tokens[userToken]; exists {
-		return nil
+		return true
 	}
 
-	err := tokenManager.FetchTokens()
-	if err != nil {
-		return err
-	}
-
-	// TODO: Remove this workaround after adding sync request to Janus when token is added
-	if _, exists := tokens[userToken]; exists {
-		return nil
-	}
-
-	return ErrTokenInvalid
+	return false
 }
 
-func NewRoleCheckerMiddleware() func(http.Handler) http.Handler {
+func NewRoleCheckerMiddleware(manager *RoleManager) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			authHeaderValue := r.Header.Get("Authorization")
 			parts := strings.Split(authHeaderValue, " ")
 
 			if len(parts) == 0 {
-				errors.Handler(w, r, errors.New(http.StatusUnauthorized, "no authorization header provided"))
+				errors.Handler(w, r, ErrAuthorizationFieldNotFound)
 				return
 			} else if len(parts) < 2 {
-				errors.Handler(w, r, errors.New(http.StatusUnauthorized, "bearer token malformed"))
+				errors.Handler(w, r, ErrBearerMalformed)
 				return
 			}
 
@@ -80,54 +94,151 @@ func NewRoleCheckerMiddleware() func(http.Handler) http.Handler {
 				return
 			}
 
-			if len(claims.Roles) <= 0 {
-				errors.Handler(w, r, errors.New(http.StatusUnauthorized, "no roles have been set"))
+			if len(claims.Roles) == 0 {
+				errors.Handler(w, r, ErrNoRolesSet)
 				return
 			}
 
-			err = RoleChecker(roleManager.Roles, claims.Roles, r.URL.Path, r.Method)
+			err = manager.FetchRoles()
 			if err != nil {
-				errors.Handler(w, r, errors.New(http.StatusUnauthorized, err.Error()))
+				errors.Handler(w, r, errors.New(http.StatusInternalServerError, err.Error()))
 				return
 			}
 
-			ctx := context.WithValue(r.Context(), "auth_header", accessToken)
+			if !isHaveAccess(manager.Roles, claims.Roles, r.URL.Path, r.Method) {
+				errors.Handler(w, r, ErrAccessIsDenied)
+				return
+			}
+
+			ctx := context.WithValue(r.Context(), AuthHeaderValue, accessToken)
 			handler.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }
 
-func RoleChecker(roles map[string]*models.Role, userRoles []string, path, method string) error {
+func isHaveAccess(roles map[string]*Role, userRoles []string, path, method string) bool {
 	for _, userRole := range userRoles {
 		if role, exists := roles[userRole]; exists {
 			for _, feature := range role.Features {
 				if feature.Method == method && isEndpointPathsEqual(path, feature.Path) {
-					return nil
+					return true
 				}
-
 			}
 		}
 	}
 
-	return fmt.Errorf("access is denied")
+	return false
 }
 
-func isEndpointPathsEqual(reqPath, dbPath string) bool {
-	reqPathArr := strings.Split(dbPath, "/")
-	dbPathArr := strings.Split(reqPath, "/")
-	if len(reqPathArr) != len(dbPathArr) {
+func isEndpointPathsEqual(reqPath, confPath string) bool {
+	reqPathArr := strings.Split(confPath, "/")
+	confPathArr := strings.Split(reqPath, "/")
+	if len(reqPathArr) != len(confPathArr) {
 		return false
 	}
 
-	for i, _ := range dbPathArr {
+	for i := range confPathArr {
 		if reqPathArr[i] == "" || string(reqPathArr[i][0]) == "{" {
 			continue
 		}
 
-		if reqPathArr[i] != dbPathArr[i] {
+		if reqPathArr[i] != confPathArr[i] {
 			return false
 		}
 	}
 
 	return true
+}
+
+func NewTokenCatcherMiddleware(manager *TokenManager) func(http.Handler) http.Handler {
+	return func(handler http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			switch r.URL.Path {
+			case fmt.Sprintf("/%s/gatewayTokens", manager.Conf.ApiVersion):
+				body, err := io.ReadAll(r.Body)
+				if err != nil {
+					errors.Handler(w, r, ErrBodyReading)
+				}
+
+				tokens := []*JWTToken{}
+				err = json.Unmarshal(body, &tokens)
+				if err != nil {
+					errors.Handler(w, r, ErrUnmarshal)
+				}
+
+				manager.UpsertTokens(tokens)
+
+				render.JSON(w, http.StatusOK, http.NoBody)
+				return
+
+			case fmt.Sprintf("/%s/gatewayTokens/delete", manager.Conf.ApiVersion):
+				body, err := io.ReadAll(r.Body)
+				if err != nil {
+					errors.Handler(w, r, ErrBodyReading)
+				}
+
+				ids := []uint64{}
+				err = json.Unmarshal(body, &ids)
+				if err != nil {
+					errors.Handler(w, r, ErrUnmarshal)
+				}
+
+				manager.DeleteTokensByIDs(ids)
+
+				render.JSON(w, http.StatusOK, http.NoBody)
+				return
+
+			default:
+				handler.ServeHTTP(w, r)
+				return
+			}
+		})
+	}
+}
+
+func NewRoleCatcherMiddleware(manager *RoleManager) func(http.Handler) http.Handler {
+	return func(handler http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			switch r.URL.Path {
+			case fmt.Sprintf("/%s/gatewayRoles", manager.Conf.ApiVersion):
+				body, err := io.ReadAll(r.Body)
+				if err != nil {
+					errors.Handler(w, r, ErrBodyReading)
+				}
+
+				roles := []*Role{}
+				err = json.Unmarshal(body, &roles)
+				if err != nil {
+					errors.Handler(w, r, ErrUnmarshal)
+				}
+
+				manager.UpsertRoles(roles)
+
+				render.JSON(w, http.StatusOK, http.NoBody)
+				return
+
+			case fmt.Sprintf("/%s/gatewayRoles/delete", manager.Conf.ApiVersion):
+				body, err := io.ReadAll(r.Body)
+				if err != nil {
+					errors.Handler(w, r, ErrBodyReading)
+				}
+
+				ids := []uint64{}
+				err = json.Unmarshal(body, &ids)
+				if err != nil {
+					errors.Handler(w, r, ErrUnmarshal)
+				}
+
+				manager.DeleteRolesByIDs(ids)
+
+				render.JSON(w, http.StatusOK, http.NoBody)
+				return
+
+			default:
+				handler.ServeHTTP(w, r)
+				return
+			}
+
+		})
+	}
 }

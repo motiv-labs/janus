@@ -294,7 +294,8 @@ func (s *Server) createRouter() router.Router {
 	}
 
 	r.Use(
-		middleware.NewStats(s.statsClient).Handler,
+		// Stats counter are disabled for now due to log spam
+		// middleware.NewStats(s.statsClient).Handler,
 		middleware.NewLogger().Handler,
 		middleware.NewRecovery(errors.RecoveryHandler),
 	)
