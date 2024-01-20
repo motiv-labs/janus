@@ -3,6 +3,7 @@ package jwt
 import (
 	"context"
 	"errors"
+	"fmt"
 	"net/http"
 	"strings"
 	"time"
@@ -121,7 +122,7 @@ func extractAccessToken(r *http.Request) (string, error) {
 	}
 
 	if strings.ToLower(parts[0]) != bearer {
-		return "", errors.New("bearer token malformed")
+		return "", fmt.Errorf("bearer token malformed, token is: %q", authHeaderValue)
 	}
 
 	return parts[1], nil
