@@ -63,7 +63,7 @@ func NewKeyExistsMiddleware(manager Manager) func(http.Handler) http.Handler {
 			statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "header"}, nil, true)
 
 			if strings.ToLower(parts[0]) != "bearer" {
-				logger.Warn("Bearer token malformed")
+				logger.Errorf("bearer token malformed, token is: %q", authHeaderValue)
 				statsClient.TrackOperation(tokensSection, bucket.MetricOperation{"key-exists", "malformed"}, nil, false)
 				stats.Record(r.Context(), obs.MOAuth2MalformedHeader.M(1))
 				errors.Handler(w, r, ErrBearerMalformed)

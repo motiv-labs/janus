@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/sirupsen/logrus"
 	"io"
 	"net/http"
 	"strings"
@@ -41,6 +42,7 @@ func NewTokenCheckerMiddleware(manager *TokenManager) func(http.Handler) http.Ha
 				errors.Handler(w, r, ErrAuthorizationFieldNotFound)
 				return
 			} else if len(parts) < 2 {
+				logrus.Errorf("bearer token malformed, token is: %q", authHeaderValue)
 				errors.Handler(w, r, ErrBearerMalformed)
 				return
 			}
@@ -82,6 +84,7 @@ func NewRoleCheckerMiddleware(manager *RoleManager) func(http.Handler) http.Hand
 				errors.Handler(w, r, ErrAuthorizationFieldNotFound)
 				return
 			} else if len(parts) < 2 {
+				logrus.Errorf("bearer token malformed, token is: %q", authHeaderValue)
 				errors.Handler(w, r, ErrBearerMalformed)
 				return
 			}
