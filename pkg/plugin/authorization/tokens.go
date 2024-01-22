@@ -18,14 +18,14 @@ type JWTToken struct {
 }
 
 type TokenManager struct {
-	Tokens map[string]*JWTToken
+	Tokens map[string]*Claims
 	Conf   *config.Config
 	sync.RWMutex
 }
 
 func NewTokenManager(conf *config.Config) *TokenManager {
 	return &TokenManager{
-		Tokens: map[string]*JWTToken{},
+		Tokens: map[string]*Claims{},
 		Conf:   conf,
 	}
 }
@@ -46,42 +46,75 @@ func (tm *TokenManager) FetchTokens() error {
 		return err
 	}
 
-	tm.Lock()
-	defer tm.Unlock()
+	tokensMap, err := tokenSliceToStringClaimsMap(tokensSlice)
+	if err != nil {
+		return err
+	}
 
-	tm.Tokens = tokenSliceToMap(tokensSlice)
+	tm.Tokens = tokensMap
 
 	return nil
 }
 
-func tokenSliceToMap(tokensSlice []*JWTToken) map[string]*JWTToken {
-	tokensMap := map[string]*JWTToken{}
+func tokenSliceToStringClaimsMap(tokensSlice []*JWTToken) (map[string]*Claims, error) {
+	tokensMap := map[string]*Claims{}
 
 	for _, token := range tokensSlice {
-		tokensMap[token.Token] = token
-	}
-
-	return tokensMap
-}
-
-func (tm *TokenManager) UpsertTokens(tokens []*JWTToken) {
-	tm.Lock()
-	defer tm.Unlock()
-
-	for _, token := range tokens {
-		tm.Tokens[token.Token] = token
-	}
-}
-
-func (tm *TokenManager) DeleteTokensByIDs(ids []uint64) {
-	tm.Lock()
-	defer tm.Unlock()
-
-	for _, id := range ids {
-		for key, token := range tm.Tokens {
-			if token.ID == id {
-				delete(tm.Tokens, key)
-			}
+		claims, err := ExtractClaims(token.Token)
+		if err != nil {
+			return nil, err
 		}
+		tokensMap[token.Token] = claims
 	}
+
+	return tokensMap, nil
+}
+
+func (tm *TokenManager) UpsertToken(token string) error {
+	claims, err := ExtractClaims(token)
+	if err != nil {
+		return err
+	}
+
+	tm.Lock()
+	defer tm.Unlock()
+
+	tm.Tokens[token] = claims
+
+	go tm.deleteTokenAfterExpiration(token)
+
+	return nil
+}
+
+func (tm *TokenManager) DeleteToken(token string) {
+	tm.Lock()
+	defer tm.Unlock()
+
+	delete(tm.Tokens, token)
+}
+
+func (tm *TokenManager) isTokenValid(accessToken string) bool {
+	tm.RLock()
+	defer tm.RUnlock()
+
+	if _, exists := tm.Tokens[accessToken]; exists {
+		return true
+	}
+
+	return false
+}
+
+func (tm *TokenManager) deleteTokenAfterExpiration(token string) {
+	claims, exists := tm.Tokens[token]
+	if !exists {
+		return
+	}
+
+	expiresAt := time.Unix(claims.ExpiresAt, 0)
+	duration := expiresAt.Sub(time.Now())
+
+	timer := time.NewTimer(duration)
+	<-timer.C
+
+	tm.DeleteToken(token)
 }

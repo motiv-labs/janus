@@ -6,17 +6,17 @@ import (
 	"fmt"
 	"strings"
 
-	jwtUser "github.com/golang-jwt/jwt/v4"
+	"github.com/golang-jwt/jwt/v4"
 )
 
-type UserClaims struct {
-	UserID       int
+type Claims struct {
+	UserID       uint64
 	FullUserName string
-	Roles        []string
-	jwtUser.StandardClaims
+	jwt.StandardClaims
+	Roles []string
 }
 
-func ExtractClaims(jwtToken string) (*UserClaims, error) {
+func ExtractClaims(jwtToken string) (*Claims, error) {
 	parts := strings.Split(jwtToken, ".")
 	if len(parts) < 2 {
 		return nil, fmt.Errorf("JWT token invalid")
@@ -27,7 +27,7 @@ func ExtractClaims(jwtToken string) (*UserClaims, error) {
 		return nil, err
 	}
 
-	claims := &UserClaims{}
+	claims := &Claims{}
 	err = json.Unmarshal(decoded, claims)
 	if err != nil {
 		return nil, err

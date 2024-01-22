@@ -6,42 +6,66 @@ import (
 	"github.com/hellofresh/janus/pkg/proxy"
 )
 
+var (
+	tm *TokenManager
+	rm *RoleManager
+)
+
+const (
+	endpointTypeField = "endpoint_type"
+	loginType         = "login"
+	logoutType        = "logout"
+)
+
 func init() {
-	err := plugin.RegisterPlugin("authorization", plugin.Plugin{
+	plugin.RegisterEventHook(plugin.StartupEvent, onStartup)
+	plugin.RegisterPlugin("authorization", plugin.Plugin{
 		Action:   setupAuthorization,
 		Validate: nil,
 	})
-	if err != nil {
-		panic(err)
-	}
 }
 
-func setupAuthorization(def *proxy.RouterDefinition, _ plugin.Config) error {
-	var conf config.Config
+func onStartup(event interface{}) error {
+	_, ok := event.(plugin.OnStartup)
+	if !ok {
+		return ErrEventTypeConvert
+	}
 
+	var conf config.Config
 	err := config.UnmarshalYAML("./config/config.yaml", &conf)
 	if err != nil {
 		return err
 	}
 
-	tokenManager := NewTokenManager(&conf)
-	roleManager := NewRoleManager(&conf)
+	tm = NewTokenManager(&conf)
+	rm = NewRoleManager(&conf)
 
-	err = tokenManager.FetchTokens()
+	err = tm.FetchTokens()
 	if err != nil {
 		return err
 	}
-	err = roleManager.FetchRoles()
+	err = rm.FetchRoles()
 	if err != nil {
 		return err
 	}
 
-	// Catch middleware needs to be first, if it successfully catches – it will interrupt http request.
-	def.AddMiddleware(NewTokenCatcherMiddleware(tokenManager))
-	def.AddMiddleware(NewRoleCatcherMiddleware(roleManager))
+	return nil
+}
 
-	def.AddMiddleware(NewTokenCheckerMiddleware(tokenManager))
-	def.AddMiddleware(NewRoleCheckerMiddleware(roleManager))
+func setupAuthorization(def *proxy.RouterDefinition, cfg plugin.Config) error {
+	endpointType, exists := cfg[endpointTypeField]
+	if exists {
+		switch endpointType {
+		case loginType:
+			def.AddMiddleware(NewLoginTokenCatcherMiddleware(tm))
+		case logoutType:
+			def.AddMiddleware(NewLogoutTokenCatcherMiddleware(tm))
+		}
+		return nil
+	}
+
+	def.AddMiddleware(NewTokenCheckerMiddleware(tm))
+	def.AddMiddleware(NewRoleCheckerMiddleware(rm))
 
 	return nil
 }

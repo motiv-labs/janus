@@ -3,26 +3,20 @@ package authorization
 import (
 	"context"
 	"encoding/json"
-	"fmt"
-	"github.com/sirupsen/logrus"
-	"io"
 	"net/http"
 	"strings"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/hellofresh/janus/pkg/errors"
-	"github.com/hellofresh/janus/pkg/render"
+)
+
+const (
+	AuthHeaderKey = "Authorization"
 )
 
 var (
 	AuthHeaderValue = ContextKey("auth_header")
-
-	ErrAuthorizationFieldNotFound = errors.New(http.StatusBadRequest, "authorization field missing")
-	ErrBearerMalformed            = errors.New(http.StatusBadRequest, "bearer token malformed")
-	ErrAccessTokenNotAuthorized   = errors.New(http.StatusUnauthorized, "access token not authorized")
-	ErrNoRolesSet                 = errors.New(http.StatusUnauthorized, "no roles in access token")
-	ErrAccessIsDenied             = errors.New(http.StatusUnauthorized, "access is denied")
-	ErrBodyReading                = errors.New(http.StatusInternalServerError, "body reading error")
-	ErrUnmarshal                  = errors.New(http.StatusInternalServerError, "cannot unmarshal")
 )
 
 // ContextKey is used to create context keys that are concurrent safe
@@ -32,30 +26,31 @@ func (c ContextKey) String() string {
 	return "janus." + string(c)
 }
 
+func getAccessToken(r *http.Request) (string, error) {
+	authHeaderValue := r.Header.Get(AuthHeaderKey)
+	parts := strings.Split(authHeaderValue, " ")
+
+	if len(parts) == 0 {
+		return "", ErrAuthorizationFieldNotFound
+	} else if len(parts) < 2 {
+		logrus.Errorf("bearer token malformed, token is: %q", authHeaderValue)
+		return "", ErrBearerMalformed
+	}
+
+	accessToken := parts[1]
+
+	return accessToken, nil
+}
+
 func NewTokenCheckerMiddleware(manager *TokenManager) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			authHeaderValue := r.Header.Get("Authorization")
-			parts := strings.Split(authHeaderValue, " ")
-
-			if len(parts) == 0 {
-				errors.Handler(w, r, ErrAuthorizationFieldNotFound)
-				return
-			} else if len(parts) < 2 {
-				logrus.Errorf("bearer token malformed, token is: %q", authHeaderValue)
-				errors.Handler(w, r, ErrBearerMalformed)
-				return
-			}
-
-			accessToken := parts[1]
-
-			err := manager.FetchTokens()
+			accessToken, err := getAccessToken(r)
 			if err != nil {
-				errors.Handler(w, r, errors.New(http.StatusInternalServerError, err.Error()))
+				errors.Handler(w, r, err)
 				return
 			}
-
-			if !isTokenAuthorized(manager.Tokens, accessToken) {
+			if !manager.isTokenValid(accessToken) {
 				errors.Handler(w, r, ErrAccessTokenNotAuthorized)
 				return
 			}
@@ -66,30 +61,55 @@ func NewTokenCheckerMiddleware(manager *TokenManager) func(http.Handler) http.Ha
 	}
 }
 
-func isTokenAuthorized(tokens map[string]*JWTToken, userToken string) bool {
-	if _, exists := tokens[userToken]; exists {
-		return true
-	}
+func NewLoginTokenCatcherMiddleware(manager *TokenManager) func(http.Handler) http.Handler {
+	return func(handler http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			rcw := &responseCatcherWriter{ResponseWriter: w}
 
-	return false
+			handler.ServeHTTP(rcw, r)
+
+			if rcw.status != http.StatusOK {
+				return
+			}
+
+			var accessToken string
+			_ = json.Unmarshal(rcw.body, &accessToken)
+
+			_ = manager.UpsertToken(accessToken)
+		})
+	}
+}
+
+func NewLogoutTokenCatcherMiddleware(manager *TokenManager) func(http.Handler) http.Handler {
+	return func(handler http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			accessToken, err := getAccessToken(r)
+			if err != nil {
+				errors.Handler(w, r, err)
+				return
+			}
+
+			rcw := &responseCatcherWriter{ResponseWriter: w}
+
+			handler.ServeHTTP(rcw, r)
+
+			if rcw.status != http.StatusOK {
+				return
+			}
+
+			manager.DeleteToken(accessToken)
+		})
+	}
 }
 
 func NewRoleCheckerMiddleware(manager *RoleManager) func(http.Handler) http.Handler {
 	return func(handler http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			authHeaderValue := r.Header.Get("Authorization")
-			parts := strings.Split(authHeaderValue, " ")
-
-			if len(parts) == 0 {
-				errors.Handler(w, r, ErrAuthorizationFieldNotFound)
-				return
-			} else if len(parts) < 2 {
-				logrus.Errorf("bearer token malformed, token is: %q", authHeaderValue)
-				errors.Handler(w, r, ErrBearerMalformed)
+			accessToken, err := getAccessToken(r)
+			if err != nil {
+				errors.Handler(w, r, err)
 				return
 			}
-
-			accessToken := parts[1]
 
 			claims, err := ExtractClaims(accessToken)
 			if err != nil {
@@ -99,12 +119,6 @@ func NewRoleCheckerMiddleware(manager *RoleManager) func(http.Handler) http.Hand
 
 			if len(claims.Roles) == 0 {
 				errors.Handler(w, r, ErrNoRolesSet)
-				return
-			}
-
-			err = manager.FetchRoles()
-			if err != nil {
-				errors.Handler(w, r, errors.New(http.StatusInternalServerError, err.Error()))
 				return
 			}
 
@@ -151,97 +165,4 @@ func isEndpointPathsEqual(reqPath, confPath string) bool {
 	}
 
 	return true
-}
-
-func NewTokenCatcherMiddleware(manager *TokenManager) func(http.Handler) http.Handler {
-	return func(handler http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			switch r.URL.Path {
-			case fmt.Sprintf("/%s/gatewayTokens", manager.Conf.ApiVersion):
-				body, err := io.ReadAll(r.Body)
-				if err != nil {
-					errors.Handler(w, r, ErrBodyReading)
-				}
-
-				tokens := []*JWTToken{}
-				err = json.Unmarshal(body, &tokens)
-				if err != nil {
-					errors.Handler(w, r, ErrUnmarshal)
-				}
-
-				manager.UpsertTokens(tokens)
-
-				render.JSON(w, http.StatusOK, http.NoBody)
-				return
-
-			case fmt.Sprintf("/%s/gatewayTokens/delete", manager.Conf.ApiVersion):
-				body, err := io.ReadAll(r.Body)
-				if err != nil {
-					errors.Handler(w, r, ErrBodyReading)
-				}
-
-				ids := []uint64{}
-				err = json.Unmarshal(body, &ids)
-				if err != nil {
-					errors.Handler(w, r, ErrUnmarshal)
-				}
-
-				manager.DeleteTokensByIDs(ids)
-
-				render.JSON(w, http.StatusOK, http.NoBody)
-				return
-
-			default:
-				handler.ServeHTTP(w, r)
-				return
-			}
-		})
-	}
-}
-
-func NewRoleCatcherMiddleware(manager *RoleManager) func(http.Handler) http.Handler {
-	return func(handler http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			switch r.URL.Path {
-			case fmt.Sprintf("/%s/gatewayRoles", manager.Conf.ApiVersion):
-				body, err := io.ReadAll(r.Body)
-				if err != nil {
-					errors.Handler(w, r, ErrBodyReading)
-				}
-
-				roles := []*Role{}
-				err = json.Unmarshal(body, &roles)
-				if err != nil {
-					errors.Handler(w, r, ErrUnmarshal)
-				}
-
-				manager.UpsertRoles(roles)
-
-				render.JSON(w, http.StatusOK, http.NoBody)
-				return
-
-			case fmt.Sprintf("/%s/gatewayRoles/delete", manager.Conf.ApiVersion):
-				body, err := io.ReadAll(r.Body)
-				if err != nil {
-					errors.Handler(w, r, ErrBodyReading)
-				}
-
-				ids := []uint64{}
-				err = json.Unmarshal(body, &ids)
-				if err != nil {
-					errors.Handler(w, r, ErrUnmarshal)
-				}
-
-				manager.DeleteRolesByIDs(ids)
-
-				render.JSON(w, http.StatusOK, http.NoBody)
-				return
-
-			default:
-				handler.ServeHTTP(w, r)
-				return
-			}
-
-		})
-	}
 }
