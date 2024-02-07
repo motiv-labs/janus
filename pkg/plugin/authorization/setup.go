@@ -1,6 +1,8 @@
 package authorization
 
 import (
+	"time"
+
 	"github.com/hellofresh/janus/pkg/config"
 	"github.com/hellofresh/janus/pkg/plugin"
 	"github.com/hellofresh/janus/pkg/proxy"
@@ -15,6 +17,9 @@ const (
 	endpointTypeField = "endpoint_type"
 	loginType         = "login"
 	logoutType        = "logout"
+
+	retryAttempts = 5
+	retryTimeout  = 3 * time.Second
 )
 
 func init() {
@@ -44,7 +49,7 @@ func onStartup(event interface{}) error {
 	if err != nil {
 		return err
 	}
-	err = rm.FetchRoles()
+	err = rm.FetchRolesWithRetry(retryAttempts, retryTimeout)
 	if err != nil {
 		return err
 	}
