@@ -1,15 +1,136 @@
-# See https://golangci-lint.run/usage/configuration/#config-file for more information
 run:
-  timeout: 5m
+  go: "1.22"
+  modules-download-mode: readonly
+  timeout: 10m
+
 linters:
   disable-all: true
   enable:
-    - gofmt
-    - golint
-    - goimports
-  fast: false
+    - bodyclose # checks whether HTTP response body is closed successfully.
+    - errcheck # finds unchecked errors
+    - errname # checks that sentinel errors are prefixed with the Err and error types are suffixed with the Error
+    - errorlint # finds code that will cause problems with the error wrapping scheme introduced in Go 1.13.
+    - exhaustive # check exhaustiveness of enum switch statements.
+    - exportloopref # checks for pointers to enclosing loop variables.
+    - forcetypeassert # finds forced type assertions.
+    - gci # gci controls Go package import order and makes it always deterministic.
+    - gocritic # provides diagnostics that check for bugs, performance and style issues.
+    - godot # check if comments end in a period.
+    - err113 # checks the errors handling expressions.
+    - goimports # check import statements are formatted according to the 'goimport' command
+    - gosec # inspects source code for security problems.
+    - gosimple # specializes in simplifying code.
+    - govet # reports suspicious constructs, such as Printf calls whose arguments do not align with the format string.
+    - misspell # finds commonly misspelled English words in comments.
+    - nolintlint # reports ill-formed or insufficient nolint directives.
+    - revive # linter for Go. Drop-in replacement of golint.
+    - staticcheck # set of rules from staticcheck
+    - stylecheck # replacement for golint.
+    - unparam # reports unused function parameters.
+    - unused # checks Go code for unused constants, variables, functions and types.
+    - whitespace # detection of leading and trailing whitespace.
+    - typecheck # reports compilation errors
+
+    - asciicheck # checks for non-ASCII identifiers
+    - bidichk # checks for dangerous unicode character sequences
+    - cyclop # calculates cyclomatic complexities of functions or packages
+    - dogsled # finds assignments/declarations with too many blank identifiers
+    - durationcheck # detect cases where two time.Duration values are being multiplied in possibly erroneous ways
+    - gocognit # calculates cognitive complexities of functions
+    - gofmt # checks for formatting
+    - gomoddirectives # manages the use of 'replace', 'retract', and 'excludes' directives in go.mod.
+    - gomodguard # allow and block list linter for direct Go module dependencies.
+    - goprintffuncname # checks that printf-like functions are named with f at the end.
+    - importas # enforces consistent import aliases.
+    - ineffassign # detects when assignments to existing variables are not used.
+    - makezero # finds slice declarations with non-zero initial length.
+    - nakedret # finds naked returns in functions greater than a specified function length.
+    - nilerr # finds the code that returns nil even if it checks that the error is not nil.
+    - noctx # finds sending http request without context.Context.
+    - prealloc # finds slice declarations that could potentially be pre-allocated.
+    - predeclared # finds code that shadows one of Go's predeclared identifiers.
+    - promlinter # check Prometheus metrics naming via promlint.
+    - rowserrcheck # checks whether Err of rows is checked successfully.
+    - sqlclosecheck # checks that sql.Rows and sql.Stmt are closed.
+    - tenv # detects using os.Setenv instead of t.Setenv since Go1.17.
+    - thelper # detects Go test helpers without t.Helper() call and checks the consistency of test helpers.
+    - unconvert # removes unnecessary type conversions.
+    - wastedassign # finds wasted assignment statements.
+
 linters-settings:
-  gofmt:
-    simplify: false
+  govet:
+    enable:
+      - shadow
+
+  gocritic:
+    enabled-tags:
+      - performance
+
+  staticcheck:
+    checks: [ "all" ]
+
+  stylecheck:
+    checks: [ "all" ]
+
+  revive:
+    # see https://github.com/mgechev/revive#available-rules for details.
+    ignore-generated-header: true
+    severity: warning
+    directives:
+      - name: specify-disable-reason
+        arguments:
+          severity: "error"
+    rules:
+      - name: blank-imports
+      - name: context-as-argument
+      - name: context-keys-type
+      - name: dot-imports
+      - name: error-return
+      - name: error-strings
+      - name: error-naming
+      - name: exported
+        arguments:
+          - disableStutteringCheck
+      - name: if-return
+      - name: increment-decrement
+      - name: var-naming
+      - name: package-comments
+      - name: range
+      - name: receiver-naming
+      - name: time-naming
+      - name: indent-error-flow
+      - name: errorf
+      - name: empty-block
+      - name: superfluous-else
+      - name: unused-parameter
+      - name: unreachable-code
+      - name: redefines-builtin-id
+      - name: indent-error-flow
+        severity: warning
+      - name: add-constant
+        severity: warning
+        arguments:
+          - maxLitCount: "3"
+            allowStrs: '""'
+            allowInts: "0,1,2,3"
+            allowFloats: "0.0,0.,1.0,1.,2.0,2."
+
 issues:
-  exclude-use-default: false
+  exclude-rules:
+    - path: '(.+)_test\.go'
+      linters:
+        - err113
+        - gosec
+        - bodyclose
+    - path: '(.+)_test\.go'
+      linters:
+        - revive
+      text: "^add-constant:.*"
+    - path: 'app/config/settings/settings\.go'
+      linters:
+        - revive
+      text: "^add-constant:.*"
+
+output:
+  formats:
+    - format: line-number
